@@ -12,7 +12,7 @@
 **HELIX CLI** is a universal developer assistant and multi-framework project generator built in TypeScript. It delivers production-grade scaffolding across 14 project templates, multi-tiered AI client integration (**Google Antigravity**, **GitHub Copilot**, **Open Code**), and official code hosting CLI automation (**GitHub CLI `gh`**, **GitLab CLI `glab`**, Bitbucket).
 
 <p align="center">
-  <a href="https://heroku.com/deploy?template=https://github.com/helix-cli/helix-cli">
+  <a href="https://heroku.com/deploy?template=https://github.com/HELIX-Origin/helix-cli">
     <img src="https://www.herokucdn.com/deploy/button.svg" alt="Deploy to Heroku (Free-Tier Eco Dyno)">
   </a>
 </p>

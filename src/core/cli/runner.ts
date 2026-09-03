@@ -56,7 +56,7 @@ export class LocalCliRunner {
   }
 
   public static getRepoUrl(): string {
-    return process.env.HELIX_CLI_REPO_URL || 'https://github.com/helix-cli/helix-cli.git';
+    return process.env.HELIX_CLI_REPO_URL || 'https://github.com/HELIX-Origin/helix-cli.git';
   }
 
   public static getStatus(): CliHostStatus {

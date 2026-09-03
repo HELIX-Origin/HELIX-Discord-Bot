@@ -107,7 +107,7 @@ console.log('\n----------------------------------------------------');
 console.log('  📦 Setting up Bot-Hosted Local Copy of CLI');
 console.log('----------------------------------------------------');
 
-const cliRepoUrl = getEnv('HELIX_CLI_REPO_URL', 'https://github.com/helix-cli/helix-cli.git');
+const cliRepoUrl = getEnv('HELIX_CLI_REPO_URL', 'https://github.com/HELIX-Origin/helix-cli.git');
 const cliDirName = getEnv('HELIX_CLI_DIR', '.cli');
 const cliDir = path.resolve(rootDir, cliDirName);
 

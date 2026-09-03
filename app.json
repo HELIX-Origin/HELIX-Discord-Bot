@@ -2,8 +2,8 @@
   "name": "helix-discord-bot",
   "description": "HELIX Universal Discord Bot & AI Dashboard with self-contained zero-cost SQLite database",
   "keywords": ["discord", "discord-bot", "nextauth", "ai", "scaffolding", "developer-tools"],
-  "website": "https://github.com/helix-cli/helix-cli",
-  "repository": "https://github.com/helix-cli/helix-cli",
+  "website": "https://github.com/HELIX-Origin/helix-cli",
+  "repository": "https://github.com/HELIX-Origin/helix-cli",
   "success_url": "/dashboard",
   "stack": "container",
   "buildpacks": [
