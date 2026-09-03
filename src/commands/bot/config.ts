@@ -8,7 +8,6 @@ export function configureBotEnv(options: {
   clientId?: string;
   clientSecret?: string;
   callbackUrl?: string;
-  guildId?: string;
   envPath?: string;
 }): void {
   const targetEnv = options.envPath || path.resolve(process.cwd(), '.env');
@@ -37,12 +36,6 @@ export function configureBotEnv(options: {
   if (options.callbackUrl) {
     saveEnvValue('DISCORD_CALLBACK_URL', options.callbackUrl, targetEnv);
     logger.success(`Saved DISCORD_CALLBACK_URL to ${pc.bold(targetEnv)}`);
-    updatedCount++;
-  }
-
-  if (options.guildId) {
-    saveEnvValue('DISCORD_GUILD_ID', options.guildId, targetEnv);
-    logger.success(`Saved DISCORD_GUILD_ID to ${pc.bold(targetEnv)}`);
     updatedCount++;
   }
 

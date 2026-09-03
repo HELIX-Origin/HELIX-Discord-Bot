@@ -32,7 +32,7 @@ export function handleDashboardStats(req: http.IncomingMessage, res: http.Server
       isReady: isBotReady,
       gatewayLatencyMs: gatewayLatency,
       clientId,
-      guildId: process.env.DISCORD_GUILD_ID || null,
+      guildCount: liveGuilds.length,
       callbackUrl,
       inviteUrl,
       version: '0.1.0',

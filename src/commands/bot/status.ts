@@ -1,11 +1,10 @@
 import pc from 'picocolors';
 import { logger } from '../../utils/logger/index.js';
-import { getAuthorizationUrl, getBotInviteUrl, resolveBotInviteUrl, BotDatabase } from '../../../bot/index.js';
+import { getAuthorizationUrl, getBotInviteUrl, resolveBotInviteUrl, BotDatabase, HelixBotClient } from '../../../bot/index.js';
 
 export function showBotStatus(): void {
   const token = process.env.DISCORD_BOT_TOKEN || process.env.DISCORD_TOKEN;
   const clientId = process.env.DISCORD_CLIENT_ID || process.env.CLIENT_ID;
-  const guildId = process.env.DISCORD_GUILD_ID || process.env.GUILD_ID;
   const callbackBase = process.env.DISCORD_CALLBACK_URL || 'http://localhost:5000';
   const callbackUrl = `${callbackBase.replace(/\/$/, '')}/api/auth/callback/discord`;
   const dbStats = BotDatabase.getInstance().getStats();
@@ -23,9 +22,12 @@ export function showBotStatus(): void {
   const nextAuthUrl = process.env.NEXTAUTH_URL || callbackBase;
   const nextAuthInternal = process.env.NEXTAUTH_INTERNAL_URL || nextAuthUrl;
 
+  const botClient = HelixBotClient.getInstance();
+  const liveGuildCount = botClient ? botClient.getGuildsCache().length : 0;
+
   console.log(`  ${token ? pc.green('✔') : pc.red('✖')} Bot Token:     ${mask(token)}`);
   console.log(`  ${clientId ? pc.green('✔') : pc.red('✖')} Client ID:     ${clientId ? pc.cyan(clientId) : pc.red('Not set')}`);
-  console.log(`  ${guildId ? pc.green('✔') : pc.dim('○')} Guild ID:      ${guildId ? pc.cyan(guildId) : pc.dim('Optional (Global deploy)')}`);
+  console.log(`  ${pc.dim('○')} Guild Count:   ${liveGuildCount > 0 ? pc.green(`${liveGuildCount} guild(s) connected`) : pc.dim('Auto-detected via Discord gateway')}`);
   console.log(`  ${pc.green('✔')} Callback URL:  ${pc.cyan(callbackUrl)}`);
   console.log(`  ${pc.green('✔')} NEXTAUTH_URL:  ${pc.cyan(nextAuthUrl)}`);
   console.log(`  ${pc.green('✔')} NEXTAUTH_INT:  ${pc.cyan(nextAuthInternal)}`);

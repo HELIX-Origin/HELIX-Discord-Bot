@@ -33,10 +33,6 @@
       "value": "https://discord.com/api/oauth2/authorize?client_id=yourclientid&permissions=8&scope=bot",
       "required": false
     },
-    "DISCORD_GUILD_ID": {
-      "description": "Optional Guild ID for instant local slash command deployment",
-      "required": false
-    },
     "NEXTAUTH_URL": {
       "description": "Public URL of your Heroku app (e.g. https://your-app-name.herokuapp.com)",
       "required": false

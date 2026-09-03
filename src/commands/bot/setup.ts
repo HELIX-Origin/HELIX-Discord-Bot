@@ -32,12 +32,6 @@ export async function runInteractiveBotSetup(): Promise<void> {
       initial: process.env.DISCORD_CALLBACK_URL || 'http://localhost:5000',
     },
     {
-      type: 'text',
-      name: 'guildId',
-      message: 'Development Guild ID (Optional - for instant command deployment):',
-      initial: process.env.DISCORD_GUILD_ID || '',
-    },
-    {
       type: 'confirm',
       name: 'configApiKeys',
       message: 'Configure optional AI API keys for local CLI scripts? (Note: Discord bot members use per-user /helix-auth)',
@@ -87,10 +81,6 @@ export async function runInteractiveBotSetup(): Promise<void> {
   // Generate & save Discord Bot Invite URL with Administrator permissions (permissions=8) and scope=bot
   const inviteUrl = `https://discord.com/api/oauth2/authorize?client_id=${answers.clientId.trim()}&permissions=8&scope=bot`;
   saveEnvValue('NEXT_PUBLIC_INVITE_URL', `"${inviteUrl}"`, envPath);
-
-  if (answers.guildId && answers.guildId.trim()) {
-    saveEnvValue('DISCORD_GUILD_ID', answers.guildId.trim(), envPath);
-  }
 
   // Save optional API keys if provided
   if (answers.geminiApiKey && answers.geminiApiKey.trim()) {

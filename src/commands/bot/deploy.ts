@@ -10,7 +10,7 @@ export async function deployBot(options: {
 }): Promise<void> {
   const token = options.token || process.env.DISCORD_BOT_TOKEN || process.env.DISCORD_TOKEN || '';
   const clientId = options.clientId || process.env.DISCORD_CLIENT_ID || process.env.CLIENT_ID || '';
-  const guildId = options.guildId || process.env.DISCORD_GUILD_ID || process.env.GUILD_ID;
+  const guildId = options.guildId; // Explicit --guild-id flag only (scoped dev deployments)
 
   logger.title('Deploying Discord Bot Slash Commands');
 

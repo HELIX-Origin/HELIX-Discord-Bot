@@ -16,7 +16,7 @@ export async function handleDashboardGuilds(req: http.IncomingMessage, res: http
       stats,
       sessions,
       liveGuilds,
-      currentGuild: process.env.DISCORD_GUILD_ID || 'Primary Guild',
+      guildCount: liveGuilds.length,
       callbackUrl: process.env.DISCORD_CALLBACK_URL || 'http://localhost:5000',
     }));
     return;
@@ -28,7 +28,7 @@ export async function handleDashboardGuilds(req: http.IncomingMessage, res: http
     req.on('end', () => {
       try {
         const payload = JSON.parse(body || '{}');
-        const guildId = payload.guildId || process.env.DISCORD_GUILD_ID || 'global';
+        const guildId = payload.guildId || 'global';
         db.setGuildSettings({
           guildId,
           prefix: payload.prefix || '/',
