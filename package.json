@@ -18,7 +18,7 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "setup": "node scripts/setup.mjs",
-    "heroku-postbuild": "npm run build && npm run setup"
+    "heroku-postbuild": "npm run build"
   },
   "keywords": [
     "cli",

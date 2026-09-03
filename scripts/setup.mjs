@@ -8,8 +8,11 @@ const __dirname = path.dirname(__filename);
 const rootDir = path.resolve(__dirname, '..');
 
 console.log('====================================================');
-console.log('  🧬 HELIX CLI & Built-in Discord Bot Setup');
+console.log('  🤖 HELIX Discord Bot — Post-Deploy Setup');
 console.log('====================================================\n');
+console.log('  This script initializes the bot SQLite database');
+console.log('  and optionally installs a local copy of the CLI.');
+console.log('  Set CLONE_CLI=true to clone the CLI into .cli/\n');
 
 function getEnv(key, defaultVal = '') {
   if (process.env[key]) return process.env[key];
@@ -102,10 +105,13 @@ try {
   console.warn(`⚠ SQLite setup note: ${err.message}`);
 }
 
-// 2. Setup Bot-Hosted Local Copy of HELIX CLI
+// 2. Setup Bot-Hosted Local Copy of HELIX CLI (opt-in via CLONE_CLI=true)
 console.log('\n----------------------------------------------------');
-console.log('  📦 Setting up Bot-Hosted Local Copy of CLI');
+console.log('  📦 Local HELIX CLI Installation (Optional)');
 console.log('----------------------------------------------------');
+console.log('  The Discord bot runs independently of the CLI.');
+console.log('  To enable /helix slash commands that run the CLI,');
+console.log('  set CLONE_CLI=true in Heroku Config Vars.\n');
 
 const cliRepoUrl = getEnv('HELIX_CLI_REPO_URL', 'https://github.com/HELIX-Origin/helix-cli.git');
 const cliDirName = getEnv('HELIX_CLI_DIR', '.cli');
@@ -205,6 +211,7 @@ if (db) {
 
 // 3. Setup Complete
 console.log('\n====================================================');
-console.log('  🎉 Setup complete!');
-console.log('  The SQLite database and local CLI are ready.');
+console.log('  🎉 Bot post-deploy setup complete!');
+console.log('  SQLite database initialized and ready.');
+console.log('  The bot will start automatically via Procfile.');
 console.log('====================================================\n');

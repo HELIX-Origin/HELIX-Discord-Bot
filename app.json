@@ -33,6 +33,11 @@
       "value": "https://discord.com/api/oauth2/authorize?client_id=yourclientid&permissions=8&scope=bot",
       "required": false
     },
+    "CLONE_CLI": {
+      "description": "Set to 'true' to clone and install the HELIX CLI into .cli/ so the bot can run /helix slash commands. Leave empty to run the bot standalone (recommended for most deployments).",
+      "value": "",
+      "required": false
+    },
     "NEXTAUTH_URL": {
       "description": "Public URL of your Heroku app (e.g. https://your-app-name.herokuapp.com)",
       "required": false
