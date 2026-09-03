@@ -1,0 +1,62 @@
+{
+  "name": "helix-cli",
+  "version": "0.1.0",
+  "description": "Universal CLI development assistant for multi-framework scaffolding, AI agents, and code hosting platforms",
+  "type": "module",
+  "main": "./dist/index.js",
+  "bin": {
+    "helix": "./dist/index.js"
+  },
+  "scripts": {
+    "start": "node dist/bot/index.js",
+    "start:cli": "node dist/index.js",
+    "start:bot": "node dist/bot/index.js",
+    "build": "tsup",
+    "dev": "tsx src/index.ts",
+    "dev:bot": "tsx bot/index.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "setup": "node scripts/setup.mjs",
+    "heroku-postbuild": "npm run build && npm run setup"
+  },
+  "keywords": [
+    "cli",
+    "scaffolding",
+    "developer-tools",
+    "discord-bot",
+    "react",
+    "vue",
+    "electron",
+    "tauri",
+    "flutter",
+    "unity",
+    "godot",
+    "rust",
+    "go",
+    "python",
+    "ai-agents",
+    "github-copilot",
+    "antigravity"
+  ],
+  "author": "HELIX CLI Team",
+  "license": "MIT",
+  "dependencies": {
+    "better-sqlite3": "^13.0.3",
+    "commander": "^12.1.0",
+    "discord.js": "^14.15.3",
+    "dotenv": "^16.4.5",
+    "ora": "^8.1.0",
+    "picocolors": "^1.1.0",
+    "prompts": "^2.4.2",
+    "yaml": "^2.5.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.5.4",
+    "@types/prompts": "^2.4.9",
+    "tsup": "^8.2.4",
+    "tsx": "^4.19.1",
+    "typescript": "^5.5.4",
+    "vitest": "^2.0.5"
+  }
+}

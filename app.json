@@ -1,0 +1,64 @@
+{
+  "name": "helix-discord-bot",
+  "description": "HELIX Universal Discord Bot & AI Dashboard with self-contained zero-cost SQLite database",
+  "keywords": ["discord", "discord-bot", "nextauth", "ai", "scaffolding", "developer-tools"],
+  "website": "https://github.com/helix-cli/helix-cli",
+  "repository": "https://github.com/helix-cli/helix-cli",
+  "success_url": "/dashboard",
+  "stack": "container",
+  "buildpacks": [
+    {
+      "url": "heroku/nodejs"
+    }
+  ],
+  "env": {
+    "DISCORD_BOT_TOKEN": {
+      "description": "Discord Bot Token from Discord Developer Portal",
+      "required": true
+    },
+    "DISCORD_CLIENT_ID": {
+      "description": "Discord Application Client ID",
+      "required": true
+    },
+    "DISCORD_CLIENT_SECRET": {
+      "description": "Discord Application Client Secret",
+      "required": false
+    },
+    "DISCORD_CALLBACK_URL": {
+      "description": "Base OAuth2 URL (leave empty or set to your Heroku app URL)",
+      "required": false
+    },
+    "NEXT_PUBLIC_INVITE_URL": {
+      "description": "Administrator Discord bot invite URL with permissions=8 and scope=bot",
+      "value": "https://discord.com/api/oauth2/authorize?client_id=yourclientid&permissions=8&scope=bot",
+      "required": false
+    },
+    "DISCORD_GUILD_ID": {
+      "description": "Optional Guild ID for instant local slash command deployment",
+      "required": false
+    },
+    "NEXTAUTH_URL": {
+      "description": "Public URL of your Heroku app (e.g. https://your-app-name.herokuapp.com)",
+      "required": false
+    },
+    "NEXTAUTH_INTERNAL_URL": {
+      "description": "Internal connection URL (defaults to http://localhost, dashboard auto-binds port)",
+      "value": "http://localhost",
+      "required": true
+    },
+    "NEXTAUTH_SECRET": {
+      "description": "HMAC secret for signing NextAuth sessions (generate a 32+ char string)",
+      "generator": "secret",
+      "required": true
+    }
+  },
+  "scripts": {
+    "postdeploy": "node scripts/setup.mjs"
+  },
+  "formation": {
+    "web": {
+      "quantity": 1,
+      "size": "eco"
+    }
+  }
+}

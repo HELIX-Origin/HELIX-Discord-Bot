@@ -1,0 +1,27 @@
+node_modules/
+dist/
+.env
+.env.local
+*.log
+coverage/
+.DS_Store
+Thumbs.db
+
+# Local Agent Workspace Folders & Files (Local IDE only, not pushed to GitHub)
+AGENTS.md
+.agents/
+.copilot/
+.gemini/
+.opencode/
+
+# Local SQLite databases (created via npm run setup)
+data/*.sqlite
+data/*.sqlite-journal
+
+# Bot Hosted Local CLI Clone Directory
+.cli/
+
+# Bot compiled dist
+bot/src/dist/
+
+
