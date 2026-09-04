@@ -124,7 +124,7 @@ Explore the documentation suite:
 
 - [Discord Bot Architecture](docs/discord-bot.md)
 - [Web Dashboard Guide](docs/web-dashboard.md)
-- [Deployment Guides](docs/deployment-heroku.md), [docs/deployment-docker.md]
+- [Deployment Guides](docs/deployment-heroku.md)\n- [Deployment Docker](docs/deployment-docker.md)
 - [Plugin System Design](docs/plugin-system.md)
 
 ---
