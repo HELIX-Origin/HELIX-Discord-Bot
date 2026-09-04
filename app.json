@@ -6,40 +6,38 @@
   "repository": "https://github.com/HELIX-Origin/helix-cli",
   "success_url": "/dashboard",
   "stack": "container",
-  "buildpacks": [
-    {
-      "url": "heroku/nodejs"
-    }
-  ],
   "env": {
+    "HEROKU_APP_NAME": {
+      "description": "Heroku application name (automatically injected by Heroku during deploy)",
+      "required": false
+    },
     "DISCORD_BOT_TOKEN": {
-      "description": "Discord Bot Token from Discord Developer Portal",
+      "description": "Discord Bot Token from Discord Developer Portal (Bot tab -> Reset Token)",
       "required": true
     },
     "DISCORD_CLIENT_ID": {
-      "description": "Discord Application Client ID",
+      "description": "Discord Application Client ID (General Information -> Application ID)",
       "required": true
     },
     "DISCORD_CLIENT_SECRET": {
-      "description": "Discord Application Client Secret",
+      "description": "Discord OAuth2 Client Secret for dashboard login. Optional for bot-only mode.",
       "required": false
     },
     "DISCORD_CALLBACK_URL": {
-      "description": "Base OAuth2 URL (leave empty or set to your Heroku app URL)",
-      "required": false
-    },
-    "NEXT_PUBLIC_INVITE_URL": {
-      "description": "Administrator Discord bot invite URL with permissions=8 and scope=bot",
-      "value": "https://discord.com/api/oauth2/authorize?client_id=yourclientid&permissions=8&scope=bot",
-      "required": false
-    },
-    "CLONE_CLI": {
-      "description": "Set to 'true' to clone and install the HELIX CLI into .cli/ so the bot can run /helix slash commands. Leave empty to run the bot standalone (recommended for most deployments).",
-      "value": "",
+      "description": "Base OAuth2 URL (leave empty to automatically use https://<app-name>.herokuapp.com)",
       "required": false
     },
     "NEXTAUTH_URL": {
-      "description": "Public URL of your Heroku app (e.g. https://your-app-name.herokuapp.com)",
+      "description": "Public NextAuth URL (leave empty to automatically use https://<app-name>.herokuapp.com)",
+      "required": false
+    },
+    "NEXT_PUBLIC_INVITE_URL": {
+      "description": "Administrator Discord bot invite URL (leave empty to automatically generate from Client ID and Heroku domain)",
+      "required": false
+    },
+    "CLONE_CLI": {
+      "description": "Set to 'true' to clone and install the HELIX CLI into .cli/ so the bot can run /helix slash commands. Leave empty to run standalone.",
+      "value": "",
       "required": false
     },
     "NEXTAUTH_INTERNAL_URL": {
@@ -48,7 +46,7 @@
       "required": true
     },
     "NEXTAUTH_SECRET": {
-      "description": "HMAC secret for signing NextAuth sessions (generate a 32+ char string)",
+      "description": "HMAC secret for signing NextAuth sessions (generated automatically)",
       "generator": "secret",
       "required": true
     }

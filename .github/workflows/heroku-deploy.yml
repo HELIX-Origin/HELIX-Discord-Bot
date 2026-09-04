@@ -48,14 +48,39 @@ jobs:
           # Install Heroku CLI
           curl https://cli-assets.heroku.com/install.sh | sh
 
-          # Set Heroku config vars from GitHub Secrets
+          # Automatically resolve dynamic Heroku public URLs
+          HEROKU_APP_URL="https://${HEROKU_APP_NAME}.herokuapp.com"
+
+          EFFECTIVE_CALLBACK="$DISCORD_CALLBACK_URL"
+          if [ -z "$EFFECTIVE_CALLBACK" ] || [ "$EFFECTIVE_CALLBACK" = "http://localhost:5000" ] || [ "$EFFECTIVE_CALLBACK" = "http://localhost" ]; then
+            EFFECTIVE_CALLBACK="$HEROKU_APP_URL"
+          fi
+
+          EFFECTIVE_NEXTAUTH="$NEXTAUTH_URL"
+          if [ -z "$EFFECTIVE_NEXTAUTH" ] || [ "$EFFECTIVE_NEXTAUTH" = "http://localhost:5000" ] || [ "$EFFECTIVE_NEXTAUTH" = "http://localhost" ]; then
+            EFFECTIVE_NEXTAUTH="$HEROKU_APP_URL"
+          fi
+
+          EFFECTIVE_INVITE="$NEXT_PUBLIC_INVITE_URL"
+          if [ -z "$EFFECTIVE_INVITE" ] || [[ "$EFFECTIVE_INVITE" == *"yourclientid"* ]]; then
+            ENCODED_REDIRECT=$(node -e "console.log(encodeURIComponent('${EFFECTIVE_CALLBACK}/api/auth/callback/discord'))")
+            EFFECTIVE_INVITE="https://discord.com/api/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&permissions=8&scope=bot&redirect_uri=${ENCODED_REDIRECT}&response_type=code"
+          fi
+
+          echo "Configuring Heroku for application $HEROKU_APP_NAME ($HEROKU_APP_URL)..."
+
+          # Enable Heroku runtime dyno metadata
+          heroku labs:enable runtime-dyno-metadata --app "$HEROKU_APP_NAME" || true
+
+          # Set Heroku config vars from GitHub Secrets & dynamically resolved URLs
           heroku config:set \
+            HEROKU_APP_NAME="$HEROKU_APP_NAME" \
             DISCORD_BOT_TOKEN="$DISCORD_BOT_TOKEN" \
             DISCORD_CLIENT_ID="$DISCORD_CLIENT_ID" \
             DISCORD_CLIENT_SECRET="$DISCORD_CLIENT_SECRET" \
-            DISCORD_CALLBACK_URL="$DISCORD_CALLBACK_URL" \
-            NEXT_PUBLIC_INVITE_URL="$NEXT_PUBLIC_INVITE_URL" \
-            NEXTAUTH_URL="$NEXTAUTH_URL" \
+            DISCORD_CALLBACK_URL="$EFFECTIVE_CALLBACK" \
+            NEXT_PUBLIC_INVITE_URL="$EFFECTIVE_INVITE" \
+            NEXTAUTH_URL="$EFFECTIVE_NEXTAUTH" \
             NEXTAUTH_INTERNAL_URL="$NEXTAUTH_INTERNAL_URL" \
             NEXTAUTH_SECRET="$NEXTAUTH_SECRET" \
             --app "$HEROKU_APP_NAME"

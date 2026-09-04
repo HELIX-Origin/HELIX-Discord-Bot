@@ -80,4 +80,19 @@ describe('Discord Bot Invite URL Generation & Dynamic Callback Resolution', () =
     expect(resolved).not.toContain('"');
     expect(resolved).not.toContain('yourclientid');
   });
+
+  it('automatically detects Heroku domain and constructs invite URL when no invite is set', () => {
+    delete process.env.NEXT_PUBLIC_INVITE_URL;
+    delete process.env.DISCORD_CALLBACK_URL;
+    delete process.env.NEXTAUTH_URL;
+    process.env.HEROKU_APP_NAME = 'helix-test-bot';
+    process.env.DISCORD_CLIENT_ID = '999888777666';
+
+    const resolved = resolveBotInviteUrl();
+
+    expect(resolved).toContain('client_id=999888777666');
+    expect(resolved).toContain('permissions=8');
+    expect(resolved).toContain('scope=bot');
+    expect(resolved).toContain(encodeURIComponent('https://helix-test-bot.herokuapp.com/api/auth/callback/discord'));
+  });
 });

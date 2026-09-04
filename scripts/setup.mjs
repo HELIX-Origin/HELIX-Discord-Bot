@@ -29,6 +29,30 @@ function getEnv(key, defaultVal = '') {
   return defaultVal;
 }
 
+// Auto-detect Heroku host environment if running on Heroku
+const herokuAppName = process.env.HEROKU_APP_NAME || process.env.HEROKU_APP_DEFAULT_DOMAIN_NAME;
+if (herokuAppName) {
+  const herokuDomain = herokuAppName.includes('.') ? herokuAppName : `${herokuAppName}.herokuapp.com`;
+  const herokuUrl = `https://${herokuDomain}`;
+  console.log(`✔ Auto-detected Heroku host environment: ${herokuUrl}`);
+
+  if (!process.env.DISCORD_CALLBACK_URL || process.env.DISCORD_CALLBACK_URL.includes('localhost')) {
+    process.env.DISCORD_CALLBACK_URL = herokuUrl;
+    console.log(`  Auto-configured DISCORD_CALLBACK_URL -> ${herokuUrl}`);
+  }
+  if (!process.env.NEXTAUTH_URL || process.env.NEXTAUTH_URL.includes('localhost')) {
+    process.env.NEXTAUTH_URL = herokuUrl;
+    console.log(`  Auto-configured NEXTAUTH_URL -> ${herokuUrl}`);
+  }
+  const clientId = getEnv('DISCORD_CLIENT_ID');
+  const existingInvite = getEnv('NEXT_PUBLIC_INVITE_URL');
+  if (clientId && (!existingInvite || existingInvite.includes('yourclientid'))) {
+    const inviteUrl = `https://discord.com/api/oauth2/authorize?client_id=${clientId}&permissions=8&scope=bot&redirect_uri=${encodeURIComponent(herokuUrl + '/api/auth/callback/discord')}&response_type=code`;
+    process.env.NEXT_PUBLIC_INVITE_URL = inviteUrl;
+    console.log(`  Auto-configured NEXT_PUBLIC_INVITE_URL -> ${inviteUrl}`);
+  }
+}
+
 // 1. Setup SQLite Database Directory & File
 const dataDir = path.resolve(rootDir, 'data');
 if (!fs.existsSync(dataDir)) {

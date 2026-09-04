@@ -72,28 +72,80 @@ export function getClientSecret(): string {
 }
 
 /**
+ * Detects the public Heroku application domain if running on Heroku.
+ * Checks HEROKU_APP_DEFAULT_DOMAIN_NAME, HEROKU_APP_NAME, or DYNO metadata.
+ */
+export function getHerokuAppUrl(): string | null {
+  const domain = process.env.HEROKU_APP_DEFAULT_DOMAIN_NAME;
+  if (domain && domain.trim()) {
+    return `https://${domain.trim().replace(/\/$/, '')}`;
+  }
+  const appName = process.env.HEROKU_APP_NAME;
+  if (appName && appName.trim()) {
+    const cleanName = appName.trim().replace(/\/$/, '');
+    return cleanName.includes('.') ? `https://${cleanName}` : `https://${cleanName}.herokuapp.com`;
+  }
+  return null;
+}
+
+/**
+ * Builds standard Discord OAuth2 bot invite URL.
+ */
+function formatBotInviteUrl(
+  clientId: string,
+  permissions: number = 8,
+  callbackBaseUrl?: string
+): string {
+  let url = `https://discord.com/api/oauth2/authorize?client_id=${clientId}&permissions=${permissions}&scope=bot`;
+  if (callbackBaseUrl) {
+    const redirectUri = `${callbackBaseUrl.replace(/\/$/, '')}/api/auth/callback/discord`;
+    url += `&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code`;
+  }
+  return url;
+}
+
+/**
  * Base OAuth2 callback URL (no trailing slash).
  * The server appends `/api/auth/callback/discord` internally.
+ * Automatically resolves Heroku domain if running on Heroku and not explicitly configured.
  *
  * @example 'http://localhost:5000' | 'https://myapp.herokuapp.com'
  */
 export function getCallbackUrl(): string {
-  return (process.env.DISCORD_CALLBACK_URL || 'http://localhost:5000').replace(/\/$/, '');
+  const explicit = (process.env.DISCORD_CALLBACK_URL || '').trim();
+  if (explicit && !explicit.includes('localhost') && !explicit.includes('127.0.0.1')) {
+    return explicit.replace(/\/$/, '');
+  }
+  const herokuUrl = getHerokuAppUrl();
+  if (herokuUrl) {
+    return herokuUrl;
+  }
+  return (explicit || 'http://localhost:5000').replace(/\/$/, '');
 }
 
 /**
  * Pre-built administrator bot invite URL.
  * Surrounding quotes from shell assignment are stripped automatically.
+ * Automatically resolves using client ID and Heroku domain if not set or if placeholder is present.
  */
 export function getInviteUrl(): string {
   const raw = (process.env.NEXT_PUBLIC_INVITE_URL || '').trim();
+  let invite = raw;
   if (
-    (raw.startsWith('"') && raw.endsWith('"')) ||
-    (raw.startsWith("'") && raw.endsWith("'"))
+    (invite.startsWith('"') && invite.endsWith('"')) ||
+    (invite.startsWith("'") && invite.endsWith("'"))
   ) {
-    return raw.slice(1, -1).trim();
+    invite = invite.slice(1, -1).trim();
   }
-  return raw;
+  if (!invite || invite.includes('yourclientid') || invite.includes('YOUR_CLIENT_ID')) {
+    const clientId = getClientId();
+    if (clientId && clientId !== 'yourclientid') {
+      const callback = getCallbackUrl();
+      const isRemote = !callback.includes('localhost') && !callback.includes('127.0.0.1');
+      return formatBotInviteUrl(clientId, 8, isRemote ? callback : undefined);
+    }
+  }
+  return invite;
 }
 
 /** HTTP port the dashboard and OAuth2 server listens on. Defaults to 5000. */
@@ -108,12 +160,21 @@ export function getPort(): number {
 
 /**
  * Public-facing NextAuth URL (e.g. your Heroku app URL).
+ * When running on Heroku, automatically uses the detected Heroku domain.
  * When running on localhost without an explicit port, the bot port is appended
  * automatically so NextAuth doesn't try to reach the wrong port.
  */
 export function getNextAuthUrl(customPort?: number): string {
   const port = customPort ?? getPort();
-  const raw = (process.env.NEXTAUTH_URL || getCallbackUrl()).replace(/\/$/, '');
+  const explicit = (process.env.NEXTAUTH_URL || '').trim();
+  if (explicit && !explicit.includes('localhost') && !explicit.includes('127.0.0.1')) {
+    return explicit.replace(/\/$/, '');
+  }
+  const herokuUrl = getHerokuAppUrl();
+  if (herokuUrl) {
+    return herokuUrl;
+  }
+  const raw = (explicit || getCallbackUrl()).replace(/\/$/, '');
   try {
     const u = new URL(raw.includes('://') ? raw : `http://${raw}`);
     if (!u.port && (u.hostname === 'localhost' || u.hostname === '127.0.0.1')) {
