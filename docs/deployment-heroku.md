@@ -1,49 +1,47 @@
-﻿# Heroku 1-Click & Docker Deployment
+﻿# Heroku Docker Deployment
 
-Deploy HELIX to Heroku in one click using Heroku Container stack (`Dockerfile`) on a single Eco Dyno with zero required add-ons.
-
-[![Deploy to Heroku](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/HELIX-Origin/HELIX)
+Deploy HELIX to Heroku using the Heroku Container stack (`Dockerfile` + `heroku.yml`) on a single Eco Dyno with zero required paid add-ons.
 
 ---
 
-## 1-Click Deployment Flow
+## Deployment Architecture
 
 ```mermaid
 flowchart TD
-    Button["1. Click 'Deploy to Heroku' Button"] --> Wizard["2. Heroku Web Setup Wizard"]
-    Wizard --> Input["3. Enter App Name & Discord Secrets"]
-    Input --> Build["4. Heroku Builds Docker Container (Dockerfile)"]
+    Create["1. Create App on Heroku Dashboard / CLI"] --> Config["2. Configure Discord Secrets in Heroku Config Vars"]
+    Config --> Push["3. Deploy via Heroku Git / Container Registry"]
+    Push --> Build["4. Heroku Builds Docker Container (node:22-bookworm-slim)"]
     Build --> Launch["5. Boots Bot Gateway Client & Dashboard Server"]
-    Launch --> Ready["✅ Bot Online & Dashboard Running at /dashboard"]
+    Launch --> Auto["6. env.ts Derives App URL & OAuth2 Callback Automatically"]
+    Auto --> Ready["✅ Bot Online & Dashboard Running at /dashboard"]
 ```
 
 ---
 
-## Step-by-Step Walkthrough
+## Step-by-Step Deployment
 
-### 1. Launch Heroku Setup
-Click the **[Deploy to Heroku](https://heroku.com/deploy?template=https://github.com/HELIX-Origin/HELIX)** button above. Heroku reads `app.json` and opens the application creation form.
+### 1. Create a Heroku App
+Create an app on the Heroku Dashboard (**New** → **Create new app**) or via the Heroku CLI:
+```bash
+heroku create <your-app-name> --stack container
+```
 
-### 2. Enter App Name & Select Region
-- **App name**: Choose a unique name (e.g., `my-helix-bot`). Your dashboard will be hosted at `https://my-helix-bot.herokuapp.com/dashboard`.
-- **Region**: Select United States or Europe.
+### 2. Configure Environment Variables
+In the Heroku Dashboard (**Settings** → **Reveal Config Vars**) or via CLI, configure your Discord credentials:
 
-### 3. Provide Required Config Vars
-Fill in your credentials from the [Discord Developer Portal](https://discord.com/developers/applications):
-
-| Variable | Description | Required? | Source in Discord Portal |
+| Config Var | Description | Required? | Source in Discord Developer Portal |
 |---|---|---|---|
 | `DISCORD_TOKEN` | Bot user token | **Yes** | **Bot** tab → *Reset Token* |
-| `DISCORD_CLIENT_ID` | Application ID | **Yes** | **General Information** → *Application ID* |
+| `DISCORD_CLIENT_ID` | Application client ID | **Yes** | **General Information** → *Application ID* |
 | `DISCORD_CLIENT_SECRET` | OAuth2 secret for Dashboard | **Yes** | **OAuth2** → **General** → *Client Secret* |
-| `NEXTAUTH_SECRET` | Session signing HMAC key | **Auto-Generated** | Pre-filled automatically by Heroku |
-| `HELIX_DEFAULT_PREFIX` | Default command prefix | Optional | Defaults to `>` |
+| `NEXTAUTH_SECRET` | 32+ character HMAC signing key | **Yes** | Generate with `openssl rand -base64 32` |
+| `HELIX_DEFAULT_PREFIX` | Default message prefix | Optional | Defaults to `>` (customizable per-guild) |
 | `HELIX_LOG_LEVEL` | Logger verbosity | Optional | Defaults to `info` |
 
 > [!NOTE]
-> All URLs (`NEXTAUTH_URL`, `DISCORD_CALLBACK_URL`, and invite links) and `PORT` are **auto-detected dynamically** from your Heroku app name. You do not need to configure them manually.
+> All URLs (`NEXTAUTH_URL`, `DISCORD_CALLBACK_URL`, and invite links) and `PORT` are **auto-detected dynamically** from `HEROKU_APP_NAME` and Heroku port allocation. You do not need to set those manually.
 
-### 4. Configure Discord OAuth2 Redirect URI
+### 3. Configure Discord OAuth2 Redirect URI
 In the [Discord Developer Portal](https://discord.com/developers/applications):
 1. Navigate to your Application → **OAuth2** → **Redirects**.
 2. Add your Heroku callback URL:
@@ -52,38 +50,36 @@ In the [Discord Developer Portal](https://discord.com/developers/applications):
    ```
 3. Click **Save Changes**.
 
-### 5. Click "Deploy App"
-Heroku will pull the repository, build the multi-stage Docker container (`node:22-bookworm-slim`), run autonomous database migrations, and boot the bot.
+### 4. Deploy the Container
 
----
-
-## Manual CLI Deployment (Alternative)
-
-If deploying via the Heroku CLI:
-
+#### Option A: Deploy via Heroku Git (Recommended)
 ```bash
-# 1. Login to Heroku and Container Registry
-heroku login
+# Add Heroku git remote
+heroku git:remote -a <your-app-name>
+
+# Push and trigger container build
+git push heroku main
+```
+
+#### Option B: Deploy via Heroku Container Registry
+```bash
+# Log in to Heroku Container Registry
 heroku container:login
 
-# 2. Create a Heroku app with container stack
-heroku create my-helix-bot --stack container
+# Build and push the Docker image
+heroku container:push web -a <your-app-name>
 
-# 3. Set required environment variables
-heroku config:set DISCORD_TOKEN="your-bot-token" \
-                  DISCORD_CLIENT_ID="your-client-id" \
-                  DISCORD_CLIENT_SECRET="your-client-secret" \
-                  NEXTAUTH_SECRET="$(openssl rand -base64 32)" \
-                  -a my-helix-bot
+# Release the container
+heroku container:release web -a <your-app-name>
+```
 
-# 4. Build and push the Docker image
-heroku container:push web -a my-helix-bot
+### 5. Verify & View Logs
+```bash
+# Stream live logs from the bot
+heroku logs --tail -a <your-app-name>
 
-# 5. Release the container to start the bot
-heroku container:release web -a my-helix-bot
-
-# 6. View logs
-heroku logs --tail -a my-helix-bot
+# Open the companion web dashboard
+heroku open dashboard -a <your-app-name>
 ```
 
 ---

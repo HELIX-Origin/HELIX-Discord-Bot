@@ -37,19 +37,4 @@ describe('Environment Loader & .env Management', () => {
     expect(matches?.length).toBe(1);
     expect(content).toContain('DISCORD_CALLBACK_URL=http://localhost:6000');
   });
-
-  it('validates that app.json conforms to Heroku Container 1-click specification', () => {
-    const appJsonPath = path.resolve(process.cwd(), 'app.json');
-    expect(fs.existsSync(appJsonPath)).toBe(true);
-
-    const raw = fs.readFileSync(appJsonPath, 'utf-8').replace(/^\uFEFF/, '');
-    const appJson = JSON.parse(raw);
-    expect(appJson.stack).toBe('container');
-    expect(appJson.env.DISCORD_TOKEN.required).toBe(true);
-    expect(appJson.env.DISCORD_CLIENT_ID.required).toBe(true);
-    expect(appJson.env.DISCORD_CLIENT_SECRET.required).toBe(true);
-    expect(appJson.env.NEXTAUTH_SECRET.required).toBe(true);
-    expect(appJson.env.NEXTAUTH_SECRET.generator).toBe('secret');
-    expect(appJson.formation.web.size).toBe('eco');
-  });
 });
