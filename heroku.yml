@@ -1,6 +1,3 @@
-setup:
-  addons: []
-  config: {}
 build:
   docker:
     web: Dockerfile

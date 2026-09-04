@@ -26,8 +26,21 @@ export interface LoadedPlugin {
   pluginDir: string;
 }
 
+function getPluginsDir(): string {
+  const candidates = [
+    path.resolve(BOT_ROOT_DIR, 'src', 'plugins'),
+    path.resolve(BOT_ROOT_DIR, '..', 'src', 'plugins'),
+    path.resolve(process.cwd(), 'HELIX', 'src', 'plugins'),
+    path.resolve(process.cwd(), 'src', 'plugins'),
+  ];
+  for (const c of candidates) {
+    if (fs.existsSync(c)) return c;
+  }
+  return candidates[0];
+}
+
 /** Plugins directory root. */
-const PLUGINS_DIR = path.resolve(BOT_ROOT_DIR, 'src', 'plugins');
+const PLUGINS_DIR = getPluginsDir();
 
 /** Community plugins directory. */
 const COMMUNITY_DIR = path.join(PLUGINS_DIR, 'community');
@@ -37,13 +50,32 @@ const HELIX_ORIGIN_DIR = path.join(PLUGINS_DIR, 'helix-origin');
 
 /**
  * Resolve the absolute path for a plugin entry file from its manifest.
+ * Automatically resolves compiled .js equivalents in production.
  */
 function resolvePluginEntry(pluginDir: string, entry: string): string {
-  const resolved = path.resolve(pluginDir, entry);
-  if (!fs.existsSync(resolved)) {
-    throw new Error(`Entry file not found: ${resolved}`);
+  const directPath = path.resolve(pluginDir, entry);
+
+  if (entry.endsWith('.ts')) {
+    const jsEntry = entry.replace(/\.ts$/, '.js');
+    const localJsPath = path.resolve(pluginDir, jsEntry);
+    if (fs.existsSync(localJsPath)) {
+      return localJsPath;
+    }
+
+    // Check compiled dist output
+    const distJsPath = directPath
+      .replace(/[\\/]src[\\/]plugins[\\/]/, path.sep + path.join('src', 'dist', 'src', 'plugins') + path.sep)
+      .replace(/\.ts$/, '.js');
+    if (fs.existsSync(distJsPath)) {
+      return distJsPath;
+    }
   }
-  return resolved;
+
+  if (fs.existsSync(directPath)) {
+    return directPath;
+  }
+
+  throw new Error(`Entry file not found: ${directPath}`);
 }
 
 /**
