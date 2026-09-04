@@ -15,10 +15,10 @@ All contributors and maintainers are expected to adhere to our [Code of Conduct]
 
 ### Development Setup
 
-1. Fork the repository on GitHub: `https://github.com/HELIX-Origin/HELIX`
+1. Fork the repository on GitHub: `https://github.com/HELIX-Origin/HELIX-Discord-Bot`
 2. Clone your fork locally:
    ```bash
-   git clone https://github.com/<your-username>/HELIX
+   git clone https://github.com/<your-username>/HELIX-Discord-Bot
    ```
 3. Install dependencies:
    ```bash

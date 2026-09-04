@@ -1,12 +1,12 @@
-﻿# Docker / Self-Hosting
+# Docker / Self-Hosting
 
 ---
 
 ## Docker Compose (recommended)
 
 ```bash
-git clone https://github.com/HELIX-Origin/HELIX.git
-cd HELIX
+git clone https://github.com/HELIX-Origin/HELIX-Discord-Bot.git
+cd HELIX-Discord-Bot
 cp .env.example .env   # fill in required vars
 docker compose up -d
 ```

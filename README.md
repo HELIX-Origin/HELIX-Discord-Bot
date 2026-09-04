@@ -2,14 +2,14 @@
   <img src=".github/assets/images/icon.jpg" alt="HELIX Icon" width="128" height="128">
 </p>
 
-<h1 align="center">HELIX</h1>
+<h1 align="center">HELIX Discord Bot</h1>
 
 <p align="center">
   <b>Standalone Discord Bot -- Developer Community Assistant</b>
 </p>
 
 <p align="center">
-  <a href="https://github.com/HELIX-Origin/HELIX/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/HELIX-Origin/HELIX/ci.yml?branch=main&label=CI&style=plastic&logo=github" alt="CI Status"></a>
+  <a href="https://github.com/HELIX-Origin/HELIX-Discord-Bot/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/HELIX-Origin/HELIX-Discord-Bot/ci.yml?branch=main&label=CI&style=plastic&logo=github" alt="CI Status"></a>
   <a href="https://discord.gg/Ww3XBZC2HV"><img src="https://img.shields.io/badge/Discord-Join%20Server-5865F2?style=plastic&logo=discord&logoColor=white" alt="Discord Server"></a>
   <a href="docs/deployment-heroku.md"><img src="https://img.shields.io/badge/Deploy%20to-Heroku-6762a6?style=plastic&logo=heroku&logoColor=white" alt="Deploy to Heroku"></a>
   <img src="https://img.shields.io/badge/Node.js-%3E%3D22.0.0-339933?style=plastic&logo=node.js&logoColor=white" alt="Node.js Version">
@@ -49,4 +49,4 @@ Fill in `DISCORD_TOKEN`, `DISCORD_CLIENT_ID`, `DISCORD_CLIENT_SECRET`, and `NEXT
 
 Released under the [BSD 3-Clause License](LICENSE.md). Copyright (c) 2026 HELIX Team & Contributors.
 
-**GitHub**: https://github.com/HELIX-Origin/HELIX  **Discord**: https://discord.gg/Ww3XBZC2HV
+**GitHub**: https://github.com/HELIX-Origin/HELIX-Discord-Bot  **Discord**: https://discord.gg/Ww3XBZC2HV

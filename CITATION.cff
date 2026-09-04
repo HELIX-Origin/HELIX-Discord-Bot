@@ -1,21 +1,20 @@
 cff-version: 1.2.0
 message: "If you use HELIX in your research, development workflows, or software projects, please cite it using the metadata below."
-title: "HELIX"
+title: "HELIX Discord Bot"
 abstract: "Standalone Discord bot with code intelligence via language plugins, developer moderation, and thread-based support ticketing."
 version: 0.1.0
 date-released: 2026-09-04
 license: BSD-3-Clause
-repository-code: "https://github.com/HELIX-Origin/HELIX"
-url: "https://github.com/HELIX-Origin/HELIX"
+repository-code: "https://github.com/HELIX-Origin/HELIX-Discord-Bot"
+url: "https://github.com/HELIX-Origin/HELIX-Discord-Bot"
 keywords:
-  - "cli"
+  - "discord-bot"
   - "developer-tools"
   - "scaffolding"
-  - "discord-bot"
   - "nextauth"
   - "sqlite"
   - "code-intelligence"
   - "language-plugins"
 authors:
   - name: "HELIX Team & Contributors"
-    website: "https://github.com/HELIX-Origin/HELIX"
+    website: "https://github.com/HELIX-Origin/HELIX-Discord-Bot"

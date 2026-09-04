@@ -49,7 +49,7 @@ describe('HELIX Multi-Source Code Resolver (Zero AI)', () => {
     });
 
     it('preserves existing GitHub raw URLs', () => {
-      const ghRaw = 'https://raw.githubusercontent.com/HELIX-Origin/HELIX/main/HELIX/index.ts';
+      const ghRaw = 'https://raw.githubusercontent.com/HELIX-Origin/HELIX-Discord-Bot/main/HELIX/index.ts';
       const normalized = normalizeRemoteUrl(ghRaw);
 
       expect(normalized?.origin).toBe('github');
@@ -167,13 +167,13 @@ describe('HELIX Multi-Source Code Resolver (Zero AI)', () => {
       globalThis.fetch = fakeFetch as any;
 
       const result = await resolveSourceCode({
-        input: 'https://github.com/HELIX-Origin/HELIX/blob/main/src/version.ts',
+        input: 'https://github.com/HELIX-Origin/HELIX-Discord-Bot/blob/main/src/version.ts',
       });
 
       expect(result.origin).toBe('github');
       expect(result.language).toBe('typescript');
       expect(result.code).toBe(mockRemoteCode);
-      expect(result.sourceName).toContain('HELIX-Origin/HELIX');
+      expect(result.sourceName).toContain('HELIX-Origin/HELIX-Discord-Bot');
     });
 
     it('dynamically resolves custom languages from registered plugins', async () => {

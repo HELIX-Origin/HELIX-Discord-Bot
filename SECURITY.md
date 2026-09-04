@@ -11,12 +11,12 @@ HELIX CLI follows semantic versioning. The following versions are currently supp
 
 ## Reporting a Vulnerability
 
-The HELIX CLI team takes the security of our universal developer tooling, Discord bot gateway, companion dashboard, and local credential discovery very seriously.
+The HELIX team takes the security of our Discord bot, web dashboard, ticketing system, and plugin architecture very seriously.
 
-If you believe you have found a security vulnerability in HELIX CLI:
+If you believe you have found a security vulnerability in HELIX Discord Bot:
 
 1. **Do not report security vulnerabilities through public GitHub issues.**
-2. Please submit a private vulnerability report via [GitHub Security Advisories](https://github.com/HELIX-Origin/HELIX-CLI/security/advisories/new) or contact the project maintainers directly.
+2. Please submit a private vulnerability report via [GitHub Security Advisories](https://github.com/HELIX-Origin/HELIX-Discord-Bot/security/advisories/new) or contact the project maintainers directly.
 3. Include detailed reproduction steps, the environment/OS, relevant configuration flags, and a proof of concept if available.
 
 ### What to Expect

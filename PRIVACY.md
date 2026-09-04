@@ -1,4 +1,4 @@
-﻿# Privacy Policy
+# Privacy Policy
 
 **Effective Date**: September 4, 2026  
 **Last Updated**: September 4, 2026
@@ -76,5 +76,5 @@ You retain complete ownership and control over all data:
 If you have any questions, security concerns, or feedback regarding privacy in HELIX:
 
 - Review our [Security Policy](SECURITY.md) for vulnerability disclosure guidelines.
-- Open a discussion or inquiry on our [GitHub Discussions](https://github.com/HELIX-Origin/HELIX/discussions) or submit a question via [GitHub Issues](https://github.com/HELIX-Origin/HELIX/issues).
+- Open a discussion or inquiry on our [GitHub Discussions](https://github.com/HELIX-Origin/HELIX-Discord-Bot/discussions) or submit a question via [GitHub Issues](https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues).
 - Connect with the team in our [Discord Community](https://discord.gg/Ww3XBZC2HV).

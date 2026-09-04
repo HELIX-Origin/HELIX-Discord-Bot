@@ -1,7 +1,7 @@
 {
-  "name": "helix",
+  "name": "helix-discord-bot",
   "version": "1.0.0",
-  "description": "HELIX — the autonomous Discord bot with an embedded AI assistant, scaffolding engine, and companion dashboard",
+  "description": "HELIX Discord Bot — Developer community assistant with multi-framework scaffolding, moderation, support ticketing, and code intelligence language plugins",
   "type": "module",
   "main": "./index.ts",
   "scripts": {

@@ -9,5 +9,5 @@
   "entry": "index.ts",
   "capabilities": ["lint", "explain", "docs", "fixes", "patterns"],
   "dependencies": [],
-  "repository": "https://github.com/HELIX-Origin/HELIX"
+  "repository": "https://github.com/HELIX-Origin/HELIX-Discord-Bot"
 }

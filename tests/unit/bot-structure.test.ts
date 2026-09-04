@@ -1,4 +1,4 @@
-﻿import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import fs from 'fs';
 import path from 'path';
 
@@ -11,7 +11,7 @@ describe('HELIX Bot Structure & Package Integrity', () => {
     expect(fs.existsSync(pkgPath)).toBe(true);
 
     const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'));
-    expect(['helix', '@helix/bot', '@helix-cli/bot']).toContain(pkg.name);
+    expect(['helix', 'helix-discord-bot', '@helix/bot', '@helix-cli/bot']).toContain(pkg.name);
     expect(pkg.main).toBe('./index.ts');
     expect(pkg.scripts.start).toBeDefined();
   });

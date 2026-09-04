@@ -216,7 +216,7 @@ export async function fetchRemoteCode(targetUrl: string): Promise<string> {
     const response = await fetch(targetUrl, {
       signal: controller.signal,
       headers: {
-        'User-Agent': 'HELIX-Bot/1.0 (Code-Intelligence-Engine; +https://github.com/HELIX-Origin/HELIX)',
+        'User-Agent': 'HELIX-Bot/1.0 (Code-Intelligence-Engine; +https://github.com/HELIX-Origin/HELIX-Discord-Bot)',
         Accept: 'text/plain, text/x-code, application/json, */*',
       },
     });
