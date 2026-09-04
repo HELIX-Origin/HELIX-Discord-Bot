@@ -33,7 +33,7 @@ export async function executeScaffold(
 
   let template;
   try {
-    template = TemplateEngine.parseTemplateFile(templatePath);
+    template = TemplateEngine.loadTemplate(templateName, templatePath);
   } catch (err: any) {
     logger.error(`Could not load template "${templateName}": ${err.message}`);
     return;

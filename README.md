@@ -1,9 +1,5 @@
 <p align="center">
-  <img src=".github/assets/images/banner.jpg" alt="HELIX CLI Banner" width="100%">
-</p>
-
-<p align="center">
-  <img src=".github/assets/images/icon.jpg" alt="HELIX CLI Icon" width="112" height="112">
+  <img src=".github/assets/images/icon.jpg" alt="HELIX CLI Icon" width="128" height="128">
 </p>
 
 <h1 align="center">HELIX CLI</h1>
@@ -12,14 +8,10 @@
   <b>Universal Multi-Framework Development Scaffolding & Multi-Agent Assistant</b>
 </p>
 
-```
-  ██╗  ██╗███████╗██╗     ██╗██╗  ██╗     ██████╗██╗     ██╗
-  ██║  ██║██╔════╝██║     ██║╚██╗██╔╝    ██╔════╝██║     ██║
-  ███████║█████╗  ██║     ██║ ╚███╔╝     ██║     ██║     ██║
-  ██╔══██║██╔══╝  ██║     ██║ ██╔██╗     ██║     ██║     ██║
-  ██║  ██║███████╗███████╗██║██╔╝ ██╗    ╚██████╗███████╗██║
-  ╚═╝  ╚═╝╚══════╝╚══════╝╚═╝╚═╝  ╚═╝     ╚═════╝╚══════╝╚═╝
-```
+<p align="center">
+  <img src=".github/assets/images/banner.jpg" alt="HELIX CLI Banner" width="100%">
+</p>
+
 
 **HELIX CLI** is a universal developer assistant and multi-framework project generator built in TypeScript. It delivers production-grade scaffolding across 14 project templates, multi-tiered AI client integration (**Google Antigravity**, **GitHub Copilot**, **Open Code**), and official code hosting CLI automation (**GitHub CLI `gh`**, **GitLab CLI `glab`**, Bitbucket).
 
@@ -168,7 +160,6 @@ helix repo sync-secrets [--name my-project] [--env-path .env]
 > [!TIP]
 > When creating or synchronizing repositories with GitHub, any local `.env` keys and values are securely piped via standard input into GitHub Secrets (`gh secret set`) without being committed or exposed to the git log.
 
-
 ### 4. Built-in Discord Bot & Web Dashboard (`helix bot`)
 Integrate HELIX Code directly into your Discord server and control everything via an interactive browser dashboard:
 ```bash
@@ -245,7 +236,7 @@ helix completion bash >> ~/.bashrc
 | `desktop-electron` | Desktop | Electron | TypeScript |
 | `desktop-tauri` | Desktop | Tauri v2 | Rust + TypeScript |
 | `mobile-flutter` | Mobile | Flutter | Dart |
-| `mobile-react-native`| Mobile | Expo Router | TypeScript |
+| `mobile-react-native` | Mobile | Expo Router | TypeScript |
 | `game-unity` | Game Engine | Unity LTS | C# |
 | `game-godot` | Game Engine | Godot 4 | GDScript |
 | `game-rpgm` | Game Engine | RPG Maker MZ/MV | JavaScript |
@@ -258,18 +249,19 @@ helix completion bash >> ~/.bashrc
 ---
 
 ## Architecture & Development
-- [docs/](file:///d:/Scripts/HELIX%20CLI/docs/index.md): Multi-page architectural specifications, deployment guides, and template catalogs.
-- `tests/`: Automated unit and integration test suite with Vitest.
+- [`docs/`](docs/index.md): Multi-page architectural specifications, deployment guides, and template catalogs.
+- [`tests/`](tests/README.md): Automated unit and integration test suite with Vitest.
 - `src/`: Modular TypeScript source code (CLI, Scaffolding Engine, NextAuth Dashboard, and Built-in Discord Bot).
+- [`CONTRIBUTING.md`](CONTRIBUTING.md): Contribution workflow, pull request guidelines, and local setup.
 
 ---
 
 ## Documentation
 
-Explore the complete multi-page documentation suite in [docs/](file:///d:/Scripts/HELIX%20CLI/docs/index.md):
-- [Architecture Overview](file:///d:/Scripts/HELIX%20CLI/docs/index.md)
-- [Discord Bot Architecture & Slash Commands](file:///d:/Scripts/HELIX%20CLI/docs/discord-bot.md)
-- [NextAuth Web Dashboard & Zero-Lag Direct Engine](file:///d:/Scripts/HELIX%20CLI/docs/web-dashboard.md)
+Explore the complete multi-page documentation suite in [`docs/`](docs/index.md):
+- [Architecture Overview](docs/index.md)
+- [Discord Bot Architecture & Slash Commands](docs/discord-bot.md)
+- [NextAuth Web Dashboard & Zero-Lag Direct Engine](docs/web-dashboard.md)
 - [Free-Tier Heroku 1-Click Deployment & GitHub Secrets](docs/deployment-heroku.md)
 - [Docker & Self-Hosting Deployment Guide](docs/deployment-docker.md)
 - [14 Multi-Framework Starter Templates](docs/scaffolding-templates.md)
@@ -279,5 +271,5 @@ Explore the complete multi-page documentation suite in [docs/](file:///d:/Script
 
 ## License
 
-MIT
+Released under the [MIT License](LICENSE). Copyright © 2026 HELIX CLI Team & Contributors.
 

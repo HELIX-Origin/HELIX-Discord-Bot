@@ -22,6 +22,7 @@ data/*.sqlite-journal
 .cli/
 
 # Bot compiled dist
-bot/src/dist/
+bot/src/dist/*
+!bot/src/dist/.gitkeep
 
 

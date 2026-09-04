@@ -1,0 +1,8 @@
+setup:
+  addons: []
+  config: {}
+build:
+  docker:
+    web: Dockerfile
+run:
+  web: node scripts/setup.mjs && node dist/bot/index.js
