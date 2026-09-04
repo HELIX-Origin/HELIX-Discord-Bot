@@ -28,7 +28,7 @@ export async function handleDashboardScaffold(req: http.IncomingMessage, res: ht
 
       const targetDir = path.resolve(process.cwd(), 'scaffolds', projectName);
 
-      await executeScaffold(
+      const result = await executeScaffold(
         type,
         targetDir,
         { PROJECT_NAME: projectName, AUTHOR: 'HELIX Dashboard', DESCRIPTION: 'Scaffolded via HELIX Dashboard' },
@@ -49,12 +49,13 @@ export async function handleDashboardScaffold(req: http.IncomingMessage, res: ht
 
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({
-        success: true,
+        success: result.success,
         type,
         templateId,
         projectName,
         targetDir,
         dryRun,
+        files: result.writtenFiles,
       }));
     } catch (err: any) {
       res.writeHead(500, { 'Content-Type': 'application/json' });

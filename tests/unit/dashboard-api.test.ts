@@ -1,4 +1,4 @@
-﻿import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import http from 'node:http';
 import { BotCallbackServer } from '../../HELIX/src/server.js';
 
@@ -94,5 +94,86 @@ describe('Discord Bot Web Dashboard & NextAuth Endpoints', () => {
     const res = await resPromise;
     expect(res.statusCode).toBe(200);
     expect(res.data.userId).toBe('test-user-999');
+  });
+
+  it('serves and saves guild configurations at /api/dashboard/guilds', async () => {
+    // 1. GET guilds
+    const getRes = await new Promise<{ statusCode: number; data: any }>((resolve, reject) => {
+      http.get(`${baseUrl}/api/dashboard/guilds`, (res) => {
+        let body = '';
+        res.on('data', chunk => body += chunk);
+        res.on('end', () => resolve({ statusCode: res.statusCode || 200, data: JSON.parse(body) }));
+      }).on('error', reject);
+    });
+
+    expect(getRes.statusCode).toBe(200);
+    expect(getRes.data.guildSettings).toBeDefined();
+
+    // 2. POST guild settings
+    const postData = JSON.stringify({
+      guildId: 'guild-test-123',
+      prefix: '!',
+      ticketsHubChannelId: '987654321',
+      modLogChannelId: '123456789',
+    });
+
+    const postRes = await new Promise<{ statusCode: number; data: any }>((resolve, reject) => {
+      const req = http.request(
+        `${baseUrl}/api/dashboard/guilds`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Content-Length': Buffer.byteLength(postData),
+          },
+        },
+        (res) => {
+          let body = '';
+          res.on('data', chunk => body += chunk);
+          res.on('end', () => resolve({ statusCode: res.statusCode || 200, data: JSON.parse(body) }));
+        }
+      );
+      req.on('error', reject);
+      req.write(postData);
+      req.end();
+    });
+
+    expect(postRes.statusCode).toBe(200);
+    expect(postRes.data.success).toBe(true);
+    expect(postRes.data.guildId).toBe('guild-test-123');
+  });
+
+  it('executes dry-run scaffolding and returns files list at /api/dashboard/scaffold', async () => {
+    const postData = JSON.stringify({
+      projectName: 'dashboard-test-app',
+      templateId: 'web-react',
+      dryRun: true,
+    });
+
+    const postRes = await new Promise<{ statusCode: number; data: any }>((resolve, reject) => {
+      const req = http.request(
+        `${baseUrl}/api/dashboard/scaffold`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Content-Length': Buffer.byteLength(postData),
+          },
+        },
+        (res) => {
+          let body = '';
+          res.on('data', chunk => body += chunk);
+          res.on('end', () => resolve({ statusCode: res.statusCode || 200, data: JSON.parse(body) }));
+        }
+      );
+      req.on('error', reject);
+      req.write(postData);
+      req.end();
+    });
+
+    expect(postRes.statusCode).toBe(200);
+    expect(postRes.data.success).toBe(true);
+    expect(postRes.data.files).toBeInstanceOf(Array);
+    expect(postRes.data.files.length).toBeGreaterThan(0);
   });
 });

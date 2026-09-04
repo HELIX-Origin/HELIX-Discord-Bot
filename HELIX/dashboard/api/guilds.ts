@@ -12,11 +12,18 @@ export async function handleDashboardGuilds(req: http.IncomingMessage, res: http
     const botClient = HelixBotClient.getInstance();
     const liveGuilds = botClient ? botClient.getGuildsCache() : [];
 
+    const guildSettings: Record<string, any> = {};
+    for (const g of liveGuilds) {
+      guildSettings[g.id] = db.getGuildSettings(g.id);
+    }
+    guildSettings['global'] = db.getGuildSettings('global');
+
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({
       stats,
       sessions,
       liveGuilds,
+      guildSettings,
       guildCount: liveGuilds.length,
       callbackUrl: getCallbackUrl(),
     }));
@@ -32,8 +39,12 @@ export async function handleDashboardGuilds(req: http.IncomingMessage, res: http
         const guildId = payload.guildId || 'global';
         db.setGuildSettings({
           guildId,
-          prefix: payload.prefix || '/',
-          callbackUrl: payload.callbackUrl || 'http://localhost:5000',
+          prefix: payload.prefix !== undefined ? payload.prefix : '>',
+          callbackUrl: payload.callbackUrl || getCallbackUrl(),
+          ticketsHubChannelId: payload.ticketsHubChannelId,
+          ticketManagerRoleId: payload.ticketManagerRoleId,
+          modLogChannelId: payload.modLogChannelId,
+          welcomeChannelId: payload.welcomeChannelId,
         });
 
         res.writeHead(200, { 'Content-Type': 'application/json' });
