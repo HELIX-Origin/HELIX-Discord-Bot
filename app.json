@@ -1,18 +1,23 @@
 {
-  "name": "helix-discord-bot",
-  "description": "HELIX Universal Discord Bot & AI Dashboard with self-contained zero-cost SQLite database",
-  "keywords": ["discord", "discord-bot", "nextauth", "ai", "scaffolding", "developer-tools"],
-  "website": "https://github.com/HELIX-Origin/HELIX-CLI",
-  "repository": "https://github.com/HELIX-Origin/HELIX-CLI",
+  "name": "helix-bot",
+  "description": "Standalone Discord bot for developer communities — moderation, thread tickets, scaffolding, and zero-AI code intelligence",
+  "keywords": [
+    "discord",
+    "discord-bot",
+    "developer-tools",
+    "scaffolding",
+    "linter",
+    "code-intelligence",
+    "docker"
+  ],
+  "website": "https://github.com/HELIX-Origin/HELIX",
+  "repository": "https://github.com/HELIX-Origin/HELIX",
+  "logo": "https://raw.githubusercontent.com/HELIX-Origin/HELIX/main/.github/assets/images/icon.jpg",
   "success_url": "/dashboard",
   "stack": "container",
   "env": {
-    "HEROKU_APP_NAME": {
-      "description": "Heroku application name (automatically injected by Heroku during deploy)",
-      "required": false
-    },
     "DISCORD_TOKEN": {
-      "description": "Discord Bot Token from Discord Developer Portal (Bot tab -> Reset Token)",
+      "description": "Discord Bot Token from Developer Portal (Bot tab -> Reset Token)",
       "required": true
     },
     "DISCORD_CLIENT_ID": {
@@ -20,30 +25,28 @@
       "required": true
     },
     "DISCORD_CLIENT_SECRET": {
-      "description": "Discord OAuth2 Client Secret for dashboard login. Optional for bot-only mode.",
-      "required": false
-    },
-    "DISCORD_CALLBACK_URL": {
-      "description": "Base OAuth2 URL (leave empty to automatically use https://<app-name>.herokuapp.com)",
-      "required": false
-    },
-    "NEXTAUTH_URL": {
-      "description": "Public NextAuth URL (leave empty to automatically use https://<app-name>.herokuapp.com)",
-      "required": false
-    },
-    "NEXT_PUBLIC_INVITE_URL": {
-      "description": "Administrator Discord bot invite URL (leave empty to automatically generate from Client ID and Heroku domain)",
-      "required": false
-    },
-    "NEXTAUTH_INTERNAL_URL": {
-      "description": "Internal connection URL (defaults to http://localhost, dashboard auto-binds port)",
-      "value": "http://localhost",
+      "description": "Discord OAuth2 Client Secret (OAuth2 -> General -> Client Secret) for Web Dashboard login",
       "required": true
     },
     "NEXTAUTH_SECRET": {
-      "description": "HMAC secret for signing NextAuth sessions (generated automatically)",
+      "description": "HMAC secret for signing NextAuth session cookies (generated automatically)",
       "generator": "secret",
       "required": true
+    },
+    "HELIX_DEFAULT_PREFIX": {
+      "description": "Default bot command prefix (customizable per-guild via >set prefix)",
+      "value": ">",
+      "required": false
+    },
+    "HELIX_LOG_LEVEL": {
+      "description": "Logging level (debug, info, warn, error)",
+      "value": "info",
+      "required": false
+    },
+    "HELIX_DISABLE_TELEMETRY": {
+      "description": "Disable usage telemetry",
+      "value": "true",
+      "required": false
     }
   },
   "formation": {
