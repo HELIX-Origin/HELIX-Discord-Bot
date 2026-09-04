@@ -37,11 +37,5 @@
       "value": "production",
       "required": false
     }
-  },
-  "formation": {
-    "web": {
-      "quantity": 1,
-      "size": "eco"
-    }
   }
 }

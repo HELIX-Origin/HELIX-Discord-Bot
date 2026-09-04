@@ -1,6 +1,6 @@
 # Heroku Docker Deployment
 
-Deploy HELIX to Heroku using the Heroku Container stack (`Dockerfile` + `heroku.yml` + `app.json`) on a single Eco Dyno with zero required paid add-ons.
+Deploy HELIX to Heroku using the Heroku Container stack (`Dockerfile` + `heroku.yml` + `app.json`) with zero required paid add-ons or tiers.
 
 ---
 
@@ -97,4 +97,4 @@ heroku open dashboard -a <your-app-name>
 
 ## Database & Persistence Note
 
-`BotDatabase` creates `data/helix-bot.sqlite` and executes autonomous forward schema migrations on boot. Note that default Heroku Eco Dynos feature an ephemeral filesystem. For persistent multi-restart storage on Heroku, mount an external volume or configure `DISCORD_DB_PATH` to point to a persistent store.
+`BotDatabase` creates `data/helix-bot.sqlite` and executes autonomous forward schema migrations on boot. Note that default Heroku dynos feature an ephemeral filesystem. For persistent multi-restart storage on Heroku, mount an external volume or configure `DISCORD_DB_PATH` to point to a persistent store.
