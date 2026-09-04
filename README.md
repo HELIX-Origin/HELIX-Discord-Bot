@@ -81,7 +81,7 @@ Only `PORT` is required in `.env` for local development. All other URL environme
 
 - **Vanilla discord.js**: Plain `new Client()` with `GatewayIntentBits` — no decorator frameworks
 - **CommandDefinition interface**: Unified type with `execute(context)` handling both prefix and slash
-- **No index files**: Only entry points (`index.ts`) at root, `src/`, and `dashboard/`
+
 - **Named exports only**: All command and event files use named exports
 - **Handler-based discovery**: Auto-discovers via `import.meta.glob`
 - **Language Plugin System**: Plugin repos read `config.json` manifest, load individual `plugin.json` manifests
