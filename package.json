@@ -1,7 +1,7 @@
 {
   "name": "helix-cli",
   "version": "0.1.0",
-  "description": "Universal CLI development assistant for multi-framework scaffolding, AI agents, and code hosting platforms",
+  "description": "Universal CLI development assistant for multi-framework scaffolding, AI agents, companion dashboard, and Discord bot automation",
   "type": "module",
   "main": "./dist/index.js",
   "bin": {
