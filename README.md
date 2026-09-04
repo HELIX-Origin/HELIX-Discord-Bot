@@ -50,9 +50,11 @@ Only `PORT` is required in `.env` for local development. All other URL environme
 
 ---
 
-## Available Commands
+## Commands
 
 ### Prefix Commands (`>`)
+Every command is a prefix command by default. The bot registers all commands as prefix commands, and guild owners may optionally register desired command groups as slash commands in their guild.
+
 - `>help` - Display all available commands
 - `>status` - Report system health
 - `>ping` - Check WebSocket latency
@@ -70,10 +72,12 @@ Only `PORT` is required in `.env` for local development. All other URL environme
 - `>ticket close` - Close current ticket
 
 ### Slash Commands (`/`)
-- `/lint` - Analyze code for errors
-- `/explain` - Explain code using documentation
-- `/docs` - Look up official documentation
-- `/plugin` - Manage language plugins
+Guild owners may optionally register specific command groups as slash commands via the guild's slash command registry. These are the same commands available as prefix commands, registered as slash commands for that guild.
+
+- `/lint` - Analyze code for errors (registered per-guild)
+- `/explain` - Explain code using documentation (registered per-guild)
+- `/docs` - Look up official documentation (registered per-guild)
+- `/plugin` - Manage language plugins (registered per-guild)
 
 ---
 
@@ -81,9 +85,12 @@ Only `PORT` is required in `.env` for local development. All other URL environme
 
 - **Vanilla discord.js**: Plain `new Client()` with `GatewayIntentBits` — no decorator frameworks
 - **CommandDefinition interface**: Unified type with `execute(context)` handling both prefix and slash
+- **No index files**: Only entry points (`index.ts`) at root, `src/`, and `dashboard/`
+- **Named exports only**: All command and event files use named exports
 - **Handler-based discovery**: Auto-discovers via `import.meta.glob`
 - **Language Plugin System**: Plugin repos read `config.json` manifest, load individual `plugin.json` manifests
 - **Database**: SQLite with `node:sqlite` `DatabaseSync`, autonomous migrations on startup
+- **Optional slash command registry**: Guild owners register desired command groups as slash commands; all commands remain available as prefix commands
 
 ---
 
