@@ -7,9 +7,23 @@ HELIX connects to your existing local AI coding assistants without requiring ext
 ## 1. Local Tool Discovery
 
 HELIX scans local configuration files and official CLI authentications:
-1. **Google Antigravity**: Checks local config path `~/.gemini/antigravity` and active `agy` CLI session.
+1. **Google Antigravity**: Checks local config path `~/.gemini/antigravity`, `%APPDATA%`, and active `agy` CLI session.
 2. **GitHub Copilot**: Resolves credentials directly via GitHub CLI (`gh auth token`) and local `hosts.json`.
 3. **Open Code Go / Zen**: Detects active session tokens in `~/.opencode/auth.json` or `opencode` CLI.
+
+```mermaid
+flowchart TD
+    Start["helix ai / bot query"] --> Tier1{"1. Installed Official CLI?"}
+    
+    Tier1 -- Yes --> UseCLI["Use Official CLI Session<br/>(gh auth token / agy in PATH)"]
+    Tier1 -- No --> Tier2{"2. Local Config Files?"}
+    
+    Tier2 -- Yes --> UseFile["Read Token from Local Config<br/>(~/.config, %APPDATA%, $XDG_CONFIG_HOME)"]
+    Tier2 -- No --> Tier3{"3. Project .env Fallback?"}
+    
+    Tier3 -- Yes --> UseEnv["Load Key from .env / process.env"]
+    Tier3 -- No --> Unauth["Status: Unauthenticated<br/>Prompt user to login or configure .env"]
+```
 
 ---
 

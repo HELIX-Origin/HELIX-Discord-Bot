@@ -12,6 +12,32 @@ Unlike standard microservice setups where the dashboard queries the bot over HTT
 - **Direct Broadcast**: Dispatches channel announcements immediately via `botClient.sendChannelMessage()`.
 - **Live Server Cache**: Guild names, channels, and member counts are served directly from the Discord gateway cache.
 
+```mermaid
+graph TB
+    Browser["Browser / Admin User"]
+    
+    subgraph "Single Node Process (Zero-Lag)"
+        HTTP["HTTP / OAuth2 Server (:5000)"]
+        Router["Dashboard Request Router"]
+        NextAuth["NextAuth Session Cryptography"]
+        
+        subgraph "In-Memory Direct Coupling"
+            BotClient["Discord Bot Gateway Client<br/>(Live WebSocket ping & server cache)"]
+        end
+        
+        DB[("Embedded SQLite DB<br/>data/helix-bot.sqlite")]
+        
+        HTTP --> Router
+        Router --> NextAuth
+        Router --> DB
+        Router <--> BotClient
+        BotClient <--> DB
+    end
+
+    Browser <--> HTTP
+    BotClient <--> DiscordAPI["Discord Gateway (GatewayIntentBits)"]
+```
+
 ---
 
 ## 2. NextAuth Configuration

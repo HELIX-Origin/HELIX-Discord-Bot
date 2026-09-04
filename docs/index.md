@@ -2,6 +2,34 @@
 
 Welcome to the comprehensive documentation for **HELIX CLI**, the built-in **Discord Bot**, and the **NextAuth Web Dashboard**.
 
+```mermaid
+graph LR
+    subgraph "Client Interfaces"
+        CLI["helix CLI Commands<br/>(Terminal / CI)"]
+        WebUI["Web Dashboard UI<br/>(Browser)"]
+        SlashCmd["Discord Slash Commands<br/>(Guilds & DMs)"]
+    end
+
+    subgraph "Core Execution Engines"
+        ScaffoldEngine["Scaffolding Engine<br/>(14 Templates)"]
+        AuthResolver["Credential Discovery<br/>(Antigravity • Copilot • Open Code)"]
+        RepoManager["Hosting & Git Automation<br/>(gh • glab • git)"]
+    end
+
+    subgraph "Runtime & Storage"
+        BotGateway["Discord Gateway Client<br/>(discord.js)"]
+        NextAuth["NextAuth & OAuth2 Router<br/>(Port 5000)"]
+        SQLiteDB[("SQLite Storage<br/>data/helix-bot.sqlite")]
+    end
+
+    CLI --> Core Execution Engines
+    WebUI --> NextAuth
+    SlashCmd --> BotGateway
+    BotGateway <--> SQLiteDB
+    NextAuth <--> SQLiteDB
+    BotGateway <--> NextAuth
+```
+
 ---
 
 ## Documentation Sections

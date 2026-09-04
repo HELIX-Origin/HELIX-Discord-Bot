@@ -2,6 +2,29 @@
 
 The HELIX Discord Bot integrates your development toolchain and AI agents directly into your Discord servers.
 
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User as Discord Member
+    participant Gateway as Discord Gateway
+    participant Bot as HelixBotClient
+    participant DB as SQLite Storage
+    participant AI as AI Resolver (Antigravity / Copilot)
+
+    User->>Gateway: Trigger /helix-ai prompt: "Explain this error"
+    Gateway->>Bot: emit('interactionCreate')
+    Bot->>DB: Query user OAuth2 token & provider preference
+    alt Personal Token Found
+        DB-->>Bot: Return user session
+    else Default Server Settings
+        DB-->>Bot: Return guild default provider
+    end
+    Bot->>AI: Synthesize prompt with workspace context
+    AI-->>Bot: Stream / return generated response
+    Bot->>Gateway: Edit interaction reply with rich Embed
+    Gateway-->>User: Render styled Markdown response in channel
+```
+
 ---
 
 ## 1. Slash Commands

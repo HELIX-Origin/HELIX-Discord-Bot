@@ -2,6 +2,26 @@
 
 Deploy the HELIX Discord Bot and companion Web Dashboard in an isolated, production-grade Docker container with automated database migrations and zero host dependencies.
 
+```mermaid
+graph LR
+    subgraph "Host System"
+        EnvFile[".env Configuration"]
+        DataDir["./data (Host Directory)"]
+        BrowserHost["Browser (localhost:5000)"]
+    end
+
+    subgraph "Docker Container (helix-discord-bot)"
+        AppServer["Node 22 Production Runner"]
+        AppServer --> ContainerDB[("/app/data/helix-bot.sqlite")]
+        HealthCheck["Container Health Probe<br/>(GET /health)"]
+    end
+
+    EnvFile -.-> AppServer
+    DataDir === ContainerDB
+    BrowserHost <== "Port 5000" ==> AppServer
+    AppServer <== "WebSocket" ==> DiscordGateway["Discord Gateway API"]
+```
+
 ---
 
 ## 1. Quick Start with Docker Compose (Recommended)

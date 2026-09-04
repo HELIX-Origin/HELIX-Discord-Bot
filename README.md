@@ -33,6 +33,31 @@
   <b>100% Free-Tier Architecture</b> • <b>Zero Paid Heroku Services</b> • <b>Self-Contained SQLite Database</b>
 </p>
 
+```mermaid
+graph TD
+    User["Developer / User"] --> CLI["HELIX CLI (helix)"]
+    User --> Discord["Discord Server / Guild"]
+
+    subgraph "HELIX Ecosystem"
+        CLI --> Scaffold["Scaffolding Engine<br/>(14 Multi-Framework Templates)"]
+        CLI --> AIResolvers["Multi-Tier AI Resolvers<br/>(Antigravity • Copilot • Open Code)"]
+        CLI --> HostAutomation["Code Hosting Automation<br/>(GitHub • GitLab • Bitbucket)"]
+
+        subgraph "Bot & Dashboard Subsystem"
+            BotClient["Discord Bot Gateway Client<br/>(discord.js)"]
+            Dashboard["Web Dashboard & NextAuth<br/>(Direct In-Process Server)"]
+            SQLite[("Zero-Cost SQLite DB<br/>data/helix-bot.sqlite")]
+            
+            BotClient <--> SQLite
+            Dashboard <--> SQLite
+            Dashboard <--> BotClient
+        end
+    end
+
+    Discord <--> BotClient
+    Scaffold --> GeneratedApp["Scaffolded App + CI/CD Pipelines"]
+```
+
 ---
 
 ## Key Features
