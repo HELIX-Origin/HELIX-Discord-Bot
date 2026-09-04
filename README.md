@@ -13,7 +13,7 @@
   <a href="https://discord.gg/Ww3XBZC2HV"><img src="https://img.shields.io/badge/Discord-Join%20Server-5865F2?style=plastic&logo=discord&logoColor=white" alt="Discord Server"></a>
   <a href="https://heroku.com/deploy?template=https://github.com/HELIX-Origin/HELIX-CLI"><img src="https://img.shields.io/badge/Deploy%20to-Heroku-6762a6?style=plastic&logo=heroku&logoColor=white" alt="Deploy to Heroku"></a>
   <a href="https://nodejs.org"><img src="https://img.shields.io/badge/Node.js-%3E%3D22.0.0-339933?style=plastic&logo=node.js&logoColor=white" alt="Node.js Version"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg?style=plastic" alt="License: MIT"></a>
+  <a href="LICENSE.md"><img src="https://img.shields.io/badge/License-BSD_3--Clause-blue.svg?style=plastic" alt="License: BSD 3-Clause"></a>
   <a href="docs/deployment-docker.md"><img src="https://img.shields.io/badge/Docker-Ready-2496ED?style=plastic&logo=docker&logoColor=white" alt="Docker Ready"></a>
 </p>
 
@@ -255,6 +255,8 @@ helix completion bash >> ~/.bashrc
 - [`tests/`](tests/README.md): Automated unit and integration test suite with Vitest.
 - `src/`: Modular TypeScript source code (CLI, Scaffolding Engine, NextAuth Dashboard, and Built-in Discord Bot).
 - [`CONTRIBUTING.md`](CONTRIBUTING.md): Contribution workflow, pull request guidelines, and local setup.
+- [`PRIVACY.md`](PRIVACY.md): Privacy policy and zero-telemetry architecture overview.
+- [`CITATION.cff`](CITATION.cff): Academic and open-source citation metadata.
 
 ---
 
@@ -273,5 +275,5 @@ Explore the complete multi-page documentation suite in [`docs/`](docs/index.md):
 
 ## License
 
-Released under the [MIT License](LICENSE). Copyright © 2026 HELIX CLI Team & Contributors.
+Released under the [BSD 3-Clause License](LICENSE.md). Copyright © 2026 HELIX CLI Team & Contributors.
 

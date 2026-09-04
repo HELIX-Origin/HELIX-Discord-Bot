@@ -47,7 +47,7 @@
     "antigravity"
   ],
   "author": "HELIX CLI Team",
-  "license": "MIT",
+  "license": "BSD-3-Clause",
   "engines": {
     "node": ">=22.0.0"
   },
