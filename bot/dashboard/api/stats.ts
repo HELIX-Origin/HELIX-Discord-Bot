@@ -4,6 +4,7 @@ import { HelixBotClient } from '../../src/client.js';
 import { AuthResolver } from '../../../src/core/auth/index.js';
 import { RepoManager } from '../../../src/core/hosting/index.js';
 import { resolveBotInviteUrl } from '../../src/server.js';
+import { getCallbackUrl, getClientId, getBotToken } from '../../src/env.js';
 
 export function handleDashboardStats(req: http.IncomingMessage, res: http.ServerResponse): void {
   const db = BotDatabase.getInstance();
@@ -22,13 +23,13 @@ export function handleDashboardStats(req: http.IncomingMessage, res: http.Server
   const recentScaffolds = db.getRecentScaffolds(10);
   const userSessions = db.getAllUserSessions();
 
-  const callbackUrl = process.env.DISCORD_CALLBACK_URL || 'http://localhost:5000';
-  const clientId = process.env.DISCORD_CLIENT_ID || null;
-  const inviteUrl = resolveBotInviteUrl(process.env.NEXT_PUBLIC_INVITE_URL, callbackUrl, clientId || undefined);
+  const callbackUrl = getCallbackUrl();
+  const clientId = getClientId() || null;
+  const inviteUrl = resolveBotInviteUrl(undefined, callbackUrl, clientId || undefined);
 
   const data = {
     bot: {
-      status: process.env.DISCORD_BOT_TOKEN ? (isBotReady ? 'online' : 'configured') : 'unconfigured',
+      status: getBotToken() ? (isBotReady ? 'online' : 'configured') : 'unconfigured',
       isReady: isBotReady,
       gatewayLatencyMs: gatewayLatency,
       clientId,

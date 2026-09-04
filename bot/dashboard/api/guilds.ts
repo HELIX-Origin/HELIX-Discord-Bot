@@ -1,5 +1,6 @@
 import http from 'node:http';
 import { BotDatabase } from '../../src/db/index.js';
+import { getCallbackUrl } from '../../src/env.js';
 
 export async function handleDashboardGuilds(req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
   const db = BotDatabase.getInstance();
@@ -17,7 +18,7 @@ export async function handleDashboardGuilds(req: http.IncomingMessage, res: http
       sessions,
       liveGuilds,
       guildCount: liveGuilds.length,
-      callbackUrl: process.env.DISCORD_CALLBACK_URL || 'http://localhost:5000',
+      callbackUrl: getCallbackUrl(),
     }));
     return;
   }

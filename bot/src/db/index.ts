@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import { getDbPath } from '../env.js';
 
 export interface QueryLogEntry {
   userId: string;
@@ -38,8 +39,7 @@ export class BotDatabase {
   private dbPath: string;
 
   constructor(customPath?: string) {
-    const defaultPath = path.resolve(process.cwd(), 'data', 'helix-bot.sqlite');
-    this.dbPath = customPath || process.env.DISCORD_DB_PATH || defaultPath;
+    this.dbPath = customPath || getDbPath();
     this.initialize();
   }
 

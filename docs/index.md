@@ -21,9 +21,14 @@ Welcome to the comprehensive documentation for **HELIX CLI**, the built-in **Dis
    - Linking GitHub repository secrets directly to Heroku config variables.
    - Setting up the 1-click button and automated deployment workflow.
 
-4. [Scaffolding & Starter Templates](file:///d:/Scripts/HELIX%20CLI/docs/scaffolding-templates.md)
+4. [Docker & Self-Hosting Deployment](deployment-docker.md)
+   - Multi-stage production container setup with Node 22 and SQLite volume persistence.
+   - 1-command startup with Docker Compose (`docker compose up -d`).
+   - Standalone container runs and environment variables configuration.
+
+5. [Scaffolding & Starter Templates](scaffolding-templates.md)
    - Detailed specifications for all 14 multi-framework starter templates across Web, Desktop, Mobile, Game Engines, and Backend services.
 
-5. [AI Agent Integration & Discovery](file:///d:/Scripts/HELIX%20CLI/docs/ai-integration.md)
+6. [AI Agent Integration & Discovery](ai-integration.md)
    - Multi-tiered local client discovery for **Google Antigravity**, **GitHub Copilot**, and **Open Code**.
    - Context-aware code generation and prompt synthesis.

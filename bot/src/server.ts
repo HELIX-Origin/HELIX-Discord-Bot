@@ -3,6 +3,7 @@ import { URL } from 'node:url';
 import pc from 'picocolors';
 import { logger } from './utils/logger/index.js';
 import { routeDashboardRequest } from '../dashboard/router.js';
+import { getClientId, getCallbackUrl, getInviteUrl, getPort } from './env.js';
 
 export interface BotServerOptions {
   callbackUrl?: string;
@@ -36,15 +37,11 @@ export function resolveBotInviteUrl(
   callbackBaseUrl?: string,
   clientId?: string
 ): string {
-  const actualClientId = clientId || process.env.DISCORD_CLIENT_ID || '';
-  const callbackBase = (callbackBaseUrl || process.env.DISCORD_CALLBACK_URL || 'http://localhost:5000').replace(/\/$/, '');
+  const actualClientId = clientId || getClientId();
+  const callbackBase = (callbackBaseUrl || getCallbackUrl()).replace(/\/$/, '');
   const redirectUri = `${callbackBase}/api/auth/callback/discord`;
 
-  let invite = (
-    rawInvite ||
-    process.env.NEXT_PUBLIC_INVITE_URL ||
-    ''
-  ).trim();
+  let invite = (rawInvite || getInviteUrl() || '').trim();
 
   // Strip surrounding quotes if present in env value
   if ((invite.startsWith('"') && invite.endsWith('"')) || (invite.startsWith("'") && invite.endsWith("'"))) {
@@ -120,9 +117,8 @@ export class BotCallbackServer {
   private baseUrl: string;
 
   constructor(options: BotServerOptions = {}) {
-    const envUrl = process.env.DISCORD_CALLBACK_URL || 'http://localhost:5000';
-    this.baseUrl = options.callbackUrl || envUrl;
-    this.port = options.port || parsePortFromUrl(this.baseUrl, 5000);
+    this.baseUrl = options.callbackUrl || getCallbackUrl();
+    this.port = options.port || getPort();
   }
 
   public start(): Promise<void> {

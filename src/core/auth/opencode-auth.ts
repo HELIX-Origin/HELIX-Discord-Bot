@@ -5,20 +5,27 @@ import { execSync } from 'child_process';
 import { AuthResult, maskToken } from './copilot-auth.js';
 
 export function resolveOpenCodeAuth(): AuthResult {
-  // 1. Check OpenCode config file
-  const opencodeConfigPath = path.join(os.homedir(), '.opencode', 'auth.json');
-  if (fs.existsSync(opencodeConfigPath)) {
-    try {
-      const raw = JSON.parse(fs.readFileSync(opencodeConfigPath, 'utf-8'));
-      if (raw.token) {
-        return {
-          authenticated: true,
-          source: 'client-file (opencode)',
-          detail: `Authenticated via config at ${opencodeConfigPath}`,
-          tokenPreview: maskToken(raw.token),
-        };
-      }
-    } catch {}
+  // 1. Check OpenCode config file across standard and non-standard paths
+  const opencodeCandidates = [
+    path.join(os.homedir(), '.opencode', 'auth.json'),
+    process.platform === 'win32' && process.env.USERPROFILE ? path.join(process.env.USERPROFILE, '.opencode', 'auth.json') : null,
+    process.env.XDG_CONFIG_HOME ? path.join(process.env.XDG_CONFIG_HOME, 'opencode', 'auth.json') : null,
+  ].filter(Boolean) as string[];
+
+  for (const opencodeConfigPath of opencodeCandidates) {
+    if (fs.existsSync(opencodeConfigPath)) {
+      try {
+        const raw = JSON.parse(fs.readFileSync(opencodeConfigPath, 'utf-8'));
+        if (raw.token) {
+          return {
+            authenticated: true,
+            source: 'client-file (opencode)',
+            detail: `Authenticated via config at ${opencodeConfigPath}`,
+            tokenPreview: maskToken(raw.token),
+          };
+        }
+      } catch {}
+    }
   }
 
   // Check if opencode CLI is installed

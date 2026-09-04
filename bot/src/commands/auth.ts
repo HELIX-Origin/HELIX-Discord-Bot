@@ -1,6 +1,7 @@
 import { SlashCommandBuilder, ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
 import { BotDatabase } from '../db/index.js';
 import { getAuthorizationUrl } from '../server.js';
+import { getClientId, getCallbackUrl } from '../env.js';
 
 export const authCommand = {
   data: new SlashCommandBuilder()
@@ -94,8 +95,8 @@ export const authCommand = {
 
         await interaction.reply({ embeds: [embed], ephemeral: true });
       } else {
-        const clientId = process.env.DISCORD_CLIENT_ID || '';
-        const callbackBase = process.env.DISCORD_CALLBACK_URL || 'http://localhost:5000';
+        const clientId = getClientId();
+        const callbackBase = getCallbackUrl();
         const authUrl = `${getAuthorizationUrl(clientId, callbackBase)}&state=${encodeURIComponent(`${userId}:${guildId || 'DM'}:${provider}`)}`;
 
         const embed = new EmbedBuilder()

@@ -1,4 +1,16 @@
-# HELIX CLI
+<p align="center">
+  <img src=".github/assets/images/banner.jpg" alt="HELIX CLI Banner" width="100%">
+</p>
+
+<p align="center">
+  <img src=".github/assets/images/icon.jpg" alt="HELIX CLI Icon" width="112" height="112">
+</p>
+
+<h1 align="center">HELIX CLI</h1>
+
+<p align="center">
+  <b>Universal Multi-Framework Development Scaffolding & Multi-Agent Assistant</b>
+</p>
 
 ```
   ██╗  ██╗███████╗██╗     ██╗██╗  ██╗     ██████╗██╗     ██╗
@@ -47,8 +59,9 @@
 
 ---
 
-## Installation
+## Installation & Deployment
 
+### 1. Global Developer CLI (npm)
 ```bash
 # Install globally via npm
 npm install -g helix-cli
@@ -56,6 +69,24 @@ npm install -g helix-cli
 # Or run directly with npx
 npx helix-cli --help
 ```
+
+### 2. Built-in Discord Bot & Web Dashboard (Docker / Self-Hosting)
+Deploy the Discord bot and companion web dashboard with persistent SQLite database storage in one command:
+
+```bash
+# Clone and configure environment
+git clone https://github.com/HELIX-Origin/helix-cli.git
+cd helix-cli
+cp .env.example .env
+
+# Launch with Docker Compose
+docker compose up -d
+
+# Open the Web Dashboard
+# -> http://localhost:5000/dashboard
+```
+
+For full details, see the [Docker & Self-Hosting Guide](docs/deployment-docker.md) or [Free-Tier Heroku Guide](docs/deployment-heroku.md).
 
 ---
 
@@ -214,9 +245,10 @@ Explore the complete multi-page documentation suite in [docs/](file:///d:/Script
 - [Architecture Overview](file:///d:/Scripts/HELIX%20CLI/docs/index.md)
 - [Discord Bot Architecture & Slash Commands](file:///d:/Scripts/HELIX%20CLI/docs/discord-bot.md)
 - [NextAuth Web Dashboard & Zero-Lag Direct Engine](file:///d:/Scripts/HELIX%20CLI/docs/web-dashboard.md)
-- [Free-Tier Heroku 1-Click Deployment & GitHub Secrets](file:///d:/Scripts/HELIX%20CLI/docs/deployment-heroku.md)
-- [14 Multi-Framework Starter Templates](file:///d:/Scripts/HELIX%20CLI/docs/scaffolding-templates.md)
-- [Multi-Tiered AI Integration & Discovery](file:///d:/Scripts/HELIX%20CLI/docs/ai-integration.md)
+- [Free-Tier Heroku 1-Click Deployment & GitHub Secrets](docs/deployment-heroku.md)
+- [Docker & Self-Hosting Deployment Guide](docs/deployment-docker.md)
+- [14 Multi-Framework Starter Templates](docs/scaffolding-templates.md)
+- [Multi-Tiered AI Integration & Discovery](docs/ai-integration.md)
 
 ---
 

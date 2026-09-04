@@ -1,13 +1,14 @@
 import { getNextAuthConfig } from '../auth/config.js';
 import { BotDatabase } from '../../src/db/index.js';
 import { resolveBotInviteUrl } from '../../src/server.js';
+import { getBotToken, getCallbackUrl, getInviteUrl, getClientId } from '../../src/env.js';
 
 export function renderDashboardHtml(botPort?: number): string {
   const config = getNextAuthConfig({ botPort });
   const dbStats = BotDatabase.getInstance().getStats();
-  const botTokenSet = !!process.env.DISCORD_BOT_TOKEN;
-  const callbackUrl = process.env.DISCORD_CALLBACK_URL || `http://localhost:${botPort || 5000}`;
-  const inviteUrl = resolveBotInviteUrl(process.env.NEXT_PUBLIC_INVITE_URL, callbackUrl, process.env.DISCORD_CLIENT_ID);
+  const botTokenSet = !!getBotToken();
+  const callbackUrl = getCallbackUrl();
+  const inviteUrl = resolveBotInviteUrl(getInviteUrl(), callbackUrl, getClientId());
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -15,6 +16,7 @@ export function renderDashboardHtml(botPort?: number): string {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>HELIX Bot & AI Dashboard</title>
+  <link rel="icon" type="image/jpeg" href="/icon.jpg">
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
@@ -27,8 +29,8 @@ export function renderDashboardHtml(botPort?: number): string {
   <!-- Top Navigation -->
   <header class="glass sticky top-0 z-50 border-b border-gray-800 px-6 py-4 flex items-center justify-between">
     <div class="flex items-center space-x-3">
-      <div class="h-10 w-10 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-cyan-500/30">
-        🧬
+      <div class="h-10 w-10 rounded-xl overflow-hidden shadow-lg shadow-cyan-500/30 border border-cyan-500/30 shrink-0 bg-gray-900 flex items-center justify-center">
+        <img src="/icon.jpg" alt="HELIX Bot" class="h-full w-full object-cover" onerror="this.outerHTML='<span class=\\'text-xl\\'>🧬</span>'">
       </div>
       <div>
         <h1 class="text-xl font-extrabold tracking-tight text-white flex items-center gap-2">

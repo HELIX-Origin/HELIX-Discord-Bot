@@ -1,5 +1,6 @@
 import { HelixBotClient } from './src/client.js';
 import { BotCallbackServer } from './src/server.js';
+import { getBotToken, getPort, getCallbackUrl } from './src/env.js';
 
 export * from './src/index.js';
 export * from './dashboard/index.js';
@@ -14,9 +15,9 @@ export async function launchBotAndDashboard(options: LaunchBotOptions = {}): Pro
   bot: HelixBotClient;
   server: BotCallbackServer;
 }> {
-  const token = options.token || process.env.DISCORD_BOT_TOKEN || process.env.DISCORD_TOKEN;
-  const port = options.port || (process.env.PORT ? parseInt(process.env.PORT, 10) : undefined);
-  const callbackUrl = options.callbackUrl || process.env.DISCORD_CALLBACK_URL;
+  const token = options.token || getBotToken();
+  const port = options.port || getPort();
+  const callbackUrl = options.callbackUrl || getCallbackUrl();
 
   console.log('====================================================');
   console.log('  🤖 HELIX Discord Bot & Web Dashboard Subsystem');

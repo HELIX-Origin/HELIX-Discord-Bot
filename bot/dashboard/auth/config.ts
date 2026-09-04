@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import { getPort, getNextAuthUrl, getNextAuthInternalUrl, getNextAuthSecret, getClientId, getClientSecret } from '../../src/env.js';
 
 export interface NextAuthConfig {
   url: string;
@@ -9,49 +10,31 @@ export interface NextAuthConfig {
 }
 
 export function resolveInternalUrl(rawInternal?: string, botPort: number = 5000): string {
-  let target = rawInternal || process.env.NEXTAUTH_INTERNAL_URL || 'http://localhost';
+  let target = rawInternal || getNextAuthInternalUrl(botPort);
   target = target.replace(/\/$/, '');
 
   try {
     const parsed = new URL(target.includes('://') ? target : `http://${target}`);
-    // If port is omitted, automatically attach the dashboard/bot port so user doesn't need to specify it
+    // If port is omitted, automatically attach the dashboard/bot port
     if (!parsed.port) {
       parsed.port = String(botPort);
     }
     return parsed.toString().replace(/\/$/, '');
   } catch {
-    // If URL parsing fails, default safely to http://localhost:<botPort>
     return `http://localhost:${botPort}`;
   }
 }
 
 export function getNextAuthConfig(options: { botPort?: number } = {}): NextAuthConfig {
-  const botPort = options.botPort || (process.env.PORT ? parseInt(process.env.PORT, 10) : 5000);
-  let publicUrl = (process.env.NEXTAUTH_URL || `http://localhost:${botPort}`).replace(/\/$/, '');
-
-  // If publicUrl doesn't have a port specified and is localhost, automatically append the port
-  try {
-    const parsedPub = new URL(publicUrl.includes('://') ? publicUrl : `http://${publicUrl}`);
-    if (!parsedPub.port && (parsedPub.hostname === 'localhost' || parsedPub.hostname === '127.0.0.1')) {
-      parsedPub.port = String(botPort);
-      publicUrl = parsedPub.toString().replace(/\/$/, '');
-    }
-  } catch {}
-
+  const botPort = options.botPort || getPort();
+  const url = getNextAuthUrl(botPort);
   const internalUrl = resolveInternalUrl(process.env.NEXTAUTH_INTERNAL_URL, botPort);
-  const secret = process.env.NEXTAUTH_SECRET || 'helix_bot_dashboard_secret_key_32_bytes_min';
-  const clientId = process.env.DISCORD_CLIENT_ID || '';
-  const clientSecret = process.env.DISCORD_CLIENT_SECRET || '';
+  const secret = getNextAuthSecret();
+  const clientId = getClientId();
+  const clientSecret = getClientSecret();
 
-  return {
-    url: publicUrl,
-    internalUrl,
-    secret,
-    clientId,
-    clientSecret,
-  };
+  return { url, internalUrl, secret, clientId, clientSecret };
 }
-
 
 export function createSessionToken(user: { id: string; name: string; email?: string }): string {
   const config = getNextAuthConfig();

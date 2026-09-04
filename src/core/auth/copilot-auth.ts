@@ -34,24 +34,29 @@ export function resolveCopilotAuth(): AuthResult {
     }
   } catch {}
 
-  // 2. Check Copilot hosts.json config file
-  const copilotConfigPath = process.platform === 'win32'
-    ? path.join(process.env.APPDATA || '', 'GitHub Copilot', 'hosts.json')
-    : path.join(os.homedir(), '.config', 'github-copilot', 'hosts.json');
+  // 2. Check Copilot hosts.json config file across standard and non-standard paths
+  const copilotCandidates = [
+    process.platform === 'win32' && process.env.APPDATA ? path.join(process.env.APPDATA, 'GitHub Copilot', 'hosts.json') : null,
+    process.platform === 'win32' && process.env.USERPROFILE ? path.join(process.env.USERPROFILE, 'AppData', 'Roaming', 'GitHub Copilot', 'hosts.json') : null,
+    process.env.XDG_CONFIG_HOME ? path.join(process.env.XDG_CONFIG_HOME, 'github-copilot', 'hosts.json') : null,
+    path.join(os.homedir(), '.config', 'github-copilot', 'hosts.json'),
+  ].filter(Boolean) as string[];
 
-  if (fs.existsSync(copilotConfigPath)) {
-    try {
-      const raw = JSON.parse(fs.readFileSync(copilotConfigPath, 'utf-8'));
-      const token = raw['github.com']?.oauth_token;
-      if (token) {
-        return {
-          authenticated: true,
-          source: 'client-file (copilot)',
-          detail: `Authenticated via Copilot config at ${copilotConfigPath}`,
-          tokenPreview: maskToken(token),
-        };
-      }
-    } catch {}
+  for (const copilotConfigPath of copilotCandidates) {
+    if (fs.existsSync(copilotConfigPath)) {
+      try {
+        const raw = JSON.parse(fs.readFileSync(copilotConfigPath, 'utf-8'));
+        const token = raw['github.com']?.oauth_token;
+        if (token) {
+          return {
+            authenticated: true,
+            source: 'client-file (copilot)',
+            detail: `Authenticated via Copilot config at ${copilotConfigPath}`,
+            tokenPreview: maskToken(token),
+          };
+        }
+      } catch {}
+    }
   }
 
   // 3. Fallback to .env / environment variables

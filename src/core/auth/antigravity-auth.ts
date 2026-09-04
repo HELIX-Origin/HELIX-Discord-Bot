@@ -5,9 +5,16 @@ import { execSync } from 'child_process';
 import { AuthResult, maskToken } from './copilot-auth.js';
 
 export function resolveAntigravityAuth(): AuthResult {
-  // 1. Check local Antigravity configuration directory
-  const geminiDir = path.join(os.homedir(), '.gemini', 'antigravity');
-  const hasClientDir = fs.existsSync(geminiDir);
+  // 1. Check local Antigravity configuration directory across standard and non-standard paths
+  const antigravityCandidates = [
+    path.join(os.homedir(), '.gemini', 'antigravity'),
+    process.platform === 'win32' && process.env.USERPROFILE ? path.join(process.env.USERPROFILE, '.gemini', 'antigravity') : null,
+    process.platform === 'win32' && process.env.LOCALAPPDATA ? path.join(process.env.LOCALAPPDATA, 'agy') : null,
+    process.platform === 'win32' && process.env.APPDATA ? path.join(process.env.APPDATA, 'antigravity') : null,
+    process.env.XDG_CONFIG_HOME ? path.join(process.env.XDG_CONFIG_HOME, 'antigravity') : null,
+  ].filter(Boolean) as string[];
+
+  const detectedDir = antigravityCandidates.find((dir) => fs.existsSync(dir));
 
   // Check if agy CLI is installed in PATH
   let hasAgyCli = false;
@@ -17,11 +24,11 @@ export function resolveAntigravityAuth(): AuthResult {
     if (res) hasAgyCli = true;
   } catch {}
 
-  if (hasAgyCli || hasClientDir) {
+  if (hasAgyCli || detectedDir) {
     return {
       authenticated: true,
       source: 'client-cli (agy)',
-      detail: `Installed client session detected (${hasClientDir ? geminiDir : 'agy in PATH'})`,
+      detail: `Installed client session detected (${detectedDir ? detectedDir : 'agy in PATH'})`,
     };
   }
 

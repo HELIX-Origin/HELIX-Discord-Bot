@@ -5,7 +5,7 @@ export function getBashCompletion(): string {
   return `_helix_completions() {
   local cur="\${COMP_WORDS[COMP_CWORD]}"
   local prev="\${COMP_WORDS[COMP_CWORD-1]}"
-  local commands="create list ai repo info update completion"
+  local commands="create list ai repo info update completion bot"
 
   if [ "\$COMP_CWORD" -eq 1 ]; then
     COMPREPLY=( $(compgen -W "\$commands" -- "\$cur") )
@@ -25,6 +25,9 @@ export function getBashCompletion(): string {
     repo)
       COMPREPLY=( $(compgen -W "status create" -- "\$cur") )
       ;;
+    bot)
+      COMPREPLY=( $(compgen -W "status setup dashboard config deploy start" -- "\$cur") )
+      ;;
     *)
       ;;
   esac
@@ -36,10 +39,11 @@ complete -F _helix_completions helix
 export function getPowerShellCompletion(): string {
   return `Register-ArgumentCompleter -Native -CommandName helix -ScriptBlock {
     param($wordToComplete, $commandAst, $cursorPosition)
-    $commands = @('create', 'list', 'ai', 'repo', 'info', 'update', 'completion')
+    $commands = @('create', 'list', 'ai', 'repo', 'info', 'update', 'completion', 'bot')
     $types = @('discord-bot', 'web', 'desktop', 'mobile', 'game-engine', 'backend')
     $aiActions = @('status', 'test', 'query', 'generate')
     $repoActions = @('status', 'create')
+    $botActions = @('status', 'setup', 'dashboard', 'config', 'deploy', 'start')
 
     $elements = $commandAst.ToString().Split(' ')
     if ($elements.Count -le 2) {
@@ -52,6 +56,10 @@ export function getPowerShellCompletion(): string {
         }
     } elseif ($elements[1] -eq 'ai') {
         $aiActions | Where-Object { $_ -like "$wordToComplete*" } | ForEach-Object {
+            [System.Management.Automation.CompletionResult]::new($_, $_, 'ParameterValue', $_)
+        }
+    } elseif ($elements[1] -eq 'bot') {
+        $botActions | Where-Object { $_ -like "$wordToComplete*" } | ForEach-Object {
             [System.Management.Automation.CompletionResult]::new($_, $_, 'ParameterValue', $_)
         }
     }
@@ -72,6 +80,7 @@ _helix() {
     'info:Show system diagnostic and detected CLI toolchain versions'
     'update:Check for HELIX CLI updates'
     'completion:Generate shell autocompletion script'
+    'bot:Manage the built-in HELIX Discord bot and NextAuth Web Dashboard'
   )
 
   _arguments '1: :->command' '*: :->args'

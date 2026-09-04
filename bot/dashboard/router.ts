@@ -1,4 +1,6 @@
 import http from 'node:http';
+import fs from 'node:fs';
+import path from 'node:path';
 import { URL } from 'node:url';
 import { handleNextAuth } from './auth/handlers.js';
 import { handleDashboardStats } from './api/stats.js';
@@ -6,6 +8,7 @@ import { handleDashboardAi } from './api/ai.js';
 import { handleDashboardScaffold } from './api/scaffold.js';
 import { handleDashboardGuilds } from './api/guilds.js';
 import { renderDashboardHtml } from './ui/html.js';
+import { getClientId, getCallbackUrl, BOT_ROOT_DIR } from '../src/env.js';
 
 export async function routeDashboardRequest(
   req: http.IncomingMessage,
@@ -26,11 +29,11 @@ export async function routeDashboardRequest(
 
   // 2. Bot Invite Redirect Endpoint ({DISCORD_CALLBACK_URL}/invite)
   if (pathname === '/invite' || pathname === '/api/bot/invite') {
-    const clientId = process.env.DISCORD_CLIENT_ID || parsed.searchParams.get('client_id');
+    const clientId = getClientId() || parsed.searchParams.get('client_id');
     const permissions = parsed.searchParams.get('permissions') || '8';
     const scope = parsed.searchParams.get('scope') || 'bot applications.commands';
-    const callbackUrl = process.env.DISCORD_CALLBACK_URL || baseUrl;
-    const redirectUri = `${callbackUrl.replace(/\/$/, '')}/api/auth/callback/discord`;
+    const callbackUrl = getCallbackUrl();
+    const redirectUri = `${callbackUrl}/api/auth/callback/discord`;
 
     if (!clientId) {
       res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
@@ -92,6 +95,26 @@ export async function routeDashboardRequest(
     const { handleDashboardBotActions } = await import('./api/bot-actions.js');
     await handleDashboardBotActions(req, res, action);
     return true;
+  }
+
+  // 5. Bot & Dashboard Icon Endpoint
+  if (pathname === '/icon.jpg' || pathname === '/favicon.ico' || pathname === '/api/bot/icon') {
+    const iconCandidates = [
+      path.resolve(BOT_ROOT_DIR, 'bot', 'icon.jpg'),
+      path.resolve(process.cwd(), 'bot', 'icon.jpg'),
+    ];
+    for (const iconPath of iconCandidates) {
+      if (fs.existsSync(iconPath)) {
+        const imageBuffer = fs.readFileSync(iconPath);
+        res.writeHead(200, {
+          'Content-Type': 'image/jpeg',
+          'Content-Length': imageBuffer.length,
+          'Cache-Control': 'public, max-age=86400',
+        });
+        res.end(imageBuffer);
+        return true;
+      }
+    }
   }
 
   return false;
