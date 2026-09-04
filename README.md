@@ -20,11 +20,15 @@
 
 ---
 
-## ⚡ 1-Click Heroku Deployment
+## ⚡ 1-Click Cloud Deployment
 
-[![Deploy to Heroku](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/HELIX-Origin/HELIX-Discord-Bot)
+Deploy HELIX Discord Bot instantly to your cloud platform of choice:
 
-Click the button above to deploy HELIX Discord Bot instantly to Heroku via Docker container (`Dockerfile` + `heroku.yml` + `app.json`).
+| Platform | Free Tier | Deploy Button |
+|---|---|---|
+| **Render** | **100% Free Web Service** | [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/HELIX-Origin/HELIX-Discord-Bot) |
+| **Koyeb** | **100% Free Nano Instance** | [![Deploy to Koyeb](https://www.koyeb.com/static/images/deploy/button.svg)](https://app.koyeb.com/deploy?type=git&repository=github.com/HELIX-Origin/HELIX-Discord-Bot&branch=main&builder=dockerfile&env[DISCORD_TOKEN]=&env[DISCORD_CLIENT_ID]=&env[DISCORD_CLIENT_SECRET]=&env[NEXTAUTH_SECRET]=&env[NODE_ENV]=production&ports=5000;http;/&instance_type=free) |
+| **Heroku** | **Eco Dyno ($5/mo pool)** | [![Deploy to Heroku](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/HELIX-Origin/HELIX-Discord-Bot) |
 
 ---
 
@@ -48,7 +52,9 @@ Fill in `DISCORD_TOKEN`, `DISCORD_CLIENT_ID`, `DISCORD_CLIENT_SECRET`, and `NEXT
 - [Plugin Authoring](docs/plugin-authoring.md) -- build and distribute custom language plugins
 - [Plugin Repo Structure](docs/plugin-repository-structure.md) -- file layout, JSON schemas & TypeScript contracts
 - [Scaffolding Templates](docs/scaffolding-templates.md) -- 17 project starters
-- [Heroku Deployment](docs/deployment-heroku.md) -- deploy guide
+- [Render Deployment (Free)](docs/deployment-render.md) -- 1-click free web service
+- [Koyeb Deployment (Free)](docs/deployment-koyeb.md) -- 1-click free nano container
+- [Heroku Deployment](docs/deployment-heroku.md) -- Eco dyno container guide
 - [Docker / Self-Hosting](docs/deployment-docker.md) -- containerized setup
 
 ---

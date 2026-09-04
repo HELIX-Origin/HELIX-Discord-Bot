@@ -90,21 +90,32 @@ export function getHerokuAppUrl(): string | null {
 
 /**
  * Detects the public application URL from platform environment variables.
- * Checks Heroku, Render, Railway, and custom DOMAIN in order.
+ * Checks Render, Koyeb, Railway, Heroku, and custom DOMAIN in order.
  * Returns null if no platform is detected.
  */
 export function detectPlatformUrl(): string | null {
-  // Heroku
-  const heroku = getHerokuAppUrl();
-  if (heroku) return heroku;
-
   // Render.com
   const render = (process.env.RENDER_EXTERNAL_URL || '').trim();
   if (render) return render.replace(/\/$/, '');
 
+  // Koyeb
+  const koyebDomain = (process.env.KOYEB_PUBLIC_DOMAIN || '').trim();
+  if (koyebDomain) {
+    const url = koyebDomain.includes('://') ? koyebDomain : `https://${koyebDomain}`;
+    return url.replace(/\/$/, '');
+  }
+  const koyebApp = (process.env.KOYEB_APP_NAME || '').trim();
+  if (koyebApp) {
+    return `https://${koyebApp}.koyeb.app`;
+  }
+
   // Railway
   const railway = (process.env.RAILWAY_STATIC_URL || '').trim();
   if (railway) return railway.replace(/\/$/, '');
+
+  // Heroku
+  const heroku = getHerokuAppUrl();
+  if (heroku) return heroku;
 
   // Custom domain
   const domain = (process.env.DOMAIN || '').trim();

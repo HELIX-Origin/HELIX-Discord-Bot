@@ -95,4 +95,37 @@ describe('Discord Bot Invite URL Generation & Dynamic Callback Resolution', () =
     expect(resolved).toContain('scope=bot');
     expect(resolved).toContain(encodeURIComponent('https://helix-test-bot.herokuapp.com/api/auth/callback/discord'));
   });
+
+  it('automatically detects Render.com domain and constructs invite URL', () => {
+    delete process.env.NEXT_PUBLIC_INVITE_URL;
+    delete process.env.DISCORD_CALLBACK_URL;
+    delete process.env.NEXTAUTH_URL;
+    delete process.env.HEROKU_APP_NAME;
+    process.env.RENDER_EXTERNAL_URL = 'https://helix-bot.onrender.com';
+    process.env.DISCORD_CLIENT_ID = '111222333444';
+
+    const resolved = resolveBotInviteUrl();
+
+    expect(resolved).toContain('client_id=111222333444');
+    expect(resolved).toContain('permissions=8');
+    expect(resolved).toContain('scope=bot');
+    expect(resolved).toContain(encodeURIComponent('https://helix-bot.onrender.com/api/auth/callback/discord'));
+  });
+
+  it('automatically detects Koyeb public domain and constructs invite URL', () => {
+    delete process.env.NEXT_PUBLIC_INVITE_URL;
+    delete process.env.DISCORD_CALLBACK_URL;
+    delete process.env.NEXTAUTH_URL;
+    delete process.env.HEROKU_APP_NAME;
+    delete process.env.RENDER_EXTERNAL_URL;
+    process.env.KOYEB_PUBLIC_DOMAIN = 'helix-bot-org.koyeb.app';
+    process.env.DISCORD_CLIENT_ID = '555666777888';
+
+    const resolved = resolveBotInviteUrl();
+
+    expect(resolved).toContain('client_id=555666777888');
+    expect(resolved).toContain('permissions=8');
+    expect(resolved).toContain('scope=bot');
+    expect(resolved).toContain(encodeURIComponent('https://helix-bot-org.koyeb.app/api/auth/callback/discord'));
+  });
 });

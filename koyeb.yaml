@@ -1,0 +1,28 @@
+name: helix-discord-bot
+services:
+  - name: bot
+    type: web
+    image: Dockerfile
+    instance_type: free
+    regions:
+      - fra
+    health_checks:
+      - path: /api/health
+        port: 5000
+    env:
+      - key: DISCORD_TOKEN
+        value: ""
+      - key: DISCORD_CLIENT_ID
+        value: ""
+      - key: DISCORD_CLIENT_SECRET
+        value: ""
+      - key: NEXTAUTH_SECRET
+        value: ""
+      - key: NODE_ENV
+        value: "production"
+      - key: PORT
+        value: "5000"
+    ports:
+      - port: 5000
+        path: /
+        protocol: http
