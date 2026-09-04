@@ -22,18 +22,6 @@
 
 ---
 
-## ⚡ 1-Click Cloud Deployment
-
-Deploy HELIX Discord Bot instantly to your cloud platform of choice:
-
-| Platform | Free Tier | Deploy Button |
-|---|---|---|
-| **Render** | **100% Free Web Service** | [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/HELIX-Origin/HELIX-Discord-Bot) |
-| **Koyeb** | **100% Free Nano Instance** | [![Deploy to Koyeb](https://www.koyeb.com/static/images/deploy/button.svg)](https://app.koyeb.com/deploy?type=git&repository=github.com/HELIX-Origin/HELIX-Discord-Bot&branch=main&builder=dockerfile&env[DISCORD_TOKEN]=&env[DISCORD_CLIENT_ID]=&env[DISCORD_CLIENT_SECRET]=&env[NEXTAUTH_SECRET]=&env[NODE_ENV]=production&ports=5000;http;/&instance_type=free) |
-| **Heroku** | **Eco Dyno ($5/mo pool)** | [![Deploy to Heroku](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/HELIX-Origin/HELIX-Discord-Bot) |
-
----
-
 ## Quick Start (Local)
 
 ```bash
