@@ -54,7 +54,7 @@ describe('Built-in Discord Bot Commands', () => {
     expect(result.message).toContain('Missing DISCORD_TOKEN');
   });
 
-  describe('Bot Owner API Key Protection', () => {
+  describe('Tiered AI Model Access & Owner Protection', () => {
     it('correctly resolves bot owner from environment variable', async () => {
       const { isBotOwner } = await import('../../bot/src/client.js');
       process.env.DISCORD_OWNER_ID = 'owner-12345';
@@ -63,7 +63,7 @@ describe('Built-in Discord Bot Commands', () => {
       delete process.env.DISCORD_OWNER_ID;
     });
 
-    it('rejects AI command for non-owner without a personal session', async () => {
+    it('auto-runs OpenCode Zen BigPickle by default on Free Tier for non-owner without an API key', async () => {
       const { aiCommand } = await import('../../bot/src/commands/ai.js');
       delete process.env.DISCORD_OWNER_ID;
       delete process.env.BOT_OWNER_ID;
@@ -75,7 +75,7 @@ describe('Built-in Discord Bot Commands', () => {
         deferReply: async () => {},
         editReply: async (data: any) => { editReplyData = data; },
         options: {
-          getString: (name: string) => (name === 'prompt' ? 'Generate a virus' : null),
+          getString: (name: string) => (name === 'prompt' ? 'How do I optimize SQLite queries?' : null),
         },
       };
 
@@ -84,11 +84,67 @@ describe('Built-in Discord Bot Commands', () => {
       expect(editReplyData).toBeDefined();
       expect(editReplyData.embeds).toBeDefined();
       const embed = editReplyData.embeds[0].data;
-      expect(embed.title).toContain('Bot Owner API Key Protection');
-      expect(embed.description).toContain('strictly restricted to the bot application owner');
+      expect(embed.title).toContain("OpenCode Zen's BigPickle");
+      expect(embed.fields.some((f: any) => f.name === 'Tier & Access' && f.value.includes('Free Tier'))).toBe(true);
     });
 
-    it('rejects Explain command for non-owner without a personal session', async () => {
+    it('allows non-owner without an API key to select free Google Gemini Flash or GitHub GPT-4o Mini', async () => {
+      const { aiCommand } = await import('../../bot/src/commands/ai.js');
+      delete process.env.DISCORD_OWNER_ID;
+      delete process.env.BOT_OWNER_ID;
+
+      let editReplyData: any = null;
+      const mockInteraction: any = {
+        user: { id: 'free-user-1', username: 'FreeDev', tag: 'FreeDev#1111' },
+        guildId: 'guild-test',
+        deferReply: async () => {},
+        editReply: async (data: any) => { editReplyData = data; },
+        options: {
+          getString: (name: string) => {
+            if (name === 'prompt') return 'Explain async/await in Node.js';
+            if (name === 'model') return 'gemini-2.5-flash';
+            return null;
+          },
+        },
+      };
+
+      await aiCommand.execute(mockInteraction);
+
+      expect(editReplyData).toBeDefined();
+      const embed = editReplyData.embeds[0].data;
+      expect(embed.title).toContain('Google Gemini 2.5 Flash');
+      expect(embed.fields.some((f: any) => f.name === 'Tier & Access' && f.value.includes('Free Tier'))).toBe(true);
+    });
+
+    it('gracefully downgrades to free counterpart when non-owner requests a key-required model', async () => {
+      const { aiCommand } = await import('../../bot/src/commands/ai.js');
+      delete process.env.DISCORD_OWNER_ID;
+      delete process.env.BOT_OWNER_ID;
+
+      let editReplyData: any = null;
+      const mockInteraction: any = {
+        user: { id: 'free-user-2', username: 'CuriousDev', tag: 'Curious#2222' },
+        guildId: 'guild-test',
+        deferReply: async () => {},
+        editReply: async (data: any) => { editReplyData = data; },
+        options: {
+          getString: (name: string) => {
+            if (name === 'prompt') return 'Refactor this algorithm';
+            if (name === 'model') return 'gemini-2.5-pro'; // Key required
+            return null;
+          },
+        },
+      };
+
+      await aiCommand.execute(mockInteraction);
+
+      expect(editReplyData).toBeDefined();
+      const embed = editReplyData.embeds[0].data;
+      expect(embed.title).toContain('Google Gemini 2.5 Flash'); // Reverted to free model
+      expect(embed.fields.some((f: any) => f.name === '⚡ Tier Notice')).toBe(true);
+    });
+
+    it('auto-runs Free Tier for Explain command for non-owner without an API key', async () => {
       const { explainCommand } = await import('../../bot/src/commands/explain.js');
       delete process.env.DISCORD_OWNER_ID;
       delete process.env.BOT_OWNER_ID;
@@ -109,8 +165,37 @@ describe('Built-in Discord Bot Commands', () => {
       expect(editReplyData).toBeDefined();
       expect(editReplyData.embeds).toBeDefined();
       const embed = editReplyData.embeds[0].data;
-      expect(embed.title).toContain('Bot Owner API Key Protection');
-      expect(embed.description).toContain('strictly restricted to the bot application owner');
+      expect(embed.title).toContain('HELIX Code Review');
+      expect(embed.fields.some((f: any) => f.name === 'Tier' && f.value.includes('Free'))).toBe(true);
+    });
+
+    it('allows bot owner to select key-required models with host credentials', async () => {
+      const { aiCommand } = await import('../../bot/src/commands/ai.js');
+      process.env.DISCORD_OWNER_ID = 'owner-12345';
+
+      let editReplyData: any = null;
+      const mockInteraction: any = {
+        user: { id: 'owner-12345', username: 'BotOwner', tag: 'Owner#0001' },
+        guildId: 'guild-test',
+        deferReply: async () => {},
+        editReply: async (data: any) => { editReplyData = data; },
+        options: {
+          getString: (name: string) => {
+            if (name === 'prompt') return 'Design architecture';
+            if (name === 'model') return 'gemini-2.5-pro';
+            return null;
+          },
+        },
+      };
+
+      await aiCommand.execute(mockInteraction);
+
+      expect(editReplyData).toBeDefined();
+      const embed = editReplyData.embeds[0].data;
+      expect(embed.title).toContain('Google Gemini 2.5 Pro');
+      expect(embed.fields.some((f: any) => f.name === 'Tier & Access' && f.value.includes('Owner Session'))).toBe(true);
+
+      delete process.env.DISCORD_OWNER_ID;
     });
   });
 
@@ -288,6 +373,33 @@ describe('Built-in Discord Bot Commands', () => {
       const embed = replyData.embeds[0].data;
       expect(embed.title).toContain('Server Configuration');
       expect(embed.fields.some((f: any) => f.name === 'Tickets Hub Channel')).toBe(true);
+    });
+
+    it('executes helix-set user model subcommand and updates user settings', async () => {
+      const { setCommand } = await import('../../bot/src/commands/set.js');
+      const { BotDatabase } = await import('../../bot/src/db/index.js');
+      let replyData: any = null;
+      const mockInteraction: any = {
+        user: { id: 'user-model-test-1', username: 'ModelTester' },
+        deferReply: async () => {},
+        editReply: async (data: any) => { replyData = data; },
+        options: {
+          getSubcommandGroup: () => 'user',
+          getSubcommand: () => 'model',
+          getString: (name: string) => (name === 'model' ? 'gemini-2.5-flash' : null),
+        },
+      };
+
+      await setCommand.execute(mockInteraction);
+
+      expect(replyData).toBeDefined();
+      expect(replyData.embeds).toBeDefined();
+      const embed = replyData.embeds[0].data;
+      expect(embed.title).toContain('User Preference Updated: AI Model');
+      expect(embed.description).toContain('gemini-2.5-flash');
+
+      const saved = BotDatabase.getInstance().getUserSettings('user-model-test-1');
+      expect(saved?.defaultModel).toBe('gemini-2.5-flash');
     });
   });
 });

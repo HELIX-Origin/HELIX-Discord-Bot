@@ -94,6 +94,29 @@ export const setCommand = {
         )
         .addSubcommand(sub =>
           sub
+            .setName('model')
+            .setDescription('Set your preferred default AI model for /helix-ai and /helix-explain')
+            .addStringOption(opt =>
+              opt
+                .setName('model')
+                .setDescription('Preferred AI model')
+                .setRequired(true)
+                .addChoices(
+                  { name: 'Google Gemini 2.5 Flash (Free)', value: 'gemini-2.5-flash' },
+                  { name: 'Google Gemini 1.5 Flash (Free)', value: 'gemini-1.5-flash' },
+                  { name: 'GitHub Copilot GPT-4o Mini (Free)', value: 'gpt-4o-mini' },
+                  { name: "OpenCode Zen's BigPickle (Free)", value: 'big-pickle' },
+                  { name: 'OpenCode Zen Standard (Free)', value: 'opencode-zen-standard' },
+                  { name: 'Google Gemini 2.5 Pro (Key Required)', value: 'gemini-2.5-pro' },
+                  { name: 'Google Gemini 1.5 Pro (Key Required)', value: 'gemini-1.5-pro' },
+                  { name: 'GitHub Copilot GPT-4o (Key Required)', value: 'gpt-4o' },
+                  { name: 'GitHub Copilot Claude 3.5 Sonnet (Key Required)', value: 'claude-3.5-sonnet' },
+                  { name: 'OpenCode Pro 2.0 (Key Required)', value: 'opencode-pro' }
+                )
+            )
+        )
+        .addSubcommand(sub =>
+          sub
             .setName('notifications')
             .setDescription('Enable or disable direct message notifications from HELIX')
             .addBooleanOption(opt =>
@@ -273,6 +296,23 @@ export const setCommand = {
         return;
       }
 
+      if (subcommand === 'model') {
+        const model = interaction.options.getString('model', true);
+        db.setUserSettings({
+          userId: interaction.user.id,
+          defaultModel: model,
+        });
+
+        const embed = new EmbedBuilder()
+          .setTitle('⚙️ User Preference Updated: AI Model')
+          .setDescription(`Default AI model set to \`${model}\`.`)
+          .setColor(0x00ff88)
+          .setTimestamp();
+
+        await interaction.editReply({ embeds: [embed] });
+        return;
+      }
+
       if (subcommand === 'notifications') {
         const enabled = interaction.options.getBoolean('enabled', true);
         db.setUserSettings({
@@ -301,6 +341,11 @@ export const setCommand = {
             {
               name: 'Preferred AI Provider',
               value: `\`${userSettings?.defaultAiProvider || 'None (System Default)'}\``,
+              inline: true,
+            },
+            {
+              name: 'Preferred AI Model',
+              value: `\`${userSettings?.defaultModel || "OpenCode Zen's BigPickle (Default)"}\``,
               inline: true,
             },
             {

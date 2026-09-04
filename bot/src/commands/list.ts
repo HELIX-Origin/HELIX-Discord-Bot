@@ -2,6 +2,7 @@ import { SlashCommandBuilder, ChatInputCommandInteraction, EmbedBuilder } from '
 import { TemplateEngine } from '../../../src/core/scaffolding/template-engine.js';
 import { AuthResolver } from '../../../src/core/auth/index.js';
 import { RepoManager } from '../../../src/core/hosting/index.js';
+import { getAllModels } from '../ai/models.js';
 
 export const listCommand = {
   data: new SlashCommandBuilder()
@@ -14,6 +15,7 @@ export const listCommand = {
         .setRequired(false)
         .addChoices(
           { name: 'all - Everything in HELIX ecosystem', value: 'all' },
+          { name: 'models - AI Models (Free Community & Key-Required)', value: 'models' },
           { name: 'templates - Multi-framework templates (14 starters)', value: 'templates' },
           { name: 'agents - AI Agent Integrations', value: 'agents' },
           { name: 'platforms - Code Hosting & CI/CD platforms', value: 'platforms' }
@@ -28,6 +30,28 @@ export const listCommand = {
       .setTitle('🧬 HELIX Ecosystem Catalog')
       .setColor(0x38bdf8)
       .setTimestamp();
+
+    if (category === 'all' || category === 'models') {
+      const models = getAllModels();
+      const freeModels = models.filter(m => m.isFree);
+      const proModels = models.filter(m => !m.isFree);
+
+      const freeEntries = freeModels.map(m => `• **\`${m.id}\`**: ${m.name} — *${m.description}*`).join('\n');
+      const proEntries = proModels.map(m => `• **\`${m.id}\`** [${m.provider}]: ${m.name} — *${m.description}*`).join('\n');
+
+      embed.addFields(
+        {
+          name: '🆓 Free Community Models (No API Key Required)',
+          value: freeEntries,
+          inline: false,
+        },
+        {
+          name: '🔑 Flagship Models (Requires /helix-auth action:login or Bot Owner)',
+          value: proEntries,
+          inline: false,
+        }
+      );
+    }
 
     if (category === 'all' || category === 'templates') {
       const templates = TemplateEngine.getAllDefaultTemplates();
@@ -70,7 +94,7 @@ export const listCommand = {
       });
     }
 
-    embed.setFooter({ text: 'Use /helix-create to scaffold any template • /helix-ai to query AI' });
+    embed.setFooter({ text: 'Use /helix-ai to query AI models • /helix-create to scaffold starters' });
     await interaction.editReply({ embeds: [embed] });
   },
 };

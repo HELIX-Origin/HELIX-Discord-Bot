@@ -1,19 +1,36 @@
 import { SlashCommandBuilder, ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
-import { AuthResolver } from '../../../src/core/auth/index.js';
-import { ProviderDispatcher } from '../../../src/core/ai/index.js';
-import { LocalCliRunner } from '../../../src/core/cli/index.js';
 import { BotDatabase } from '../db/index.js';
 import { HelixBotClient } from '../client.js';
+import { BotAIEngine } from '../ai/engine.js';
+import { resolveAIModel } from '../ai/models.js';
 
 export const aiCommand = {
   data: new SlashCommandBuilder()
     .setName('helix-ai')
-    .setDescription('Query connected AI agents with your prompt')
+    .setDescription('Query connected AI models with your prompt (Free tier auto-runs OpenCode Zen)')
     .addStringOption(option =>
       option
         .setName('prompt')
         .setDescription('Your coding or architecture question')
         .setRequired(true)
+    )
+    .addStringOption(option =>
+      option
+        .setName('model')
+        .setDescription('AI model selection (Free: Gemini Flash, GPT-4o Mini, BigPickle; Key-required: Pro models)')
+        .setRequired(false)
+        .addChoices(
+          { name: 'Google Gemini 2.5 Flash (Free)', value: 'gemini-2.5-flash' },
+          { name: 'Google Gemini 1.5 Flash (Free)', value: 'gemini-1.5-flash' },
+          { name: 'GitHub Copilot GPT-4o Mini (Free)', value: 'gpt-4o-mini' },
+          { name: "OpenCode Zen's BigPickle (Free)", value: 'big-pickle' },
+          { name: 'OpenCode Zen Standard (Free)', value: 'opencode-zen-standard' },
+          { name: 'Google Gemini 2.5 Pro (Key Required)', value: 'gemini-2.5-pro' },
+          { name: 'Google Gemini 1.5 Pro (Key Required)', value: 'gemini-1.5-pro' },
+          { name: 'GitHub Copilot GPT-4o (Key Required)', value: 'gpt-4o' },
+          { name: 'GitHub Copilot Claude 3.5 Sonnet (Key Required)', value: 'claude-3.5-sonnet' },
+          { name: 'OpenCode Pro 2.0 (Key Required)', value: 'opencode-pro' }
+        )
     )
     .addStringOption(option =>
       option
@@ -29,6 +46,7 @@ export const aiCommand = {
 
   async execute(interaction: ChatInputCommandInteraction) {
     const prompt = interaction.options.getString('prompt', true);
+    const modelChoice = interaction.options.getString('model');
     const providerChoice = interaction.options.getString('provider');
     const userId = interaction.user.id;
     const username = interaction.user.tag || interaction.user.username;
@@ -37,6 +55,7 @@ export const aiCommand = {
 
     const db = BotDatabase.getInstance();
     const userSession = db.getUserSession(userId, providerChoice || undefined);
+    const userSettings = db.getUserSettings(userId);
 
     // Verify if the executing member is the bot application owner
     const botClient = HelixBotClient.getInstance();
@@ -45,74 +64,67 @@ export const aiCommand = {
       (process.env.BOT_OWNER_ID && process.env.BOT_OWNER_ID.trim() === userId)
     );
 
-    // API keys provided by environment variables or secrets are strictly reserved for the bot's owner.
-    // Non-owners MUST have their own personal session configured via /helix-auth.
-    if (!isOwner && !userSession) {
-      const restrictedEmbed = new EmbedBuilder()
-        .setTitle('🔒 Bot Owner API Key Protection')
-        .setColor(0xffa500)
-        .setDescription(
-          'API keys configured in the environment or repository secrets are strictly restricted to the bot application owner.'
-        )
-        .addFields({
-          name: 'How to use HELIX AI',
-          value:
-            'You can authenticate your personal account with your own AI provider key using `/helix-auth action:login`.\nYour credentials are encrypted in your private SQLite member session and never exposed to other members.',
-        })
-        .setFooter({ text: 'HELIX Security • Per-user credential isolation' });
+    // Host environment/secret API keys are strictly reserved for the bot owner.
+    // Non-owners can use their personal userSession API key, or auto-run Free Tier (OpenCode Zen's BigPickle).
+    const hasPersonalKey = Boolean(userSession && userSession.token);
+    const userHasKey = isOwner || hasPersonalKey;
 
-      await interaction.editReply({ embeds: [restrictedEmbed] });
-      return;
-    }
+    const requestedModel = modelChoice || userSettings?.defaultModel || null;
+    const preferredProvider = providerChoice || userSession?.provider || userSettings?.defaultAiProvider || null;
 
-    // Only bot owners can use systemProvider fallback (host's env/secret API keys)
-    const systemProvider = isOwner ? ProviderDispatcher.selectBestProvider(providerChoice || undefined) : null;
+    // Resolve the model with automatic Free Tier fallback and downgrade messaging
+    const resolution = resolveAIModel(requestedModel, userHasKey, preferredProvider);
 
-    let activeProviderName = userSession ? userSession.provider : (systemProvider ? systemProvider.displayName : null);
-    let activeSource = userSession ? `User Session (${username})` : (systemProvider ? `${systemProvider.source} (Bot Owner)` : null);
-
-    if (!activeProviderName) {
-      await interaction.editReply({
-        content: '⚠️ You do not have an active authenticated session. Run `/helix-auth login` to connect your account for this Discord server.',
-      });
-      return;
-    }
-
-    // Persist to internal SQLite database
+    // Log query to SQLite database
     db.logQuery({
       userId,
       username,
       guildId: interaction.guildId || undefined,
       prompt,
-      provider: activeProviderName,
+      provider: resolution.model.provider,
     });
 
-    // Execute through the bot's hosted local copy of the CLI
-    const cliArgs = ['ai', 'query', prompt];
-    if (providerChoice) {
-      cliArgs.push('--provider', providerChoice);
-    }
-
-    const cliResult = await LocalCliRunner.execute(cliArgs, {
-      userId,
-      isOwner,
-      provider: providerChoice || activeProviderName,
+    // Execute through in-process BotAIEngine (Zero CLI subprocesses)
+    const result = await BotAIEngine.executeQuery(prompt, {
+      model: resolution.model,
+      isFreeTier: resolution.isFreeTier,
+      userToken: userSession?.token,
     });
-
-    const responseText = cliResult.stdout || cliResult.stderr || 'Query executed successfully.';
-    const truncatedResponse = responseText.length > 2000 ? responseText.slice(0, 1950) + '\n... (truncated)' : responseText;
 
     const embed = new EmbedBuilder()
-      .setTitle(`🤖 HELIX AI — ${activeProviderName.toUpperCase()}`)
-      .setDescription(`**Prompt:**\n> ${prompt}\n\n**Output:**\n\`\`\`text\n${truncatedResponse.slice(0, 1500)}\n\`\`\``)
-      .setColor(cliResult.success ? 0x00ff88 : 0xffaa00)
+      .setTitle(`🤖 HELIX AI — ${resolution.model.name}`)
+      .setDescription(result.content.slice(0, 4000))
+      .setColor(resolution.isFreeTier ? 0x00d2ff : 0x00ff88)
       .addFields(
-        { name: 'Authenticated Session', value: `\`${activeSource}\``, inline: true },
-        { name: 'Session Mode', value: userSession ? 'Personal Member Session' : 'Bot Owner Master Session', inline: true },
-        { name: 'Local CLI Host', value: `\`helix v${LocalCliRunner.getStatus().version}\``, inline: true }
+        {
+          name: 'Tier & Access',
+          value: resolution.isFreeTier ? '🆓 OpenCode Zen Free Tier' : (isOwner ? '👑 Bot Owner Session' : '🔑 Authenticated Member Session'),
+          inline: true,
+        },
+        {
+          name: 'Provider',
+          value: `\`${resolution.model.provider}\``,
+          inline: true,
+        },
+        {
+          name: 'Latency',
+          value: `\`${result.latencyMs}ms\``,
+          inline: true,
+        }
       )
-      .setFooter({ text: 'HELIX AI • Hosted Local CLI Engine' })
+      .setFooter({
+        text: resolution.downgraded
+          ? `Notice: ${resolution.downgradeReason}`
+          : 'HELIX AI • Zero-Subprocess In-Process Gateway',
+      })
       .setTimestamp();
+
+    if (resolution.downgraded && resolution.downgradeReason) {
+      embed.addFields({
+        name: '⚡ Tier Notice',
+        value: `${resolution.downgradeReason}\nUse \`/helix-auth action:login\` to authenticate your API key and unlock proprietary models.`,
+      });
+    }
 
     await interaction.editReply({ embeds: [embed] });
   },

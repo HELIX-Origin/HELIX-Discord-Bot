@@ -156,12 +156,14 @@ describe('Discord Bot Internal SQLite Database', () => {
     db.setUserSettings({
       userId: 'developer-42',
       defaultAiProvider: 'antigravity',
+      defaultModel: 'gemini-2.5-flash',
       notificationsEnabled: false,
     });
 
     const settings = db.getUserSettings('developer-42');
     expect(settings).not.toBeNull();
     expect(settings?.defaultAiProvider).toBe('antigravity');
+    expect(settings?.defaultModel).toBe('gemini-2.5-flash');
     expect(settings?.notificationsEnabled).toBe(false);
   });
 });

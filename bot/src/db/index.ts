@@ -74,6 +74,7 @@ export interface WarningEntry {
 export interface UserSettings {
   userId: string;
   defaultAiProvider?: string;
+  defaultModel?: string;
   notificationsEnabled?: boolean;
   updatedAt?: string;
 }
@@ -172,6 +173,7 @@ export class BotDatabase {
       CREATE TABLE IF NOT EXISTS user_settings (
         user_id TEXT PRIMARY KEY,
         default_ai_provider TEXT,
+        default_model TEXT,
         notifications_enabled INTEGER DEFAULT 1,
         updated_at TEXT
       );
@@ -225,6 +227,12 @@ export class BotDatabase {
       } catch {
         // Ignored if column already exists
       }
+    }
+
+    try {
+      this.db.exec(`ALTER TABLE user_settings ADD COLUMN default_model TEXT`);
+    } catch {
+      // Ignored if column already exists
     }
 
     try {
@@ -538,6 +546,7 @@ export class BotDatabase {
       return {
         userId: row.user_id,
         defaultAiProvider: row.default_ai_provider,
+        defaultModel: row.default_model,
         notificationsEnabled: row.notifications_enabled === 1,
         updatedAt: row.updated_at,
       };
@@ -550,16 +559,18 @@ export class BotDatabase {
     if (!this.db) return;
     try {
       const stmt = this.db.prepare(`
-        INSERT INTO user_settings (user_id, default_ai_provider, notifications_enabled, updated_at)
-        VALUES (?, ?, ?, datetime('now'))
+        INSERT INTO user_settings (user_id, default_ai_provider, default_model, notifications_enabled, updated_at)
+        VALUES (?, ?, ?, ?, datetime('now'))
         ON CONFLICT(user_id) DO UPDATE SET
           default_ai_provider = COALESCE(excluded.default_ai_provider, user_settings.default_ai_provider),
+          default_model = COALESCE(excluded.default_model, user_settings.default_model),
           notifications_enabled = COALESCE(excluded.notifications_enabled, user_settings.notifications_enabled),
           updated_at = datetime('now')
       `);
       stmt.run(
         settings.userId,
         settings.defaultAiProvider || null,
+        settings.defaultModel || null,
         settings.notificationsEnabled !== undefined ? (settings.notificationsEnabled ? 1 : 0) : 1
       );
     } catch {
