@@ -107,9 +107,8 @@ The [`Dockerfile`](../Dockerfile) uses a 2-stage build:
    - Runs `npm prune --omit=dev` to eliminate all development tooling.
 2. **Production Runner Stage (`node:22-bookworm-slim`)**:
    - Copies only runtime dependencies and compiled binaries.
-   - Includes `git` and `ca-certificates` for optional CLI cloning (`CLONE_CLI=true`).
    - Exposes port `5000` with an integrated HTTP health check (`/health`).
-   - Automatically executes `scripts/setup.mjs` on boot to initialize the SQLite database schema prior to launching the Discord gateway client.
+   - Automatically initializes the zero-cost SQLite database schema on boot and launches the Discord gateway client.
 
 ---
 

@@ -8,6 +8,10 @@ import { scaffoldCommand } from './scaffold.js';
 import { statusCommand } from './status.js';
 import { repoCommand } from './repo.js';
 import { infoCommand } from './info.js';
+import { modCommand } from './mod.js';
+import { utilCommand } from './util.js';
+import { ticketCommand } from './ticket.js';
+import { setCommand } from './set.js';
 
 export const botCommands = [
   helpCommand,
@@ -20,6 +24,10 @@ export const botCommands = [
   statusCommand,
   repoCommand,
   infoCommand,
+  modCommand,
+  utilCommand,
+  ticketCommand,
+  setCommand,
 ];
 
 export * from './help.js';
@@ -32,3 +40,8 @@ export * from './scaffold.js';
 export * from './status.js';
 export * from './repo.js';
 export * from './info.js';
+export * from './mod.js';
+export * from './util.js';
+export * from './ticket.js';
+export * from './set.js';
+

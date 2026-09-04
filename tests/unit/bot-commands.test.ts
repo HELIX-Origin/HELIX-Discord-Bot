@@ -15,7 +15,11 @@ describe('Built-in Discord Bot Commands', () => {
     expect(names).toContain('helix-create');
     expect(names).toContain('helix-list');
     expect(names).toContain('helix-info');
-    expect(names.length).toBe(10);
+    expect(names).toContain('helix-mod');
+    expect(names).toContain('helix-util');
+    expect(names).toContain('helix-ticket');
+    expect(names).toContain('helix-set');
+    expect(names.length).toBe(14);
   });
 
   it('serializes slash commands into valid Discord REST payloads', () => {
@@ -185,6 +189,107 @@ describe('Built-in Discord Bot Commands', () => {
       expect(fieldNames).toContain('Memory Footprint');
       expect(fieldNames).toContain('SQLite Database Metrics');
     });
+
+    it('executes helix-mod warn and warnings subcommands', async () => {
+      const { modCommand } = await import('../../bot/src/commands/mod.js');
+      let replyData: any = null;
+      const mockInteraction: any = {
+        guild: { id: 'guild-test-mod', channels: { fetch: async () => null } },
+        user: { id: 'moderator-1', tag: 'Mod#0001' },
+        member: { permissions: { has: () => true } },
+        deferReply: async () => {},
+        editReply: async (data: any) => { replyData = data; },
+        options: {
+          getSubcommand: () => 'warn',
+          getUser: () => ({ id: 'troublemaker-1', tag: 'Bad#0001', username: 'BadUser' }),
+          getString: (name: string) => (name === 'reason' ? 'Disruptive behavior' : null),
+        },
+      };
+
+      await modCommand.execute(mockInteraction);
+
+      expect(replyData).toBeDefined();
+      expect(replyData.embeds).toBeDefined();
+      const embed = replyData.embeds[0].data;
+      expect(embed.title).toContain('Member Warned');
+      expect(embed.fields.some((f: any) => f.name === 'Reason' && f.value === 'Disruptive behavior')).toBe(true);
+    });
+
+    it('executes helix-util ping and snowflake subcommands', async () => {
+      const { utilCommand } = await import('../../bot/src/commands/util.js');
+      let replyData: any = null;
+      const mockInteraction: any = {
+        deferReply: async () => {},
+        editReply: async (data: any) => { replyData = data; },
+        options: {
+          getSubcommand: () => 'snowflake',
+          getString: (name: string) => (name === 'id' ? '1545203514932731934' : null),
+        },
+      };
+
+      await utilCommand.execute(mockInteraction);
+
+      expect(replyData).toBeDefined();
+      expect(replyData.embeds).toBeDefined();
+      const embed = replyData.embeds[0].data;
+      expect(embed.title).toContain('Snowflake Decoder');
+      expect(embed.fields.some((f: any) => f.name === 'Snowflake ID')).toBe(true);
+    });
+
+    it('executes helix-ticket setup-hub subcommand', async () => {
+      const { ticketCommand } = await import('../../bot/src/commands/ticket.js');
+      let replyData: any = null;
+      let sentData: any = null;
+      const mockChannel: any = {
+        id: 'channel-hub-123',
+        isTextBased: () => true,
+        isThread: () => false,
+        send: async (data: any) => { sentData = data; },
+      };
+      const mockInteraction: any = {
+        guild: { id: 'guild-ticket-test' },
+        member: { permissions: { has: () => true } },
+        channel: mockChannel,
+        deferReply: async () => {},
+        editReply: async (data: any) => { replyData = data; },
+        options: {
+          getSubcommand: () => 'setup-hub',
+          getChannel: () => mockChannel,
+        },
+      };
+
+      await ticketCommand.execute(mockInteraction);
+
+      expect(sentData).toBeDefined();
+      expect(sentData.embeds[0].data.title).toContain('HELIX Support & Ticket Hub');
+      expect(sentData.components.length).toBeGreaterThan(0);
+      expect(replyData.content).toContain('Tickets Hub deployed successfully');
+    });
+
+    it('executes helix-set guild and user view subcommands', async () => {
+      const { setCommand } = await import('../../bot/src/commands/set.js');
+      let replyData: any = null;
+      const mockInteraction: any = {
+        guild: { id: 'guild-set-test', name: 'Dev Guild' },
+        user: { id: 'user-set-test', username: 'TestDeveloper' },
+        member: { permissions: { has: () => true } },
+        deferReply: async () => {},
+        editReply: async (data: any) => { replyData = data; },
+        options: {
+          getSubcommandGroup: () => 'guild',
+          getSubcommand: () => 'view',
+        },
+      };
+
+      await setCommand.execute(mockInteraction);
+
+      expect(replyData).toBeDefined();
+      expect(replyData.embeds).toBeDefined();
+      const embed = replyData.embeds[0].data;
+      expect(embed.title).toContain('Server Configuration');
+      expect(embed.fields.some((f: any) => f.name === 'Tickets Hub Channel')).toBe(true);
+    });
   });
 });
+
 

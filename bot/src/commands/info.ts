@@ -41,7 +41,7 @@ export const infoCommand = {
         },
         {
           name: 'SQLite Database Metrics',
-          value: `Path: \`${dbStats.dbPath}\`\nSize: ${Math.round(dbStats.sizeBytes / 1024)} KB | Total Queries: ${dbStats.queryCount} | Scaffolds: ${dbStats.scaffoldCount}`,
+          value: `Path: \`${dbStats.dbPath}\`\nSize: ${Math.round(dbStats.sizeBytes / 1024)} KB | Queries: ${dbStats.queryCount} | Scaffolds: ${dbStats.scaffoldCount} | Tickets: ${dbStats.ticketCount} | Mod Logs: ${dbStats.moderationCount}`,
           inline: false,
         },
         {

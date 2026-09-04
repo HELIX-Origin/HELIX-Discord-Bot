@@ -19,7 +19,7 @@
     "test:integration": "vitest run tests/integration",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
-    "setup": "node scripts/setup.mjs",
+    "setup": "npm run build",
     "heroku-postbuild": "npm run build",
     "docker:build": "docker build -t helix-discord-bot .",
     "docker:run": "docker run -d -p 5000:5000 --env-file .env -v ./data:/app/data --name helix-discord-bot helix-discord-bot",

@@ -46,9 +46,6 @@
       "required": true
     }
   },
-  "scripts": {
-    "postdeploy": "node scripts/setup.mjs"
-  },
   "formation": {
     "web": {
       "quantity": 1,

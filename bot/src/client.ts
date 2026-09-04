@@ -2,6 +2,7 @@ import { Client, GatewayIntentBits, Events, Collection } from 'discord.js';
 import pc from 'picocolors';
 import { botCommands } from './commands/index.js';
 import { logger } from './utils/logger/index.js';
+import { handleTicketButton, handleTicketModal } from './interactions/tickets.js';
 
 export class HelixBotClient {
   private static instance: HelixBotClient | null = null;
@@ -117,7 +118,7 @@ export class HelixBotClient {
       logger.info(`Serving ${readyClient.guilds.cache.size} server(s)`);
 
       try {
-        readyClient.user.setActivity('/helix-help | Developer Suite', { type: 3 }); // ActivityType.Watching = 3
+        readyClient.user.setActivity('HELIX | /helix-help', { type: 3 }); // ActivityType.Watching = 3
       } catch {}
     });
 
@@ -127,14 +128,14 @@ export class HelixBotClient {
         if (guild.systemChannel && guild.systemChannel.isTextBased()) {
           const welcomeEmbed = {
             title: '🧬 Thank you for inviting HELIX!',
-            description: 'HELIX provides an all-in-one developer suite directly inside your Discord server: multi-framework project scaffolding, AI code synthesis, code explanations, and repository automation.',
+            description: 'HELIX provides an all-in-one developer, moderation, utility, and support ticket suite directly inside your Discord server.',
             color: 0x00d2ff,
             fields: [
-              { name: 'Get Started', value: 'Type `/helix-help` to browse all available commands.', inline: true },
-              { name: 'Scaffold Projects', value: 'Use `/helix-create` to generate blueprints across 14 frameworks.', inline: true },
-              { name: 'AI Assistance', value: 'Use `/helix-ai` to ask coding questions or generate code.', inline: true },
+              { name: 'Help & Docs', value: 'Type `/helix-help` to browse all 14 available commands.', inline: true },
+              { name: 'Server Configuration', value: 'Use `/helix-set guild view` to configure channels and roles.', inline: true },
+              { name: 'Support Tickets', value: 'Use `/helix-ticket setup-hub` to deploy an interactive tickets hub.', inline: true },
             ],
-            footer: { text: 'HELIX Developer Suite • Zero-Cost SQLite Persistence' },
+            footer: { text: 'HELIX Discord Suite • Zero-Cost SQLite Persistence' },
           };
           await (guild.systemChannel as any).send({ embeds: [welcomeEmbed] });
         }
@@ -146,21 +147,46 @@ export class HelixBotClient {
     });
 
     this.client.on(Events.InteractionCreate, async (interaction) => {
-      if (!interaction.isChatInputCommand()) return;
+      if (interaction.isChatInputCommand()) {
+        const command = this.commands.get(interaction.commandName);
+        if (!command) return;
 
-      const command = this.commands.get(interaction.commandName);
-      if (!command) return;
-
-      try {
-        await command.execute(interaction);
-      } catch (error: any) {
-        logger.error(`Error executing ${interaction.commandName}: ${error.message}`);
-        const replyContent = { content: '❌ An error occurred while executing this command.', ephemeral: true };
-        if (interaction.replied || interaction.deferred) {
-          await interaction.followUp(replyContent);
-        } else {
-          await interaction.reply(replyContent);
+        try {
+          await command.execute(interaction);
+        } catch (error: any) {
+          logger.error(`Error executing ${interaction.commandName}: ${error.message}`);
+          const replyContent = { content: '❌ An error occurred while executing this command.', ephemeral: true };
+          if (interaction.replied || interaction.deferred) {
+            await interaction.followUp(replyContent);
+          } else {
+            await interaction.reply(replyContent);
+          }
         }
+        return;
+      }
+
+      if (interaction.isButton()) {
+        try {
+          await handleTicketButton(interaction);
+        } catch (error: any) {
+          logger.error(`Error handling button ${interaction.customId}: ${error.message}`);
+          if (!interaction.replied && !interaction.deferred) {
+            await interaction.reply({ content: '❌ An error occurred while processing this button.', ephemeral: true });
+          }
+        }
+        return;
+      }
+
+      if (interaction.isModalSubmit()) {
+        try {
+          await handleTicketModal(interaction);
+        } catch (error: any) {
+          logger.error(`Error handling modal ${interaction.customId}: ${error.message}`);
+          if (!interaction.replied && !interaction.deferred) {
+            await interaction.reply({ content: '❌ An error occurred while processing this modal submission.', ephemeral: true });
+          }
+        }
+        return;
       }
     });
   }

@@ -38,15 +38,10 @@ The included GitHub Actions workflow (`.github/workflows/heroku-deploy.yml`) aut
 
 ---
 
-## 4. Automated Database Setup (`postdeploy`)
+## 4. Automated Database Initialization on Boot
 
 When deploying via the 1-Click button:
-- Heroku triggers the `postdeploy` hook declared in `app.json`:
-  ```json
-  "scripts": {
-    "postdeploy": "node scripts/setup.mjs"
-  }
-  ```
-- The setup script automatically initializes `data/helix-bot.sqlite` and builds all schema tables and indices.
-- Because environment variables and secrets are already supplied by the 1-Click deployment interface and GitHub Secrets, the setup script **automatically skips interactive prompts** and utilizes the injected configuration directly.
+- The bot application starts automatically via `Procfile` / `heroku.yml` (`node dist/bot/index.js`).
+- On boot, `BotDatabase` automatically verifies and creates `data/helix-bot.sqlite` and builds all schema tables and indices in-process.
+- Because environment variables and secrets are already supplied by the 1-Click deployment interface and GitHub Secrets, the bot launches immediately without manual setup.
 
