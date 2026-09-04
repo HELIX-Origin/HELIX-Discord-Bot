@@ -53,9 +53,43 @@ body:
       required: false
 
   - type: textarea
+    id: mermaid-diagram
+    attributes:
+      label: Architecture / Workflow Mermaid Diagram (Optional)
+      description: Provide a Mermaid sequenceDiagram or flowchart for the proposed feature architecture.
+      placeholder: |
+        ```mermaid
+        flowchart TD
+            User["User Trigger"] --> Command["Bot Command"]
+            Command --> Service["Target Module"]
+            Service --> Result["Render Output Embed"]
+        ```
+      render: markdown
+
+  - type: textarea
+    id: sub-issues
+    attributes:
+      label: Implementation Sub-Tasks / Sub-Issues (Optional)
+      description: Breakdown of milestone sub-issues for implementing this feature.
+      placeholder: |
+        - [ ] Sub-Issue 1: Architecture & API Design
+        - [ ] Sub-Issue 2: Core Feature Implementation
+        - [ ] Sub-Issue 3: Automated Test Suite (Vitest)
+        - [ ] Sub-Issue 4: User Documentation & Help Commands
+      render: markdown
+
+  - type: textarea
     id: context
     attributes:
       label: Additional Context / Mockups
       description: Add any mockups, screenshots, sample terminal outputs, or architectural sketches.
     validations:
       required: false
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Pre-submission Checklist
+      options:
+        - label: I have verified this feature is not already supported or requested.
+          required: true

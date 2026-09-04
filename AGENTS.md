@@ -111,13 +111,24 @@ Non-negotiable invariants for all AI coding assistants:
 
 ## Bug Tracking (`.agents/bugs/`)
 
-- [bug-tracking.md](.agents/bugs/bug-tracking.md) — Active bug index
-- [BUG-001](.agents/bugs/BUG-001-credential-discovery-path.md) — Cross-platform config path resolution — **Resolved**
-- [BUG-002](.agents/bugs/BUG-002-game-engine-template-placeholders.md) — Binary asset preservation in templates — **Resolved**
-- [BUG-003](.agents/bugs/BUG-003-heroku-deploy-dynamic-url-detection.md) — Heroku dynamic URL detection — **Resolved**
-- [BUG-004](.agents/bugs/BUG-004-auto-resolve-url-env.md) — Auto-resolve NEXTAUTH_URL and callback URLs — **Resolved**
-- [BUG-005](.agents/bugs/BUG-005-typescript-strict-mode-errors.md) — TypeScript strict mode errors — **Resolved**
-- [BUG-006](.agents/bugs/BUG-006-messages-json-formatting-refactor.md) — Centralized Message Formatting Engine & messages.json refactor — **Resolved**
+All bugs and milestones are tracked via live GitHub Issues using decomposed Sub-Issues and visual Mermaid diagrams:
+
+```mermaid
+flowchart LR
+    Open["Bug Discovered"] --> Sub1["Sub-Issue 1: Diagnostics"]
+    Sub1 --> Sub2["Sub-Issue 2: Core Patch"]
+    Sub2 --> Sub3["Sub-Issue 3: Vitest Suite"]
+    Sub3 --> Sub4["Sub-Issue 4: Verification & Docs"]
+    Sub4 --> Closed["✅ Resolved & Closed"]
+```
+
+- [bug-tracking.md](.agents/bugs/bug-tracking.md) — Active bug index and Sub-Issue lifecycle
+- [BUG-001](.agents/bugs/BUG-001-credential-discovery-path.md) — Cross-platform config path resolution — **Resolved** (4 Sub-Tasks)
+- [BUG-002](.agents/bugs/BUG-002-game-engine-template-placeholders.md) — Binary asset preservation in templates — **Resolved** (4 Sub-Tasks)
+- [BUG-003](.agents/bugs/BUG-003-heroku-deploy-dynamic-url-detection.md) — Heroku dynamic URL detection — **Resolved** (4 Sub-Tasks)
+- [BUG-004](.agents/bugs/BUG-004-auto-resolve-url-env.md) — Auto-resolve NEXTAUTH_URL and callback URLs — **Resolved** (4 Sub-Tasks)
+- [BUG-005](.agents/bugs/BUG-005-typescript-strict-mode-errors.md) — TypeScript strict mode errors — **Resolved** (4 Sub-Tasks)
+- [BUG-006](.agents/bugs/BUG-006-messages-json-formatting-refactor.md) — Centralized Message Formatting Engine & messages.json refactor — **Resolved** (4 Sub-Tasks)
 
 ---
 

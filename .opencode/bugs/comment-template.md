@@ -1,6 +1,6 @@
-# Issue Comment Template & Safe Remote Posting Protocol
+﻿# Issue Comment Template & Safe Remote Posting Protocol
 
-This document defines the standardized templates and protocols for publishing issue comments, status reports, and bug resolution notices on GitHub remote issues for **HELIX**.
+This document defines the standardized templates and protocols for publishing issue comments, status reports, sub-issue updates, and bug resolution notices on GitHub remote issues for **HELIX**.
 
 ---
 
@@ -21,29 +21,44 @@ This document defines the standardized templates and protocols for publishing is
 
 ---
 
-## 1. Architectural & Plan Update Template
+## 1. Sub-Issue Progress & Status Update Template
 
 ```markdown
-### 🔄 Update: [Title]
+### 🔄 Sub-Issue Update: [Title]
+
+```mermaid
+flowchart TD
+    A["Sub-Issue: Triage"] -->|Completed| B["Sub-Issue: Implementation"]
+    B -->|In Progress| C["Sub-Issue: Testing"]
+    C -->|Pending| D["Sub-Issue: Verification"]
+```
 
 **Context**:
 [Describe requirement or design refinement]
 
-**Key Changes**:
-- **[Component 1]**: [Details with `inline_code`]
-- **[Component 2]**: [Details with `inline_code`]
+**Progress Breakdown**:
+- [x] Sub-Issue 1: Root Cause & Diagnostics (`#123`)
+- [ ] Sub-Issue 2: Core Fix & Implementation (`#124`)
+- [ ] Sub-Issue 3: Test Suite & Regression Checks (`#125`)
+- [ ] Sub-Issue 4: Verification & Docs (`#126`)
 
 **Next Steps**:
-- [ ] Task 1
-- [ ] Task 2
+- [ ] Next actionable step
 ```
 
 ---
 
-## 2. Bug Resolution Template
+## 2. Bug Resolution & Verification Template
 
 ```markdown
 ### ✅ Resolved: [BUG-XXX] [Title]
+
+```mermaid
+flowchart LR
+    Bug["Defect Identified"] --> Fix["Applied Patch in src/..."]
+    Fix --> Test["Vitest Suite Verified"]
+    Test --> Resolved["Closed on GitHub & Multi-Agent Mirror"]
+```
 
 **Root Cause**:
 [Why the defect occurred]
@@ -51,23 +66,13 @@ This document defines the standardized templates and protocols for publishing is
 **Remediation**:
 - Modified `[filepath]` to [fix summary]
 
+**Sub-Issues Closed**:
+- [x] Sub-Issue 1: Diagnostics
+- [x] Sub-Issue 2: Core Implementation
+- [x] Sub-Issue 3: Vitest Test Suite
+- [x] Sub-Issue 4: Multi-Agent Docs Sync
+
 **Verification**:
 - Automated test: `tests/...test.ts` passed
 - Zero regressions
-```
-
----
-
-## 3. Progress Check-in Template
-
-```markdown
-### 🚀 Progress Update: [Milestone]
-
-- [x] [Completed task 1]
-- [x] [Completed task 2]
-- [ ] [Pending task 3]
-
-**Verification Status**:
-- `npm run test`: Passed (X/X tests)
-- `npm run build`: Clean build
 ```

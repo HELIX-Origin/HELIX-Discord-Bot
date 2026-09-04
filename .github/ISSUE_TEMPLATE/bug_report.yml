@@ -96,6 +96,31 @@ body:
       description: Paste any relevant terminal logs, stack traces, or diagnostic output.
       render: shell
 
+  - type: textarea
+    id: mermaid-diagram
+    attributes:
+      label: Mermaid Diagram (Optional)
+      description: Provide a Mermaid sequenceDiagram or flowchart visualizing the reproduction or system failure.
+      placeholder: |
+        ```mermaid
+        flowchart LR
+            User["User Action"] --> Handler["Bot Handler"]
+            Handler -->|"Failing Condition"| Error["💥 Bug Occurs"]
+        ```
+      render: markdown
+
+  - type: textarea
+    id: sub-issues
+    attributes:
+      label: Sub-Issues / Proposed Task Breakdown (Optional)
+      description: Proposed sub-issues or task checklist for triaging and resolving this issue.
+      placeholder: |
+        - [ ] Sub-Issue 1: Root Cause & Diagnostics
+        - [ ] Sub-Issue 2: Core Fix & Implementation
+        - [ ] Sub-Issue 3: Test Suite & Regression Checks
+        - [ ] Sub-Issue 4: Verification & Docs Sync
+      render: markdown
+
   - type: checkboxes
     id: checklist
     attributes:
