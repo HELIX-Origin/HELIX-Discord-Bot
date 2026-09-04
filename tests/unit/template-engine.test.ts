@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { TemplateEngine } from '../../HELIX/src/scaffolding/index.js';
+﻿import { describe, it, expect } from 'vitest';
+import { TemplateEngine } from '../../HELIX/src/scaffolding/template-engine.js';
 
 describe('TemplateEngine', () => {
   it('identifies binary and text files correctly', () => {

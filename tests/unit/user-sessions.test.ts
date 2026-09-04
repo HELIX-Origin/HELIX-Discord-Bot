@@ -1,8 +1,8 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+﻿import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
-import { BotDatabase } from '../../HELIX/src/db/index.js';
+import { BotDatabase } from '../../HELIX/src/db/database.js';
 
 describe('Discord Bot Per-User Authentication Sessions', () => {
   let tempDir: string;
@@ -25,83 +25,51 @@ describe('Discord Bot Per-User Authentication Sessions', () => {
       userId: 'user_123',
       username: 'DiscordMember1',
       guildId: 'guild_abc',
-      provider: 'copilot',
-      token: 'gho_secret_token_123',
+      provider: 'discord',
+      token: 'oauth_secret_token_123',
     });
 
-    const session = db.getUserSession('user_123', 'copilot');
+    const session = db.getUserSession('user_123', 'discord');
     expect(session).not.toBeNull();
     expect(session?.userId).toBe('user_123');
-    expect(session?.provider).toBe('copilot');
-    expect(session?.token).toBe('gho_secret_token_123');
-  });
-
-  it('allows a user to have multiple sessions for different AI providers', () => {
-    db.setUserSession({
-      userId: 'user_123',
-      username: 'DiscordMember1',
-      provider: 'copilot',
-      token: 'token_copilot',
-    });
-
-    db.setUserSession({
-      userId: 'user_123',
-      username: 'DiscordMember1',
-      provider: 'antigravity',
-      token: 'token_antigravity',
-    });
-
-    const sessions = db.getUserSessions('user_123');
-    expect(sessions.length).toBe(2);
-    const providers = sessions.map(s => s.provider);
-    expect(providers).toContain('copilot');
-    expect(providers).toContain('antigravity');
+    expect(session?.provider).toBe('discord');
+    expect(session?.token).toBe('oauth_secret_token_123');
   });
 
   it('updates token for existing user and provider without duplicating', () => {
     db.setUserSession({
       userId: 'user_456',
       username: 'DiscordMember2',
-      provider: 'antigravity',
-      token: 'initial_key',
+      provider: 'discord',
+      token: 'initial_token',
     });
 
     db.setUserSession({
       userId: 'user_456',
       username: 'DiscordMember2',
-      provider: 'antigravity',
-      token: 'updated_key',
+      provider: 'discord',
+      token: 'updated_token',
     });
 
     const sessions = db.getUserSessions('user_456');
     expect(sessions.length).toBe(1);
-    expect(sessions[0].token).toBe('updated_key');
+    expect(sessions[0].token).toBe('updated_token');
   });
 
-  it('deletes specific provider session and all sessions on logout', () => {
+  it('deletes session on revocation/logout', () => {
     db.setUserSession({
       userId: 'user_789',
       username: 'DiscordMember3',
-      provider: 'copilot',
+      provider: 'discord',
       token: 'token_1',
     });
-    db.setUserSession({
-      userId: 'user_789',
-      username: 'DiscordMember3',
-      provider: 'opencode',
-      token: 'token_2',
-    });
 
-    expect(db.getUserSessions('user_789').length).toBe(2);
-
-    // Delete single provider session
-    db.deleteUserSession('user_789', 'copilot');
     expect(db.getUserSessions('user_789').length).toBe(1);
-    expect(db.getUserSession('user_789', 'copilot')).toBeNull();
 
-    // Delete all sessions for user
-    db.deleteUserSession('user_789');
+    // Delete session
+    db.deleteUserSession('user_789', 'discord');
     expect(db.getUserSessions('user_789').length).toBe(0);
+    expect(db.getUserSession('user_789', 'discord')).toBeNull();
   });
 
   it('tracks session count in database stats', () => {
@@ -110,13 +78,13 @@ describe('Discord Bot Per-User Authentication Sessions', () => {
     db.setUserSession({
       userId: 'user_1',
       username: 'Member1',
-      provider: 'antigravity',
+      provider: 'discord',
       token: 'tok1',
     });
     db.setUserSession({
       userId: 'user_2',
       username: 'Member2',
-      provider: 'copilot',
+      provider: 'discord',
       token: 'tok2',
     });
 

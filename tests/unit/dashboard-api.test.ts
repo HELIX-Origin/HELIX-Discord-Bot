@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+﻿import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import http from 'node:http';
 import { BotCallbackServer } from '../../HELIX/src/server.js';
 
@@ -64,8 +64,8 @@ describe('Discord Bot Web Dashboard & NextAuth Endpoints', () => {
     expect(stats.database).toBeDefined();
     expect(stats.database.exists).toBe(true);
     expect(stats.database.directConnection).toBe(true);
-    expect(stats.recentQueries).toBeInstanceOf(Array);
-    expect(stats.aiProviders).toBeInstanceOf(Array);
+    expect(stats.recentScaffolds).toBeInstanceOf(Array);
+    expect(stats.plugins).toBeDefined();
   }, 15000);
 
   it('handles direct bot action /api/dashboard/bot/revoke-session gracefully', async () => {

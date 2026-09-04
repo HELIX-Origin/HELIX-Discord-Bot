@@ -1,14 +1,13 @@
-import http from 'node:http';
+﻿import http from 'node:http';
 import { BotDatabase } from '../../src/db/database.js';
 import { HelixBotClient } from '../../src/client.js';
-import { AuthResolver } from '../../src/auth/auth-resolver.js';
 import { resolveBotInviteUrl } from '../../src/server.js';
 import { getCallbackUrl, getClientId, getBotToken } from '../../src/env.js';
+import { getAllPlugins, getRegistryStats } from '../../src/plugins/registry.js';
 
 export function handleDashboardStats(req: http.IncomingMessage, res: http.ServerResponse): void {
   const db = BotDatabase.getInstance();
   const dbStats = db.getStats();
-  const aiStatuses = AuthResolver.resolveAll();
 
   // Direct bot client instance (zero-lag in-memory check)
   const botClient = HelixBotClient.getInstance();
@@ -23,6 +22,15 @@ export function handleDashboardStats(req: http.IncomingMessage, res: http.Server
   const callbackUrl = getCallbackUrl();
   const clientId = getClientId() || null;
   const inviteUrl = resolveBotInviteUrl(undefined, callbackUrl, clientId || undefined);
+
+  const plugins = getAllPlugins().map(p => ({
+    id: p.id,
+    name: p.name,
+    version: p.version,
+    fileExtensions: p.fileExtensions,
+    capabilities: p.capabilities,
+  }));
+  const pluginStats = getRegistryStats();
 
   const data = {
     bot: {
@@ -44,13 +52,10 @@ export function handleDashboardStats(req: http.IncomingMessage, res: http.Server
     },
     recentScaffolds,
     userSessions,
-    aiProviders: aiStatuses.map(s => ({
-      provider: s.provider,
-      displayName: s.displayName,
-      authenticated: s.authenticated,
-      source: s.source,
-      sessionCount: s.sessionCount,
-    })),
+    plugins: {
+      stats: pluginStats,
+      list: plugins,
+    },
   };
 
   res.writeHead(200, { 'Content-Type': 'application/json' });

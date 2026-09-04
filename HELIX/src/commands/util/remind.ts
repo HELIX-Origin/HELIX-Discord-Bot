@@ -1,19 +1,49 @@
-import { EmbedBuilder } from 'discord.js';
+﻿import { createEmbed, formatError, getMessage } from '../../handlers/message-handler.js';
 import type { CommandDefinition } from '../../types/command.js';
 
 export const remind: CommandDefinition = {
-  name: 'remind', description: 'Set a reminder that DMs you later', category: 'utility',
+  name: 'remind',
+  description: 'Set a timed reminder',
+  category: 'utility',
   options: [
-    { name: 'minutes', description: 'Minutes from now', type: 'integer', required: true, minValue: 1, maxValue: 10080 },
-    { name: 'message', description: 'Reminder message', type: 'string', required: true },
+    { name: 'time', description: 'Duration (e.g. 10m, 1h, 2d)', type: 'string', required: true },
+    { name: 'message', description: 'Reminder text', type: 'string', required: true },
   ],
-  async execute({ message, interaction, getOption, user }) {
-    const minutes = getOption<number>('minutes');
-    const text = getOption<string>('message');
-    if (!minutes || !text) { const r = '❌ Duration and message required.'; if (message) return message.reply(r); return interaction!.reply({ content: r, ephemeral: true }); }
+  async execute({ message, interaction, getOption }) {
+    const timeStr = getOption<string>('time') || '10m';
+    const text = getOption<string>('message') || 'Reminder';
+    const user = message?.author || interaction!.user;
 
-    setTimeout(() => { user.send(`⏰ **Reminder:** ${text}`).catch(() => {}); }, minutes * 60_000);
-    const embed = new EmbedBuilder().setTitle('⏰ Reminder Set').setColor(0x00ff88).setDescription(`I'll DM you in **${minutes} minute(s)** with: ${text}`).setTimestamp();
-    if (message) await message.reply({ embeds: [embed] }); else await interaction!.reply({ embeds: [embed] });
+    const match = timeStr.match(/^(\d+)(s|m|h|d)$/i);
+    if (!match) {
+      const err = formatError(getMessage('errors.invalid_duration'));
+      if (message) return message.reply({ embeds: [err] });
+      return interaction!.reply({ embeds: [err], ephemeral: true });
+    }
+
+    const val = parseInt(match[1]);
+    const unit = match[2].toLowerCase();
+    const multipliers: Record<string, number> = { s: 1000, m: 60000, h: 3600000, d: 86400000 };
+    const delay = val * multipliers[unit];
+
+    if (delay > 2419200000) {
+      const err = formatError(getMessage('errors.duration_too_long', { max: '28d' }));
+      if (message) return message.reply({ embeds: [err] });
+      return interaction!.reply({ embeds: [err], ephemeral: true });
+    }
+
+    const embed = createEmbed('utility.remind.embed', {
+      duration: timeStr,
+      message: text,
+    });
+
+    if (message) await message.reply({ embeds: [embed] });
+    else await interaction!.reply({ embeds: [embed] });
+
+    setTimeout(async () => {
+      try {
+        await user.send(`⏰ **Reminder:** ${text}`);
+      } catch {}
+    }, delay);
   },
 };

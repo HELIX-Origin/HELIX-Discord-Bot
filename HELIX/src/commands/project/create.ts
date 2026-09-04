@@ -1,5 +1,5 @@
-import { EmbedBuilder } from 'discord.js';
 import { BotDatabase } from '../../db/database.js';
+import { createEmbed, formatError } from '../../handlers/message-handler.js';
 import type { CommandDefinition } from '../../types/command.js';
 
 const TEMPLATES = [
@@ -31,14 +31,19 @@ export const create: CommandDefinition = {
     const template = getOption<string>('template');
     const name = getOption<string>('name');
     const dryRun = getOption<boolean>('dry_run') || false;
-    if (!template || !name) { const r = '❌ Template and name required.'; if (message) return message.reply(r); return interaction!.reply({ content: r, ephemeral: true }); }
+    if (!template || !name) {
+      const errEmbed = formatError('missing_argument', { arg: 'template, name' });
+      if (message) return message.reply({ embeds: [errEmbed] });
+      return interaction!.reply({ embeds: [errEmbed], ephemeral: true });
+    }
 
     BotDatabase.getInstance().logScaffold({ userId: user.id, templateId: template, projectName: name });
 
-    const embed = new EmbedBuilder().setTitle('🛠️ Project Scaffold').setColor(0x00ff88)
-      .addFields({ name: 'Template', value: template, inline: true }, { name: 'Project', value: name, inline: true }, { name: 'Dry Run', value: dryRun ? 'Yes' : 'No', inline: true })
-      .setDescription(`Scaffold${dryRun ? ' preview' : ''} for **${name}** using \`${template}\` template.`)
-      .setTimestamp();
+    const embed = createEmbed('project.create.embed', {
+      name,
+      template,
+      fileCount: dryRun ? 'Preview (0 files written)' : 'Scaffolded successfully',
+    });
     if (message) await message.reply({ embeds: [embed] }); else await interaction!.reply({ embeds: [embed] });
   },
 };

@@ -1,65 +1,121 @@
-# Discord Bot Architecture & Engine
+﻿# Bot Reference
 
-The HELIX Discord Bot integrates your development toolchain and AI agents directly into your Discord servers.
+## Commands
 
-```mermaid
-sequenceDiagram
-    autonumber
-    actor User as Discord Member
-    participant Gateway as Discord Gateway
-    participant Bot as HelixBotClient
-    participant DB as SQLite Storage
-    participant AI as AI Resolver (Antigravity / Copilot)
+Default prefix: `>` — configurable per guild. All commands are available as both prefix and slash.
 
-    User->>Gateway: Trigger /helix-ai prompt: "Explain this error"
-    Gateway->>Bot: emit('interactionCreate')
-    Bot->>DB: Query user OAuth2 token & provider preference
-    alt Personal Token Found
-        DB-->>Bot: Return user session
-    else Default Server Settings
-        DB-->>Bot: Return guild default provider
-    end
-    Bot->>AI: Synthesize prompt with workspace context
-    AI-->>Bot: Stream / return generated response
-    Bot->>Gateway: Edit interaction reply with rich Embed
-    Gateway-->>User: Render styled Markdown response in channel
-```
+### Moderation
+
+| Command | Description | Required Permission |
+|---------|-------------|---------------------|
+| `>kick @user [reason]` | Kick a member | KickMembers |
+| `>ban @user [reason]` | Ban a member | BanMembers |
+| `>unban <userId> [reason]` | Unban by ID | BanMembers |
+| `>timeout @user <minutes> [reason]` | Timeout (max 28 days) | ModerateMembers |
+| `>untimeout @user` | Remove timeout | ModerateMembers |
+| `>purge <1–100>` | Bulk delete messages in current channel | ManageMessages |
+| `>warn user @user [reason]` | Issue a warning (logged to DB) | ModerateMembers |
+| `>warn list @user` | View a member's warning history | ModerateMembers |
+| `>warn clear @user` | Clear all warnings for a member | ModerateMembers |
+
+### Utility
+
+| Command | Description |
+|---------|-------------|
+| `>ping` | Gateway latency |
+| `>avatar [@user]` | Get avatar URL |
+| `>serverinfo` | Server statistics |
+| `>userinfo [@user]` | User information |
+| `>poll <question>` | Reaction poll |
+| `>snowflake <id>` | Decode a Discord snowflake |
+| `>remind <time> <message>` | Set a timed reminder |
+
+### Info
+
+| Command | Description |
+|---------|-------------|
+| `>help` | All commands |
+| `>info` | Bot diagnostics and version |
+| `>status` | System health (gateway, DB, uptime) |
+| `>list` | Available scaffold template IDs |
+
+### Project Scaffolding
+
+| Command | Description |
+|---------|-------------|
+| `>create <type> <name>` | Scaffold a new project from a template |
+| `>scaffold <type>` | Preview the file tree for a template |
+
+See [Scaffolding Templates](scaffolding-templates.md) for all valid `<type>` values.
+
+### Configuration
+
+**`>set <subcommand>`** — Requires ManageGuild.
+
+| Subcommand | Description |
+|------------|-------------|
+| `prefix <char>` | Change the guild command prefix |
+| `tickets-hub <#channel>` | Channel where the ticket panel is posted |
+| `ticket-manager-role <@role>` | Role that can manage all tickets |
+| `mod-log-channel <#channel>` | Channel for moderation action logs |
+| `welcome-channel <#channel>` | Channel for member join messages |
+| `view` | Display all current guild settings |
+
+**`>ticket <subcommand>`**
+
+| Subcommand | Description |
+|------------|-------------|
+| `create [subject]` | Open a new ticket thread |
+| `close` | Close the ticket in the current thread |
+| `setup-hub` | Post the interactive ticket panel in the configured hub channel |
+| `add @user` | Add a user to the current ticket thread |
+| `remove @user` | Remove a user from the current ticket thread |
+| `transcript` | Export the thread message history |
+
+**`>plugin <subcommand>`**
+
+| Subcommand | Description |
+|------------|-------------|
+| `list` | List installed plugin repos and their languages |
+| `install <owner/repo>` | Clone a GitHub plugin repo and register all plugins |
+| `remove <id>` | Remove a plugin |
+| `info <id>` | Show plugin manifest details |
+| `enable <id>` / `disable <id>` | Toggle a plugin |
 
 ---
 
-## 1. Slash Commands
+## Database
 
-The bot registers and deploys rich slash commands:
-- `/helix-help`: Detailed guide of all bot functions, CLI tools, and architecture features.
-- `/helix-auth`: Per-user authentication allowing individual server members to link their own AI sessions without sharing server credentials.
-- `/helix-ai <prompt> [provider]`: Query AI assistants directly from channels.
-- `/helix-explain <code> [language]`: Instant explanation and debugging of code blocks.
-- `/helix-scaffold <type> <name>`: Blueprint project structures across 14 multi-framework starter templates.
-- `/helix-status`: Diagnostic health of the bot, internal SQLite database, AI providers, and host machine.
-- `/helix-repo <action>`: Inspect connected Git remote repositories and official CLIs (`gh`, `glab`).
+**Location:** `HELIX/data/helix-bot.sqlite` (auto-created on first boot)  
+**Engine:** Node native `DatabaseSync` (`node:sqlite`) — no external DB process required.
 
----
+Schema is created and migrated automatically at startup. No setup step needed.
 
-## 2. SQLite Database Engine
-
-- **Path**: `data/helix-bot.sqlite`
-- **Engine**: Node native SQLite (`node:sqlite` / `DatabaseSync`)
-- **Initialization**: Run `npm run setup` to generate the database, tables, and indices.
-- **Tables**:
-  - `user_sessions`: Per-user OAuth2 credentials and token timestamps.
-  - `guild_settings`: Guild command prefix, preferred AI model, and custom callback URLs.
-  - `query_logs`: Every prompt, execution provider, and timestamp.
-  - `scaffold_history`: Project generation logs.
-  - `bot_kv`: General key-value store.
+| Table | Contents |
+|-------|----------|
+| `guild_settings` | Per-guild prefix, hub channel, manager role, log channels |
+| `tickets` | Open and closed ticket records with thread/channel IDs |
+| `moderation_logs` | Kick, ban, timeout, purge, warn actions with reason and actor |
+| `warnings` | Per-user warning history |
+| `user_sessions` | Discord OAuth2 session tokens (dashboard login) |
+| `user_settings` | Per-user notification preferences |
+| `query_logs` | Prompt/query history and provider metadata |
+| `scaffold_history` | Project generation records |
+| `bot_kv` | General-purpose key-value store |
 
 ---
 
-## 3. Administrator Invite URL (`NEXT_PUBLIC_INVITE_URL`)
+## Environment Variables
 
-- Defined in `.env` and generated automatically during `helix bot setup`:
-  ```
-  NEXT_PUBLIC_INVITE_URL="https://discord.com/api/oauth2/authorize?client_id=yourclientid&permissions=8&scope=bot"
-  ```
-- **Permissions Bitflag**: `8` (Administrator).
-- **Scope**: `bot`.
-- Automatically handled natively by Discord without requiring any redirect URI.
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `DISCORD_TOKEN` | Yes | Bot token |
+| `DISCORD_CLIENT_ID` | Yes | Application client ID |
+| `DISCORD_CLIENT_SECRET` | Yes | OAuth2 client secret (dashboard) |
+| `NEXTAUTH_SECRET` | Yes | Session signing secret (32+ chars) |
+| `PORT` | No | HTTP server port — defaults to `5000` |
+| `BOT_OWNER_ID` | No | Discord user ID for bot-owner-only commands |
+| `NEXT_PUBLIC_INVITE_URL` | No | Pre-built bot invite URL — auto-generated from `CLIENT_ID` if unset |
+| `DISCORD_CALLBACK_URL` | No | OAuth2 base URL — auto-detected on Heroku/Render/Railway |
+| `NEXTAUTH_URL` | No | Public NextAuth URL — auto-detected on Heroku/Render/Railway |
+| `DISCORD_DB_PATH` | No | Custom SQLite file path — defaults to `data/helix-bot.sqlite` |

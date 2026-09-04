@@ -1,5 +1,6 @@
-import { ChatInputCommandInteraction, ButtonInteraction, ModalSubmitInteraction } from 'discord.js';
+﻿import { ChatInputCommandInteraction, ButtonInteraction, ModalSubmitInteraction } from 'discord.js';
 import { logs } from './logs-handler.js';
+import { formatError } from './message-handler.js';
 
 type InteractionType = 'command' | 'button' | 'modal';
 
@@ -12,13 +13,13 @@ export async function handleError(
   const errorMsg = error?.message || String(error);
   logs.error(`Error handling ${type} "${name}": ${errorMsg}`);
 
-  const content = `❌ An error occurred while processing this ${type}.`;
+  const embed = formatError('generic');
 
   try {
     if (interaction.replied || interaction.deferred) {
-      await interaction.followUp({ content, ephemeral: true });
+      await interaction.followUp({ embeds: [embed], ephemeral: true });
     } else {
-      await interaction.reply({ content, ephemeral: true });
+      await interaction.reply({ embeds: [embed], ephemeral: true });
     }
   } catch {
     // Interaction already expired or failed

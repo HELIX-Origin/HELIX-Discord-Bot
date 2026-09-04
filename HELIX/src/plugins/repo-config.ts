@@ -1,4 +1,4 @@
-/**
+﻿/**
  * src/plugins/repo-config.ts
  * ──────────────────────────────────────────────────────────────────────────
  * Repository config (config.json) schema and validation.
@@ -60,8 +60,8 @@ export function validateRepoConfig(config: unknown): RepoConfigValidation {
   if (!c.author || typeof c.author !== 'string') {
     errors.push('Missing or invalid "author" field');
   }
-  if (!Array.isArray(c.plugins)) {
-    errors.push('Missing or invalid "plugins" array');
+  if (!Array.isArray(c.plugins) || c.plugins.length === 0) {
+    errors.push('Missing or empty "plugins" array');
   } else {
     for (let i = 0; i < c.plugins.length; i++) {
       const p = c.plugins[i] as Record<string, unknown>;

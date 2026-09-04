@@ -1,4 +1,4 @@
-# Privacy Policy
+﻿# Privacy Policy
 
 **Effective Date**: September 4, 2026  
 **Last Updated**: September 4, 2026
@@ -17,24 +17,25 @@
 
 When you deploy or launch the built-in Discord bot and companion web dashboard, the application initializes a zero-cost, self-contained SQLite database. This database stores:
 
-- **Query Logs**: Prompts submitted via `/helix-ai` or `/helix-explain` along with the responding AI provider name, username, user ID, and timestamp.
+- **Guild Settings**: Per-server preferences including command prefixes, tickets hub channels, ticket manager roles, and moderation log channels.
+- **Support Tickets**: Thread IDs, user IDs, ticket subjects, and status (open/closed) for guild support.
+- **Moderation Logs**: Moderation actions (kick, ban, timeout, purge, warn) with moderator IDs, timestamps, and reasons.
+- **Warnings**: Per-user infraction records logged by guild moderators.
+- **User Sessions**: Discord OAuth2 user IDs and session tokens used exclusively for web dashboard login.
 - **Scaffold History**: Project scaffolding events, template IDs, and project names generated through the bot.
-- **User Sessions**: Discord OAuth2 user IDs, usernames, provider identifiers, and optional local session tokens used to authenticate members with local AI tools.
-- **Guild Settings**: Per-server preferences including command prefixes, chosen AI provider, and callback URLs.
 
 > [!IMPORTANT]
 > This SQLite database resides entirely within your local filesystem or mounted container volume (`./data:/app/data`). It is never uploaded to HELIX maintainers or remote telemetry endpoints.
 
 ### B. Environment Variables & Credentials
 
-- Credentials stored in `.env` (such as `DISCORD_TOKEN`, `DISCORD_CLIENT_SECRET`, `NEXTAUTH_SECRET`, and AI API keys) are read exclusively at runtime to establish authenticated connections.
+- Credentials stored in `.env` (such as `DISCORD_TOKEN`, `DISCORD_CLIENT_SECRET`, and `NEXTAUTH_SECRET`) are read exclusively at runtime to establish authenticated connections with Discord.
 - `.env` files are explicitly excluded by `.gitignore` to prevent accidental commits.
-- When running `helix repo sync-secrets`, values are securely piped via standard input into GitHub Secrets (`gh secret set`) without being saved to temporary disk files or logged to the console.
 
-### C. AI Agent Integrations & Prompts
+### C. Language Plugin System
 
-- AI queries made through `helix ai query`, `helix ai generate`, or Discord slash commands are transmitted **directly** to the designated provider's official endpoint (Google Antigravity, GitHub Copilot, or Open Code).
-- HELIX does not operate intermediate proxy servers or inspection relays. Prompts and source code contexts travel solely between your machine/server and the selected AI provider.
+- Language plugins (such as TypeScript, Python, JavaScript linters and analyzers) execute 100% locally and in-process using static analysis, AST parsers, and local documentation caches.
+- No source code or snippets sent to the bot are forwarded to third-party AI APIs or external inspection servers.
 
 ---
 
@@ -43,8 +44,7 @@ When you deploy or launch the built-in Discord bot and companion web dashboard, 
 When utilizing HELIX, you interact directly with the following third-party platforms subject to their respective privacy terms:
 
 - **Discord API**: Used by the bot subsystem for gateway events, slash commands, and OAuth2 authorization. Governed by [Discord Privacy Policy](https://discord.com/privacy).
-- **Google Antigravity / Gemini API**: Used when Antigravity is configured as the active AI provider. Governed by [Google Privacy Policy](https://policies.google.com/privacy).
-- **GitHub**: Used for repository automation and GitHub Secrets synchronization. Governed by [GitHub Privacy Statement](https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement).
+- **GitHub**: Used for optional community plugin installation via `>plugin install <repo>`. Governed by [GitHub Privacy Statement](https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement).
 - **Heroku / Docker**: Used for optional 1-click cloud or container deployment.
 
 ---
@@ -66,11 +66,8 @@ When utilizing HELIX, you interact directly with the following third-party platf
 
 You retain complete ownership and control over all data:
 
-> [!IMPORTANT]
-> **Revoking Sessions & Deleting Data**
-> - **Revoke Active Member Sessions**: Run `/helix-auth` in Discord or click the **Revoke Session** action button in the Web Dashboard (`/api/dashboard/bot/revoke-session`).
-> - **Clear Database Records**: Delete or truncate the `data/helix-bot.sqlite` file to purge all historical queries, sessions, and settings.
-> - **Reset Environment**: Remove or update `.env` to invalidate local credentials immediately.
+- **Clear Database Records**: Delete or truncate the `data/helix-bot.sqlite` file to purge all historical sessions, warnings, logs, and settings.
+- **Reset Environment**: Remove or update `.env` to invalidate local credentials immediately.
 
 ---
 

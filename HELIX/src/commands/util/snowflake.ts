@@ -1,16 +1,36 @@
-import { EmbedBuilder } from 'discord.js';
+import { SnowflakeUtil } from 'discord.js';
+import { createEmbed, formatError } from '../../handlers/message-handler.js';
 import type { CommandDefinition } from '../../types/command.js';
 
 export const snowflake: CommandDefinition = {
-  name: 'snowflake', description: 'Decode a Discord snowflake ID to a timestamp', category: 'utility',
+  name: 'snowflake',
+  description: 'Deconstruct a Discord snowflake ID',
+  category: 'utility',
   options: [{ name: 'id', description: 'Snowflake ID', type: 'string', required: true }],
   async execute({ message, interaction, getOption }) {
-    const id = getOption<string>('id') || '';
+    const id = getOption<string>('id');
+    if (!id) {
+      const err = formatError('Missing snowflake ID.');
+      if (message) return message.reply({ embeds: [err] });
+      return interaction!.reply({ embeds: [err], ephemeral: true });
+    }
+
     try {
-      const ts = Number((BigInt(id) >> 22n) + 1420070400000n);
-      const embed = new EmbedBuilder().setTitle('🔍 Snowflake Decode').setColor(0x00d2ff)
-        .addFields({ name: 'Timestamp', value: `<t:${Math.floor(ts / 1000)}:F>`, inline: true }, { name: 'Relative', value: `<t:${Math.floor(ts / 1000)}:R>`, inline: true }).setTimestamp();
-      if (message) await message.reply({ embeds: [embed] }); else await interaction!.reply({ embeds: [embed] });
-    } catch { const r = '❌ Invalid snowflake ID.'; if (message) await message.reply(r); else await interaction!.reply({ content: r, ephemeral: true }); }
+      const deconstructed = SnowflakeUtil.deconstruct(id);
+      const date = new Date(Number(deconstructed.timestamp)).toUTCString();
+      const embed = createEmbed('utility.snowflake.embed', {
+        id,
+        timestamp: date,
+        workerId: deconstructed.workerId.toString(),
+        processId: deconstructed.processId.toString(),
+      });
+
+      if (message) await message.reply({ embeds: [embed] });
+      else await interaction!.reply({ embeds: [embed] });
+    } catch {
+      const err = formatError('Invalid snowflake ID.');
+      if (message) await message.reply({ embeds: [err] });
+      else await interaction!.reply({ embeds: [err], ephemeral: true });
+    }
   },
 };

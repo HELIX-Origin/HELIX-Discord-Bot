@@ -1,6 +1,7 @@
-import { EmbedBuilder, PermissionFlagsBits, ChannelType, ThreadChannel, ActionRowBuilder, ButtonBuilder, ButtonStyle, AttachmentBuilder } from 'discord.js';
+import { PermissionFlagsBits, ChannelType, ThreadChannel, ActionRowBuilder, ButtonBuilder, ButtonStyle, AttachmentBuilder } from 'discord.js';
 import { BotDatabase } from '../../db/database.js';
 import { createTicketsHubEmbed } from '../../interactions/tickets.js';
+import { createEmbed, formatError, getMessage } from '../../handlers/message-handler.js';
 import type { CommandDefinition } from '../../types/command.js';
 
 export const ticket: CommandDefinition = {
@@ -28,9 +29,9 @@ export const ticket: CommandDefinition = {
 
       if (sub === 'setup-hub') {
         const member = interaction.member as any;
-        if (!member?.permissions?.has(PermissionFlagsBits.ManageGuild)) return interaction.reply({ content: '❌ Manage Server required.', ephemeral: true });
+        if (!member?.permissions?.has(PermissionFlagsBits.ManageGuild)) return interaction.reply({ embeds: [formatError('permission_denied')], ephemeral: true });
         const ch = interaction.options.getChannel('channel') || interaction.channel;
-        if (!ch || !('send' in ch)) return interaction.reply({ content: '❌ Invalid channel.', ephemeral: true });
+        if (!ch || !('send' in ch)) return interaction.reply({ embeds: [formatError('invalid_channel', { input: 'channel' })], ephemeral: true });
         await (ch as any).send(createTicketsHubEmbed());
         db.setGuildSettings({ guildId: guild.id, ticketsHubChannelId: ch.id });
         return interaction.reply({ content: `✅ Hub deployed in <#${ch.id}>!`, ephemeral: true });
@@ -40,12 +41,12 @@ export const ticket: CommandDefinition = {
         const subject = interaction.options.getString('subject', true);
         const details = interaction.options.getString('details') || '';
         const active = db.getUserActiveTicket(guild.id, user.id);
-        if (active) return interaction.reply({ content: `❌ Active ticket: <#${active.threadId}>`, ephemeral: true });
+        if (active) return interaction.reply({ embeds: [formatError(`You already have an active ticket: <#${active.threadId}>`)], ephemeral: true });
 
         const settings = db.getGuildSettings(guild.id);
         let targetCh: any = interaction.channel;
         if (settings?.ticketsHubChannelId) { try { const h = await guild.channels.fetch(settings.ticketsHubChannelId); if (h?.isTextBased()) targetCh = h; } catch {} }
-        if (!targetCh?.isTextBased() || targetCh.isThread()) return interaction.reply({ content: '❌ Cannot create ticket here.', ephemeral: true });
+        if (!targetCh?.isTextBased() || targetCh.isThread()) return interaction.reply({ embeds: [formatError('Cannot create ticket in this channel.')], ephemeral: true });
 
         const clean = user.username.replace(/[^a-zA-Z0-9]/g, '').slice(0, 12).toLowerCase() || 'user';
         let thread: ThreadChannel;
@@ -54,8 +55,11 @@ export const ticket: CommandDefinition = {
 
         try { await thread.members.add(user.id); } catch {}
         const mgr = settings?.ticketManagerRoleId ? `<@&${settings.ticketManagerRoleId}>` : 'Support Team';
-        const embed = new EmbedBuilder().setTitle(`🎫 ${subject}`).setDescription(`${mgr} will be with you shortly.`).setColor(0x00d2ff)
-          .addFields({ name: 'Opened By', value: `<@${user.id}>`, inline: true }, { name: 'Topic', value: subject, inline: true }).setTimestamp();
+        const embed = createEmbed('config.ticket.welcome_embed', {
+          subject,
+          userId: user.id,
+          staffMention: mgr,
+        });
         if (details) embed.addFields({ name: 'Details', value: details });
 
         const btn = new ActionRowBuilder<ButtonBuilder>().addComponents(new ButtonBuilder().setCustomId('helix_ticket_close').setLabel('Close Ticket').setStyle(ButtonStyle.Danger).setEmoji('🔒'));
@@ -65,27 +69,27 @@ export const ticket: CommandDefinition = {
       }
 
       if (sub === 'close') {
-        if (!interaction.channel?.isThread()) return interaction.reply({ content: '❌ Use in a ticket thread.', ephemeral: true });
+        if (!interaction.channel?.isThread()) return interaction.reply({ embeds: [formatError('Use this command inside a ticket thread.')], ephemeral: true });
         const reason = interaction.options.getString('reason') || 'Resolved';
         db.closeTicket(interaction.channel.id, user.id);
-        const embed = new EmbedBuilder().setTitle('🔒 Ticket Closed').setDescription(`Closed by <@${user.id}>\n**Reason**: ${reason}`).setColor(0xff4444).setTimestamp();
+        const embed = createEmbed('config.ticket.closed_embed', { closedBy: user.id });
         await interaction.reply({ embeds: [embed] });
         try { await (interaction.channel as ThreadChannel).setLocked(true, reason); await (interaction.channel as ThreadChannel).setArchived(true, reason); } catch {}
         return;
       }
 
       if (sub === 'add' || sub === 'remove') {
-        if (!interaction.channel?.isThread()) return interaction.reply({ content: '❌ Use in a ticket thread.', ephemeral: true });
+        if (!interaction.channel?.isThread()) return interaction.reply({ embeds: [formatError('Use this command inside a ticket thread.')], ephemeral: true });
         const target = interaction.options.getUser('user', true);
         try {
           if (sub === 'add') await (interaction.channel as ThreadChannel).members.add(target.id);
           else await (interaction.channel as ThreadChannel).members.remove(target.id);
           return interaction.reply({ content: `✅ ${sub === 'add' ? 'Added' : 'Removed'} <@${target.id}>.` });
-        } catch (err: any) { return interaction.reply({ content: `❌ Failed: ${err.message}`, ephemeral: true }); }
+        } catch (err: any) { return interaction.reply({ embeds: [formatError(`Failed: ${err.message}`)], ephemeral: true }); }
       }
 
       if (sub === 'transcript') {
-        if (!interaction.channel?.isThread()) return interaction.reply({ content: '❌ Use in a ticket thread.', ephemeral: true });
+        if (!interaction.channel?.isThread()) return interaction.reply({ embeds: [formatError('Use this command inside a ticket thread.')], ephemeral: true });
         await interaction.deferReply();
         const thread = interaction.channel as ThreadChannel;
         const messages = await thread.messages.fetch({ limit: 100 });
@@ -103,13 +107,13 @@ export const ticket: CommandDefinition = {
     const sub = args[1]?.toLowerCase();
     if (sub === 'setup-hub') {
       const member = message!.member;
-      if (!member?.permissions.has(PermissionFlagsBits.ManageGuild)) return message!.reply('❌ Manage Server required.');
+      if (!member?.permissions.has(PermissionFlagsBits.ManageGuild)) return message!.reply({ embeds: [formatError('permission_denied')] });
       const ch = message!.mentions.channels.first() || message!.channel;
-      if (!('send' in ch)) return message!.reply('❌ Invalid channel.');
+      if (!('send' in ch)) return message!.reply({ embeds: [formatError('invalid_channel', { input: 'channel' })] });
       await (ch as any).send(createTicketsHubEmbed());
       db.setGuildSettings({ guildId: guild.id, ticketsHubChannelId: ch.id });
       return message!.reply(`✅ Hub deployed in <#${ch.id}>!`);
     }
-    return message!.reply('❌ Usage: `>ticket <create|close|setup-hub|add|remove|transcript>`');
+    return message!.reply({ embeds: [formatError('subcommand_not_found')] });
   },
 };

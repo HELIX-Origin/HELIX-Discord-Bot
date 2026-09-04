@@ -1,47 +1,42 @@
-# Free-Tier Heroku 1-Click Deployment Guide
+﻿# Heroku Deployment
 
-Deploy HELIX Discord Bot and Web Dashboard to Heroku using 100% free-tier eligible resources.
-
----
-
-## 1. Zero Paid Services Architecture
-
-- **Eco Dyno Allocation**: Uses a single lightweight `web` dyno process (`web: node dist/index.js bot start --port $PORT`).
-- **Zero Paid Add-ons**: Does not require Heroku Postgres, Redis, or other paid add-ons. It utilizes the embedded SQLite database engine.
-- **Port Binding**: Heroku dynamically assigns `$PORT`, which `BotCallbackServer` automatically parses and binds.
+Free-tier eligible. Uses a single Eco Dyno with the embedded SQLite database — no paid add-ons required.
 
 ---
 
-## 2. Heroku 1-Click Button
+## 1-Click Deploy
 
-Add this button to your repository README to deploy with one click:
+Click the **Deploy to Heroku** button in the README to launch the app wizard. The wizard prompts for your credentials directly; no local setup needed.
 
-```markdown
-[![Deploy to Heroku](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
-```
+After deployment Heroku sets `HEROKU_APP_DEFAULT_DOMAIN_NAME` and `HEROKU_APP_NAME` automatically. HELIX reads these to resolve `NEXTAUTH_URL` and `DISCORD_CALLBACK_URL` — you do not need to set those manually.
 
 ---
 
-## 3. GitHub Secrets Synchronization
+## Required Config Vars
 
-The included GitHub Actions workflow (`.github/workflows/heroku-deploy.yml`) automatically pushes your GitHub Secrets to Heroku config variables on every git push:
+Set these in the Heroku app wizard or under **Settings → Config Vars**:
 
-### Required GitHub Secrets:
-1. `HEROKU_API_KEY`: Your Heroku API key from Account Settings.
-2. `HEROKU_APP_NAME`: The name of your Heroku application.
-3. `DISCORD_TOKEN`: Discord Bot Token.
-4. `DISCORD_CLIENT_ID`: Discord Application Client ID.
-5. `DISCORD_CALLBACK_URL`: Public base URL (`https://<app-name>.herokuapp.com`).
-6. `NEXTAUTH_URL`: Public base URL (`https://<app-name>.herokuapp.com`).
-7. `NEXTAUTH_INTERNAL_URL`: Internal URL (`http://127.0.0.1:5000`).
-8. `NEXTAUTH_SECRET`: Secret key for session encryption.
+| Variable | Value |
+|----------|-------|
+| `DISCORD_TOKEN` | Bot token |
+| `DISCORD_CLIENT_ID` | Application client ID |
+| `DISCORD_CLIENT_SECRET` | OAuth2 client secret |
+| `NEXTAUTH_SECRET` | Random 32+ character string |
+
+`PORT` is set by Heroku automatically. Everything else is auto-resolved.
 
 ---
 
-## 4. Automated Database Initialization on Boot
+## GitHub Actions Auto-Deploy
 
-When deploying via the 1-Click button:
-- The bot application starts automatically via `Procfile` / `heroku.yml` (`node dist/bot/index.js`).
-- On boot, `BotDatabase` automatically verifies and creates `data/helix-bot.sqlite` and builds all schema tables and indices in-process.
-- Because environment variables and secrets are already supplied by the 1-Click deployment interface and GitHub Secrets, the bot launches immediately without manual setup.
+The included `.github/workflows/heroku-deploy.yml` syncs GitHub Secrets to Heroku config vars on every push to `main`. Add these GitHub Secrets to your repo:
 
+- `HEROKU_API_KEY` — from Heroku Account Settings
+- `HEROKU_APP_NAME` — your Heroku app name
+- `DISCORD_TOKEN`, `DISCORD_CLIENT_ID`, `DISCORD_CLIENT_SECRET`, `NEXTAUTH_SECRET`
+
+---
+
+## Database
+
+`BotDatabase` creates `data/helix-bot.sqlite` and runs all schema migrations on boot. No setup command, no add-ons. Note that Heroku Eco Dynos have an ephemeral filesystem — the SQLite file is lost on dyno restart. For persistence on Heroku, mount an external volume or use `DISCORD_DB_PATH` to point to a persistent store.

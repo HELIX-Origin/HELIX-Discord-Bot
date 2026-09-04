@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+﻿import { describe, it, expect } from 'vitest';
 import fs from 'fs';
 import path from 'path';
 
@@ -16,16 +16,20 @@ describe('HELIX Bot Structure & Package Integrity', () => {
     expect(pkg.scripts.start).toBeDefined();
   });
 
-  it('contains /HELIX/src as the root for the discord bot client, db, and dist', () => {
+  it('contains /HELIX/src as the root for the discord bot client, db, commands, and plugins', () => {
     const srcDir = path.resolve(botDir, 'src');
     expect(fs.existsSync(srcDir)).toBe(true);
     expect(fs.existsSync(path.resolve(srcDir, 'client.ts'))).toBe(true);
     expect(fs.existsSync(path.resolve(srcDir, 'server.ts'))).toBe(true);
-    expect(fs.existsSync(path.resolve(srcDir, 'deploy.ts'))).toBe(true);
-    expect(fs.existsSync(path.resolve(srcDir, 'db', 'index.ts'))).toBe(true);
-    expect(fs.existsSync(path.resolve(srcDir, 'commands', 'index.ts'))).toBe(true);
-    expect(fs.existsSync(path.resolve(srcDir, 'utils', 'logger', 'index.ts'))).toBe(true);
-    expect(fs.existsSync(path.resolve(srcDir, 'dist'))).toBe(true);
+    expect(fs.existsSync(path.resolve(srcDir, 'env.ts'))).toBe(true);
+    expect(fs.existsSync(path.resolve(srcDir, 'config.ts'))).toBe(true);
+    expect(fs.existsSync(path.resolve(srcDir, 'db', 'database.ts'))).toBe(true);
+    expect(fs.existsSync(path.resolve(srcDir, 'handlers', 'command-handler.ts'))).toBe(true);
+    expect(fs.existsSync(path.resolve(srcDir, 'handlers', 'slash-handler.ts'))).toBe(true);
+    expect(fs.existsSync(path.resolve(srcDir, 'handlers', 'event-handler.ts'))).toBe(true);
+    expect(fs.existsSync(path.resolve(srcDir, 'plugins', 'registry.ts'))).toBe(true);
+    expect(fs.existsSync(path.resolve(srcDir, 'plugins', 'plugin-loader.ts'))).toBe(true);
+    expect(fs.existsSync(path.resolve(srcDir, 'scaffolding', 'template-engine.ts'))).toBe(true);
   });
 
   it('contains /HELIX/dashboard as the root for the companion web dashboard', () => {

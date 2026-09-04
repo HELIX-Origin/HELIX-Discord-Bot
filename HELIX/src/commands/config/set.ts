@@ -1,5 +1,6 @@
-import { EmbedBuilder, PermissionFlagsBits } from 'discord.js';
+import { PermissionFlagsBits } from 'discord.js';
 import { BotDatabase } from '../../db/database.js';
+import { createEmbed, formatError, getMessage } from '../../handlers/message-handler.js';
 import type { CommandDefinition } from '../../types/command.js';
 
 export const set: CommandDefinition = {
@@ -30,43 +31,43 @@ export const set: CommandDefinition = {
       const sub = interaction.options.getSubcommand();
       const member = interaction.member as any;
       if (sub !== 'view' && !member?.permissions?.has(PermissionFlagsBits.ManageGuild)) {
-        return interaction.reply({ content: '❌ Manage Server required.', ephemeral: true });
+        return interaction.reply({ embeds: [formatError('permission_denied')], ephemeral: true });
       }
 
       if (sub === 'prefix') {
         const prefix = interaction.options.getString('prefix', true);
         db.setGuildSettings({ guildId: guild.id, prefix });
-        return interaction.reply({ embeds: [new EmbedBuilder().setTitle('⚙️ Prefix Updated').setColor(0x00ff88).setDescription(`Set to \`${prefix}\``).setTimestamp()] });
+        return interaction.reply({ embeds: [createEmbed('config.set.embed_success', { setting: 'Command Prefix', value: `\`${prefix}\`` })] });
       }
       if (sub === 'tickets-hub') {
         const ch = interaction.options.getChannel('channel', true);
         db.setGuildSettings({ guildId: guild.id, ticketsHubChannelId: ch.id });
-        return interaction.reply({ embeds: [new EmbedBuilder().setTitle('⚙️ Tickets Hub').setColor(0x00ff88).setDescription(`Set to <#${ch.id}>`).setTimestamp()] });
+        return interaction.reply({ embeds: [createEmbed('config.set.embed_success', { setting: 'Tickets Hub Channel', value: `<#${ch.id}>` })] });
       }
       if (sub === 'ticket-manager-role') {
         const role = interaction.options.getRole('role', true);
         db.setGuildSettings({ guildId: guild.id, ticketManagerRoleId: role.id });
-        return interaction.reply({ embeds: [new EmbedBuilder().setTitle('⚙️ Ticket Manager Role').setColor(0x00ff88).setDescription(`Set to <@&${role.id}>`).setTimestamp()] });
+        return interaction.reply({ embeds: [createEmbed('config.set.embed_success', { setting: 'Ticket Manager Role', value: `<@&${role.id}>` })] });
       }
       if (sub === 'mod-log-channel') {
         const ch = interaction.options.getChannel('channel', true);
         db.setGuildSettings({ guildId: guild.id, modLogChannelId: ch.id });
-        return interaction.reply({ embeds: [new EmbedBuilder().setTitle('⚙️ Mod Log Channel').setColor(0x00ff88).setDescription(`Set to <#${ch.id}>`).setTimestamp()] });
+        return interaction.reply({ embeds: [createEmbed('config.set.embed_success', { setting: 'Moderation Log Channel', value: `<#${ch.id}>` })] });
       }
       if (sub === 'welcome-channel') {
         const ch = interaction.options.getChannel('channel', true);
         db.setGuildSettings({ guildId: guild.id, welcomeChannelId: ch.id });
-        return interaction.reply({ embeds: [new EmbedBuilder().setTitle('⚙️ Welcome Channel').setColor(0x00ff88).setDescription(`Set to <#${ch.id}>`).setTimestamp()] });
+        return interaction.reply({ embeds: [createEmbed('config.set.embed_success', { setting: 'Welcome Channel', value: `<#${ch.id}>` })] });
       }
       if (sub === 'view') {
         const s = db.getGuildSettings(guild.id);
-        const ts = db.getTicketStats(guild.id);
-        const embed = new EmbedBuilder().setTitle(`⚙️ ${guild.name}`).setColor(0x00d2ff).addFields(
-          { name: 'Prefix', value: `\`${s?.prefix || '>'}\``, inline: true },
-          { name: 'Tickets Hub', value: s?.ticketsHubChannelId ? `<#${s.ticketsHubChannelId}>` : '`Not Set`', inline: true },
-          { name: 'Mod Log', value: s?.modLogChannelId ? `<#${s.modLogChannelId}>` : '`Not Set`', inline: true },
-          { name: 'Tickets', value: `Total: ${ts.total} | Open: ${ts.open}`, inline: true },
-        ).setTimestamp();
+        const embed = createEmbed('config.set.embed_view', {
+          prefix: s?.prefix || '>',
+          ticketsHub: s?.ticketsHubChannelId ? `<#${s.ticketsHubChannelId}>` : '`Not Set`',
+          managerRole: s?.ticketManagerRoleId ? `<@&${s.ticketManagerRoleId}>` : '`Not Set`',
+          modLog: s?.modLogChannelId ? `<#${s.modLogChannelId}>` : '`Not Set`',
+          welcome: s?.welcomeChannelId ? `<#${s.welcomeChannelId}>` : '`Not Set`',
+        });
         return interaction.reply({ embeds: [embed] });
       }
       return;
@@ -77,14 +78,21 @@ export const set: CommandDefinition = {
     const sub = args[1]?.toLowerCase();
     if (sub === 'prefix') {
       const prefix = args[2];
-      if (!prefix) return message!.reply('❌ Usage: `>set prefix {input}`');
+      if (!prefix) return message!.reply({ embeds: [formatError('missing_argument', { arg: 'prefix' })] });
       db.setGuildSettings({ guildId: guild.id, prefix });
-      return message!.reply({ embeds: [new EmbedBuilder().setTitle('⚙️ Prefix Updated').setColor(0x00ff88).setDescription(`Set to \`${prefix}\``).setTimestamp()] });
+      return message!.reply({ embeds: [createEmbed('config.set.embed_success', { setting: 'Command Prefix', value: `\`${prefix}\`` })] });
     }
     if (sub === 'view') {
       const s = db.getGuildSettings(guild.id);
-      return message!.reply(`⚙️ Prefix: \`${s?.prefix || '>'}\``);
+      const embed = createEmbed('config.set.embed_view', {
+        prefix: s?.prefix || '>',
+        ticketsHub: s?.ticketsHubChannelId ? `<#${s.ticketsHubChannelId}>` : '`Not Set`',
+        managerRole: s?.ticketManagerRoleId ? `<@&${s.ticketManagerRoleId}>` : '`Not Set`',
+        modLog: s?.modLogChannelId ? `<#${s.modLogChannelId}>` : '`Not Set`',
+        welcome: s?.welcomeChannelId ? `<#${s.welcomeChannelId}>` : '`Not Set`',
+      });
+      return message!.reply({ embeds: [embed] });
     }
-    return message!.reply('❌ Usage: `>set <prefix|view> [value]`');
+    return message!.reply({ embeds: [formatError('subcommand_not_found')] });
   },
 };

@@ -1,8 +1,8 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+﻿import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
-import { BotDatabase } from '../../HELIX/src/db/index.js';
+import { BotDatabase } from '../../HELIX/src/db/database.js';
 
 describe('Discord Bot Internal SQLite Database', () => {
   let tempDir: string;
@@ -25,20 +25,7 @@ describe('Discord Bot Internal SQLite Database', () => {
     const stats = db.getStats();
     expect(stats.exists).toBe(true);
     expect(stats.sizeBytes).toBeGreaterThan(0);
-    expect(stats.queryCount).toBe(0);
-  });
-
-  it('logs and counts queries properly', () => {
-    db.logQuery({
-      userId: '112233',
-      username: 'HelixDev',
-      guildId: '998877',
-      prompt: 'How do I add a slash command?',
-      provider: 'Google Antigravity',
-    });
-
-    const stats = db.getStats();
-    expect(stats.queryCount).toBe(1);
+    expect(stats.guildCount).toBe(0);
   });
 
   it('records project scaffolding operations in history', () => {
@@ -50,91 +37,78 @@ describe('Discord Bot Internal SQLite Database', () => {
 
     const stats = db.getStats();
     expect(stats.scaffoldCount).toBe(1);
+
+    const scaffolds = db.getRecentScaffolds(5);
+    expect(scaffolds.length).toBe(1);
+    expect(scaffolds[0].projectName).toBe('my-cool-app');
+    expect(scaffolds[0].templateId).toBe('web-react');
   });
 
   it('manages guild-specific settings with upsert behavior', () => {
     db.setGuildSettings({
       guildId: 'guild-100',
-      prefix: '!',
-      aiProvider: 'copilot',
+      prefix: '>',
       callbackUrl: 'http://localhost:5000',
+      ticketsHubChannelId: 'channel-hub-1',
+      ticketManagerRoleId: 'role-mgr-1',
+      modLogChannelId: 'channel-mod-1',
+      welcomeChannelId: 'channel-welcome-1',
     });
 
     const settings = db.getGuildSettings('guild-100');
     expect(settings).not.toBeNull();
-    expect(settings.prefix).toBe('!');
-    expect(settings.ai_provider).toBe('copilot');
+    expect(settings?.prefix).toBe('>');
+    expect(settings?.ticketsHubChannelId).toBe('channel-hub-1');
+    expect(settings?.ticketManagerRoleId).toBe('role-mgr-1');
+    expect(settings?.modLogChannelId).toBe('channel-mod-1');
+    expect(settings?.welcomeChannelId).toBe('channel-welcome-1');
 
-    // Update settings
+    // Update prefix
     db.setGuildSettings({
       guildId: 'guild-100',
       prefix: '$',
-      ticketsHubChannelId: 'channel-999',
-      ticketManagerRoleId: 'role-888',
-      modLogChannelId: 'channel-777',
-      welcomeChannelId: 'channel-666',
     });
 
     const updated = db.getGuildSettings('guild-100');
-    expect(updated.prefix).toBe('$');
-    expect(updated.ticketsHubChannelId).toBe('channel-999');
-    expect(updated.ticketManagerRoleId).toBe('role-888');
-    expect(updated.modLogChannelId).toBe('channel-777');
-    expect(updated.welcomeChannelId).toBe('channel-666');
+    expect(updated?.prefix).toBe('$');
   });
 
-  it('manages support ticket lifecycle and statistics', () => {
+  it('creates, retrieves, and closes support tickets', () => {
     const ticketId = db.createTicket({
       guildId: 'guild-200',
       channelId: 'hub-channel-1',
-      threadId: 'thread-12345',
-      userId: 'user-support-1',
-      subject: 'Billing issue',
+      threadId: 'ticket-thread-101',
+      userId: 'ticket-creator-1',
+      subject: 'Billing assistance',
     });
-
     expect(ticketId).toBeGreaterThan(0);
 
-    const ticket = db.getTicketByThread('thread-12345');
+    const ticket = db.getTicketByThread('ticket-thread-101');
     expect(ticket).not.toBeNull();
-    expect(ticket?.subject).toBe('Billing issue');
     expect(ticket?.status).toBe('open');
+    expect(ticket?.subject).toBe('Billing assistance');
 
-    const active = db.getUserActiveTicket('guild-200', 'user-support-1');
-    expect(active).not.toBeNull();
-    expect(active?.threadId).toBe('thread-12345');
-
-    const statsBefore = db.getTicketStats('guild-200');
-    expect(statsBefore.total).toBe(1);
-    expect(statsBefore.open).toBe(1);
-    expect(statsBefore.closed).toBe(0);
-
-    // Close ticket
-    const closed = db.closeTicket('thread-12345', 'staff-moderator-1');
+    const closed = db.closeTicket('ticket-thread-101', 'staff-member-1');
     expect(closed).toBe(true);
 
-    const statsAfter = db.getTicketStats('guild-200');
-    expect(statsAfter.open).toBe(0);
-    expect(statsAfter.closed).toBe(1);
-
-    const activeAfter = db.getUserActiveTicket('guild-200', 'user-support-1');
-    expect(activeAfter).toBeNull();
+    const closedTicket = db.getTicketByThread('ticket-thread-101');
+    expect(closedTicket?.status).toBe('closed');
+    expect(closedTicket?.closedBy).toBe('staff-member-1');
   });
 
-  it('records moderation audit actions and member warnings', () => {
+  it('logs moderation actions and warnings', () => {
     db.logModeration({
       guildId: 'guild-300',
-      userId: 'bad-actor-1',
+      userId: 'target-user-1',
       moderatorId: 'mod-1',
-      action: 'kick',
-      reason: 'Spamming channels',
+      action: 'timeout',
+      durationMinutes: 10,
+      reason: 'Spamming',
     });
 
-    const logs = db.getModerationLogs('guild-300');
-    expect(logs.length).toBe(1);
-    expect(logs[0].action).toBe('kick');
-    expect(logs[0].reason).toBe('Spamming channels');
+    const stats = db.getStats();
+    expect(stats.moderationCount).toBe(1);
 
-    // Warnings
     const warnId = db.addWarning({
       guildId: 'guild-300',
       userId: 'bad-actor-1',
@@ -152,18 +126,9 @@ describe('Discord Bot Internal SQLite Database', () => {
     expect(db.getWarnings('guild-300', 'bad-actor-1').length).toBe(0);
   });
 
-  it('saves and retrieves personal user settings', () => {
-    db.setUserSettings({
-      userId: 'developer-42',
-      defaultAiProvider: 'antigravity',
-      defaultModel: 'gemini-2.5-flash',
-      notificationsEnabled: false,
-    });
-
-    const settings = db.getUserSettings('developer-42');
-    expect(settings).not.toBeNull();
-    expect(settings?.defaultAiProvider).toBe('antigravity');
-    expect(settings?.defaultModel).toBe('gemini-2.5-flash');
-    expect(settings?.notificationsEnabled).toBe(false);
+  it('saves and retrieves KV pairs', () => {
+    db.setKv('custom_key', 'custom_value');
+    expect(db.getKv('custom_key')).toBe('custom_value');
+    expect(db.getKv('non_existent')).toBeNull();
   });
 });

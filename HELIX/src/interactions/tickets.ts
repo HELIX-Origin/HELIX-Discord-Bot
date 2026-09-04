@@ -1,11 +1,10 @@
-import {
+﻿import {
   ButtonInteraction,
   ModalSubmitInteraction,
   ModalBuilder,
   TextInputBuilder,
   TextInputStyle,
   ActionRowBuilder,
-  EmbedBuilder,
   ButtonBuilder,
   ButtonStyle,
   ChannelType,
@@ -13,20 +12,10 @@ import {
   PermissionFlagsBits,
 } from 'discord.js';
 import { BotDatabase } from '../db/database.js';
+import { createEmbed, formatError, getMessage } from '../handlers/message-handler.js';
 
 export function createTicketsHubEmbed() {
-  const embed = new EmbedBuilder()
-    .setTitle('🎫 HELIX Support & Ticket Hub')
-    .setDescription(
-      'Welcome to Support! If you need assistance, wish to report an issue, or have questions for our team, click the button below to open a private ticket thread.'
-    )
-    .setColor(0x00d2ff)
-    .addFields(
-      { name: 'Private & Secure', value: 'Only you and the Ticket Managers have access to your ticket.', inline: true },
-      { name: 'Fast Response', value: 'A team member will be notified immediately upon opening.', inline: true }
-    )
-    .setFooter({ text: 'HELIX Support Suite • Thread-Based Architecture' })
-    .setTimestamp();
+  const embed = createEmbed('config.ticket.hub_embed');
 
   const button = new ButtonBuilder()
     .setCustomId('helix_ticket_create')
@@ -73,7 +62,7 @@ export async function handleTicketButton(interaction: ButtonInteraction): Promis
 
   if (interaction.customId === 'helix_ticket_close') {
     if (!interaction.channel || !interaction.channel.isThread()) {
-      await interaction.reply({ content: '❌ This button can only be used inside a ticket thread.', ephemeral: true });
+      await interaction.reply({ embeds: [formatError('This action can only be performed inside a ticket thread.')], ephemeral: true });
       return;
     }
 
@@ -87,19 +76,15 @@ export async function handleTicketButton(interaction: ButtonInteraction): Promis
     const hasRole = settings?.ticketManagerRoleId && member?.roles?.cache?.has(settings.ticketManagerRoleId);
 
     if (!isOwner && !hasPerm && !hasRole) {
-      await interaction.reply({ content: '❌ You do not have permission to close this ticket.', ephemeral: true });
+      await interaction.reply({ embeds: [formatError('permission_denied')], ephemeral: true });
       return;
     }
 
     db.closeTicket(thread.id, interaction.user.id);
 
-    const closeEmbed = new EmbedBuilder()
-      .setTitle('🔒 Ticket Closed')
-      .setDescription(
-        `This ticket has been closed by <@${interaction.user.id}> at ${new Date().toUTCString()}.\n\nThis thread is now locked and archived.`
-      )
-      .setColor(0xff4444)
-      .setTimestamp();
+    const closeEmbed = createEmbed('config.ticket.closed_embed', {
+      closedBy: interaction.user.id,
+    });
 
     await interaction.reply({ embeds: [closeEmbed] });
 
@@ -122,14 +107,14 @@ export async function handleTicketModal(interaction: ModalSubmitInteraction): Pr
     await interaction.deferReply({ ephemeral: true });
 
     if (!interaction.guild) {
-      await interaction.editReply({ content: '❌ Tickets can only be created within a server.' });
+      await interaction.editReply({ embeds: [formatError('guild_only')] });
       return;
     }
 
     const activeTicket = db.getUserActiveTicket(interaction.guild.id, interaction.user.id);
     if (activeTicket) {
       await interaction.editReply({
-        content: `❌ You already have an active open ticket in this server: <#${activeTicket.threadId}>. Please use or close it first.`,
+        embeds: [formatError(`You already have an active open ticket in this server: <#${activeTicket.threadId}>. Please use or close it first.`)],
       });
       return;
     }
@@ -149,7 +134,7 @@ export async function handleTicketModal(interaction: ModalSubmitInteraction): Pr
     }
 
     if (!targetChannel || !targetChannel.isTextBased() || targetChannel.isThread()) {
-      await interaction.editReply({ content: '❌ Unable to create a ticket thread in this channel.' });
+      await interaction.editReply({ embeds: [formatError('Unable to create a ticket thread in this channel.')] });
       return;
     }
 
@@ -173,7 +158,7 @@ export async function handleTicketModal(interaction: ModalSubmitInteraction): Pr
           reason: `Support ticket created by ${interaction.user.tag}`,
         });
       } catch (err: any) {
-        await interaction.editReply({ content: `❌ Failed to create ticket thread: ${err.message}` });
+        await interaction.editReply({ embeds: [formatError(`Failed to create ticket thread: ${err.message}`)] });
         return;
       }
     }
@@ -182,21 +167,13 @@ export async function handleTicketModal(interaction: ModalSubmitInteraction): Pr
       await thread.members.add(interaction.user.id);
     } catch {}
 
-    const managerMention = settings?.ticketManagerRoleId ? `<@&${settings.ticketManagerRoleId}>` : 'Support Team';
+    const managerMention = settings?.ticketManagerRoleId ? `<@&${settings.ticketManagerRoleId}>` : 'Support Staff';
 
-    const welcomeEmbed = new EmbedBuilder()
-      .setTitle(`🎫 Ticket: ${subject}`)
-      .setDescription(
-        `Welcome <@${interaction.user.id}>! ${managerMention} will be with you shortly.\n\nPlease describe your request or issue in detail. When your issue is resolved, click **Close Ticket** below.`
-      )
-      .setColor(0x00d2ff)
-      .addFields(
-        { name: 'Opened By', value: `<@${interaction.user.id}> (${interaction.user.tag})`, inline: true },
-        { name: 'Status', value: '`🟢 Open`', inline: true },
-        { name: 'Topic', value: subject, inline: false }
-      )
-      .setFooter({ text: 'HELIX Support Suite • Thread-Based Architecture' })
-      .setTimestamp();
+    const welcomeEmbed = createEmbed('config.ticket.welcome_embed', {
+      subject,
+      userId: interaction.user.id,
+      staffMention: managerMention,
+    });
 
     if (details) {
       welcomeEmbed.addFields({ name: 'Details', value: details, inline: false });

@@ -1,4 +1,4 @@
-import { getNextAuthConfig } from '../auth/config.js';
+﻿import { getNextAuthConfig } from '../auth/config.js';
 import { BotDatabase } from '../../src/db/database.js';
 import { resolveBotInviteUrl } from '../../src/server.js';
 import { getBotToken, getCallbackUrl, getInviteUrl, getClientId } from '../../src/env.js';
@@ -15,7 +15,7 @@ export function renderDashboardHtml(botPort?: number): string {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>HELIX Bot & AI Dashboard</title>
+  <title>HELIX Bot Dashboard</title>
   <link rel="icon" type="image/jpeg" href="/icon.jpg">
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -36,7 +36,7 @@ export function renderDashboardHtml(botPort?: number): string {
         <h1 class="text-xl font-extrabold tracking-tight text-white flex items-center gap-2">
           HELIX <span class="text-cyan-400">Dashboard</span>
         </h1>
-        <p class="text-xs text-gray-400">Discord Bot & Universal AI Hub</p>
+        <p class="text-xs text-gray-400">Developer Discord Bot & Plugin Ecosystem</p>
       </div>
     </div>
 
@@ -67,8 +67,8 @@ export function renderDashboardHtml(botPort?: number): string {
         <button onclick="switchTab('broadcast')" id="tab-btn-broadcast" class="tab-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition text-gray-400 hover:text-white hover:bg-gray-800">
           <i class="fa-solid fa-bullhorn w-5"></i> Direct Broadcast
         </button>
-        <button onclick="switchTab('ai')" id="tab-btn-ai" class="tab-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition text-gray-400 hover:text-white hover:bg-gray-800">
-          <i class="fa-solid fa-robot w-5"></i> AI Playground
+        <button onclick="switchTab('plugins')" id="tab-btn-plugins" class="tab-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition text-gray-400 hover:text-white hover:bg-gray-800">
+          <i class="fa-solid fa-puzzle-piece w-5"></i> Language Plugins
         </button>
         <button onclick="switchTab('scaffold')" id="tab-btn-scaffold" class="tab-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition text-gray-400 hover:text-white hover:bg-gray-800">
           <i class="fa-solid fa-cubes w-5"></i> Scaffolding Studio
@@ -116,18 +116,18 @@ export function renderDashboardHtml(botPort?: number): string {
           </div>
         </div>
 
-        <!-- Direct Live Queries Feed -->
+        <!-- Direct Live Scaffold Feed -->
         <div class="glass p-6 rounded-2xl border border-gray-800 space-y-4">
           <div class="flex justify-between items-center">
             <h2 class="text-lg font-bold text-white flex items-center gap-2">
-              <i class="fa-solid fa-bolt text-cyan-400"></i> Live Bot & AI Interaction Feed
+              <i class="fa-solid fa-clock-rotate-left text-cyan-400"></i> Recent Scaffolding Operations
             </h2>
             <button onclick="fetchStats()" class="px-3 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-xs text-gray-300 transition">
               <i class="fa-solid fa-rotate-right mr-1"></i> Refresh Stream
             </button>
           </div>
-          <div id="live-query-feed" class="space-y-2 max-h-56 overflow-y-auto font-mono text-xs">
-            <div class="text-gray-500 py-4 text-center">Loading direct database query stream...</div>
+          <div id="live-scaffold-feed" class="space-y-2 max-h-56 overflow-y-auto font-mono text-xs">
+            <div class="text-gray-500 py-4 text-center">Loading recent activity...</div>
           </div>
         </div>
 
@@ -139,8 +139,8 @@ export function renderDashboardHtml(botPort?: number): string {
               <button onclick="switchTab('broadcast')" class="w-full py-2.5 px-4 rounded-xl bg-cyan-600 hover:bg-cyan-500 font-semibold text-sm transition flex items-center justify-between">
                 <span>Direct Channel Announcement</span> <i class="fa-solid fa-bullhorn"></i>
               </button>
-              <button onclick="switchTab('ai')" class="w-full py-2.5 px-4 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-200 font-semibold text-sm transition flex items-center justify-between">
-                <span>Query AI Agents Directly</span> <i class="fa-solid fa-robot"></i>
+              <button onclick="switchTab('plugins')" class="w-full py-2.5 px-4 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-200 font-semibold text-sm transition flex items-center justify-between">
+                <span>View Language Plugins</span> <i class="fa-solid fa-puzzle-piece"></i>
               </button>
               <button onclick="switchTab('scaffold')" class="w-full py-2.5 px-4 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-200 font-semibold text-sm transition flex items-center justify-between">
                 <span>Launch Scaffolding Studio</span> <i class="fa-solid fa-cubes"></i>
@@ -198,36 +198,53 @@ export function renderDashboardHtml(botPort?: number): string {
         </div>
       </section>
 
-      <!-- 2. AI PLAYGROUND TAB -->
-      <section id="tab-ai" class="tab-content hidden space-y-6">
+      <!-- 2. LANGUAGE PLUGINS TAB -->
+      <section id="tab-plugins" class="tab-content hidden space-y-6">
         <div class="glass p-6 rounded-2xl border border-gray-800 space-y-4">
           <div class="flex justify-between items-center">
             <div>
-              <h2 class="text-lg font-bold text-white flex items-center gap-2"><i class="fa-solid fa-brain text-cyan-400"></i> AI Agent Interaction Studio</h2>
-              <p class="text-xs text-gray-400">Query connected AI models directly from your browser. Prompts are automatically logged in the bot's SQLite database.</p>
+              <h2 class="text-lg font-bold text-white flex items-center gap-2"><i class="fa-solid fa-puzzle-piece text-cyan-400"></i> Language Plugin Ecosystem</h2>
+              <p class="text-xs text-gray-400">Local in-process language intelligence plugins for linting, code explanation, and documentation.</p>
             </div>
-            <select id="ai-provider-select" class="bg-gray-800 border border-gray-700 rounded-xl px-3 py-2 text-sm text-gray-200">
-              <option value="antigravity">Google Antigravity (Default)</option>
-              <option value="copilot">GitHub Copilot</option>
-              <option value="opencode">Open Code Go / Zen</option>
-            </select>
+            <button onclick="fetchStats()" class="px-3 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-xs text-gray-300 transition">
+              <i class="fa-solid fa-rotate-right mr-1"></i> Refresh
+            </button>
           </div>
 
-          <div class="space-y-2">
-            <textarea id="ai-prompt-input" rows="3" placeholder="Enter your architecture question, code generation task, or error diagnosis..." class="w-full bg-gray-900 border border-gray-700 rounded-xl p-4 text-sm text-white focus:outline-none focus:border-cyan-500"></textarea>
-            <div class="flex justify-end">
-              <button onclick="submitAiQuery()" id="ai-submit-btn" class="px-5 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 font-semibold text-sm transition flex items-center gap-2">
-                <i class="fa-solid fa-paper-plane"></i> Send Query
-              </button>
+          <div class="grid grid-cols-3 gap-4">
+            <div class="p-4 rounded-xl bg-gray-900 border border-gray-800 space-y-1">
+              <span class="text-xs text-gray-400 uppercase font-semibold">Official Repo</span>
+              <div class="text-white font-mono text-sm">HELIX-Origin/helix-origin</div>
+              <span class="text-xs text-green-400">Shipped Built-in</span>
+            </div>
+            <div class="p-4 rounded-xl bg-gray-900 border border-gray-800 space-y-1">
+              <span class="text-xs text-gray-400 uppercase font-semibold">Execution Model</span>
+              <div class="text-white font-mono text-sm">In-Process / AST / Static</div>
+              <span class="text-xs text-emerald-400">0ms External API Lag</span>
+            </div>
+            <div class="p-4 rounded-xl bg-gray-900 border border-gray-800 space-y-1">
+              <span class="text-xs text-gray-400 uppercase font-semibold">Community Installation</span>
+              <div class="text-white font-mono text-sm">>plugin install &lt;repo&gt;</div>
+              <span class="text-xs text-cyan-400">GitHub Repository Cloner</span>
             </div>
           </div>
 
-          <div id="ai-result-card" class="hidden p-5 rounded-xl bg-gray-900/90 border border-gray-800 space-y-2">
-            <div class="flex justify-between items-center text-xs text-gray-400">
-              <span id="ai-res-provider" class="font-bold text-cyan-400"></span>
-              <span id="ai-res-timestamp"></span>
+          <div class="p-4 rounded-xl bg-gray-900 border border-gray-800 space-y-3">
+            <h3 class="text-sm font-bold text-white flex items-center gap-2"><i class="fa-solid fa-code text-indigo-400"></i> Supported Languages (Built-in & Plugins)</h3>
+            <div class="grid grid-cols-4 gap-2 text-xs text-gray-300 font-mono">
+              <div class="p-2 rounded bg-gray-800/80 border border-gray-700/50">TypeScript (.ts, .tsx)</div>
+              <div class="p-2 rounded bg-gray-800/80 border border-gray-700/50">JavaScript (.js, .jsx)</div>
+              <div class="p-2 rounded bg-gray-800/80 border border-gray-700/50">Python (.py)</div>
+              <div class="p-2 rounded bg-gray-800/80 border border-gray-700/50">Rust (.rs)</div>
+              <div class="p-2 rounded bg-gray-800/80 border border-gray-700/50">Go (.go)</div>
+              <div class="p-2 rounded bg-gray-800/80 border border-gray-700/50">Java (.java)</div>
+              <div class="p-2 rounded bg-gray-800/80 border border-gray-700/50">C# (.cs)</div>
+              <div class="p-2 rounded bg-gray-800/80 border border-gray-700/50">GDScript (.gd)</div>
+              <div class="p-2 rounded bg-gray-800/80 border border-gray-700/50">PHP (.php)</div>
+              <div class="p-2 rounded bg-gray-800/80 border border-gray-700/50">SQL (.sql)</div>
+              <div class="p-2 rounded bg-gray-800/80 border border-gray-700/50">HTML/CSS (.html, .css)</div>
+              <div class="p-2 rounded bg-gray-800/80 border border-gray-700/50">Dart / Flutter (.dart)</div>
             </div>
-            <div id="ai-res-content" class="text-sm text-gray-200 whitespace-pre-wrap font-mono bg-black/40 p-4 rounded-lg"></div>
           </div>
         </div>
       </section>
@@ -237,7 +254,7 @@ export function renderDashboardHtml(botPort?: number): string {
         <div class="glass p-6 rounded-2xl border border-gray-800 space-y-5">
           <div>
             <h2 class="text-lg font-bold text-white flex items-center gap-2"><i class="fa-solid fa-cubes-stacked text-blue-400"></i> Visual Project Scaffolder</h2>
-            <p class="text-xs text-gray-400">Select any of the 14 multi-framework starter templates to scaffold projects directly.</p>
+            <p class="text-xs text-gray-400">Select any of the 17 multi-framework starter templates to scaffold projects directly.</p>
           </div>
 
           <div class="grid grid-cols-2 gap-4">
@@ -250,14 +267,20 @@ export function renderDashboardHtml(botPort?: number): string {
               <select id="scaffold-template" class="w-full bg-gray-900 border border-gray-700 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-cyan-500">
                 <option value="web-react">Web • React 19 + Vite (TypeScript)</option>
                 <option value="web-vue">Web • Vue 3 + Vite (TypeScript)</option>
+                <option value="web-app">Web • Vanilla HTML5/CSS/JS + Vite</option>
                 <option value="discord-bot">Discord Bot • discord.js v14 (TypeScript)</option>
                 <option value="desktop-tauri">Desktop • Tauri v2 (Rust + TypeScript)</option>
                 <option value="desktop-electron">Desktop • Electron Context-Isolation (TypeScript)</option>
+                <option value="mobile-flutter">Mobile • Flutter + Riverpod (Dart)</option>
+                <option value="mobile-react-native">Mobile • React Native / Expo Router (TypeScript)</option>
                 <option value="backend-rust">Backend • Rust Axum + Tokio</option>
                 <option value="backend-python">Backend • Python FastAPI + uv</option>
                 <option value="backend-go">Backend • Go 1.22+ ServeMux</option>
+                <option value="backend-java">Backend • Java 21 + Spring Boot 3</option>
                 <option value="game-godot">Game Engine • Godot 4 (GDScript)</option>
                 <option value="game-unity">Game Engine • Unity LTS (C#)</option>
+                <option value="game-rpgm">Game Engine • RPG Maker MZ/MV (JavaScript)</option>
+                <option value="game-renpy">Game Engine • Ren'Py (Python)</option>
               </select>
             </div>
           </div>
@@ -285,7 +308,7 @@ export function renderDashboardHtml(botPort?: number): string {
           <div class="flex justify-between items-center">
             <div>
               <h2 class="text-lg font-bold text-white flex items-center gap-2"><i class="fa-solid fa-users-gear text-emerald-400"></i> Member Authentication Sessions</h2>
-              <p class="text-xs text-gray-400">Per-user credentials stored in the internal SQLite database (from Discord /auth).</p>
+              <p class="text-xs text-gray-400">Discord OAuth2 sessions stored in the internal SQLite database.</p>
             </div>
             <button onclick="fetchStats()" class="px-3 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-xs text-gray-300 transition"><i class="fa-solid fa-rotate-right mr-1"></i> Refresh</button>
           </div>
@@ -296,7 +319,7 @@ export function renderDashboardHtml(botPort?: number): string {
               <span>Status</span>
             </div>
             <div class="py-3 text-xs text-gray-400 text-center">
-              Member sessions are created in real time when users run <code class="text-cyan-400">/auth login</code> in your Discord server.
+              Member sessions are authenticated via Discord OAuth2 when visiting the dashboard.
             </div>
           </div>
         </div>
@@ -314,7 +337,7 @@ export function renderDashboardHtml(botPort?: number): string {
             </div>
             <div class="p-4 rounded-xl bg-gray-900 border border-gray-800 space-y-2">
               <span class="font-bold text-blue-400">NEXTAUTH_INTERNAL_URL</span>
-              <p class="text-xs text-gray-400">Internal URL used by dashboard background threads and server-side connections.</p>
+              <p class="text-xs text-gray-400">Internal loopback URL used by dashboard server-side connections.</p>
               <div class="font-mono text-xs text-gray-300 bg-black/40 p-2 rounded">${config.internalUrl}</div>
             </div>
           </div>
@@ -337,34 +360,6 @@ export function renderDashboardHtml(botPort?: number): string {
       if (btn) {
         btn.classList.add('bg-cyan-600/20', 'text-cyan-300', 'border', 'border-cyan-500/30');
         btn.classList.remove('text-gray-400');
-      }
-    }
-
-    async function submitAiQuery() {
-      const prompt = document.getElementById('ai-prompt-input').value.trim();
-      const provider = document.getElementById('ai-provider-select').value;
-      if (!prompt) return;
-
-      const btn = document.getElementById('ai-submit-btn');
-      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
-      btn.disabled = true;
-
-      try {
-        const res = await fetch('/api/dashboard/ai', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ prompt, provider })
-        });
-        const data = await res.json();
-        document.getElementById('ai-result-card').classList.remove('hidden');
-        document.getElementById('ai-res-provider').textContent = data.provider || 'AI Assistant';
-        document.getElementById('ai-res-timestamp').textContent = new Date().toLocaleTimeString();
-        document.getElementById('ai-res-content').textContent = data.content || JSON.stringify(data, null, 2);
-      } catch (err) {
-        alert('Error: ' + err.message);
-      } finally {
-        btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Send Query';
-        btn.disabled = false;
       }
     }
 
@@ -434,7 +429,6 @@ export function renderDashboardHtml(botPort?: number): string {
         const res = await fetch('/api/dashboard/stats');
         const data = await res.json();
         if (data.database) {
-          document.getElementById('stat-query-count').textContent = data.database.queryCount || 0;
           document.getElementById('stat-session-count').textContent = data.database.sessionCount || 0;
           document.getElementById('stat-scaffold-count').textContent = data.database.scaffoldCount || 0;
         }
@@ -448,23 +442,23 @@ export function renderDashboardHtml(botPort?: number): string {
           }
         }
 
-        // Render Live Query Feed
-        const feedContainer = document.getElementById('live-query-feed');
-        if (feedContainer && data.recentQueries && data.recentQueries.length > 0) {
-          feedContainer.innerHTML = data.recentQueries.map(q => \`
+        // Render Recent Scaffolds Feed
+        const feedContainer = document.getElementById('live-scaffold-feed');
+        if (feedContainer && data.recentScaffolds && data.recentScaffolds.length > 0) {
+          feedContainer.innerHTML = data.recentScaffolds.map(s => \`
             <div class="p-3 rounded-xl bg-gray-900/90 border border-gray-800/80 flex justify-between items-center hover:border-cyan-500/40 transition">
               <div class="space-y-0.5">
                 <div class="flex items-center gap-2">
-                  <span class="text-cyan-400 font-bold">\${q.username || q.userId}</span>
-                  <span class="text-gray-500 text-[10px]">• \${q.provider}</span>
+                  <span class="text-cyan-400 font-bold">\${s.projectName}</span>
+                  <span class="text-gray-500 text-[10px]">• \${s.templateId}</span>
                 </div>
-                <div class="text-gray-300 text-xs truncate max-w-xl">\${q.prompt}</div>
+                <div class="text-gray-400 text-xs">Generated by \${s.userId}</div>
               </div>
-              <span class="text-[10px] text-gray-500 shrink-0">\${q.timestamp}</span>
+              <span class="text-[10px] text-gray-500 shrink-0">\${s.timestamp}</span>
             </div>
           \`).join('');
         } else if (feedContainer) {
-          feedContainer.innerHTML = '<div class="text-gray-500 py-3 text-center">No recent query events logged in SQLite yet.</div>';
+          feedContainer.innerHTML = '<div class="text-gray-500 py-3 text-center">No recent scaffolding operations recorded yet.</div>';
         }
       } catch {}
     }

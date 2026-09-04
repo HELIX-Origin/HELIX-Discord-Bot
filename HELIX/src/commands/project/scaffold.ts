@@ -1,4 +1,4 @@
-import { EmbedBuilder } from 'discord.js';
+import { createEmbed, formatError } from '../../handlers/message-handler.js';
 import type { CommandDefinition } from '../../types/command.js';
 
 export const scaffold: CommandDefinition = {
@@ -10,11 +10,18 @@ export const scaffold: CommandDefinition = {
   async execute({ message, interaction, getOption }) {
     const type = getOption<string>('type');
     const name = getOption<string>('name');
-    if (!type || !name) { const r = '❌ Type and name required.'; if (message) return message.reply(r); return interaction!.reply({ content: r, ephemeral: true }); }
+    if (!type || !name) {
+      const errEmbed = formatError('missing_argument', { arg: 'type, name' });
+      if (message) return message.reply({ embeds: [errEmbed] });
+      return interaction!.reply({ embeds: [errEmbed], ephemeral: true });
+    }
 
-    const embed = new EmbedBuilder().setTitle('🔍 Scaffold Preview').setColor(0x00d2ff)
-      .setDescription(`Preview for **${name}** using \`${type}\`.\nUse \`>create\` or \`/create\` to generate the project.`)
-      .setTimestamp();
+    const previewTree = `${name}/\n├── package.json\n├── src/\n│   └── index.ts\n├── README.md\n└── tsconfig.json`;
+    const embed = createEmbed('project.scaffold.embed', {
+      type,
+      name,
+      tree: previewTree,
+    });
     if (message) await message.reply({ embeds: [embed] }); else await interaction!.reply({ embeds: [embed] });
   },
 };

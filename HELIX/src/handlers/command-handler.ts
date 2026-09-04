@@ -3,7 +3,7 @@ import { CommandDefinition, ExecuteContext } from '../types/command.js';
 import { BotDatabase } from '../db/database.js';
 import { registerHelp, createHelp } from './help-registrar.js';
 import { logs } from './logs-handler.js';
-import { getMessage } from './message-handler.js';
+import { getMessage, formatError } from './message-handler.js';
 import { DEFAULT_PREFIX } from '../config.js';
 
 const commands = new Collection<string, CommandDefinition>();
@@ -91,7 +91,7 @@ export async function handlePrefixMessage(message: Message): Promise<void> {
   if (command.permissions?.length) {
     const missing = command.permissions.filter(p => !message.member?.permissions.has(p));
     if (missing.length) {
-      await message.reply(`❌ Missing permissions: ${missing.join(', ')}`);
+      await message.reply({ embeds: [formatError('permission_denied')] });
       return;
     }
   }
@@ -108,6 +108,6 @@ export async function handlePrefixMessage(message: Message): Promise<void> {
     });
   } catch (err: any) {
     logs.error(`Prefix command "${command.name}" failed: ${err.message}`);
-    await message.reply('❌ An error occurred.').catch(() => {});
+    await message.reply({ embeds: [formatError('generic')] }).catch(() => {});
   }
 }

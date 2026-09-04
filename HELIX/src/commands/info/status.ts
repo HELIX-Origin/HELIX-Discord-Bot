@@ -1,19 +1,26 @@
-import { EmbedBuilder } from 'discord.js';
-import { BotDatabase } from '../../db/database.js';
+﻿import { BotDatabase } from '../../db/database.js';
+import { createEmbed } from '../../handlers/message-handler.js';
 import type { CommandDefinition } from '../../types/command.js';
 
 export const status: CommandDefinition = {
-  name: 'status', description: 'Report system health', category: 'info',
+  name: 'status',
+  description: 'Report HELIX system health and database statistics',
+  category: 'info',
   async execute({ message, interaction }) {
-    const stats = BotDatabase.getInstance().getStats();
-    const embed = new EmbedBuilder().setTitle('💚 HELIX Status').setColor(0x00ff88).addFields(
-      { name: 'Guilds', value: `${(message || interaction!)!.client.guilds.cache.size}`, inline: true },
-      { name: 'Sessions', value: `${stats.sessionCount}`, inline: true },
-      { name: 'Scaffolds', value: `${stats.scaffoldCount}`, inline: true },
-      { name: 'Tickets', value: `${stats.ticketCount}`, inline: true },
-      { name: 'Mod Actions', value: `${stats.moderationCount}`, inline: true },
-      { name: 'Warnings', value: `${stats.warningCount}`, inline: true },
-    ).setTimestamp();
-    if (message) await message.reply({ embeds: [embed] }); else await interaction!.reply({ embeds: [embed] });
+    const db = BotDatabase.getInstance();
+    const stats = db.getStats();
+    const client = (message || interaction!)!.client;
+
+    const embed = createEmbed('info.status.embed', {
+      gateway: client.ws.ping,
+      dbSize: Math.round(stats.sizeBytes / 1024),
+      guildCount: client.guilds.cache.size,
+      ticketCount: stats.ticketCount,
+      scaffoldCount: stats.scaffoldCount,
+      warningCount: stats.warningCount,
+    });
+
+    if (message) await message.reply({ embeds: [embed] });
+    else await interaction!.reply({ embeds: [embed] });
   },
 };

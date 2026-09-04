@@ -1,59 +1,77 @@
-import { EmbedBuilder } from 'discord.js';
+﻿import { GuildMember } from 'discord.js';
 import { BotDatabase } from '../../db/database.js';
+import { createEmbed, formatError, getMessage } from '../../handlers/message-handler.js';
 import type { CommandDefinition } from '../../types/command.js';
 
 export const warn: CommandDefinition = {
-  name: 'warn', description: 'Manage server warnings',
-  category: 'moderation', permissions: ['32' as any],
-  subcommands: [
-    { name: 'user', description: 'Warn a user', options: [
-      { name: 'user', description: 'Target user', type: 'user', required: true },
-      { name: 'reason', description: 'Reason', type: 'string', required: false },
-    ]},
-    { name: 'list', description: 'View your warnings' },
-    { name: 'clear', description: 'Clear your warnings' },
+  name: 'warn',
+  description: 'Issue, view, or clear member warnings',
+  category: 'moderation',
+  permissions: ['1099511627776' as any],
+  options: [
+    { name: 'subcommand', description: 'Action (user, list, clear)', type: 'string', required: true, choices: [{ name: 'user', value: 'user' }, { name: 'list', value: 'list' }, { name: 'clear', value: 'clear' }] },
+    { name: 'user', description: 'Target user', type: 'user', required: true },
+    { name: 'reason', description: 'Reason for warning', type: 'string', required: false },
   ],
-  async execute({ message, interaction, guild, user }) {
+  async execute({ message, interaction, getOption, guild }) {
+    const sub = getOption<string>('subcommand') || 'user';
+    const target = getOption<GuildMember>('user');
+    const reason = getOption<string>('reason') || 'No reason provided';
     const db = BotDatabase.getInstance();
 
-    if (interaction) {
-      const sub = interaction.options.getSubcommand();
-      if (sub === 'user') {
-        const target = interaction.options.getUser('user', true);
-        const reason = interaction.options.getString('reason') || 'No reason provided';
-        db.addWarning({ guildId: guild.id, userId: target.id, moderatorId: user.id, reason });
-        return interaction.reply({ embeds: [new EmbedBuilder().setTitle('⚠️ Warned').setColor(0xffaa00).addFields({ name: 'Target', value: `<@${target.id}>` }, { name: 'Reason', value: reason }).setTimestamp()] });
-      }
-      if (sub === 'list') {
-        const warnings = db.getWarnings(guild.id, user.id);
-        if (!warnings.length) return interaction.reply({ content: '✅ No warnings.', ephemeral: true });
-        return interaction.reply({ embeds: [new EmbedBuilder().setTitle('⚠️ Warnings').setColor(0xffaa00).setDescription(warnings.map((w, i) => `**${i + 1}.** ${w.reason} — <@${w.moderatorId}>`).join('\n')).setTimestamp()], ephemeral: true });
-      }
-      if (sub === 'clear') {
-        db.clearWarnings(guild.id, user.id);
-        return interaction.reply({ content: '✅ Warnings cleared.', ephemeral: true });
-      }
-      return;
+    if (!target) {
+      const err = formatError(getMessage('errors.invalid_user', { input: 'user' }));
+      if (message) return message.reply({ embeds: [err] });
+      return interaction!.reply({ embeds: [err], ephemeral: true });
     }
 
-    const args = message!.content.split(/\s+/);
-    const sub = args[1]?.toLowerCase();
-    if (sub === 'list') {
-      const warnings = db.getWarnings(guild.id, user.id);
-      if (!warnings.length) return message!.reply('✅ No warnings.');
-      return message!.reply({ embeds: [new EmbedBuilder().setTitle('⚠️ Warnings').setColor(0xffaa00).setDescription(warnings.map((w, i) => `**${i + 1}.** ${w.reason} — <@${w.moderatorId}>`).join('\n')).setTimestamp()] });
-    }
-    if (sub === 'clear') {
-      db.clearWarnings(guild.id, user.id);
-      return message!.reply('✅ Warnings cleared.');
-    }
     if (sub === 'user') {
-      const target = message!.mentions?.users?.first();
-      if (!target) return message!.reply('❌ Usage: `>warn user @user [reason]`');
-      const reason = args.slice(3).join(' ') || 'No reason provided';
-      db.addWarning({ guildId: guild.id, userId: target.id, moderatorId: user.id, reason });
-      return message!.reply({ embeds: [new EmbedBuilder().setTitle('⚠️ Warned').setColor(0xffaa00).addFields({ name: 'Target', value: `<@${target.id}>` }, { name: 'Reason', value: reason }).setTimestamp()] });
+      db.addWarning({
+        guildId: guild.id,
+        userId: target.id,
+        moderatorId: message?.author.id || interaction!.user.id,
+        reason,
+      });
+
+      const embed = createEmbed('moderation.warn.warn_embed', {
+        target: target.user.tag,
+        moderatorId: message?.author.id || interaction!.user.id,
+        reason,
+      });
+
+      if (message) await message.reply({ embeds: [embed] });
+      else await interaction!.reply({ embeds: [embed] });
+    } else if (sub === 'list') {
+      const warnings = db.getWarnings(guild.id, target.id);
+      if (!warnings.length) {
+        const noWarnEmbed = createEmbed('moderation.warn.list_embed', {
+          target: target.user.tag,
+          warningsList: getMessage('moderation.warn.no_warnings', { target: target.user.tag }),
+        });
+        if (message) return message.reply({ embeds: [noWarnEmbed] });
+        return interaction!.reply({ embeds: [noWarnEmbed] });
+      }
+
+      const formatted = warnings
+        .map((w, i) => `**${i + 1}.** \`${w.timestamp || 'N/A'}\` — ${w.reason} *(by <@${w.moderatorId}>)*`)
+        .join('\n');
+
+      const embed = createEmbed('moderation.warn.list_embed', {
+        target: target.user.tag,
+        warningsList: formatted,
+      });
+
+      if (message) await message.reply({ embeds: [embed] });
+      else await interaction!.reply({ embeds: [embed] });
+    } else if (sub === 'clear') {
+      const count = db.clearWarnings(guild.id, target.id);
+      const embed = createEmbed('moderation.warn.clear_embed', {
+        target: target.user.tag,
+        count,
+      });
+
+      if (message) await message.reply({ embeds: [embed] });
+      else await interaction!.reply({ embeds: [embed] });
     }
-    return message!.reply('❌ Usage: `>warn <user|list|clear>`');
   },
 };

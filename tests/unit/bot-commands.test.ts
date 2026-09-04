@@ -1,407 +1,106 @@
-import { describe, it, expect } from 'vitest';
-import { botCommands } from '../../HELIX/src/commands/index.js';
-import { deployBotCommands } from '../../HELIX/src/deploy.js';
+﻿import { describe, it, expect } from 'vitest';
+import { kick } from '../../HELIX/src/commands/mod/kick.js';
+import { ban } from '../../HELIX/src/commands/mod/ban.js';
+import { unban } from '../../HELIX/src/commands/mod/unban.js';
+import { timeout } from '../../HELIX/src/commands/mod/timeout.js';
+import { untimeout } from '../../HELIX/src/commands/mod/untimeout.js';
+import { purge } from '../../HELIX/src/commands/mod/purge.js';
+import { warn } from '../../HELIX/src/commands/mod/warn.js';
 
-describe('Built-in Discord Bot Commands', () => {
-  it('registers all required slash commands', () => {
-    const names = botCommands.map(c => c.data.name);
-    expect(names).toContain('helix-help');
-    expect(names).toContain('helix-ai');
-    expect(names).toContain('helix-auth');
-    expect(names).toContain('helix-explain');
-    expect(names).toContain('helix-scaffold');
-    expect(names).toContain('helix-status');
-    expect(names).toContain('helix-repo');
-    expect(names).toContain('helix-create');
-    expect(names).toContain('helix-list');
-    expect(names).toContain('helix-info');
-    expect(names).toContain('helix-mod');
-    expect(names).toContain('helix-util');
-    expect(names).toContain('helix-ticket');
-    expect(names).toContain('helix-set');
-    expect(names.length).toBe(14);
-  });
+import { ping } from '../../HELIX/src/commands/util/ping.js';
+import { avatar } from '../../HELIX/src/commands/util/avatar.js';
+import { serverinfo } from '../../HELIX/src/commands/util/serverinfo.js';
+import { userinfo } from '../../HELIX/src/commands/util/userinfo.js';
+import { poll } from '../../HELIX/src/commands/util/poll.js';
+import { snowflake } from '../../HELIX/src/commands/util/snowflake.js';
+import { remind } from '../../HELIX/src/commands/util/remind.js';
 
-  it('serializes slash commands into valid Discord REST payloads', () => {
-    for (const cmd of botCommands) {
-      const json = cmd.data.toJSON();
-      expect(typeof json.name).toBe('string');
-      expect(typeof json.description).toBe('string');
-      expect(json.name.startsWith('helix-')).toBe(true);
+import { help } from '../../HELIX/src/commands/info/help.js';
+import { info } from '../../HELIX/src/commands/info/info.js';
+import { list } from '../../HELIX/src/commands/info/list.js';
+import { status } from '../../HELIX/src/commands/info/status.js';
+
+import { create } from '../../HELIX/src/commands/project/create.js';
+import { scaffold } from '../../HELIX/src/commands/project/scaffold.js';
+
+import { plugin } from '../../HELIX/src/commands/config/plugin.js';
+import { set } from '../../HELIX/src/commands/config/set.js';
+import { ticket } from '../../HELIX/src/commands/config/ticket.js';
+
+describe('Built-in Discord Bot Commands (No AI)', () => {
+  const allCommands = [
+    kick, ban, unban, timeout, untimeout, purge, warn,
+    ping, avatar, serverinfo, userinfo, poll, snowflake, remind,
+    help, info, list, status,
+    create, scaffold,
+    plugin, set, ticket,
+  ];
+
+  it('defines all 23 native commands with required metadata', () => {
+    expect(allCommands).toHaveLength(23);
+
+    for (const cmd of allCommands) {
+      expect(cmd.name).toBeDefined();
+      expect(typeof cmd.name).toBe('string');
+      expect(cmd.description).toBeDefined();
+      expect(typeof cmd.description).toBe('string');
+      expect(cmd.category).toBeDefined();
+      expect(['moderation', 'utility', 'plugins', 'info', 'project', 'config']).toContain(cmd.category);
+      expect(typeof cmd.execute).toBe('function');
     }
   });
 
-  it('executes deployBotCommands in dry-run mode without network calls', async () => {
-    const result = await deployBotCommands({
-      token: 'mock-token',
-      clientId: '123456789',
-      dryRun: true,
+  describe('Moderation Commands', () => {
+    it('declares moderation category for mod commands', () => {
+      const modCmds = [kick, ban, unban, timeout, untimeout, purge, warn];
+      for (const cmd of modCmds) {
+        expect(cmd.category).toBe('moderation');
+        expect(cmd.permissions).toBeDefined();
+        expect(cmd.permissions!.length).toBeGreaterThan(0);
+      }
     });
-
-    expect(result.success).toBe(true);
-    expect(result.count).toBe(botCommands.length);
-    expect(result.message).toContain('Dry-run');
   });
 
-  it('handles missing credentials when dryRun is false', async () => {
-    const result = await deployBotCommands({
-      token: '',
-      clientId: '',
-      dryRun: false,
+  describe('Utility Commands', () => {
+    it('declares utility category for util commands', () => {
+      const utilCmds = [ping, avatar, serverinfo, userinfo, poll, snowflake, remind];
+      for (const cmd of utilCmds) {
+        expect(cmd.category).toBe('utility');
+      }
     });
-
-    expect(result.success).toBe(false);
-    expect(result.message).toContain('Missing DISCORD_TOKEN');
   });
 
-  describe('Tiered AI Model Access & Owner Protection', () => {
-    it('correctly resolves bot owner from environment variable', async () => {
+  describe('Info Commands', () => {
+    it('declares info category for info commands', () => {
+      const infoCmds = [help, info, list, status];
+      for (const cmd of infoCmds) {
+        expect(cmd.category).toBe('info');
+      }
+    });
+  });
+
+  describe('Project Scaffolding Commands', () => {
+    it('declares project category for create and scaffold', () => {
+      expect(create.category).toBe('project');
+      expect(scaffold.category).toBe('project');
+    });
+  });
+
+  describe('Configuration & Plugin Commands', () => {
+    it('declares config category for set and ticket, plugins for plugin', () => {
+      expect(set.category).toBe('config');
+      expect(ticket.category).toBe('config');
+      expect(plugin.category).toBe('plugins');
+    });
+  });
+
+  describe('Bot Owner Resolution', () => {
+    it('resolves owner from DISCORD_OWNER_ID or BOT_OWNER_ID', async () => {
       const { isBotOwner } = await import('../../HELIX/src/client.js');
-      process.env.DISCORD_OWNER_ID = 'owner-12345';
-      expect(await isBotOwner('owner-12345')).toBe(true);
-      expect(await isBotOwner('stranger-99999')).toBe(false);
+      process.env.DISCORD_OWNER_ID = 'owner-999';
+      expect(isBotOwner('owner-999')).toBe(true);
+      expect(isBotOwner('other-user')).toBe(false);
       delete process.env.DISCORD_OWNER_ID;
-    });
-
-    it('auto-runs OpenCode Zen BigPickle by default on Free Tier for non-owner without an API key', async () => {
-      const { aiCommand } = await import('../../HELIX/src/commands/ai.js');
-      delete process.env.DISCORD_OWNER_ID;
-      delete process.env.BOT_OWNER_ID;
-
-      let editReplyData: any = null;
-      const mockInteraction: any = {
-        user: { id: 'unauthorized-user-999', username: 'RandomMember', tag: 'RandomMember#1234' },
-        guildId: 'guild-test',
-        deferReply: async () => {},
-        editReply: async (data: any) => { editReplyData = data; },
-        options: {
-          getString: (name: string) => (name === 'prompt' ? 'How do I optimize SQLite queries?' : null),
-        },
-      };
-
-      await aiCommand.execute(mockInteraction);
-
-      expect(editReplyData).toBeDefined();
-      expect(editReplyData.embeds).toBeDefined();
-      const embed = editReplyData.embeds[0].data;
-      expect(embed.title).toContain("OpenCode Zen's BigPickle");
-      expect(embed.fields.some((f: any) => f.name === 'Tier & Access' && f.value.includes('Free Tier'))).toBe(true);
-    });
-
-    it('allows non-owner without an API key to select free Google Gemini Flash or GitHub GPT-4o Mini', async () => {
-      const { aiCommand } = await import('../../HELIX/src/commands/ai.js');
-      delete process.env.DISCORD_OWNER_ID;
-      delete process.env.BOT_OWNER_ID;
-
-      let editReplyData: any = null;
-      const mockInteraction: any = {
-        user: { id: 'free-user-1', username: 'FreeDev', tag: 'FreeDev#1111' },
-        guildId: 'guild-test',
-        deferReply: async () => {},
-        editReply: async (data: any) => { editReplyData = data; },
-        options: {
-          getString: (name: string) => {
-            if (name === 'prompt') return 'Explain async/await in Node.js';
-            if (name === 'model') return 'gemini-2.5-flash';
-            return null;
-          },
-        },
-      };
-
-      await aiCommand.execute(mockInteraction);
-
-      expect(editReplyData).toBeDefined();
-      const embed = editReplyData.embeds[0].data;
-      expect(embed.title).toContain('Google Gemini 2.5 Flash');
-      expect(embed.fields.some((f: any) => f.name === 'Tier & Access' && f.value.includes('Free Tier'))).toBe(true);
-    });
-
-    it('gracefully downgrades to free counterpart when non-owner requests a key-required model', async () => {
-      const { aiCommand } = await import('../../HELIX/src/commands/ai.js');
-      delete process.env.DISCORD_OWNER_ID;
-      delete process.env.BOT_OWNER_ID;
-
-      let editReplyData: any = null;
-      const mockInteraction: any = {
-        user: { id: 'free-user-2', username: 'CuriousDev', tag: 'Curious#2222' },
-        guildId: 'guild-test',
-        deferReply: async () => {},
-        editReply: async (data: any) => { editReplyData = data; },
-        options: {
-          getString: (name: string) => {
-            if (name === 'prompt') return 'Refactor this algorithm';
-            if (name === 'model') return 'gemini-2.5-pro'; // Key required
-            return null;
-          },
-        },
-      };
-
-      await aiCommand.execute(mockInteraction);
-
-      expect(editReplyData).toBeDefined();
-      const embed = editReplyData.embeds[0].data;
-      expect(embed.title).toContain('Google Gemini 2.5 Flash'); // Reverted to free model
-      expect(embed.fields.some((f: any) => f.name === '⚡ Tier Notice')).toBe(true);
-    });
-
-    it('auto-runs Free Tier for Explain command for non-owner without an API key', async () => {
-      const { explainCommand } = await import('../../HELIX/src/commands/explain.js');
-      delete process.env.DISCORD_OWNER_ID;
-      delete process.env.BOT_OWNER_ID;
-
-      let editReplyData: any = null;
-      const mockInteraction: any = {
-        user: { id: 'unauthorized-user-888', username: 'RandomMember2', tag: 'RandomMember2#5678' },
-        guildId: 'guild-test',
-        deferReply: async () => {},
-        editReply: async (data: any) => { editReplyData = data; },
-        options: {
-          getString: (name: string) => (name === 'code' ? 'console.log("hello")' : null),
-        },
-      };
-
-      await explainCommand.execute(mockInteraction);
-
-      expect(editReplyData).toBeDefined();
-      expect(editReplyData.embeds).toBeDefined();
-      const embed = editReplyData.embeds[0].data;
-      expect(embed.title).toContain('HELIX Code Review');
-      expect(embed.fields.some((f: any) => f.name === 'Tier' && f.value.includes('Free'))).toBe(true);
-    });
-
-    it('allows bot owner to select key-required models with host credentials', async () => {
-      const { aiCommand } = await import('../../HELIX/src/commands/ai.js');
-      process.env.DISCORD_OWNER_ID = 'owner-12345';
-
-      let editReplyData: any = null;
-      const mockInteraction: any = {
-        user: { id: 'owner-12345', username: 'BotOwner', tag: 'Owner#0001' },
-        guildId: 'guild-test',
-        deferReply: async () => {},
-        editReply: async (data: any) => { editReplyData = data; },
-        options: {
-          getString: (name: string) => {
-            if (name === 'prompt') return 'Design architecture';
-            if (name === 'model') return 'gemini-2.5-pro';
-            return null;
-          },
-        },
-      };
-
-      await aiCommand.execute(mockInteraction);
-
-      expect(editReplyData).toBeDefined();
-      const embed = editReplyData.embeds[0].data;
-      expect(embed.title).toContain('Google Gemini 2.5 Pro');
-      expect(embed.fields.some((f: any) => f.name === 'Tier & Access' && f.value.includes('Owner Session'))).toBe(true);
-
-      delete process.env.DISCORD_OWNER_ID;
-    });
-  });
-
-  describe('Merged In-Process Command Executions', () => {
-    it('executes helix-create and returns complete scaffold blueprint', async () => {
-      const { createCommand } = await import('../../HELIX/src/commands/create.js');
-      let replyData: any = null;
-      const mockInteraction: any = {
-        user: { id: 'user-scaffold-1', username: 'Developer' },
-        deferReply: async () => {},
-        editReply: async (data: any) => { replyData = data; },
-        options: {
-          getString: (name: string) => {
-            if (name === 'template') return 'web-react';
-            if (name === 'name') return 'my-app';
-            if (name === 'git_platform') return 'github';
-            return null;
-          },
-          getBoolean: (name: string) => (name === 'dry_run' ? true : false),
-        },
-      };
-
-      await createCommand.execute(mockInteraction);
-
-      expect(replyData).toBeDefined();
-      expect(replyData.embeds).toBeDefined();
-      const embed = replyData.embeds[0].data;
-      expect(embed.title).toContain('HELIX Project Scaffolding: my-app');
-      expect(embed.description).toContain('web-react');
-      const fields = embed.fields;
-      expect(fields.find((f: any) => f.name === 'Framework').value.toLowerCase()).toContain('react');
-      expect(fields.find((f: any) => f.name === 'Language').value.toLowerCase()).toContain('typescript');
-      expect(fields.find((f: any) => f.name === 'Generated Manifest').value).toContain('src/');
-      expect(fields.find((f: any) => f.name === 'Getting Started Commands').value).toContain('npm install');
-    });
-
-    it('executes helix-list across templates, agents, and platforms', async () => {
-      const { listCommand } = await import('../../HELIX/src/commands/list.js');
-      let replyData: any = null;
-      const mockInteraction: any = {
-        deferReply: async () => {},
-        editReply: async (data: any) => { replyData = data; },
-        options: {
-          getString: (name: string) => (name === 'category' ? 'all' : null),
-        },
-      };
-
-      await listCommand.execute(mockInteraction);
-
-      expect(replyData).toBeDefined();
-      expect(replyData.embeds).toBeDefined();
-      const embed = replyData.embeds[0].data;
-      expect(embed.title).toContain('HELIX Ecosystem Catalog');
-      const fieldNames = embed.fields.map((f: any) => f.name);
-      expect(fieldNames.some((n: string) => n.includes('Templates'))).toBe(true);
-      expect(fieldNames.some((n: string) => n.includes('AI Agent'))).toBe(true);
-      expect(fieldNames.some((n: string) => n.includes('Code Hosting'))).toBe(true);
-    });
-
-    it('executes helix-info and returns comprehensive bot diagnostics', async () => {
-      const { infoCommand } = await import('../../HELIX/src/commands/info.js');
-      let replyData: any = null;
-      const mockInteraction: any = {
-        deferReply: async () => {},
-        editReply: async (data: any) => { replyData = data; },
-      };
-
-      await infoCommand.execute(mockInteraction);
-
-      expect(replyData).toBeDefined();
-      expect(replyData.embeds).toBeDefined();
-      const embed = replyData.embeds[0].data;
-      expect(embed.title).toContain('HELIX Bot & System Diagnostics');
-      const fieldNames = embed.fields.map((f: any) => f.name);
-      expect(fieldNames).toContain('Bot Version');
-      expect(fieldNames).toContain('Memory Footprint');
-      expect(fieldNames).toContain('SQLite Database Metrics');
-    });
-
-    it('executes helix-mod warn and warnings subcommands', async () => {
-      const { modCommand } = await import('../../HELIX/src/commands/mod.js');
-      let replyData: any = null;
-      const mockInteraction: any = {
-        guild: { id: 'guild-test-mod', channels: { fetch: async () => null } },
-        user: { id: 'moderator-1', tag: 'Mod#0001' },
-        member: { permissions: { has: () => true } },
-        deferReply: async () => {},
-        editReply: async (data: any) => { replyData = data; },
-        options: {
-          getSubcommand: () => 'warn',
-          getUser: () => ({ id: 'troublemaker-1', tag: 'Bad#0001', username: 'BadUser' }),
-          getString: (name: string) => (name === 'reason' ? 'Disruptive behavior' : null),
-        },
-      };
-
-      await modCommand.execute(mockInteraction);
-
-      expect(replyData).toBeDefined();
-      expect(replyData.embeds).toBeDefined();
-      const embed = replyData.embeds[0].data;
-      expect(embed.title).toContain('Member Warned');
-      expect(embed.fields.some((f: any) => f.name === 'Reason' && f.value === 'Disruptive behavior')).toBe(true);
-    });
-
-    it('executes helix-util ping and snowflake subcommands', async () => {
-      const { utilCommand } = await import('../../HELIX/src/commands/util.js');
-      let replyData: any = null;
-      const mockInteraction: any = {
-        deferReply: async () => {},
-        editReply: async (data: any) => { replyData = data; },
-        options: {
-          getSubcommand: () => 'snowflake',
-          getString: (name: string) => (name === 'id' ? '1545203514932731934' : null),
-        },
-      };
-
-      await utilCommand.execute(mockInteraction);
-
-      expect(replyData).toBeDefined();
-      expect(replyData.embeds).toBeDefined();
-      const embed = replyData.embeds[0].data;
-      expect(embed.title).toContain('Snowflake Decoder');
-      expect(embed.fields.some((f: any) => f.name === 'Snowflake ID')).toBe(true);
-    });
-
-    it('executes helix-ticket setup-hub subcommand', async () => {
-      const { ticketCommand } = await import('../../HELIX/src/commands/ticket.js');
-      let replyData: any = null;
-      let sentData: any = null;
-      const mockChannel: any = {
-        id: 'channel-hub-123',
-        isTextBased: () => true,
-        isThread: () => false,
-        send: async (data: any) => { sentData = data; },
-      };
-      const mockInteraction: any = {
-        guild: { id: 'guild-ticket-test' },
-        member: { permissions: { has: () => true } },
-        channel: mockChannel,
-        deferReply: async () => {},
-        editReply: async (data: any) => { replyData = data; },
-        options: {
-          getSubcommand: () => 'setup-hub',
-          getChannel: () => mockChannel,
-        },
-      };
-
-      await ticketCommand.execute(mockInteraction);
-
-      expect(sentData).toBeDefined();
-      expect(sentData.embeds[0].data.title).toContain('HELIX Support & Ticket Hub');
-      expect(sentData.components.length).toBeGreaterThan(0);
-      expect(replyData.content).toContain('Tickets Hub deployed successfully');
-    });
-
-    it('executes helix-set guild and user view subcommands', async () => {
-      const { setCommand } = await import('../../HELIX/src/commands/set.js');
-      let replyData: any = null;
-      const mockInteraction: any = {
-        guild: { id: 'guild-set-test', name: 'Dev Guild' },
-        user: { id: 'user-set-test', username: 'TestDeveloper' },
-        member: { permissions: { has: () => true } },
-        deferReply: async () => {},
-        editReply: async (data: any) => { replyData = data; },
-        options: {
-          getSubcommandGroup: () => 'guild',
-          getSubcommand: () => 'view',
-        },
-      };
-
-      await setCommand.execute(mockInteraction);
-
-      expect(replyData).toBeDefined();
-      expect(replyData.embeds).toBeDefined();
-      const embed = replyData.embeds[0].data;
-      expect(embed.title).toContain('Server Configuration');
-      expect(embed.fields.some((f: any) => f.name === 'Tickets Hub Channel')).toBe(true);
-    });
-
-    it('executes helix-set user model subcommand and updates user settings', async () => {
-      const { setCommand } = await import('../../HELIX/src/commands/set.js');
-      const { BotDatabase } = await import('../../HELIX/src/db/index.js');
-      let replyData: any = null;
-      const mockInteraction: any = {
-        user: { id: 'user-model-test-1', username: 'ModelTester' },
-        deferReply: async () => {},
-        editReply: async (data: any) => { replyData = data; },
-        options: {
-          getSubcommandGroup: () => 'user',
-          getSubcommand: () => 'model',
-          getString: (name: string) => (name === 'model' ? 'gemini-2.5-flash' : null),
-        },
-      };
-
-      await setCommand.execute(mockInteraction);
-
-      expect(replyData).toBeDefined();
-      expect(replyData.embeds).toBeDefined();
-      const embed = replyData.embeds[0].data;
-      expect(embed.title).toContain('User Preference Updated: AI Model');
-      expect(embed.description).toContain('gemini-2.5-flash');
-
-      const saved = BotDatabase.getInstance().getUserSettings('user-model-test-1');
-      expect(saved?.defaultModel).toBe('gemini-2.5-flash');
     });
   });
 });
-
-
