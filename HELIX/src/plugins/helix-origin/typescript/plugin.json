@@ -1,0 +1,13 @@
+﻿{
+  "id": "typescript",
+  "name": "TypeScript",
+  "version": "1.0.0",
+  "description": "TypeScript static analysis, linting, pattern detection, and official documentation cross-references",
+  "author": "HELIX-Origin",
+  "fileExtensions": [".ts", ".tsx"],
+  "docUrl": "https://www.typescriptlang.org/docs/",
+  "entry": "index.ts",
+  "capabilities": ["lint", "explain", "docs", "fixes", "patterns"],
+  "dependencies": [],
+  "repository": "https://github.com/HELIX-Origin/HELIX"
+}

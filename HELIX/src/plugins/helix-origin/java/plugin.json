@@ -1,0 +1,13 @@
+﻿{
+  "id": "java",
+  "name": "Java",
+  "version": "1.0.0",
+  "description": "Java language linting and docs.oracle.com documentation",
+  "author": "HELIX-Origin",
+  "fileExtensions": [".java"],
+  "docUrl": "https://docs.oracle.com/en/java/",
+  "entry": "index.ts",
+  "capabilities": ["lint", "explain", "docs", "fixes", "patterns"],
+  "dependencies": [],
+  "repository": "https://github.com/HELIX-Origin/HELIX"
+}

@@ -1,0 +1,13 @@
+﻿{
+  "id": "html-css",
+  "name": "HTML & CSS",
+  "version": "1.0.0",
+  "description": "HTML5 semantic markup and CSS3 styling validation with MDN Web Docs",
+  "author": "HELIX-Origin",
+  "fileExtensions": [".html", ".htm", ".css"],
+  "docUrl": "https://developer.mozilla.org/en-US/docs/Web/HTML",
+  "entry": "index.ts",
+  "capabilities": ["lint", "explain", "docs", "fixes", "patterns"],
+  "dependencies": [],
+  "repository": "https://github.com/HELIX-Origin/HELIX"
+}

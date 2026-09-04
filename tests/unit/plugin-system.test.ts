@@ -1,4 +1,4 @@
-﻿import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { validateManifest } from '../../HELIX/src/plugins/manifest.js';
 import { validateRepoConfig } from '../../HELIX/src/plugins/repo-config.js';
 import {
@@ -186,4 +186,51 @@ describe('Language Plugin System', () => {
       expect(getPluginByExtension('.testlang')).toBeNull();
     });
   });
+
+  describe('Built-in Language Plugins', () => {
+    it('executes typescript plugin linting and explanation', async () => {
+      const { typescriptPlugin } = await import('../../HELIX/src/plugins/helix-origin/typescript/index.js');
+      expect(typescriptPlugin.id).toBe('typescript');
+
+      const lintResult = await typescriptPlugin.lint('var x = 10;\nlet y: any = "test";\nconsole.log(x);');
+      expect(lintResult.results.length).toBeGreaterThan(0);
+      expect(lintResult.summary.warnings).toBeGreaterThan(0);
+
+      const explainResult = await typescriptPlugin.explain('interface User { name: string; }\nconst u: User = { name: "test" };');
+      expect(explainResult.explanations.length).toBeGreaterThan(0);
+
+      const docs = await typescriptPlugin.getDocumentation('generics');
+      expect(docs.length).toBeGreaterThan(0);
+      expect(docs[0].title).toContain('Generics');
+    });
+
+    it('executes python plugin linting and explanation', async () => {
+      const { pythonPlugin } = await import('../../HELIX/src/plugins/helix-origin/python/index.js');
+      expect(pythonPlugin.id).toBe('python');
+
+      const lintResult = await pythonPlugin.lint('import os\nfrom math import *\ntry:\n    pass\nexcept:\n    pass');
+      expect(lintResult.results.length).toBeGreaterThan(0);
+
+      const explainResult = await pythonPlugin.explain('def greet(name: str) -> str:\n    return f"Hello, {name}"');
+      expect(explainResult.explanations.length).toBeGreaterThan(0);
+
+      const docs = await pythonPlugin.getDocumentation('async');
+      expect(docs.length).toBeGreaterThan(0);
+    });
+
+    it('executes rust plugin linting and explanation', async () => {
+      const { rustPlugin } = await import('../../HELIX/src/plugins/helix-origin/rust/index.js');
+      expect(rustPlugin.id).toBe('rust');
+
+      const lintResult = await rustPlugin.lint('fn main() {\n    let mut x = 5;\n    let y = x.unwrap();\n}');
+      expect(lintResult.results.length).toBeGreaterThan(0);
+
+      const explainResult = await rustPlugin.explain('fn main() {\n    println!("Hello, world!");\n}');
+      expect(explainResult.explanations.length).toBeGreaterThan(0);
+
+      const docs = await rustPlugin.getDocumentation('ownership');
+      expect(docs.length).toBeGreaterThan(0);
+    });
+  });
 });
+

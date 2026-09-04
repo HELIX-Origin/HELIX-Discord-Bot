@@ -1,0 +1,13 @@
+﻿{
+  "id": "php",
+  "name": "PHP",
+  "version": "1.0.0",
+  "description": "PHP static analysis and php.net documentation lookup",
+  "author": "HELIX-Origin",
+  "fileExtensions": [".php"],
+  "docUrl": "https://www.php.net/docs.php",
+  "entry": "index.ts",
+  "capabilities": ["lint", "explain", "docs", "fixes", "patterns"],
+  "dependencies": [],
+  "repository": "https://github.com/HELIX-Origin/HELIX"
+}

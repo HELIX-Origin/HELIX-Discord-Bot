@@ -1,0 +1,13 @@
+﻿{
+  "id": "csharp",
+  "name": "C# (.NET)",
+  "version": "1.0.0",
+  "description": "C# and .NET static analysis and learn.microsoft.com cross-references",
+  "author": "HELIX-Origin",
+  "fileExtensions": [".cs"],
+  "docUrl": "https://learn.microsoft.com/en-us/dotnet/csharp/",
+  "entry": "index.ts",
+  "capabilities": ["lint", "explain", "docs", "fixes", "patterns"],
+  "dependencies": [],
+  "repository": "https://github.com/HELIX-Origin/HELIX"
+}

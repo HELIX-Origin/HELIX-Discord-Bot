@@ -1,0 +1,13 @@
+﻿{
+  "id": "javascript",
+  "name": "JavaScript (ECMAScript)",
+  "version": "1.0.0",
+  "description": "JavaScript standard linting, pattern analysis, and MDN Web Docs cross-references",
+  "author": "HELIX-Origin",
+  "fileExtensions": [".js", ".mjs", ".cjs", ".jsx"],
+  "docUrl": "https://developer.mozilla.org/en-US/docs/Web/JavaScript",
+  "entry": "index.ts",
+  "capabilities": ["lint", "explain", "docs", "fixes", "patterns"],
+  "dependencies": [],
+  "repository": "https://github.com/HELIX-Origin/HELIX"
+}

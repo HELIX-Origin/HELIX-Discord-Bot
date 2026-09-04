@@ -1,4 +1,4 @@
-﻿# Bot Reference
+# Bot Reference
 
 ## Commands
 
@@ -30,7 +30,7 @@ Default prefix: `>` — configurable per guild. All commands are available as bo
 | `>snowflake <id>` | Decode a Discord snowflake |
 | `>remind <time> <message>` | Set a timed reminder |
 
-### Info
+### Info & Code Intelligence
 
 | Command | Description |
 |---------|-------------|
@@ -38,6 +38,9 @@ Default prefix: `>` — configurable per guild. All commands are available as bo
 | `>info` | Bot diagnostics and version |
 | `>status` | System health (gateway, DB, uptime) |
 | `>list` | Available scaffold template IDs |
+| `>lint <language> <code>` | Static code analysis and linting (100% local, zero AI) |
+| `>explain <language> <code>` | Explain code structure and purpose via static analysis & docs (zero AI) |
+| `>docs [language] <topic>` | Look up official language documentation (zero AI) |
 
 ### Project Scaffolding
 

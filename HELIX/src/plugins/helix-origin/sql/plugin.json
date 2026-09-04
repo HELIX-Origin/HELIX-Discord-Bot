@@ -1,0 +1,13 @@
+﻿{
+  "id": "sql",
+  "name": "SQL",
+  "version": "1.0.0",
+  "description": "SQL query syntax and ANSI standards documentation",
+  "author": "HELIX-Origin",
+  "fileExtensions": [".sql"],
+  "docUrl": "https://www.sqlite.org/lang.html",
+  "entry": "index.ts",
+  "capabilities": ["lint", "explain", "docs", "fixes", "patterns"],
+  "dependencies": [],
+  "repository": "https://github.com/HELIX-Origin/HELIX"
+}

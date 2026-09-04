@@ -1,4 +1,4 @@
-﻿import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { kick } from '../../HELIX/src/commands/mod/kick.js';
 import { ban } from '../../HELIX/src/commands/mod/ban.js';
 import { unban } from '../../HELIX/src/commands/mod/unban.js';
@@ -19,6 +19,9 @@ import { help } from '../../HELIX/src/commands/info/help.js';
 import { info } from '../../HELIX/src/commands/info/info.js';
 import { list } from '../../HELIX/src/commands/info/list.js';
 import { status } from '../../HELIX/src/commands/info/status.js';
+import { lint } from '../../HELIX/src/commands/info/lint.js';
+import { explain } from '../../HELIX/src/commands/info/explain.js';
+import { docs } from '../../HELIX/src/commands/info/docs.js';
 
 import { create } from '../../HELIX/src/commands/project/create.js';
 import { scaffold } from '../../HELIX/src/commands/project/scaffold.js';
@@ -31,13 +34,13 @@ describe('Built-in Discord Bot Commands (No AI)', () => {
   const allCommands = [
     kick, ban, unban, timeout, untimeout, purge, warn,
     ping, avatar, serverinfo, userinfo, poll, snowflake, remind,
-    help, info, list, status,
+    help, info, list, status, lint, explain, docs,
     create, scaffold,
     plugin, set, ticket,
   ];
 
-  it('defines all 23 native commands with required metadata', () => {
-    expect(allCommands).toHaveLength(23);
+  it('defines all 26 native commands with required metadata', () => {
+    expect(allCommands).toHaveLength(26);
 
     for (const cmd of allCommands) {
       expect(cmd.name).toBeDefined();

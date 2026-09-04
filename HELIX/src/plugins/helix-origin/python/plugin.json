@@ -1,0 +1,13 @@
+﻿{
+  "id": "python",
+  "name": "Python",
+  "version": "1.0.0",
+  "description": "Python static pattern analysis, PEP8 standards, and official docs.python.org cross-references",
+  "author": "HELIX-Origin",
+  "fileExtensions": [".py"],
+  "docUrl": "https://docs.python.org/3/",
+  "entry": "index.ts",
+  "capabilities": ["lint", "explain", "docs", "fixes", "patterns"],
+  "dependencies": [],
+  "repository": "https://github.com/HELIX-Origin/HELIX"
+}

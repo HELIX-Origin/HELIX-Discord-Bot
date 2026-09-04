@@ -1,0 +1,13 @@
+﻿{
+  "id": "go",
+  "name": "Go",
+  "version": "1.0.0",
+  "description": "Go vet analysis, goroutine safety, and official go.dev cross-references",
+  "author": "HELIX-Origin",
+  "fileExtensions": [".go"],
+  "docUrl": "https://go.dev/doc/",
+  "entry": "index.ts",
+  "capabilities": ["lint", "explain", "docs", "fixes", "patterns"],
+  "dependencies": [],
+  "repository": "https://github.com/HELIX-Origin/HELIX"
+}

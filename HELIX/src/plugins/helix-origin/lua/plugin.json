@@ -1,0 +1,13 @@
+﻿{
+  "id": "lua",
+  "name": "Lua",
+  "version": "1.0.0",
+  "description": "Lua 5.4 scripting and official lua.org documentation lookup",
+  "author": "HELIX-Origin",
+  "fileExtensions": [".lua"],
+  "docUrl": "https://www.lua.org/manual/5.4/",
+  "entry": "index.ts",
+  "capabilities": ["lint", "explain", "docs", "fixes", "patterns"],
+  "dependencies": [],
+  "repository": "https://github.com/HELIX-Origin/HELIX"
+}

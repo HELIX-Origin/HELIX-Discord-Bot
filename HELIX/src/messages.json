@@ -1,4 +1,4 @@
-﻿{
+{
   "errors": {
     "generic": "❌ An unexpected error occurred. Please try again later.",
     "permission_denied": "❌ You do not have permission to execute this command.",
@@ -233,6 +233,36 @@
         "color": "#651fff",
         "description": "Use `{prefix}create <template> <name>` to scaffold a project.\n\n{templatesList}"
       }
+    },
+    "lint": {
+      "clean_embed": {
+        "title": "✨ Code Diagnostics Clean — {language}",
+        "color": "#00e676",
+        "description": "No errors, warnings, or anti-patterns detected in the provided code snippet."
+      },
+      "issues_embed": {
+        "title": "🔍 Code Diagnostics — {language}",
+        "color": "#ffaa00",
+        "description": "Found **{errors}** error(s), **{warnings}** warning(s), **{info}** suggestion(s):\n\n{issuesList}"
+      }
+    },
+    "explain": {
+      "embed": {
+        "title": "📖 Code Breakdown — {language}",
+        "color": "#00d2ff",
+        "description": "{summary}\n\n{explanationsList}"
+      }
+    },
+    "docs": {
+      "embed": {
+        "title": "📚 Official Documentation — {topic}",
+        "color": "#00d2ff",
+        "description": "{summary}",
+        "fields": [
+          { "name": "Official Guide", "value": "[Click to Read Online]({url})", "inline": false }
+        ]
+      },
+      "not_found": "ℹ️ No documentation references found for topic `{topic}` in `{language}`."
     }
   },
   "project": {

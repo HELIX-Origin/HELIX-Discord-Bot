@@ -1,0 +1,13 @@
+﻿{
+  "id": "rust",
+  "name": "Rust",
+  "version": "1.0.0",
+  "description": "Rust compiler diagnostics, borrow checker guidelines, and official doc.rust-lang.org cross-references",
+  "author": "HELIX-Origin",
+  "fileExtensions": [".rs"],
+  "docUrl": "https://doc.rust-lang.org/book/",
+  "entry": "index.ts",
+  "capabilities": ["lint", "explain", "docs", "fixes", "patterns"],
+  "dependencies": [],
+  "repository": "https://github.com/HELIX-Origin/HELIX"
+}

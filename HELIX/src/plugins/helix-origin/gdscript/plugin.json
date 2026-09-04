@@ -1,0 +1,13 @@
+﻿{
+  "id": "gdscript",
+  "name": "GDScript (Godot)",
+  "version": "1.0.0",
+  "description": "Godot 4 GDScript linting and docs.godotengine.org documentation lookup",
+  "author": "HELIX-Origin",
+  "fileExtensions": [".gd"],
+  "docUrl": "https://docs.godotengine.org/en/stable/tutorials/scripting/gdscript/",
+  "entry": "index.ts",
+  "capabilities": ["lint", "explain", "docs", "fixes", "patterns"],
+  "dependencies": [],
+  "repository": "https://github.com/HELIX-Origin/HELIX"
+}

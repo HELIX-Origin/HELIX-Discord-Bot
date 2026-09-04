@@ -1,8 +1,8 @@
-﻿# Language Plugin System
+# Language Plugin System
 
 HELIX uses GitHub-hosted plugin repositories for code intelligence. No AI APIs. No external services at runtime.
 
-> **Status:** Plugin infrastructure is complete (Phase 7). Individual language plugins are in progress (Phase 8). Discord commands `/lint`, `/explain`, and `/docs` ship with Phase 8.
+> **Status:** Plugin infrastructure, 13 built-in language plugins (`HELIX-Origin/helix-origin`), and Discord commands `/lint`, `/explain`, and `/docs` are fully implemented (Phase 8).
 
 ---
 

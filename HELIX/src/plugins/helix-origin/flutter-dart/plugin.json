@@ -1,0 +1,13 @@
+﻿{
+  "id": "flutter-dart",
+  "name": "Flutter & Dart",
+  "version": "1.0.0",
+  "description": "Flutter widgets, state management, and official dart.dev cross-references",
+  "author": "HELIX-Origin",
+  "fileExtensions": [".dart"],
+  "docUrl": "https://dart.dev/guides",
+  "entry": "index.ts",
+  "capabilities": ["lint", "explain", "docs", "fixes", "patterns"],
+  "dependencies": [],
+  "repository": "https://github.com/HELIX-Origin/HELIX"
+}
