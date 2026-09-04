@@ -9,7 +9,7 @@
  * ──────────────────────────────────────────────────────────────────────────
  */
 
-import type { LanguagePlugin } from './types.js';
+import type { LanguagePlugin, SourceProvider, SourceProviderResolution } from './types.js';
 import type { LoadedPlugin } from './plugin-loader.js';
 
 /** Registry entry for a loaded plugin. */
@@ -25,6 +25,9 @@ const registry = new Map<string, RegistryEntry>();
 /** Reverse map: file extension → plugin id. */
 const extensionMap = new Map<string, string>();
 
+/** Pluggable source providers registered by built-in or community plugins. */
+const sourceProviders = new Map<string, SourceProvider>();
+
 /**
  * Register a loaded plugin in the registry.
  */
@@ -39,6 +42,13 @@ export function registerPlugin(loaded: LoadedPlugin): void {
   for (const ext of loaded.manifest.fileExtensions) {
     extensionMap.set(ext.toLowerCase(), loaded.manifest.id);
   }
+
+  // Register any source providers contributed by this plugin
+  if (loaded.instance.sourceProviders) {
+    for (const sp of loaded.instance.sourceProviders) {
+      registerSourceProvider(sp);
+    }
+  }
 }
 
 /**
@@ -48,6 +58,45 @@ export function registerPlugins(loaded: LoadedPlugin[]): void {
   for (const p of loaded) {
     registerPlugin(p);
   }
+}
+
+/**
+ * Register a standalone or plugin-contributed SourceProvider.
+ */
+export function registerSourceProvider(provider: SourceProvider): void {
+  sourceProviders.set(provider.id, provider);
+}
+
+/**
+ * Unregister a SourceProvider by its id.
+ */
+export function unregisterSourceProvider(id: string): boolean {
+  return sourceProviders.delete(id);
+}
+
+/**
+ * Get all registered SourceProviders.
+ */
+export function getSourceProviders(): SourceProvider[] {
+  return Array.from(sourceProviders.values());
+}
+
+/**
+ * Finds matching registered SourceProvider and resolves a URL dynamically.
+ */
+export function findSourceProviderForUrl(rawUrl: string): SourceProviderResolution | null {
+  try {
+    const parsed = new URL(rawUrl);
+    for (const provider of sourceProviders.values()) {
+      if (provider.matches(rawUrl, parsed)) {
+        const res = provider.resolve(rawUrl, parsed);
+        if (res) return res;
+      }
+    }
+  } catch {
+    return null;
+  }
+  return null;
 }
 
 /**
@@ -143,6 +192,13 @@ export function unregisterPlugin(id: string): boolean {
   // Remove extension mappings
   for (const [ext, pluginId] of extensionMap) {
     if (pluginId === id) extensionMap.delete(ext);
+  }
+
+  // Remove plugin's source providers if any
+  if (entry.plugin.sourceProviders) {
+    for (const sp of entry.plugin.sourceProviders) {
+      unregisterSourceProvider(sp.id);
+    }
   }
 
   registry.delete(id);

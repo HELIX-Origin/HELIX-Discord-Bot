@@ -263,6 +263,39 @@
         ]
       },
       "not_found": "ℹ️ No documentation references found for topic `{topic}` in `{language}`."
+    },
+    "debug": {
+      "embed": {
+        "title": "🛠️ Error Diagnostics — {errorType}",
+        "color": "#ff334b",
+        "description": "❌ **{errorMessage}**\n\n**🔍 Root Cause:**\n{rootCause}\n\n**💡 Recommended Solution:**\n{suggestedFix}"
+      }
+    },
+    "generate": {
+      "embed": {
+        "title": "⚡ Code Generator — {name} ({language})",
+        "color": "#00e676",
+        "description": "Generated **{snippetType}** for `{name}`:\n\n{description}"
+      }
+    },
+    "refactor": {
+      "embed": {
+        "title": "🔨 Code Modernization & Refactor — {language}",
+        "color": "#00d2ff",
+        "description": "📊 **{diffSummary}**\n\n{transformationsList}"
+      }
+    },
+    "inspect": {
+      "clean_embed": {
+        "title": "🛡️ Security Audit Passed — {language}",
+        "color": "#00e676",
+        "description": "Security Score: **100 / 100 (A+)** ✨\n\nNo security vulnerabilities, hardcoded secrets, injection vectors, or hazardous anti-patterns detected in source code."
+      },
+      "issues_embed": {
+        "title": "🛡️ Security & Anti-Pattern Audit — {language}",
+        "color": "#ff334b",
+        "description": "Security Score: **{score} / 100**\nCritical: **{critical}** · High: **{high}** · Medium: **{medium}** · Low: **{low}**\n\n{findingsList}"
+      }
     }
   },
   "project": {

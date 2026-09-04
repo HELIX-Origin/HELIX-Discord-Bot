@@ -1,4 +1,4 @@
-﻿import type {
+import type {
   LanguagePlugin,
   LintOutput,
   LintResult,
@@ -61,7 +61,7 @@ export const typescriptPlugin: LanguagePlugin = {
   name: "TypeScript",
   version: "1.0.0",
   fileExtensions: [".ts", ".tsx"],
-  capabilities: ["lint", "explain", "docs", "fixes", "patterns"],
+  capabilities: ["lint", "explain", "docs", "fixes", "patterns", "debug", "generate", "refactor", "inspect"],
 
   async lint(code: string, fileName?: string): Promise<LintOutput> {
     const results: LintResult[] = [];
@@ -244,6 +244,26 @@ export const typescriptPlugin: LanguagePlugin = {
         code: "const data = (response as any).user;",
       },
     ];
+  },
+
+  async debug(errorLog: string, codeContext?: string): Promise<any> {
+    const { diagnoseError } = await import("../../sdk/stack-trace-parser.js");
+    return diagnoseError(errorLog, codeContext);
+  },
+
+  async generate(type: string, name: string, options?: Record<string, any>): Promise<any> {
+    const { buildSnippet } = await import("../../sdk/snippet-builder.js");
+    return buildSnippet("typescript", type, name, options);
+  },
+
+  async refactor(code: string, rule?: string): Promise<any> {
+    const { refactorCode } = await import("../../sdk/code-transformer.js");
+    return refactorCode(code, "typescript", rule);
+  },
+
+  async inspect(code: string): Promise<any> {
+    const { scanSecurity } = await import("../../sdk/security-scanner.js");
+    return scanSecurity(code, "typescript");
   },
 };
 

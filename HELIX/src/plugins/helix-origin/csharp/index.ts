@@ -1,4 +1,4 @@
-﻿import type { LanguagePlugin, LintOutput, LintResult, ExplainOutput, DocReference } from "../../types.js";
+import type { LanguagePlugin, LintOutput, LintResult, ExplainOutput, DocReference } from "../../types.js";
 
 const CS_DOCS: Record<string, DocReference> = {
   async: {
@@ -20,7 +20,7 @@ export const csharpPlugin: LanguagePlugin = {
   name: "C#",
   version: "1.0.0",
   fileExtensions: [".cs"],
-  capabilities: ["lint", "explain", "docs", "fixes", "patterns"],
+  capabilities: ["lint", "explain", "docs", "fixes", "patterns", "debug", "generate", "refactor", "inspect"],
 
   async lint(code: string, fileName?: string): Promise<LintOutput> {
     const results: LintResult[] = [];
@@ -61,6 +61,27 @@ export const csharpPlugin: LanguagePlugin = {
   async getDocumentation(topic: string): Promise<DocReference[]> {
     return [CS_DOCS.async, CS_DOCS.linq];
   },
+
+  async debug(errorLog: string, codeContext?: string): Promise<any> {
+    const { diagnoseError } = await import("../../sdk/stack-trace-parser.js");
+    return diagnoseError(errorLog, codeContext);
+  },
+
+  async generate(type: string, name: string, options?: Record<string, any>): Promise<any> {
+    const { buildSnippet } = await import("../../sdk/snippet-builder.js");
+    return buildSnippet("csharp", type, name, options);
+  },
+
+  async refactor(code: string, rule?: string): Promise<any> {
+    const { refactorCode } = await import("../../sdk/code-transformer.js");
+    return refactorCode(code, "csharp", rule);
+  },
+
+  async inspect(code: string): Promise<any> {
+    const { scanSecurity } = await import("../../sdk/security-scanner.js");
+    return scanSecurity(code, "csharp");
+  },
 };
 
 export default csharpPlugin;
+

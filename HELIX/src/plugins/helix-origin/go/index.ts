@@ -1,4 +1,4 @@
-﻿import type { LanguagePlugin, LintOutput, LintResult, ExplainOutput, CodeExplanation, DocReference } from "../../types.js";
+import type { LanguagePlugin, LintOutput, LintResult, ExplainOutput, CodeExplanation, DocReference } from "../../types.js";
 
 const GO_DOCS: Record<string, DocReference> = {
   goroutines: {
@@ -20,7 +20,7 @@ export const goPlugin: LanguagePlugin = {
   name: "Go",
   version: "1.0.0",
   fileExtensions: [".go"],
-  capabilities: ["lint", "explain", "docs", "fixes", "patterns"],
+  capabilities: ["lint", "explain", "docs", "fixes", "patterns", "debug", "generate", "refactor", "inspect"],
 
   async lint(code: string, fileName?: string): Promise<LintOutput> {
     const results: LintResult[] = [];
@@ -79,6 +79,27 @@ export const goPlugin: LanguagePlugin = {
     const matches = Object.values(GO_DOCS).filter(d => d.title.toLowerCase().includes(lower) || d.summary.toLowerCase().includes(lower));
     return matches.length > 0 ? matches : [GO_DOCS.errors];
   },
+
+  async debug(errorLog: string, codeContext?: string): Promise<any> {
+    const { diagnoseError } = await import("../../sdk/stack-trace-parser.js");
+    return diagnoseError(errorLog, codeContext);
+  },
+
+  async generate(type: string, name: string, options?: Record<string, any>): Promise<any> {
+    const { buildSnippet } = await import("../../sdk/snippet-builder.js");
+    return buildSnippet("go", type, name, options);
+  },
+
+  async refactor(code: string, rule?: string): Promise<any> {
+    const { refactorCode } = await import("../../sdk/code-transformer.js");
+    return refactorCode(code, "go", rule);
+  },
+
+  async inspect(code: string): Promise<any> {
+    const { scanSecurity } = await import("../../sdk/security-scanner.js");
+    return scanSecurity(code, "go");
+  },
 };
 
 export default goPlugin;
+

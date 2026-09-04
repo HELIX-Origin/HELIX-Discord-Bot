@@ -55,7 +55,7 @@ my-plugin-repo/
 }
 ```
 
-**Valid capabilities:** `lint` · `explain` · `fixes` · `docs` · `format` · `patterns`
+**Valid capabilities:** `lint` · `explain` · `fixes` · `docs` · `format` · `patterns` · `debug` · `generate` · `refactor` · `inspect`
 
 ---
 
@@ -77,8 +77,26 @@ interface LanguagePlugin {
   suggestFixes?(errors: LintResult[]): Promise<CodeFix[]>;
   format?(code: string): Promise<string>;
   getPatterns?(): Promise<CodePattern[]>;
+  debug?(errorLog: string, codeContext?: string): Promise<DebugDiagnostic>;
+  generate?(type: string, name: string, options?: Record<string, any>): Promise<SnippetGeneration>;
+  refactor?(code: string, rule?: string): Promise<RefactorOutput>;
+  inspect?(code: string): Promise<SecurityAuditResult>;
 }
 ```
+
+---
+
+## Multi-Source Code Ingestion Engine
+
+Plugins and bot commands seamlessly accept code from diverse sources without manual conversion:
+1. **Pasted Code & Codeblocks**: Direct arguments, inline code, or fenced Markdown (```` ```lang ... ``` ````).
+2. **Discord Attachments**: Attached source files and logs (`.ts`, `.py`, `.rs`, `.go`, `.java`, `.cs`, etc.).
+3. **Remote Repositories & Gists**:
+   - **GitHub**: Blob (`github.com/.../blob/...`) and Raw URLs (`raw.githubusercontent.com/...`)
+   - **GitHub Gists**: Gist links (`gist.github.com/...`)
+   - **GitLab**: Blob (`gitlab.com/.../-/blob/...`), Raw, and Snippets (`gitlab.com/-/snippets/...`)
+   - **Bitbucket**: Source (`bitbucket.org/.../src/...`), Raw, and Snippets
+   - **Pastebins**: Raw text pastes
 
 ---
 

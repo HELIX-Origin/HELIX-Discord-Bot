@@ -1,12 +1,11 @@
 import type { CommandDefinition, ExecuteContext } from "../../types/command.js";
 import { createEmbed, formatError } from "../../handlers/message-handler.js";
-import { getPlugin, getPluginByExtension, getAllPlugins } from "../../plugins/registry.js";
+import { scanSecurity } from "../../plugins/sdk/security-scanner.js";
 import { resolveSourceCode } from "../../plugins/sdk/source-resolver.js";
-import type { LintResult } from "../../plugins/types.js";
 
-export const lint: CommandDefinition = {
-  name: "lint",
-  description: "Static code analysis and linting for pasted code, attachments, or remote repos (100% local, zero AI)",
+export const inspect: CommandDefinition = {
+  name: "inspect",
+  description: "Static security & anti-pattern auditor for pasted code, attachments, or remote repos (zero AI)",
   category: "info",
   options: [
     { name: "code", description: "Code snippet, file URL (GitHub/GitLab/Bitbucket/Gist), or raw text", type: "string", required: false },
@@ -34,56 +33,56 @@ export const lint: CommandDefinition = {
 
       if (!resolved.code) {
         return reply({
-          embeds: [formatError("Usage: `>lint [language] <code | url>` or attach a file with `>lint`")],
+          embeds: [formatError("Usage: `>inspect [language] <code | url>` or attach a file with `>inspect`")],
           ephemeral: true,
         });
       }
 
       const targetLang = (resolved.language || "typescript").toLowerCase();
+      const { getPlugin, getPluginByExtension, getAllPlugins } = await import("../../plugins/registry.js");
       const plugin = getPlugin(targetLang) || getPluginByExtension(`.${targetLang}`) || getAllPlugins()[0];
 
-      if (!plugin) {
-        return reply({
-          embeds: [formatError("unsupported_language", { lang: targetLang })],
-          ephemeral: true,
-        });
+      let audit: any;
+      if (plugin && typeof plugin.inspect === "function") {
+        audit = await plugin.inspect(resolved.code);
+      } else {
+        audit = scanSecurity(resolved.code, targetLang);
       }
 
-      const output = await plugin.lint(resolved.code, resolved.sourceName);
-
-      if (output.results.length === 0) {
-        const embed = createEmbed("info.lint.clean_embed", { language: plugin.name });
+      if (audit.findings.length === 0) {
+        const embed = createEmbed("info.inspect.clean_embed", { language: plugin?.name || targetLang });
         embed.setFooter({ text: `Source: ${resolved.sourceName} • ${resolved.sizeBytes} bytes` });
         return reply({ embeds: [embed] });
       }
 
-      const issuesList = output.results
-        .slice(0, 10)
-        .map((r: LintResult) => {
-          const icon = r.severity === "error" ? "🔴" : r.severity === "warning" ? "🟡" : "ℹ️";
-          const doc = r.docLink ? ` [Docs](${r.docLink})` : "";
-          return `${icon} **Line ${r.line}:${r.column}** — \`${r.code}\`: ${r.message}${doc}`;
+      const findingsList = audit.findings
+        .slice(0, 8)
+        .map((f: any) => {
+          const icon = f.severity === "critical" ? "🔴" : f.severity === "high" ? "🟠" : "🟡";
+          const cweStr = f.cwe ? ` [${f.cwe}]` : "";
+          return `${icon} **${f.title}** (\`${f.ruleId}\`${cweStr})\n↳ Line ${f.line}: \`${f.snippet}\`\n💡 *Fix:* ${f.recommendation}`;
         })
         .join("\n\n");
 
-      const embed = createEmbed("info.lint.issues_embed", {
-        language: plugin.name,
-        errors: String(output.summary.errors),
-        warnings: String(output.summary.warnings),
-        info: String(output.summary.info),
-        issuesList,
+      const embed = createEmbed("info.inspect.issues_embed", {
+        language: targetLang,
+        score: String(audit.score),
+        critical: String(audit.summary.critical),
+        high: String(audit.summary.high),
+        medium: String(audit.summary.medium),
+        low: String(audit.summary.low),
+        findingsList,
       });
 
       embed.setFooter({ text: `Source: ${resolved.sourceName} • ${resolved.sizeBytes} bytes` });
       return reply({ embeds: [embed] });
     } catch (err: any) {
       return reply({
-        embeds: [formatError(`Lint analysis failed: ${err.message}`)],
+        embeds: [formatError(`Security inspection failed: ${err.message}`)],
         ephemeral: true,
       });
     }
   },
 };
 
-export default lint;
-
+export default inspect;

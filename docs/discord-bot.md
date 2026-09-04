@@ -31,15 +31,19 @@ Default prefix: `>` — configurable per guild. All commands are available as bo
 | `>remind <time> <message>` | Set a timed reminder |
 
 ### Info & Code Intelligence
-
+ 
 | Command | Description |
 |---------|-------------|
 | `>help` | All commands |
 | `>info` | Bot diagnostics and version |
 | `>status` | System health (gateway, DB, uptime) |
 | `>list` | Available scaffold template IDs |
-| `>lint <language> <code>` | Static code analysis and linting (100% local, zero AI) |
-| `>explain <language> <code>` | Explain code structure and purpose via static analysis & docs (zero AI) |
+| `>lint [language] <code \| url>` | Static code analysis and linting for pasted code, attachments, or remote repos (100% local, zero AI) |
+| `>explain [language] <code \| url>` | Explain code structure and purpose via static analysis & docs (zero AI) |
+| `>inspect [language] <code \| url>` | Static security & anti-pattern auditor for SQLi, hardcoded tokens, XSS, ReDoS (zero AI) |
+| `>debug <error_log \| url>` | Multi-runtime error triager for Node/V8, Python, Rust, Java, and Go errors (zero AI) |
+| `>generate <lang> <type> <name>` | Parameterized code snippet generator for models, routes, tests, and algorithms (zero AI) |
+| `>refactor [language] <code \| url>` | Modernize syntax, convert `var` $\rightarrow$ `const`, and apply idiomatic patterns (zero AI) |
 | `>docs [language] <topic>` | Look up official language documentation (zero AI) |
 
 ### Project Scaffolding

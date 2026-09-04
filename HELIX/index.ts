@@ -5,6 +5,8 @@ import { logs } from './src/handlers/logs-handler.js';
 import { loadPrefixCommands, handlePrefixMessage } from './src/handlers/command-handler.js';
 import { loadSlashCommands, registerGlobalSlashCommands, handleSlashInteraction } from './src/handlers/slash-handler.js';
 import { loadEvents } from './src/handlers/event-handler.js';
+import { loadAllPlugins } from './src/plugins/plugin-loader.js';
+import { registerPlugins } from './src/plugins/registry.js';
 
 export * from './src/client.js';
 export * from './src/server.js';
@@ -28,6 +30,15 @@ export async function launchBotAndDashboard(options: LaunchBotOptions = {}): Pro
   console.log('====================================================');
   console.log('  🤖 HELIX Discord Bot & Web Dashboard');
   console.log('====================================================\n');
+
+  // Discover and register all language plugins
+  try {
+    const loadedPlugins = await loadAllPlugins();
+    registerPlugins(loadedPlugins);
+    logs.info(`Language Plugin System initialized: ${loadedPlugins.length} plugin(s) active.`);
+  } catch (err: any) {
+    logs.warn(`Plugin loader initialization warning: ${err.message}`);
+  }
 
   const server = new BotCallbackServer({ callbackUrl, port });
   await server.start();
