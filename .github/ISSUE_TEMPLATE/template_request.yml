@@ -1,5 +1,5 @@
-name: "New Starter Template Request"
-description: "Propose a new language, framework, or game engine scaffolding template"
+﻿name: "New Starter Template Request"
+description: "Propose a new framework, language, or game engine scaffolding starter template"
 title: "[Template]: "
 labels: ["template-request", "scaffolding"]
 body:
@@ -7,19 +7,19 @@ body:
     attributes:
       value: |
         ### Propose a New Framework Starter Template
-        HELIX CLI supports 14 multi-framework templates. Propose a new production-ready starter template here!
+        HELIX supports 17 multi-framework starter templates across Web, Desktop, Mobile, Game Engines, and Backend Services. Propose a new production-ready starter template here!
 
   - type: dropdown
     id: domain
     attributes:
       label: Project Domain
       options:
-        - "Web Applications (e.g. Next.js, Nuxt, SvelteKit, Astro)"
-        - "Desktop Applications (e.g. Wails, Tauri + React, Qt)"
-        - "Mobile Applications (e.g. Kotlin Multiplatform, Ionic)"
-        - "Game Engines (e.g. Godot C#, Unreal Engine, Bevy Rust)"
-        - "Backend Services & APIs (e.g. Bun Elysia, Elixir Phoenix, NestJS)"
-        - "Developer Tooling / CLI Starter"
+        - "Web Applications (e.g. Next.js, Nuxt, SvelteKit, Astro, Remix)"
+        - "Desktop Applications (e.g. Wails, Tauri + React, Qt, Flutter Desktop)"
+        - "Mobile Applications (e.g. Kotlin Multiplatform, Ionic, Capacitor)"
+        - "Game Engines (e.g. Godot C#, Unreal Engine, Bevy Rust, Defold)"
+        - "Backend Services & APIs (e.g. Bun Elysia, Elixir Phoenix, NestJS, FastAPI)"
+        - "Developer Tooling / Library Starter"
         - "Other"
     validations:
       required: true
@@ -60,10 +60,34 @@ body:
       required: true
 
   - type: textarea
-    id: ci-pipeline
+    id: mermaid-diagram
     attributes:
-      label: CI/CD Pipeline Expectations
-      description: What checks should the generated GitHub Actions / GitLab CI pipeline run?
-      placeholder: "e.g., Run linter, typecheck, unit tests, and build step"
-    validations:
-      required: false
+      label: Scaffolding Directory Flow / Architecture (Optional)
+      description: Mermaid diagram visualizing the scaffolded layout and lifecycle.
+      placeholder: |
+        ```mermaid
+        flowchart TD
+            Scaffold["`>project scaffold`"] --> Engine["template-engine.ts"]
+            Engine --> Output["Generated Project Starter"]
+        ```
+      render: markdown
+
+  - type: textarea
+    id: sub-issues
+    attributes:
+      label: Implementation Sub-Tasks / Sub-Issues (Optional)
+      description: Breakdown of milestone sub-issues for adding this template.
+      placeholder: |
+        - [ ] Sub-Issue 1: YML Template Definition in `.agents/templates/`
+        - [ ] Sub-Issue 2: Scaffolding Generator Implementation
+        - [ ] Sub-Issue 3: Vitest Integration Tests
+        - [ ] Sub-Issue 4: Documentation in `docs/scaffolding-templates.md`
+      render: markdown
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Pre-submission Checklist
+      options:
+        - label: I have verified this framework starter is not already supported.
+          required: true

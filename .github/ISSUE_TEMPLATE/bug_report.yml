@@ -1,5 +1,5 @@
-name: "Bug Report"
-description: "Report unexpected behavior, crashes, or errors in HELIX CLI, Scaffolding, or Bot"
+﻿name: "Bug Report"
+description: "Report unexpected behavior, crashes, or errors in HELIX Bot, Web Dashboard, or Plugins"
 title: "[Bug]: "
 labels: ["bug", "triage"]
 body:
@@ -7,7 +7,7 @@ body:
     attributes:
       value: |
         ### Thank you for reporting a bug!
-        Please search existing issues to avoid filing duplicates. Ensure you are running the latest version of HELIX CLI.
+        Please search existing issues to avoid filing duplicates. Ensure you are running the latest version of HELIX.
 
   - type: dropdown
     id: component
@@ -15,31 +15,33 @@ body:
       label: Affected Component
       description: Which part of HELIX is encountering the issue?
       options:
-        - "CLI Core (helix commands, parser, config)"
-        - "Scaffolding Engine & Atomic Generator"
-        - "Starter Templates (Web, Desktop, Mobile, Game, Backend)"
-        - "AI Agent Integration (Google Antigravity, GitHub Copilot, Open Code)"
-        - "Code Hosting Automation (GitHub gh, GitLab glab, Bitbucket)"
-        - "Discord Bot Gateway Client & Slash Commands"
-        - "Web Dashboard & NextAuth OAuth2"
+        - "Discord Bot Commands (Moderation, Utility, Info, Project, Config)"
+        - "Language Plugin System & Code Intelligence Engine (>lint, >explain, >debug, >refactor, >generate, >inspect, >docs)"
+        - "Multi-Source Code Ingestion & Source Providers (GitHub, GitLab, Bitbucket, Pastebins)"
+        - "Thread-based Ticket System & Interactive Modals/Buttons"
+        - "Web Dashboard & NextAuth OAuth2 Server"
+        - "Project Scaffolding Engine (17 Starter Templates)"
+        - "SQLite Database & Migrations"
         - "Docker Container & Self-Hosting"
-        - "CI/CD Workflows & Packaging"
+        - "Multi-Agent Configurations (.agents, .copilot, .gemini, .opencode)"
+        - "Other"
     validations:
       required: true
 
   - type: dropdown
     id: os
     attributes:
-      label: Operating System
-      description: What operating system are you running HELIX on?
+      label: Operating System / Environment
+      description: What operating system or platform is HELIX running on?
       options:
         - "Windows 11 / 10 (PowerShell)"
         - "Windows 11 / 10 (CMD / Git Bash)"
-        - "macOS (Apple Silicon)"
-        - "macOS (Intel)"
         - "Linux (Ubuntu / Debian / Mint)"
         - "Linux (Arch / Fedora / RHEL)"
+        - "macOS (Apple Silicon)"
+        - "macOS (Intel)"
         - "Docker Container"
+        - "Cloud Hosting (Heroku, Railway, Render, Fly.io)"
     validations:
       required: true
 
@@ -48,16 +50,16 @@ body:
     attributes:
       label: Node.js Runtime Version
       description: Run `node -v` in your terminal
-      placeholder: "e.g. v22.5.0, v20.12.0, v26.8.1"
+      placeholder: "e.g. v22.5.0, v20.18.0"
     validations:
       required: true
 
   - type: input
-    id: helix-version
+    id: bot-version
     attributes:
-      label: HELIX CLI Version
-      description: Run `helix --version` or `helix info`
-      placeholder: "e.g. 0.1.0"
+      label: HELIX Version
+      description: Bot version or Git commit hash
+      placeholder: "e.g. 1.0.0 or 06c416d"
     validations:
       required: true
 
@@ -75,8 +77,8 @@ body:
       label: Steps to Reproduce
       description: Exact steps to reproduce the bug.
       placeholder: |
-        1. Run `helix create ...` or `helix bot start`
-        2. Enter parameters: ...
+        1. Run bot command `>...` or perform dashboard action `...`
+        2. Provide arguments or code snippet: ...
         3. Observe error: ...
     validations:
       required: true
@@ -104,8 +106,8 @@ body:
       placeholder: |
         ```mermaid
         flowchart LR
-            User["User Action"] --> Handler["Bot Handler"]
-            Handler -->|"Failing Condition"| Error["💥 Bug Occurs"]
+            User["User Trigger: >command"] --> Handler["message-handler.ts"]
+            Handler -->|"Failing Condition"| Error["💥 Defect Occurs"]
         ```
       render: markdown
 
@@ -128,5 +130,5 @@ body:
       options:
         - label: I have verified this is not a duplicate of an existing issue.
           required: true
-        - label: I am running a supported Node.js LTS version (v18, v20, v22, or newer).
+        - label: I am running Node.js v22.x or a supported LTS runtime.
           required: true

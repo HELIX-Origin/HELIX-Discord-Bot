@@ -1,0 +1,89 @@
+﻿name: "Language Plugin / Code Intelligence Request"
+description: "Propose a new language plugin, diagnostic rule set, or custom source provider for HELIX"
+title: "[Plugin]: "
+labels: ["plugin", "enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ### Propose a Language Plugin or Source Provider
+        HELIX utilizes a local, deterministic plugin system for code intelligence, static analysis, debugging, and snippet generation without external AI APIs or paid subscriptions.
+
+  - type: input
+    id: plugin-name
+    attributes:
+      label: Target Language / Tool Name
+      placeholder: "e.g. Lua, Zig, Elixir, Ruby, PHP, Dart, Scala, Kotlin"
+    validations:
+      required: true
+
+  - type: input
+    id: file-extensions
+    attributes:
+      label: File Extensions
+      placeholder: "e.g. .lua, .zig, .ex, .exs, .rb, .kt"
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: capabilities
+    attributes:
+      label: Target Capabilities
+      description: Select which capabilities this plugin will provide.
+      options:
+        - label: "Linting & Static Diagnostics (`lint`)"
+        - label: "Code Explanation & AST Summary (`explain`)"
+        - label: "Offline Documentation & Reference Lookup (`docs`)"
+        - label: "Runtime & Syntax Error Diagnostics (`debug`)"
+        - label: "Deterministic Snippet & Boilerplate Generation (`generate`)"
+        - label: "Code Refactoring & Idiomatic Transformations (`refactor`)"
+        - label: "Security & Vulnerability Audit (`inspect`)"
+        - label: "Custom Remote Source Provider (`SourceProvider`)"
+
+  - type: textarea
+    id: static-rules
+    attributes:
+      label: Core Rules & Diagnostic Approach
+      description: Detail the static rules, AST patterns, or regex heuristics used for this language.
+      placeholder: |
+        - Rule 1: Detect unused variables / global leakage
+        - Rule 2: Deprecated API usage
+        - Rule 3: Error pattern diagnostics
+    validations:
+      required: true
+
+  - type: textarea
+    id: mermaid-diagram
+    attributes:
+      label: Plugin Architecture / Execution Flow (Optional)
+      description: Provide a Mermaid sequenceDiagram or flowchart for the plugin execution.
+      placeholder: |
+        ```mermaid
+        flowchart LR
+            Code["Source Code Ingested"] --> Plugin["Target LanguagePlugin"]
+            Plugin --> Lint["AST Linter"]
+            Plugin --> Diag["Debug Diagnostic Engine"]
+            Lint --> Embed["messages.json Embed"]
+            Diag --> Embed
+        ```
+      render: markdown
+
+  - type: textarea
+    id: sub-issues
+    attributes:
+      label: Implementation Sub-Tasks / Sub-Issues (Optional)
+      description: Breakdown of milestone sub-issues for implementing this plugin.
+      placeholder: |
+        - [ ] Sub-Issue 1: Plugin Manifest (`plugin.json`) & Types
+        - [ ] Sub-Issue 2: Linter & Diagnostics Implementation
+        - [ ] Sub-Issue 3: Vitest Test Suite (`plugin.test.ts`)
+        - [ ] Sub-Issue 4: Register in `config.json` & Docs Update
+      render: markdown
+
+  - type: input
+    id: docs-link
+    attributes:
+      label: Official Language Documentation URL
+      placeholder: "https://www.lua.org/docs.html"
+    validations:
+      required: false

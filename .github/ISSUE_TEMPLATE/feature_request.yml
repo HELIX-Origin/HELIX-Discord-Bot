@@ -1,5 +1,5 @@
-name: "Feature Request"
-description: "Suggest a new feature, CLI command, or improvement for HELIX"
+﻿name: "Feature Request"
+description: "Suggest a new feature, Discord bot command, or improvement for HELIX"
 title: "[Feature]: "
 labels: ["enhancement", "triage"]
 body:
@@ -7,7 +7,7 @@ body:
     attributes:
       value: |
         ### Have a feature idea for HELIX?
-        We welcome proposals for new developer tools, commands, UI features, and integrations!
+        We welcome proposals for new Discord bot commands, language plugin capabilities, dashboard tools, and integrations!
 
   - type: dropdown
     id: scope
@@ -15,13 +15,15 @@ body:
       label: Target Feature Scope
       description: Which part of HELIX does this feature enhance?
       options:
-        - "CLI Command (new subcommand or options)"
-        - "Scaffolding Engine & Generators"
-        - "AI Context Detection & Prompt Synthesis"
-        - "Code Hosting Platforms & CI/CD Pipelines"
-        - "Discord Bot Slash Commands & Server Tools"
-        - "Web Dashboard Interface & Analytics"
-        - "Developer Experience & Tooling"
+        - "Discord Bot Commands (Moderation, Utility, Info, Project, Config)"
+        - "Language Plugin System & Code Intelligence Engine"
+        - "Multi-Source Code Ingestion & Source Providers"
+        - "Ticket System, Modal Interactions & Logging"
+        - "Web Dashboard Interface & OAuth2 Authentication"
+        - "Scaffolding Engine & Starter Templates"
+        - "Database, Migrations & Persistence"
+        - "Docker Container & Self-Hosting"
+        - "Multi-Agent Configurations (.agents, .copilot, .gemini, .opencode)"
         - "Other"
     validations:
       required: true
@@ -40,7 +42,7 @@ body:
     attributes:
       label: Proposed Solution
       description: A clear and detailed description of what you want to happen.
-      placeholder: "e.g., Add a new command `helix ...` that accepts `--flag` and automatically..."
+      placeholder: "e.g., Add a new command `>...` that accepts `--flag` and automatically..."
     validations:
       required: true
 
@@ -62,7 +64,7 @@ body:
         flowchart TD
             User["User Trigger"] --> Command["Bot Command"]
             Command --> Service["Target Module"]
-            Service --> Result["Render Output Embed"]
+            Service --> Result["Render messages.json Embed"]
         ```
       render: markdown
 
@@ -82,7 +84,7 @@ body:
     id: context
     attributes:
       label: Additional Context / Mockups
-      description: Add any mockups, screenshots, sample terminal outputs, or architectural sketches.
+      description: Add any mockups, screenshots, sample Discord outputs, or architectural sketches.
     validations:
       required: false
 

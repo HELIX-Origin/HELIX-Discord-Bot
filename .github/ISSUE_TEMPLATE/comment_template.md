@@ -1,89 +1,78 @@
-# GitHub Issue Comment Guidelines & Templates
+﻿# Issue Comment Template & Safe Remote Posting Protocol
 
-This document defines the standardized templates and execution protocols for posting issue comments, progress updates, and resolution reports on GitHub for the **HELIX** project.
-
----
-
-## ⚠️ Safe Remote Posting Protocol (Preventing Unicode & Escaping Errors)
-
-When posting or updating comments on GitHub from terminal environments (especially Windows PowerShell):
-
-1. **NEVER pass inline markdown strings containing backticks or Unicode directly via CLI arguments**:
-   ```bash
-   # ❌ WRONG: PowerShell treats backticks (`) as escape characters and strips or mangles characters
-   gh issue comment 4 --body "Using `model` with 🔄 emoji"
-   ```
-
-2. **ALWAYS author comments in a clean UTF-8 markdown file and pass via `--body-file` or `@file`**:
-   ```bash
-   # ✅ CORRECT: Preserves all UTF-8 characters, emojis, and inline code formatting perfectly
-   gh issue comment <issue-number> --body-file path/to/comment.md
-
-   # ✅ CORRECT FOR UPDATING EXISTING COMMENTS:
-   gh api -X PATCH repos/:owner/:repo/issues/comments/<comment-id> -F body=@path/to/comment.md
-   ```
-
-3. **Verify encoding**: Ensure the temporary `.md` file is explicitly encoded in UTF-8 without BOM.
+This document defines the standardized templates and protocols for publishing issue comments, status reports, sub-issue updates, and bug resolution notices on GitHub remote issues for **HELIX**.
 
 ---
 
-## Standard Comment Templates
+## Safe Remote Posting Protocol (Unicode & Character Preservation)
 
-### Template A: Architectural / Plan Update
+> [!IMPORTANT]
+> **Windows PowerShell Escaping Rules**:
+> 1. In Windows PowerShell, the backtick character (\`) is a reserved escape character.
+> 2. Passing inline arguments containing backticks or UTF-8 emojis directly to commands like `gh issue comment --body "..."` causes PowerShell to parse backticks as escape sequences, stripping letters or mangling markdown formatting.
+> 3. **MANDATORY**: Always write the comment body into a UTF-8 markdown file (e.g. `scratch/comment.md` or `.agents/bugs/comments/`), and supply it using the file flag:
+>    ```bash
+>    # Posting a new comment:
+>    gh issue comment <issue-number> --body-file path/to/comment.md
+>
+>    # Updating an existing comment:
+>    gh api -X PATCH repos/:owner/:repo/issues/comments/<comment-id> -F body=@path/to/comment.md
+>    ```
+
+---
+
+## 1. Sub-Issue Progress & Status Update Template
 
 ```markdown
-### 🔄 Update: [Brief Descriptive Title]
+### 🔄 Sub-Issue Update: [Title]
 
-**Context & Motivation**:
-[Explain what design or requirement changed and why]
+```mermaid
+flowchart TD
+    A["Sub-Issue: Triage"] -->|Completed| B["Sub-Issue: Implementation"]
+    B -->|In Progress| C["Sub-Issue: Testing"]
+    C -->|Pending| D["Sub-Issue: Verification"]
+```
 
-**Key Changes**:
-- **[Component / Area 1]**: [Details with `inline_code` formatting]
-- **[Component / Area 2]**: [Details with `inline_code` formatting]
+**Context**:
+[Describe requirement or design refinement]
 
-**Impact on Scope & Milestones**:
-- [x] Documented in Phase plan: `[phase-file.md]`
-- [x] Automated test expectations updated
-- [x] Documentation synchronized
+**Progress Breakdown**:
+- [x] Sub-Issue 1: Root Cause & Diagnostics (`#123`)
+- [ ] Sub-Issue 2: Core Fix & Implementation (`#124`)
+- [ ] Sub-Issue 3: Test Suite & Regression Checks (`#125`)
+- [ ] Sub-Issue 4: Verification & Docs (`#126`)
+
+**Next Steps**:
+- [ ] Next actionable step
 ```
 
 ---
 
-### Template B: Implementation Progress & Verification
+## 2. Bug Resolution & Verification Template
 
 ```markdown
-### 🚀 Progress Update: [Feature / Milestone Title]
+### ✅ Resolved: [BUG-XXX] [Title]
 
-**Completed Deliverables**:
-- [x] **[Deliverable 1]**: [Description with file link `path/to/file.ts`]
-- [x] **[Deliverable 2]**: [Description with file link `path/to/file.ts`]
-
-**Test Results & Quality Verification**:
-- Unit Tests: `X passed, 0 failed` across `Y` test suites (`npm run test`)
-- TypeScript Compilation: `npx tsc --noEmit` passed with 0 errors
-- Build Bundle: `npm run build` compiled clean standalone bundle
-
-**Next Planned Steps**:
-1. [Next step 1]
-2. [Next step 2]
+```mermaid
+flowchart LR
+    Bug["Defect Identified"] --> Fix["Applied Patch in src/..."]
+    Fix --> Test["Vitest Suite Verified"]
+    Test --> Resolved["Closed on GitHub & Multi-Agent Mirror"]
 ```
-
----
-
-### Template C: Bug Resolution Report
-
-```markdown
-### ✅ Resolved: [BUG-XXX] [Bug Title]
 
 **Root Cause**:
-[Concise technical description of why the bug occurred]
+[Why the defect occurred]
 
-**Fix Applied**:
-- Modified `[filename]` to [describe specific technical change]
-- Preserved backward compatibility and security boundaries
+**Remediation**:
+- Modified `[filepath]` to [fix summary]
+
+**Sub-Issues Closed**:
+- [x] Sub-Issue 1: Diagnostics
+- [x] Sub-Issue 2: Core Implementation
+- [x] Sub-Issue 3: Vitest Test Suite
+- [x] Sub-Issue 4: Multi-Agent Docs Sync
 
 **Verification**:
-- Automated test added/updated: `[test-file.test.ts]`
-- Verified across target operating systems (Windows, macOS, Linux)
-- Commit: `[commit-hash]`
+- Automated test: `tests/...test.ts` passed
+- Zero regressions
 ```

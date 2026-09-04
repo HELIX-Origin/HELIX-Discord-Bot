@@ -1,5 +1,5 @@
-name: "Documentation Improvement"
-description: "Suggest improvements, fixes, or additions to HELIX CLI documentation"
+﻿name: "Documentation Improvement"
+description: "Suggest improvements, fixes, or additions to HELIX documentation"
 title: "[Docs]: "
 labels: ["documentation"]
 body:
@@ -15,15 +15,17 @@ body:
       label: Affected Documentation Area
       options:
         - "README.md (Main Project Overview & Quick Start)"
+        - "AGENTS.md (Root Multi-Agent Architecture Guide)"
         - "docs/index.md (Documentation Hub)"
-        - "docs/discord-bot.md (Discord Bot & Slash Commands)"
-        - "docs/web-dashboard.md (NextAuth Dashboard & API)"
+        - "docs/discord-bot.md (Discord Bot Commands, DB & Config)"
+        - "docs/web-dashboard.md (Web Dashboard, OAuth2 Flow & Endpoints)"
+        - "docs/plugin-system.md (Language Plugin Architecture & Built-in Plugins)"
+        - "docs/plugin-authoring.md (Plugin Authoring & Distribution Guide)"
+        - "docs/scaffolding-templates.md (17 Supported Starter Templates)"
         - "docs/deployment-docker.md (Docker & Self-Hosting Guide)"
-        - "docs/deployment-heroku.md (Heroku 1-Click Deployment)"
-        - "docs/scaffolding-templates.md (14 Starter Templates)"
-        - "docs/ai-integration.md (AI Credential Discovery)"
-        - ".agents/ (Universal Agents & Framework Skills)"
-        - "CLI Inline Help (helix --help / man pages)"
+        - "docs/deployment-heroku.md (Heroku Deployment Guide)"
+        - ".agents/ / .copilot/ / .gemini/ / .opencode/ (Multi-Agent Configurations)"
+        - "messages.json (Central Message Formatting Engine)"
         - "Other"
     validations:
       required: true
@@ -33,7 +35,7 @@ body:
     attributes:
       label: Description of the Documentation Issue
       description: What is incorrect, unclear, or missing?
-      placeholder: "e.g., The Docker Compose command in docs/deployment-docker.md does not mention..."
+      placeholder: "e.g., The Plugin Authoring guide in docs/plugin-authoring.md needs an example for..."
     validations:
       required: true
 
@@ -44,3 +46,25 @@ body:
       description: How should the documentation read instead?
     validations:
       required: true
+
+  - type: textarea
+    id: mermaid-diagram
+    attributes:
+      label: Proposed Mermaid Diagram (Optional)
+      description: Supply a Mermaid diagram to be added or updated in the documentation.
+      placeholder: |
+        ```mermaid
+        flowchart LR
+            A["Topic A"] --> B["Topic B"]
+        ```
+      render: markdown
+
+  - type: textarea
+    id: sub-issues
+    attributes:
+      label: Documentation Sub-Tasks / Sub-Issues (Optional)
+      placeholder: |
+        - [ ] Sub-Issue 1: Draft Documentation
+        - [ ] Sub-Issue 2: Verification & Review
+        - [ ] Sub-Issue 3: Multi-Agent Mirror Sync
+      render: markdown

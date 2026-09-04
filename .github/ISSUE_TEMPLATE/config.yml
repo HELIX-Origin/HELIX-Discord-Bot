@@ -1,8 +1,8 @@
-blank_issues_enabled: false
+﻿blank_issues_enabled: false
 contact_links:
   - name: GitHub Discussions
-    url: https://github.com/HELIX-Origin/HELIX-CLI/discussions
+    url: https://github.com/HELIX-Origin/HELIX/discussions
     about: Ask questions, share ideas, and discuss HELIX with the community.
   - name: Discord Community & Bot Support
-    url: https://github.com/HELIX-Origin/HELIX-CLI
-    about: Connect with the community for help and architecture discussions.
+    url: https://discord.gg/Ww3XBZC2HV
+    about: Join our Discord server for real-time support, feature discussion, and testing.
