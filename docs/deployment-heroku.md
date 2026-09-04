@@ -1,4 +1,4 @@
-﻿# Heroku Deployment
+# Heroku Deployment
 
 Free-tier eligible. Uses a single Eco Dyno with the embedded SQLite database — no paid add-ons required.
 
@@ -27,10 +27,8 @@ Set these in the Heroku app wizard or under **Settings → Config Vars**:
 
 ---
 
-## GitHub Actions Auto-Deploy
-
-The included `.github/workflows/heroku-deploy.yml` syncs GitHub Secrets to Heroku config vars on every push to `main`. Add these GitHub Secrets to your repo:
-
+## Deployment
+Deployments can be pushed directly via the Heroku Git remote or Heroku CLI container/app push once configured with the required environment variables:
 - `HEROKU_API_KEY` — from Heroku Account Settings
 - `HEROKU_APP_NAME` — your Heroku app name
 - `DISCORD_TOKEN`, `DISCORD_CLIENT_ID`, `DISCORD_CLIENT_SECRET`, `NEXTAUTH_SECRET`
