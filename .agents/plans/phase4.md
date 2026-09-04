@@ -1,56 +1,27 @@
-# HELIX CLI - Phase 4: AI Agent Integrations & Credential Discovery
+﻿# HELIX - Phase 4: Web Dashboard & NextAuth OAuth2 Infrastructure
 
 ## Goals & Objectives
-Integrate AI agent runtimes (**Google Antigravity CLI**, **Open Code Go/Zen**, and **GitHub Copilot**) into HELIX CLI with automatic client credential discovery and `.env` fallback handling.
+Build the companion web dashboard and HTTP server (`src/server.ts`) providing Discord OAuth2 authentication, guild management, system statistics, and REST endpoints.
 
-## Credential Waterfall Strategy
+---
+
+## Sub-Issues & Milestone Breakdown
 
 ```mermaid
 flowchart TD
-    A["CLI Request with AI Tool"] --> B{"Check Local Client"}
-    B -->|"Copilot: gh auth token / hosts.json"| C["Authenticate Copilot"]
-    B -->|"Antigravity: ~/.gemini/antigravity/"| D["Authenticate Antigravity"]
-    B -->|"OpenCode: ~/.opencode/auth.json"| E["Authenticate OpenCode"]
-    B -->|"Not Found"| F{"Check .env Fallback"}
-    F -->|"Found in .env"| G["Authenticate via API Key"]
-    F -->|"Not Found in .env"| H["Graceful Degradation / Inform User"]
+    P4["Phase 4: Web Dashboard"] --> Sub1["Sub-Issue 1: Native HTTP Callback Server (src/server.ts)"]
+    P4 --> Sub2["Sub-Issue 2: NextAuth-Compatible Discord OAuth2 Route"]
+    P4 --> Sub3["Sub-Issue 3: Responsive Dark-Mode Dashboard UI (HTML/CSS/JS)"]
+    P4 --> Sub4["Sub-Issue 4: REST API Endpoints (/api/stats, /api/guilds, /health)"]
 ```
 
-## Features to Implement
+- [x] **Sub-Issue 1: HTTP Server**: Native Node.js `http` server integrated into the bot process.
+- [x] **Sub-Issue 2: NextAuth OAuth2**: Endpoint `/api/auth/callback/discord` with state verification and session exchange.
+- [x] **Sub-Issue 3: Dashboard UI**: Responsive dark-mode dashboard (`dashboard/index.html`) displaying bot health, guild list, and active plugins.
+- [x] **Sub-Issue 4: API Endpoints**: Endpoints `/api/stats`, `/api/guilds`, `/api/plugins`, and `/health`.
 
-### 1. `CredentialResolver` Module
-- **GitHub Copilot**:
-  - Run `gh auth token` synchronously to leverage existing GitHub CLI logins.
-  - Check platform-specific config paths:
-    - Windows: `%APPDATA%\GitHub Copilot\hosts.json`
-    - macOS/Linux: `~/.config/github-copilot/hosts.json`
-  - Fallback to `GITHUB_TOKEN` or `COPILOT_API_KEY` in `.env`.
-- **Google Antigravity CLI**:
-  - Detect active Antigravity session from `~/.gemini/antigravity/`.
-  - Fallback to `ANTIGRAVITY_API_KEY` or `GEMINI_API_KEY` in `.env`.
-- **Open Code Go / Zen**:
-  - Detect client session from `~/.opencode/auth.json`.
-  - Fallback to `OPENCODE_API_KEY` in `.env`.
+---
 
-### 2. `helix ai` CLI Subcommands
-```bash
-# Display authenticated status for each AI client
-helix ai status
-
-# Output example:
-# [✓] GitHub Copilot: Authenticated (via GitHub CLI)
-# [✓] Google Antigravity: Authenticated (via .env GEMINI_API_KEY)
-# [✗] Open Code: Unauthenticated (client not detected, OPENCODE_API_KEY missing)
-
-# Run a test query or verify connection
-helix ai test copilot
-helix ai test antigravity
-helix ai test opencode
-```
-
-### 3. Context-Aware Prompt Synthesis
-- Ability to package current project context (project type, framework, dependencies, files) to supply as rich context for AI agents when answering queries or generating code.
-
-## Completion Criteria
-- `helix ai status` correctly reports client detection or `.env` fallback across all three providers.
-- When no clients or keys are available, CLI gracefully suggests adding keys to `.env` without throwing uncaught exceptions.
+## Verification & Criteria
+1. Web dashboard loads cleanly and handles Discord OAuth2 redirects without external web frameworks.
+2. Unit tests verify HTTP routing, session creation, and API payloads.

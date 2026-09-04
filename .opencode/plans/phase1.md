@@ -1,26 +1,33 @@
-# HELIX CLI - Phase 1: Core Foundation & Agent Ecosystem
+﻿# HELIX - Phase 1: Core Foundation & Agent Ecosystem
 
 ## Goals & Objectives
-Establish the universal agent foundation for HELIX CLI across all targeted project domains, languages, game engines, and AI ecosystems.
+Establish the universal multi-assistant agent ecosystem, mandatory architecture rules, framework skills, and documentation for HELIX.
 
-## Deliverables
-- [x] Standard multi-assistant folder structure: `.agents/`, `.copilot/`, `.gemini/`, `.opencode/`.
-- [x] Comprehensive root documentation: `AGENTS.md`.
-- [x] Detailed agent definitions for all project types:
-  - `discord-bot.md`
-  - `web.md`
-  - `desktop.md`
-  - `mobile.md`
-  - `game-engine.md`
-  - `backend.md`
-  - `ai-agents.md`
-- [x] Skills knowledge base covering all languages, engines, and frameworks (19 skills + index).
-- [x] Multi-tiered AI agent credential discovery architecture (Copilot, Antigravity, Open Code, with `.env` fallback).
-- [x] Bug tracking system with template and initial tracked issues.
-- [x] Reusable YML templates catalog with index.
-- [x] Blueprint and testing strategy for the `tests/` directory suite.
+---
+
+## Sub-Issues & Milestone Breakdown
+
+```mermaid
+flowchart TD
+    P1["Phase 1: Agent Ecosystem"] --> Sub1["Sub-Issue 1: Universal Multi-Agent Layout (.agents, .copilot, .gemini, .opencode)"]
+    P1 --> Sub2["Sub-Issue 2: Core Mandatory Rules (Rules 00-05)"]
+    P1 --> Sub3["Sub-Issue 3: Framework & Language Skills Knowledge Base (21 Skills)"]
+    P1 --> Sub4["Sub-Issue 4: AGENTS.md Landing & GitHub Issues Bug Tracking Standard"]
+```
+
+- [x] **Sub-Issue 1: Multi-Agent Layout**: Universal directory structure across `.agents/`, `.copilot/`, `.gemini/`, and `.opencode/`.
+- [x] **Sub-Issue 2: Architecture Rules**: Established non-negotiable invariants:
+  - `00-agent-safety-compliance.md`
+  - `01-zero-ai-architecture.md`
+  - `02-discord-bot-architecture.md`
+  - `03-message-formatting.md`
+  - `04-remote-issue-protocol.md`
+  - `05-documentation-standards.md`
+- [x] **Sub-Issue 3: Skills Base**: 21 language and framework skill guides.
+- [x] **Sub-Issue 4: Bug Tracking & Docs**: Standardized GitHub Issues mirror and `AGENTS.md`.
+
+---
 
 ## Verification & Criteria
-1. All agent and skill markdown files are populated with concrete architectures, commands, and code samples.
-2. Relative paths and markdown links between agents, skills, plans, bugs, and templates resolve accurately.
-3. OpenCode configuration (`opencode.json`) maps all registered agents, skills, plans, and templates.
+1. Multi-assistant directories are tracked in version control and synchronized.
+2. Architecture rules enforce zero external AI dependencies and vanilla discord.js standards.

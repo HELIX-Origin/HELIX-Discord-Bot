@@ -1,26 +1,23 @@
-# HELIX -- Project Roadmap
+﻿# HELIX -- Project Roadmap
 
 ```mermaid
 flowchart TD
-    subgraph Core ["Core Infrastructure"]
-        P1["Phase 1: Architecture & Agent Ecosystem ✅"]
-        P2["Phase 2: TypeScript CLI & Scaffolding Engine ✅"]
-        P3["Phase 3: Multi-Framework Templates & Generators ✅"]
+    subgraph Foundation ["Core Foundation"]
+        P1["Phase 1: Agent Ecosystem & Universal Foundation ✅"]
+        P2["Phase 2: Project Scaffolding Engine & Templates ✅"]
+        P3["Phase 3: Database & Autonomous Schema Migrations ✅"]
     end
 
-    subgraph Platform ["Platform & Quality"]
-        P4["Phase 4: Code Hosting Platform Integrations ✅"]
-        P5["Phase 5: Testing Suite & Verification ✅"]
-        P6["Phase 6: Packaging, Docker & Production Release ✅"]
+    subgraph BotCore ["Bot Core & Web Dashboard"]
+        P4["Phase 4: Web Dashboard & NextAuth OAuth2 ✅"]
+        P5["Phase 5: Discord Bot Gateway Client & Commands ✅"]
+        P6["Phase 6: Production Packaging, Docker & Deploy ✅"]
     end
 
-    subgraph Discord ["Discord Bot Architecture"]
-        P7["Phase 7: Full Discord Bot Architecture Transition ✅"]
-        P8["Phase 8: Language Plugin System & Code Intelligence ✅"]
-    end
-
-    subgraph Community ["Community Ecosystem"]
-        P9["Phase 9: Plugin Template Repository & SDK ✅"]
+    subgraph Intelligence ["Code Intelligence & Community"]
+        P7["Phase 7: Full Bot Architecture Stabilization ✅"]
+        P8["Phase 8: Language Plugin System & Intelligence Engine ✅"]
+        P9["Phase 9: Plugin Template Repository & Ecosystem ✅"]
     end
 
     P1 --> P2 --> P3 --> P4 --> P5 --> P6 --> P7 --> P8 --> P9
@@ -28,59 +25,91 @@ flowchart TD
 
 ---
 
-### [Phase 1](phase1.md) — Core Foundation & Agent Ecosystem
+## Phase Milestones & GitHub Tracking
+
+```mermaid
+flowchart LR
+    P7Plan["Phase 7 (#4)"] --> Sub5["#5: Auth & Config"]
+    P7Plan --> Sub6["#6: Command Suite"]
+    P7Plan --> Sub7["#7: Bot Core Migration"]
+    P7Plan --> Sub8["#8: Verification & DB"]
+
+    P8Plan["Phase 8 (#11)"] --> P8Sub1["Sub 1: Plugin Architecture"]
+    P8Plan --> P8Sub2["Sub 2: Ingestion & Source Providers"]
+    P8Plan --> P8Sub3["Sub 3: 13 Built-in Plugins"]
+    P8Plan --> P8Sub4["Sub 4: messages.json Engine"]
+
+    P9Plan["Phase 9 (#12)"] --> P9Sub1["Sub 1: Starter Template SDK"]
+    P9Plan --> P9Sub2["Sub 2: Plugin Authoring Guide"]
+    P9Plan --> P9Sub3["Sub 3: Vitest Test Harness"]
+    P9Plan --> P9Sub4["Sub 4: Community Docs"]
+```
+
+| Phase | Milestone Name | Status | GitHub Issue | Sub-Issues |
+|-------|----------------|--------|--------------|------------|
+| **Phase 1** | Agent Ecosystem & Universal Foundation | Completed | N/A | 4 Sub-Tasks |
+| **Phase 2** | Project Scaffolding Engine & Templates | Completed | N/A | 4 Sub-Tasks |
+| **Phase 3** | Database & Autonomous Schema Migrations | Completed | N/A | 4 Sub-Tasks |
+| **Phase 4** | Web Dashboard & NextAuth OAuth2 | Completed | N/A | 4 Sub-Tasks |
+| **Phase 5** | Discord Bot Gateway Client & Commands | Completed | N/A | 4 Sub-Tasks |
+| **Phase 6** | Production Packaging, Docker & Deploy | Completed | N/A | 4 Sub-Tasks |
+| **Phase 7** | Full Bot Architecture Stabilization | Completed | [#4](https://github.com/HELIX-Origin/HELIX/issues/4) | [#5](https://github.com/HELIX-Origin/HELIX/issues/5), [#6](https://github.com/HELIX-Origin/HELIX/issues/6), [#7](https://github.com/HELIX-Origin/HELIX/issues/7), [#8](https://github.com/HELIX-Origin/HELIX/issues/8) |
+| **Phase 8** | Language Plugin System & Intelligence Engine | Completed | [#11](https://github.com/HELIX-Origin/HELIX/issues/11) | 4 Sub-Tasks |
+| **Phase 9** | Plugin Template Repository & Ecosystem | Completed | [#12](https://github.com/HELIX-Origin/HELIX/issues/12) | 4 Sub-Tasks |
+
+---
+
+### [Phase 1](phase1.md) — Agent Ecosystem & Universal Foundation
 - [x] Universal agent directory structure (`.agents/`, `.copilot/`, `.gemini/`, `.opencode/`)
-- [x] Agent definitions for all project types (discord-bot, web, desktop, mobile, game-engine, backend, code-hosting)
-- [x] 21 framework/language skills
-- [x] Bug tracking framework
-- [x] YML template catalog with index
+- [x] Mandatory rules: Zero-AI runtime (`01`), Discord bot architecture (`02`), messages.json (`03`), GitHub issues protocol (`04`), documentation standards (`05`)
+- [x] 21 framework and language skills knowledge base
+- [x] Bug tracking index with GitHub Issues synchronization
 
-### [Phase 2](phase2.md) — TypeScript CLI Architecture & Scaffolding Engine
-- [x] TypeScript project config, commander CLI, interactive prompts
-- [x] File system generator with atomic writes
-- [x] Template engine with variable substitution and binary file safety
+### [Phase 2](phase2.md) — Project Scaffolding Engine & Templates
+- [x] Scaffolding engine with template variable interpolation (`TemplateEngine`)
+- [x] Binary asset safe bypass (`isBinaryFile`)
+- [x] 17 production-ready starter templates across Web, Desktop, Mobile, Game, and Backend domains
+- [x] Scaffolding Discord commands (`>project create`, `>project scaffold`)
 
-### [Phase 3](phase3.md) — Project Type Generators & Template System
-- [x] Generators for: Discord bot, Web (React/Vue), Desktop (Electron/Tauri), Mobile (Flutter/RN), Game Engines (Unity/Godot/RPGM/Ren'\''Py), Backend (Rust/Go/Java/Python)
-- [x] CI/CD pipeline templates (GitHub Actions, GitLab CI, Bitbucket Pipelines)
+### [Phase 3](phase3.md) — Database & Autonomous Schema Migrations
+- [x] SQLite database singleton (`BotDatabase`) using `better-sqlite3`
+- [x] Autonomous schema migrations on boot (`migrations.ts`)
+- [x] Tables: `guild_settings`, `tickets`, `moderation_logs`, `warnings`, `user_settings`, `user_sessions`, `bot_kv`
+- [x] Per-guild configuration persistence (custom prefix, ticket hub, mod log channel)
 
-### [Phase 4](phase4.md) — Code Hosting Platform Integrations
-- [x] GitHub CLI (`gh`), GitLab CLI (`glab`), Bitbucket automation
-- [x] Remote repo creation, auth discovery
+### [Phase 4](phase4.md) — Web Dashboard & NextAuth OAuth2
+- [x] Native Node.js HTTP server (`src/server.ts`)
+- [x] NextAuth Discord OAuth2 callback handler (`/api/auth/callback/discord`)
+- [x] Responsive dark-mode dashboard HTML/CSS/JS (`dashboard/index.html`)
+- [x] REST API endpoints (`/api/stats`, `/api/guilds`, `/api/plugins`, `/health`)
 
-### [Phase 5](phase5.md) — Testing Suite & Verification
-- [x] Vitest infrastructure with TypeScript ESM
-- [x] Unit tests: CLI parsers, template substitution, validation
-- [x] Integration tests: end-to-end scaffolding per domain
-- [x] 63/63 tests passing across 16 test suites
+### [Phase 5](phase5.md) — Discord Bot Gateway Client & Commands
+- [x] Vanilla discord.js v14 client architecture (`HelixBotClient`)
+- [x] 25 commands across 5 categories (`mod`, `util`, `info`, `project`, `config`)
+- [x] Thread-based ticket system with interactive buttons and modals
+- [x] Unified `execute(context)` execution supporting prefix (`>`) and slash commands
 
-### [Phase 6](phase6.md) — Packaging, Docker & Production Release
-- [x] Dual ESM build (`dist/index.js`, `dist/bot/index.js`) via tsup
-- [x] Docker multi-stage image + Docker Compose with SQLite volume
-- [x] GitHub Actions CI/CD: matrix tests, Heroku deploy, npm release
+### [Phase 6](phase6.md) — Production Packaging, Docker & Deploy
+- [x] Production multi-stage Docker image (`node:22-bookworm-slim`)
+- [x] Docker Compose with persistent SQLite volume (`./data:/app/data`)
+- [x] GitHub Actions CI matrix runner across Ubuntu, Windows, macOS
 - [x] Resolved BUG-001, BUG-002, BUG-003
 
-### [Phase 7](phase7.md) — Full Discord Bot Architecture Transition
-- [x] Standalone vanilla discord.js bot with TypeScript
-- [x] 25 commands across 5 categories (mod, util, info, project, config)
-- [x] Per-guild configurable prefix (default `>`)
-- [x] Thread-based ticket system with button/modal interactions
-- [x] SQLite database with autonomous schema migrations
-- [x] OAuth2 callback server and web dashboard
-- [x] Plugin system infrastructure (types, manifest, loader, registry)
-- [x] Resolved BUG-004 (URL auto-resolution), BUG-005 (TypeScript strict mode)
+### [Phase 7](phase7.md) — Full Bot Architecture Stabilization
+- [x] Complete transition to standalone Discord bot architecture (GitHub Issue [#4](https://github.com/HELIX-Origin/HELIX/issues/4))
+- [x] Multi-platform dynamic URL auto-detection in `src/env.ts` (Resolved BUG-004)
+- [x] TypeScript strict mode type safety and type narrowing (Resolved BUG-005)
+- [x] Resolved sub-issues #5, #6, #7, #8
 
-### [Phase 8](phase8.md) — Language Plugin System & Code Intelligence Engine
-- [x] Built-in TypeScript plugin (TS Compiler API diagnostics)
-- [x] Built-in JavaScript plugin (ESLint-compatible rules)
-- [x] Built-in Python plugin (AST pattern matching)
-- [x] Built-in plugins: C#, GDScript, Rust, Go, Java, PHP, SQL, HTML/CSS, Flutter/Dart, Lua
-- [x] Discord commands: `/lint`, `/explain`, `/docs`
-- [x] GitHub-hosted community plugin installer (`>plugin install`)
-- [x] Centralized message formatting engine (`messages.json`)
+### [Phase 8](phase8.md) — Language Plugin System & Intelligence Engine
+- [x] Zero-AI local language plugin architecture (GitHub Issue [#11](https://github.com/HELIX-Origin/HELIX/issues/11))
+- [x] Universal multi-source code ingestion (Chat codeblocks, Discord attachments, GitHub, GitLab, Bitbucket, Pastebins)
+- [x] 13 built-in language plugins (`typescript`, `python`, `rust`, `go`, `java`, `csharp`, etc.)
+- [x] Bot commands: `>lint`, `>explain`, `>debug`, `>refactor`, `>generate`, `>inspect`, `>docs`
+- [x] Centralized message formatting engine (`messages.json` + `message-handler.ts`, Resolved BUG-006)
 
-### [Phase 9](phase9.md) — Plugin Template Repository & Community Ecosystem
-- [x] Official template repo architecture (`HELIX-Origin/helix-plugin-template`)
-- [x] Boilerplate plugin structure, tests, and CI validator specifications
-- [x] Comprehensive community documentation (`docs/plugin-authoring.md`)
-- [x] Pluggable custom source providers and language intelligence dispatchers
+### [Phase 9](phase9.md) — Plugin Template Repository & Ecosystem
+- [x] Template repository specification (`HELIX-Origin/helix-plugin-template`) (GitHub Issue [#12](https://github.com/HELIX-Origin/HELIX/issues/12))
+- [x] Pluggable `SourceProvider` registration for custom code repositories
+- [x] Comprehensive community plugin authoring guide (`docs/plugin-authoring.md`)
+- [x] Public plugin installation via `>plugin install <owner/repo>`

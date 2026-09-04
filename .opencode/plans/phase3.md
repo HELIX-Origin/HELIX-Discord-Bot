@@ -1,45 +1,27 @@
-# HELIX CLI - Phase 3: Project Type Generators & Multi-Framework Template System
+﻿# HELIX - Phase 3: Database Architecture & Autonomous Schema Migrations
 
 ## Goals & Objectives
-Implement concrete project scaffolding generators for all supported domains, languages, frameworks, and game engines using the YML template catalog.
+Design and implement the embedded SQLite database singleton (`BotDatabase`) with zero-configuration autonomous schema migrations on boot.
 
-## Generators to Implement
+---
 
-### 1. Discord Bot Generator
-- **Stack**: TypeScript, discord.js v14
-- **Features**: Slash commands (`/ping`, `/info`), event handlers (`ready`, `interactionCreate`), gateway intent configuration, `.env` file generation.
+## Sub-Issues & Milestone Breakdown
 
-### 2. Web Application Generators
-- **React**: Vite + React 19 + TypeScript + Tailwind CSS option.
-- **Vue 3**: Vite + Vue 3 + TypeScript + Pinia.
-- **Svelte**: Vite + Svelte 5 + TypeScript.
-- **Angular**: Angular standalone components template.
+```mermaid
+flowchart TD
+    P3["Phase 3: Database Architecture"] --> Sub1["Sub-Issue 1: SQLite Singleton & Connection Manager"]
+    P3 --> Sub2["Sub-Issue 2: Autonomous Schema Migration System (migrations.ts)"]
+    P3 --> Sub3["Sub-Issue 3: Guild & User Settings Persistence Layer"]
+    P3 --> Sub4["Sub-Issue 4: Moderation Logs, Warnings & Tickets Store"]
+```
 
-### 3. Desktop Application Generators
-- **Electron**: Vite + Electron + TypeScript + secure context isolation preload.
-- **Tauri v2**: Tauri CLI + Rust backend + Vite frontend.
+- [x] **Sub-Issue 1: Database Singleton**: `src/db/database.ts` using `better-sqlite3` with WAL mode and fast queries.
+- [x] **Sub-Issue 2: Autonomous Migrations**: Automatic forward schema migrations executed on bot startup.
+- [x] **Sub-Issue 3: Settings Persistence**: Tables `guild_settings`, `user_settings`, `user_sessions`, and `bot_kv`.
+- [x] **Sub-Issue 4: Operational Data**: Tables `tickets`, `moderation_logs`, `warnings`, and `scaffold_history`.
 
-### 4. Mobile Application Generators
-- **Flutter**: Clean directory layout + Riverpod counter starter.
-- **React Native / Expo**: Expo Router tabs starter with TypeScript.
+---
 
-### 5. Game Engine Generators
-- **Unity**: Standard folder hierarchy (`Assets/Scripts`, `Scenes`, `Prefabs`) + C# assembly definition + starter player controller.
-- **Godot 4**: `project.godot` manifest + 2D character controller GDScript + starter scene `.tscn`.
-- **RPG Maker MZ**: Plugin template with structured JSDoc header, plugin parameters, and command hooks.
-- **Ren'Py**: Visual novel skeleton with `game/script.rpy`, character declarations, dialogue branching, and Python item state.
-
-### 6. Backend Services Generators
-- **Rust**: Cargo binary with Axum HTTP server and Tokio runtime.
-- **Go**: Standard Go layout (`cmd/server`, `internal/`) with Go 1.22+ `http.ServeMux`.
-- **Java**: Maven + Spring Boot 3 + Java 21 REST endpoint starter.
-- **Python**: Modern `uv init` + FastAPI + Pydantic v2 + ruff configuration.
-
-## Tasks & Deliverables
-- [x] Connect `helix create` command to load corresponding `.yml` template from `.agents/templates/`.
-- [x] Execute template pre-hooks and post-hooks (e.g. `npm install`, `cargo check`, `flutter pub get`).
-- [x] Implement git repository initialization (`git init` with proper `.gitignore`).
-- [x] Add post-scaffold summary banner showing next steps to launch the project.
-
-## Completion Criteria
-- Creating each of the 14 project templates produces a runnable, syntax-valid project in an isolated directory.
+## Verification & Criteria
+1. Database automatically initializes in `data/helix-bot.sqlite` on first run without external DB servers.
+2. Unit tests verify CRUD operations and schema integrity across migrations.

@@ -96,13 +96,13 @@ Non-negotiable invariants for all AI coding assistants:
 
 ## Plan Tracking (`.agents/plans/`)
 
-- [roadmap.md](.agents/plans/roadmap.md) — Master 8-phase roadmap
+- [roadmap.md](.agents/plans/roadmap.md) — Master 9-phase roadmap
 - [phase1.md](.agents/plans/phase1.md) — Core Foundation & Agent Ecosystem
-- [phase2.md](.agents/plans/phase2.md) — TypeScript CLI Architecture & Scaffolding Engine
-- [phase3.md](.agents/plans/phase3.md) — Project Type Generators & Template System
-- [phase4.md](.agents/plans/phase4.md) — Code Hosting Platform Integrations
-- [phase5.md](.agents/plans/phase5.md) — Testing Suite & Verification
-- [phase6.md](.agents/plans/phase6.md) — Packaging, Docker & Production Release
+- [phase2.md](.agents/plans/phase2.md) — Project Scaffolding Engine & Template System
+- [phase3.md](.agents/plans/phase3.md) — Database Architecture & Autonomous Schema Migrations
+- [phase4.md](.agents/plans/phase4.md) — Web Dashboard & NextAuth OAuth2 Infrastructure
+- [phase5.md](.agents/plans/phase5.md) — Discord Bot Gateway Client & Core 25 Commands
+- [phase6.md](.agents/plans/phase6.md) — Production Packaging, Docker & Deployment
 - [phase7.md](.agents/plans/phase7.md) — Full Discord Bot Architecture Transition
 - [phase8.md](.agents/plans/phase8.md) — Language Plugin System & Code Intelligence Engine
 - [phase9.md](.agents/plans/phase9.md) — Plugin Template Repository & Community Ecosystem

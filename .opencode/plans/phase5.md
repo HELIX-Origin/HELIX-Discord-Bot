@@ -1,69 +1,32 @@
-# HELIX CLI - Phase 5: Testing Suite & Verification Infrastructure
+﻿# HELIX - Phase 5: Discord Bot Gateway Client & Core Commands
 
 ## Goals & Objectives
-Establish a comprehensive automated testing suite inside the `tests/` directory to debug, test, and verify all CLI commands, template generation, template parsing, and AI credential resolution across operating systems.
+Implement the standalone vanilla `discord.js v14` gateway client (`HelixBotClient`) and complete suite of 25 developer community commands across 5 categories.
 
-## `tests/` Directory Architecture
+---
 
-```
-tests/
-├── README.md                 # Testing documentation, guidelines, and commands
-├── unit/                     # Fast in-memory unit tests
-│   ├── cli-parser.test.ts    # Argument & flag parsing tests
-│   ├── template-engine.test.ts # Variable substitution & conditional logic
-│   ├── auth-copilot.test.ts  # GitHub CLI / Copilot auth discovery
-│   ├── auth-antigravity.test.ts # Antigravity config & env fallback
-│   └── auth-opencode.test.ts # OpenCode config & env fallback
-├── integration/              # Integration tests interacting with file system
-│   ├── create-discord.test.ts# Discord bot project generation in temp dir
-│   ├── create-web.test.ts    # Web React/Vue/Svelte project generation
-│   ├── create-desktop.test.ts# Electron/Tauri scaffolding
-│   ├── create-mobile.test.ts # Flutter/React Native scaffolding
-│   ├── create-games.test.ts  # Unity/Godot/RPGM/RenPy scaffolding
-│   └── create-backend.test.ts# Rust/Go/Java/Python scaffolding
-├── fixtures/                 # Static mock data & mock environments
-│   ├── mock-configs/         # Mock hosts.json, auth.json, .env files
-│   ├── mock-templates/       # Valid and invalid sample YML templates
-│   └── expected-trees/       # Golden file trees for output verification
-└── helpers/                  # Test helpers
-    ├── temp-dir.ts           # Isolated temp sandbox creation & cleanup
-    └── mock-env.ts           # Environment variable mocker
+## Sub-Issues & Milestone Breakdown
+
+```mermaid
+flowchart TD
+    P5["Phase 5: Discord Bot Core"] --> Sub1["Sub-Issue 1: Vanilla discord.js Gateway Client & Event Dispatcher"]
+    P5 --> Sub2["Sub-Issue 2: Unified CommandContext & Execution Pipeline"]
+    P5 --> Sub3["Sub-Issue 3: Core 25 Commands Suite (Mod, Util, Info, Project, Config)"]
+    P5 --> Sub4["Sub-Issue 4: Thread-Based Support Ticket System (Buttons & Modals)"]
 ```
 
-## Testing Technologies & Tools
-- **Test Runner**: Vitest (ESM native, ultra-fast parallel execution).
-- **Assertions & Spies**: Vitest built-in `describe`, `it`, `expect`, `vi.fn()`, `vi.spyOn()`.
-- **Process Testing**: `execa` for spawning the compiled CLI binary in sub-processes.
-- **File Verification**: `memfs` or real temporary directories via Node `fs/promises.mkdtemp`.
+- [x] **Sub-Issue 1: Gateway Client**: `src/client.ts` with typed gateway intent management and event routing.
+- [x] **Sub-Issue 2: Unified Pipeline**: `execute(context)` interface handling prefix (`>`) and slash commands transparently.
+- [x] **Sub-Issue 3: Command Suite**:
+  - `mod/`: `kick`, `ban`, `unban`, `timeout`, `untimeout`, `purge`, `warn`
+  - `util/`: `ping`, `avatar`, `serverinfo`, `userinfo`, `poll`, `snowflake`, `remind`
+  - `info/`: `help`, `info`, `status`, `list`
+  - `project/`: `create`, `scaffold`
+  - `config/`: `set`, `ticket`, `plugin`
+- [x] **Sub-Issue 4: Ticket System**: Interactive buttons, modal inputs, private thread creation, and transcript generation.
 
-## Test Scenarios & Suites
+---
 
-### 1. Template Engine & Variable Interpolation
-- Test substitution of single `${VAR}` and multiple variables in the same file.
-- Test missing required variables throwing descriptive errors.
-- Test default variable fallbacks when optional variables are not supplied.
-
-### 2. AI Credential Resolution Waterfall
-- Test client auth discovered when `gh auth token` succeeds.
-- Test client auth discovered when `hosts.json` exists in mock app data.
-- Test fallback to `.env` when client is not installed.
-- Test graceful failure and `authenticated: false` when neither is found.
-
-### 3. End-to-End Scaffolding Verification
-- For each supported template, run CLI in a clean temp directory with `--skip-install --skip-git`.
-- Verify expected files exist (e.g. `package.json`, `src/index.ts`, `.env.example`).
-- Verify generated source files contain no un-interpolated `${...}` placeholders.
-
-## Verification Commands
-```bash
-# Run all unit and integration tests
-npm test
-
-# Run tests in watch mode
-npm run test:watch
-```
-
-## Completion Status
-- [x] Vitest configuration (`vitest.config.ts`) established with TypeScript ESM support.
-- [x] 16 test suites implemented and passing across `tests/unit/` and `tests/integration/`.
-- [x] 63 tests verifying CLI scaffolding, AI context, NextAuth dashboard, bot slash commands, SQLite database, dynamic invite URLs, and decoupled bot structure.
+## Verification & Criteria
+1. All commands respond to both prefix and slash invocations.
+2. Thread tickets execute interactively via Discord UI components.

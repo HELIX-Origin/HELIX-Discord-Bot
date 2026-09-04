@@ -3,26 +3,22 @@
 ## Goals & Strategic Vision
 Replace AI-dependent code assistance with a plugin-based language intelligence system that uses official documentation, built-in linters, and static analysis. The bot provides code support without requiring paid APIs or external AI authentication. Users can host their own language plugins via GitHub repositories.
 
+## GitHub Issue & Sub-Issues Tracking
+- **Parent GitHub Issue**: [#11 Language Plugin System & Code Intelligence Engine (Phase 8)](https://github.com/HELIX-Origin/HELIX/issues/11)
+- **Status**: Completed / Resolved
+
 ```mermaid
 flowchart TD
-    A["User sends code in Discord"] --> B{"Language Detection"}
-    B --> C["Plugin Router"]
-    C --> D["Language Plugin"]
-    D --> E["Official Documentation Cross-Reference"]
-    D --> F["Built-in Linter / AST Parser"]
-    D --> G["Code Pattern Database"]
-    E --> H["Structured Response"]
-    F --> H
-    G --> H
-    H --> I["Discord Reply with Errors, Fixes, & Docs Links"]
-
-    subgraph PluginSystem ["Plugin System"]
-        J["Plugin Registry"] --> C
-        K["Built-in Plugins"] --> J
-        L["GitHub-hosted User Plugins"] --> J
-        M["Plugin Installer"] --> J
-    end
+    P8["Phase 8: Plugin System (#11)"] --> Sub1["Sub-Issue 1: Core Plugin Architecture & Manifest Schemas"]
+    P8 --> Sub2["Sub-Issue 2: Universal Multi-Source Ingestion & Pluggable SourceProviders"]
+    P8 --> Sub3["Sub-Issue 3: Built-in Language Plugins & Bot Commands"]
+    P8 --> Sub4["Sub-Issue 4: Centralized messages.json Formatting Engine & Vitest Suite"]
 ```
+
+- [x] **Sub-Issue 1**: Core Plugin Architecture, `LanguagePlugin` interface, and manifest validation (`#11-sub1`)
+- [x] **Sub-Issue 2**: Pluggable `SourceProvider` system supporting GitHub, GitLab, Bitbucket, Gists, and Pastebins (`#11-sub2`)
+- [x] **Sub-Issue 3**: Built-in language plugins (`typescript`, `python`, `rust`, `go`, `java`, `csharp`) and commands (`>lint`, `>explain`, `>debug`, `>refactor`, `>generate`, `>inspect`, `>docs`) (`#11-sub3`)
+- [x] **Sub-Issue 4**: Centralized formatting engine (`messages.json`), Vitest test suite, and typecheck verification (`#11-sub4`)
 
 ---
 

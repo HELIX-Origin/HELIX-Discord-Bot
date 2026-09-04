@@ -3,18 +3,22 @@
 ## Goals & Strategic Vision
 Create a dedicated starter template repository (`HELIX-Origin/helix-plugin-template`) that community developers can fork or clone to build, test, and publish their own language plugins for the HELIX Discord bot. When the bot core and built-in plugins are completed, this template repository will serve as the official boilerplate for third-party language tools, AST linters, and documentation providers.
 
+## GitHub Issue & Sub-Issues Tracking
+- **Parent GitHub Issue**: [#12 Plugin Template Repository & Community Ecosystem (Phase 9)](https://github.com/HELIX-Origin/HELIX/issues/12)
+- **Status**: Completed / Resolved
+
 ```mermaid
 flowchart TD
-    A[Community Developer] -->|1. Use GitHub Template| B[helix-plugin-template Repo]
-    B -->|2. Define config.json| C[Root Repo Manifest]
-    B -->|3. Implement LanguagePlugin| D[Custom Plugin Folder]
-    D --> E[plugin.json]
-    D --> F[linter.ts / parser]
-    D --> G[docs-cache.ts]
-    B -->|4. Test locally with Vitest| H[Built-in Plugin Test Harness]
-    B -->|5. Publish to GitHub| I[Public GitHub Repository]
-    I -->|6. Install in Discord| J[HELIX Bot: >plugin install user/repo]
+    P9["Phase 9: Community Ecosystem (#12)"] --> Sub1["Sub-Issue 1: Template Repository & SDK Specification"]
+    P9 --> Sub2["Sub-Issue 2: Comprehensive End-User Documentation (docs/plugin-authoring.md)"]
+    P9 --> Sub3["Sub-Issue 3: Verification & Vitest Test Harness Specification"]
+    P9 --> Sub4["Sub-Issue 4: Pluggable Source Providers Ecosystem & Multi-Agent Mirror"]
 ```
+
+- [x] **Sub-Issue 1**: Template repository structure, `config.json`, and `plugin.json` schemas (`#12-sub1`)
+- [x] **Sub-Issue 2**: Comprehensive community authoring guide in `docs/plugin-authoring.md` and `docs/plugin-system.md` (`#12-sub2`)
+- [x] **Sub-Issue 3**: Schema validation, test fixtures, and interface compliance checks (`#12-sub3`)
+- [x] **Sub-Issue 4**: Source providers registration, Discord command dispatching, and multi-agent plan synchronization (`#12-sub4`)
 
 ---
 

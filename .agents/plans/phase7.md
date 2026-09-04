@@ -3,34 +3,22 @@
 ## Goals & Strategic Vision
 Transition the HELIX repository from a dual CLI / companion bot into a dedicated, standalone **Discord bot project** named **HELIX**. The bot serves developer Discord communities with code intelligence (via language plugins), moderation tools, thread-based ticketing, server utilities, and unified guild/user settings.
 
+## GitHub Issue & Sub-Issues Tracking
+- **Parent GitHub Issue**: [#4 Full Discord Bot Architecture Transition (Phase 7)](https://github.com/HELIX-Origin/HELIX/issues/4)
+- **Status**: Completed / Resolved
+
 ```mermaid
 flowchart TD
-    subgraph ClientArchitecture ["Client Architecture"]
-        A["Discord Client Interaction"] --> B{"Interaction Router"}
-        B --> B1["Prefix Command Handler"]
-        B --> B2["Slash Command Handler"]
-        B --> B3["Button/Modal Interactions"]
-    end
-
-    subgraph CommandSuites ["Command Suites"]
-        B1 --> C["mod, util, info, project, config"]
-        B2 --> C
-        B3 --> D["Ticket Interactions"]
-    end
-
-    subgraph CodeIntelligence ["Code Intelligence (Phase 8)"]
-        C --> E{"Language Plugin Router"}
-        E --> F["TypeScript Plugin"]
-        E --> G["Python Plugin"]
-        E --> H["JavaScript Plugin"]
-        E --> I["Community Plugins via GitHub"]
-    end
-
-    subgraph StorageLifecycle ["Storage & Lifecycle"]
-        C --> J[("SQLite Database")]
-        K["Autonomous Schema Migration on Boot"] --> J
-    end
+    P7["Phase 7: Architecture Transition (#4)"] --> Sub1["#5: Environment Config & Platform URL Auto-Detection"]
+    P7 --> Sub2["#6: Core Command Suite (25 Commands across 5 Categories)"]
+    P7 --> Sub3["#7: Bot Core Migration (Vanilla discord.js & Client Factory)"]
+    P7 --> Sub4["#8: Verification, SQLite DB Migrations & Web Dashboard"]
 ```
+
+- [x] **Sub-Issue 1**: Multi-platform environment variable resolution & URL auto-detection ([#5](https://github.com/HELIX-Origin/HELIX/issues/5))
+- [x] **Sub-Issue 2**: Core 25 commands across mod, util, info, project, and config categories ([#6](https://github.com/HELIX-Origin/HELIX/issues/6))
+- [x] **Sub-Issue 3**: Bot core migration and vanilla discord.js gateway client ([#7](https://github.com/HELIX-Origin/HELIX/issues/7))
+- [x] **Sub-Issue 4**: Verification, SQLite autonomous schema migrations, and web dashboard ([#8](https://github.com/HELIX-Origin/HELIX/issues/8))
 
 ---
 
