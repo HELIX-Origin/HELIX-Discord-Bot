@@ -9,17 +9,19 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/HELIX-Origin/HELIX-CLI/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/HELIX-Origin/HELIX-CLI/ci.yml?branch=main&label=CI&style=plastic&logo=github" alt="CI Status"></a>
+  <a href="https://discord.gg/Ww3XBZC2HV"><img src="https://img.shields.io/badge/Discord-Join%20Server-5865F2?style=plastic&logo=discord&logoColor=white" alt="Discord Server"></a>
+  <a href="https://heroku.com/deploy?template=https://github.com/HELIX-Origin/HELIX-CLI"><img src="https://img.shields.io/badge/Deploy%20to-Heroku-6762a6?style=plastic&logo=heroku&logoColor=white" alt="Deploy to Heroku"></a>
+  <a href="https://nodejs.org"><img src="https://img.shields.io/badge/Node.js-%3E%3D22.0.0-339933?style=plastic&logo=node.js&logoColor=white" alt="Node.js Version"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg?style=plastic" alt="License: MIT"></a>
+  <a href="docs/deployment-docker.md"><img src="https://img.shields.io/badge/Docker-Ready-2496ED?style=plastic&logo=docker&logoColor=white" alt="Docker Ready"></a>
+</p>
+
+<p align="center">
   <img src=".github/assets/images/banner.jpg" alt="HELIX CLI Banner" width="100%">
 </p>
 
-
 **HELIX CLI** is a universal developer assistant and multi-framework project generator built in TypeScript. It delivers production-grade scaffolding across 14 project templates, multi-tiered AI client integration (**Google Antigravity**, **GitHub Copilot**, **Open Code**), and official code hosting CLI automation (**GitHub CLI `gh`**, **GitLab CLI `glab`**, Bitbucket).
-
-<p align="center">
-  <a href="https://heroku.com/deploy?template=https://github.com/HELIX-Origin/helix-cli">
-    <img src="https://www.herokucdn.com/deploy/button.svg" alt="Deploy to Heroku (Free-Tier Eco Dyno)">
-  </a>
-</p>
 
 <p align="center">
   <b>100% Free-Tier Architecture</b> • <b>Zero Paid Heroku Services</b> • <b>Self-Contained SQLite Database</b>
