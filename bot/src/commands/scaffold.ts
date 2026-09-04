@@ -1,5 +1,6 @@
 import { SlashCommandBuilder, ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
 import { BotDatabase } from '../db/index.js';
+import { TemplateEngine } from '../../../src/core/scaffolding/template-engine.js';
 
 export const scaffoldCommand = {
   data: new SlashCommandBuilder()
@@ -45,19 +46,25 @@ export const scaffoldCommand = {
       projectName,
     });
 
+    const template = TemplateEngine.getDefaultTemplate(templateType);
+    const framework = template ? (template.framework || template.project_type) : templateType;
+    const language = template ? template.language : 'TypeScript';
+
     const embed = new EmbedBuilder()
       .setTitle(`🚀 HELIX Scaffolding Plan: ${projectName}`)
-      .setDescription(`Prepared blueprint for **${projectName}** using template **${templateType}**.`)
+      .setDescription(`Prepared starter blueprint for **${projectName}** using template **${templateType}**.`)
       .setColor(0x7289da)
       .addFields(
         { name: 'Template ID', value: `\`${templateType}\``, inline: true },
-        { name: 'Project Name', value: `\`${projectName}\``, inline: true },
+        { name: 'Framework', value: `\`${framework}\``, inline: true },
+        { name: 'Language', value: `\`${language}\``, inline: true },
         {
-          name: 'CLI Execution Command',
-          value: `\`\`\`bash\nhelix create ${templateType} ${projectName} --template ${templateType}\n\`\`\``,
+          name: 'Generate Blueprint in Discord',
+          value: `Use \`/helix-create template:${templateType} name:${projectName}\` to generate the complete file manifest and starter code.`,
+          inline: false,
         }
       )
-      .setFooter({ text: 'Run the command locally to create files and install dependencies.' });
+      .setFooter({ text: 'HELIX • In-Process Project Scaffolder' });
 
     await interaction.reply({ embeds: [embed] });
   },

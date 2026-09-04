@@ -1,8 +1,8 @@
 import { SlashCommandBuilder, ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
 import { AuthResolver } from '../../../src/core/auth/index.js';
 import { RepoManager } from '../../../src/core/hosting/index.js';
-import { LocalCliRunner } from '../../../src/core/cli/index.js';
 import { BotDatabase } from '../db/index.js';
+import { getAllModels, getFreeModels } from '../ai/models.js';
 
 export const statusCommand = {
   data: new SlashCommandBuilder()
@@ -13,7 +13,8 @@ export const statusCommand = {
     const aiStatuses = AuthResolver.resolveAll();
     const repoStatuses = RepoManager.checkAll();
     const dbStats = BotDatabase.getInstance().getStats();
-    const cliStatus = LocalCliRunner.getStatus();
+    const allModels = getAllModels();
+    const freeModels = getFreeModels();
 
     const aiField = aiStatuses
       .map(s => `${s.authenticated ? '✅' : '❌'} **${s.displayName}**: ${s.authenticated ? s.source : 'Not logged in'}`)
@@ -26,21 +27,21 @@ export const statusCommand = {
     const dbField = `${dbStats.exists ? '✅ Connected' : '⚠️ Missing'} • ${Math.round(dbStats.sizeBytes / 1024)} KB\n` +
       `Queries Logged: **${dbStats.queryCount}** | Scaffolds: **${dbStats.scaffoldCount}**`;
 
-    const cliField = `${cliStatus.installed ? '✅ Installed' : '⚠️ Missing'} • \`v${cliStatus.version}\`\n` +
-      `Repo: \`${cliStatus.repoUrl}\``;
+    const engineField = `✅ **In-Process Gateway Active** (Zero CLI Subprocesses)\n` +
+      `AI Models Registered: **${allModels.length}** (**${freeModels.length}** Community Free Tier, **${allModels.length - freeModels.length}** Flagship Pro)`;
 
     const embed = new EmbedBuilder()
       .setTitle('📊 HELIX System & Database Diagnostics')
       .setColor(0x00ffc8)
       .addFields(
         { name: '🤖 AI Agent Providers', value: aiField || 'None', inline: false },
-        { name: '🐙 Code Hosting Tools', value: repoField || 'None', inline: false },
+        { name: '⚡ Bot AI & Interaction Engine', value: engineField, inline: false },
         { name: '💾 Internal SQLite Database', value: dbField, inline: false },
-        { name: '📦 Local Cloned CLI Host', value: cliField, inline: false },
+        { name: '🐙 Code Hosting Tools', value: repoField || 'None', inline: false },
         { name: 'Host Architecture', value: `Node ${process.version} on ${process.platform}`, inline: true },
         { name: 'HELIX Version', value: '0.1.0', inline: true }
       )
-      .setFooter({ text: 'HELIX Code • Discord Gateway & SQLite Engine' })
+      .setFooter({ text: 'HELIX • Autonomous Discord Bot Gateway' })
       .setTimestamp();
 
     await interaction.reply({ embeds: [embed] });
