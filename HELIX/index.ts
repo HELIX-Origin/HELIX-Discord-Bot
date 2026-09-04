@@ -51,16 +51,18 @@ export async function launchBotAndDashboard(options: LaunchBotOptions = {}): Pro
       await loadSlashCommands();
       await loadEvents(client);
 
-      client.on('messageCreate', (message) => handlePrefixMessage(message));
-      client.on('interactionCreate', (interaction) => {
-        if (interaction.isChatInputCommand()) handleSlashInteraction(interaction);
-      });
-
-      await registerGlobalSlashCommands(token, client.user?.id || '');
-
       await client.login(token);
+      logs.success('Discord Bot client connected to gateway.');
+
+      const appId = client.user?.id || getClientId() || '';
+      if (appId) {
+        await registerGlobalSlashCommands(token, appId);
+      }
     } catch (err: any) {
       logs.error(`Gateway error: ${err.message}`);
+      if (err.message && err.message.includes('disallowed intents')) {
+        logs.warn('Privileged Intent Required: Please enable "Message Content Intent" in Discord Developer Portal -> Bot -> Privileged Gateway Intents.');
+      }
     }
   } else {
     logs.warn('No DISCORD_TOKEN found.');

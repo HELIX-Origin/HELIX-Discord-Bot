@@ -135,7 +135,7 @@ function formatBotInviteUrl(
   permissions: number = 8,
   callbackBaseUrl?: string
 ): string {
-  let url = `https://discord.com/api/oauth2/authorize?client_id=${clientId}&permissions=${permissions}&scope=bot`;
+  let url = `https://discord.com/oauth2/authorize?client_id=${clientId}&permissions=${permissions}&scope=bot%20applications.commands`;
   if (callbackBaseUrl) {
     const redirectUri = `${callbackBaseUrl.replace(/\/$/, '')}/api/auth/callback/discord`;
     url += `&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code`;
@@ -166,7 +166,7 @@ export function getCallbackUrl(): string {
 /**
  * Pre-built administrator bot invite URL.
  * Surrounding quotes from shell assignment are stripped automatically.
- * Automatically resolves using client ID and Heroku domain if not set or if placeholder is present.
+ * Automatically resolves using client ID without requiring pre-configured OAuth redirect URI.
  */
 export function getInviteUrl(): string {
   const raw = (process.env.NEXT_PUBLIC_INVITE_URL || '').trim();
@@ -177,12 +177,10 @@ export function getInviteUrl(): string {
   ) {
     invite = invite.slice(1, -1).trim();
   }
-  if (!invite || invite.includes('yourclientid') || invite.includes('YOUR_CLIENT_ID')) {
+  if (!invite) {
     const clientId = getClientId();
     if (clientId && clientId !== 'yourclientid') {
-      const callback = getCallbackUrl();
-      const isRemote = !callback.includes('localhost') && !callback.includes('127.0.0.1');
-      return formatBotInviteUrl(clientId, 8, isRemote ? callback : undefined);
+      return formatBotInviteUrl(clientId, 8);
     }
   }
   return invite;

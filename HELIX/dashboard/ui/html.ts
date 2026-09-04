@@ -653,11 +653,30 @@ export function renderDashboardHtml(botPort?: number): string {
         }
 
         if (data.bot) {
+          const statusPill = document.getElementById('bot-status-pill');
+          const statusText = document.getElementById('bot-status-text');
+          if (statusPill && statusText) {
+            if (data.bot.isReady) {
+              statusPill.className = 'inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-900/60 text-green-300 border border-green-700';
+              statusText.textContent = 'Bot Online';
+            } else if (data.bot.status === 'configured') {
+              statusPill.className = 'inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-yellow-900/60 text-yellow-300 border border-yellow-700';
+              statusText.textContent = 'Connecting...';
+            } else {
+              statusPill.className = 'inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-900/60 text-red-300 border border-red-700';
+              statusText.textContent = 'Offline';
+            }
+          }
+
           const pingText = document.getElementById('gateway-ping-text');
-          if (data.bot.gatewayLatencyMs >= 0) {
-            pingText.textContent = 'Gateway: ' + data.bot.gatewayLatencyMs + 'ms';
-          } else {
-            pingText.textContent = data.bot.status === 'online' ? 'Gateway: <5ms' : 'Gateway: Direct';
+          if (pingText) {
+            if (typeof data.bot.gatewayLatencyMs === 'number' && data.bot.gatewayLatencyMs >= 0) {
+              pingText.textContent = 'Gateway: ' + data.bot.gatewayLatencyMs + 'ms';
+            } else if (data.bot.isReady) {
+              pingText.textContent = 'Gateway: Connected';
+            } else {
+              pingText.textContent = 'Gateway: Offline';
+            }
           }
         }
 

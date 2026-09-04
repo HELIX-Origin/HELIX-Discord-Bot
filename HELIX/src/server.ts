@@ -24,7 +24,7 @@ export function getBotInviteUrl(
   permissions: number = 8,
   callbackBaseUrl?: string
 ): string {
-  let url = `https://discord.com/api/oauth2/authorize?client_id=${clientId}&permissions=${permissions}&scope=bot`;
+  let url = `https://discord.com/oauth2/authorize?client_id=${clientId}&permissions=${permissions}&scope=bot%20applications.commands`;
   if (callbackBaseUrl) {
     const redirectUri = `${callbackBaseUrl.replace(/\/$/, '')}/api/auth/callback/discord`;
     url += `&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code`;
