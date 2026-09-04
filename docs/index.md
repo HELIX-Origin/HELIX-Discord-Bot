@@ -5,6 +5,7 @@
 | [Bot Reference](discord-bot.md) | Full command reference, DB schema, environment variables |
 | [Web Dashboard](web-dashboard.md) | Dashboard endpoints, OAuth2 flow, bot connection |
 | [Language Plugins](plugin-system.md) | Plugin architecture, manifest spec, built-in plugin list |
+| [Plugin Authoring](plugin-authoring.md) | How to build, test, and publish custom language plugins & source providers |
 | [Scaffolding Templates](scaffolding-templates.md) | All 17 supported project templates |
 | [Heroku Deployment](deployment-heroku.md) | 1-click free-tier deploy |
 | [Docker / Self-Hosting](deployment-docker.md) | Containerized self-hosted setup |
