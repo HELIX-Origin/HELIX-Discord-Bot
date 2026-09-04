@@ -1,279 +1,136 @@
 <p align="center">
-  <img src=".github/assets/images/icon.jpg" alt="HELIX CLI Icon" width="128" height="128">
+  <img src=".github/assets/images/icon.jpg" alt="HELIX Icon" width="128" height="128">
 </p>
 
-<h1 align="center">HELIX CLI</h1>
+<h1 align="center">HELIX</h1>
 
 <p align="center">
-  <b>Universal Multi-Framework Development Scaffolding & Multi-Agent Assistant</b>
+  <b>Standalone Discord Bot — Developer Community Assistant</b>
 </p>
 
 <p align="center">
   <a href="https://github.com/HELIX-Origin/HELIX-CLI/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/HELIX-Origin/HELIX-CLI/ci.yml?branch=main&label=CI&style=plastic&logo=github" alt="CI Status"></a>
   <a href="https://discord.gg/Ww3XBZC2HV"><img src="https://img.shields.io/badge/Discord-Join%20Server-5865F2?style=plastic&logo=discord&logoColor=white" alt="Discord Server"></a>
-  <a href="https://heroku.com/deploy?template=https://github.com/HELIX-Origin/HELIX-CLI&env[DISCORD_CLIENT_ID]=1545203514932731934"><img src="https://img.shields.io/badge/Deploy%20to-Heroku-6762a6?style=plastic&logo=heroku&logoColor=white" alt="Deploy to Heroku"></a>
-  <a href="https://nodejs.org"><img src="https://img.shields.io/badge/Node.js-%3E%3D22.0.0-339933?style=plastic&logo=node.js&logoColor=white" alt="Node.js Version"></a>
+  <img src="https://img.shields.io/badge/Node.js-%3E%3D22.0.0-339933?style=plastic&logo=node.js&logoColor=white" alt="Node.js Version">
   <a href="LICENSE.md"><img src="https://img.shields.io/badge/License-BSD_3--Clause-blue.svg?style=plastic" alt="License: BSD 3-Clause"></a>
-  <a href="docs/deployment-docker.md"><img src="https://img.shields.io/badge/Docker-Ready-2496ED?style=plastic&logo=docker&logoColor=white" alt="Docker Ready"></a>
 </p>
 
-<p align="center">
-  <img src=".github/assets/images/banner.jpg" alt="HELIX CLI Banner" width="100%">
-</p>
-
-**HELIX CLI** is a universal developer assistant and multi-framework project generator built in TypeScript. It delivers production-grade scaffolding across 14 project templates, multi-tiered AI client integration (**Google Antigravity**, **GitHub Copilot**, **Open Code**), and official code hosting CLI automation (**GitHub CLI `gh`**, **GitLab CLI `glab`**, Bitbucket).
-
-<p align="center">
-  <b>100% Free-Tier Architecture</b> • <b>Zero Paid Heroku Services</b> • <b>Self-Contained SQLite Database</b>
-</p>
-
-```mermaid
-graph TD
-    User["Developer / User"] --> CLI["HELIX CLI (helix)"]
-    User --> Discord["Discord Server / Guild"]
-
-    subgraph "HELIX Ecosystem"
-        CLI --> Scaffold["Scaffolding Engine<br/>(14 Multi-Framework Templates)"]
-        CLI --> AIResolvers["Multi-Tier AI Resolvers<br/>(Antigravity • Copilot • Open Code)"]
-        CLI --> HostAutomation["Code Hosting Automation<br/>(GitHub • GitLab • Bitbucket)"]
-
-        subgraph "Bot & Dashboard Subsystem"
-            BotClient["Discord Bot Gateway Client<br/>(discord.js)"]
-            Dashboard["Web Dashboard & NextAuth<br/>(Direct In-Process Server)"]
-            SQLite[("Zero-Cost SQLite DB<br/>data/helix-bot.sqlite")]
-            
-            BotClient <--> SQLite
-            Dashboard <--> SQLite
-            Dashboard <--> BotClient
-        end
-    end
-
-    Discord <--> BotClient
-    Scaffold --> GeneratedApp["Scaffolded App + CI/CD Pipelines"]
-```
+**HELIX** is a standalone Discord bot for developer communities, providing code intelligence via language plugins, moderation tools, and thread-based support ticketing. The bot is self-contained in `HELIX/src/` using vanilla discord.js (TypeScript) with no AI API dependencies.
 
 ---
 
-## Key Features
+## Core Features
 
-- **Universal Multi-Architecture Support**:
-  - **Discord Bots**: `discord.js` v14 with slash command deployment scripts.
-  - **Web Applications**: React 19 & Vue 3 with Vite, TypeScript, and Tailwind CSS.
-  - **Desktop Applications**: Electron (context-isolated security) and Tauri v2 (Rust backend).
-  - **Mobile Applications**: Flutter Riverpod & React Native with Expo Router.
-  - **Game Engines**: Unity (C# Assembly Definition), Godot 4 (GDScript), RPG Maker MZ (Plugins), and Ren'Py (Visual Novels).
-  - **Backend Services**: Rust (Axum + Tokio), Go 1.22+ (`http.ServeMux`), Java 21 (Spring Boot 3), and Python (FastAPI + uv).
-- **Code Hosting CLI Automation**:
-  - Automatically initializes Git and creates remote repositories via **GitHub CLI (`gh`)** or **GitLab CLI (`glab`)**.
-  - Generates platform-specific CI/CD pipelines (`.github/workflows/ci.yml`, `.gitlab-ci.yml`, `bitbucket-pipelines.yml`).
-- **Multi-Tiered AI Client Discovery**:
-  - Discovers authenticated local sessions from installed tools:
-    - **Google Antigravity**: Active client directory (`~/.gemini/antigravity`) or `agy` CLI.
-    - **GitHub Copilot**: Active GitHub CLI login (`gh auth token`) or local `hosts.json`.
-    - **Open Code Go / Zen**: Stored token in `~/.opencode/auth.json` or `opencode` CLI.
-  - Gracefully falls back to `.env` if clients are not available.
-- **Interactive AI Context Assistant**:
-  - `helix ai query "<query>"`: Analyzes your current codebase and queries your primary authenticated agent.
-  - `helix ai generate "<feature>"`: Generates production-ready, strictly typed code adhering to the detected project structure.
+- **Code Intelligence via Language Plugins**: Linting, explanation, and documentation cross-referencing using built-in linters — no paid APIs required
+- **13 Built-in Language Plugins**: TypeScript, JavaScript, Python, C#, GDScript, Rust, Go, Java, PHP, SQL, HTML/CSS, Flutter/Dart, Lua
+- **Developer Moderation**: Kick, ban, unban, timeout, untimeout, purge, warn
+- **Support Ticketing**: Thread-based tickets with setup, close, transcript export
+- **Guild Configuration**: Per-guild prefix (`>` default), tickets-hub, mod-log-channel, welcome-channel
+- **Self-Contained**: SQLite database with autonomous schema creation and migrations
+- **Auto-Resolved URLs**: NEXTAUTH_URL and DISCORD_CALLBACK_URL auto-detected from platform env vars (Heroku, Render, Railway, custom domain)
+- **Only `PORT` needed for local development**: Public URLs auto-detected on deployment platforms
 
 ---
 
-## Installation & Deployment
-
-### 1. Global Developer CLI (npm)
-```bash
-# Install globally via npm
-npm install -g helix-cli
-
-# Or run directly with npx
-npx helix-cli --help
-```
-
-### 2. Built-in Discord Bot & Web Dashboard (Docker / Self-Hosting)
-Deploy the Discord bot and companion web dashboard with persistent SQLite database storage in one command:
+## Quick Start
 
 ```bash
-# Clone and configure environment
-git clone https://github.com/HELIX-Origin/helix-cli.git
-cd helix-cli
+# Install dependencies
+npm install
+
+# Copy example environment file
 cp .env.example .env
 
-# Launch with Docker Compose
-docker compose up -d
-
-# Open the Web Dashboard
-# -> http://localhost:5000/dashboard
+# Launch the bot
+npm start
 ```
 
-For full details, see the [Docker & Self-Hosting Guide](docs/deployment-docker.md) or [Free-Tier Heroku Guide](docs/deployment-heroku.md).
+Only `PORT` is required in `.env` for local development. All other URL environment variables are auto-resolved on deployment platforms.
 
 ---
 
-## CLI Command Reference
+## Available Commands
 
-### 1. Project Scaffolding (`helix create`)
-```bash
-helix create <type> <name> [options]
+### Prefix Commands (`>`)
+- `>help` - Display all available commands
+- `>status` - Report system health
+- `>ping` - Check WebSocket latency
+- `>avatar [user]` - Get user avatar
+- `>serverinfo` - Server information
+- `>userinfo [user]` - User information
+- `>plugin list` - List installed language plugins
+- `>plugin install <owner/repo>` - Install plugin from GitHub
+- `>plugin remove <id>` - Remove installed plugin
+- `>plugin info <id>` - Show plugin details
+- `>plugin enable <id>` / `>plugin disable <id>` - Enable/disable plugin
+- `>set prefix <char>` - Change server prefix
+- `>set tickets-hub <channel>` - Set ticket hub channel
+- `>ticket create [subject]` - Create support ticket
+- `>ticket close` - Close current ticket
 
-# Examples:
-helix create web my-react-app --template web-react --git-platform github
-helix create discord-bot my-bot --template discord-bot
-helix create desktop my-desktop --template desktop-tauri
-helix create game-engine my-godot --template game-godot
-helix create backend my-api --template backend-rust
-```
-
-Options:
-- `-t, --template <name>`: Template override (e.g. `web-react`, `desktop-tauri`, `backend-python`)
-- `--git-platform <platform>`: Code hosting platform (`github`, `gitlab`, `bitbucket`, `none`)
-- `--repo-visibility <visibility>`: Remote visibility (`public`, `private`)
-- `--skip-install`: Skip automatic dependency installation
-- `--skip-git`: Skip local git repository initialization
-- `--dry-run`: Preview file generation without touching disk
-
-### 2. AI Agent Management (`helix ai`)
-```bash
-# Check authentication status across all AI clients
-helix ai status
-
-# Test connection to a specific provider
-helix ai test copilot
-helix ai test antigravity
-helix ai test opencode
-
-# Query the AI with full workspace context
-helix ai query "How do I register a new slash command in this bot?"
-
-# Generate code with project architecture context
-helix ai generate "Health check endpoint with timestamp"
-```
-
-### 3. Code Hosting CLI Automation (`helix repo`)
-```bash
-# Check status of installed official CLIs (gh, glab)
-helix repo status
-
-# Create a remote repository and automatically push .env to GitHub Secrets
-helix repo create --platform github --name my-project --visibility public
-
-# Manually synchronize local .env variables into GitHub Secrets securely
-helix repo sync-secrets [--name my-project] [--env-path .env]
-```
-> [!TIP]
-> When creating or synchronizing repositories with GitHub, any local `.env` keys and values are securely piped via standard input into GitHub Secrets (`gh secret set`) without being committed or exposed to the git log.
-
-### 4. Built-in Discord Bot & Web Dashboard (`helix bot`)
-Integrate HELIX Code directly into your Discord server and control everything via an interactive browser dashboard:
-```bash
-# Check Discord bot and NextAuth configuration
-helix bot status
-
-# Interactive setup wizard (configures .env and initializes SQLite)
-helix bot setup
-
-# Setup database tables and indexes independently
-npm run setup
-
-# Launch the Web Dashboard (NextAuth powered)
-helix bot dashboard [--port 5000]
-
-# Deploy application slash commands to Discord
-helix bot deploy [--guild-id <id>] [--dry-run]
-
-# Start the built-in Discord bot server & dashboard listener
-helix bot start [--port 5000]
-```
-
-#### Web Dashboard & NextAuth Configuration
-The bot server hosts a companion dashboard that runs alongside the bot. Configure the following environment variables in `.env`:
-- `NEXTAUTH_URL`: Public-facing base URL (e.g. `http://localhost:5000` or production domain).
-- `NEXTAUTH_INTERNAL_URL`: Internal URL used by the dashboard and local loopback connections (e.g. `http://127.0.0.1:5000`).
-- `NEXTAUTH_SECRET`: HMAC SHA-256 signing secret for session tokens.
-- `DISCORD_CALLBACK_URL`: Base OAuth2 callback URL (`http://localhost:5000`).
-- `NEXT_PUBLIC_INVITE_URL`: Administrator invite URL (`https://discord.com/api/oauth2/authorize?client_id=yourclientid&permissions=8&scope=bot`).
-
-#### Dashboard Features:
-- **Overview & Diagnostics**: Real-time bot latency, SQLite query logs, scaffold history, AI providers, and code hosting tools.
-- **AI Playground**: Send direct prompts to Google Antigravity, GitHub Copilot, or Open Code directly from your browser.
-- **Visual Scaffolding Studio**: Blueprint and generate multi-framework projects with 14 templates directly from the web interface.
-- **Guild & Member Sessions**: Inspect Discord guild members and active authenticated sessions.
-- **NextAuth Token Inspector**: Verify active NextAuth session state and environment keys.
-
-Available Slash Commands in Discord:
-- `/helix-help`: Display all HELIX Code and CLI capabilities.
-- `/helix-auth`: Authenticate your Discord user account with local HELIX CLI agents.
-- `/helix-ai <prompt> [provider]`: Query AI assistants directly from Discord channels.
-- `/helix-explain <code> [language]`: Explain code snippets, algorithms, and stack traces.
-- `/helix-scaffold <type> <name>`: Blueprint and plan multi-framework project structures.
-- `/helix-status`: Diagnostic health of AI agents, tools, and host system.
-- `/helix-repo <action>`: Inspect remote repository status and CLI credentials.
-
-### 5. Catalog & Diagnostics
-```bash
-# List available agents, skills, and templates
-helix list templates
-helix list agents
-helix list skills
-
-# Display system and toolchain diagnostics
-helix info
-
-# Check for updates on npm
-helix update
-
-# Generate shell autocompletion
-helix completion powershell >> $PROFILE
-helix completion bash >> ~/.bashrc
-```
+### Slash Commands (`/`)
+- `/lint` - Analyze code for errors
+- `/explain` - Explain code using documentation
+- `/docs` - Look up official documentation
+- `/plugin` - Manage language plugins
 
 ---
 
-## Supported Templates
+## Architecture
 
-| Template ID | Domain | Framework / Engine | Language |
-|-------------|--------|--------------------|----------|
-| `discord-bot` | Discord | discord.js v14 | TypeScript |
-| `web-react` | Web | React 19 + Vite | TypeScript |
-| `web-vue` | Web | Vue 3 + Vite | TypeScript |
-| `desktop-electron` | Desktop | Electron | TypeScript |
-| `desktop-tauri` | Desktop | Tauri v2 | Rust + TypeScript |
-| `mobile-flutter` | Mobile | Flutter | Dart |
-| `mobile-react-native` | Mobile | Expo Router | TypeScript |
-| `game-unity` | Game Engine | Unity LTS | C# |
-| `game-godot` | Game Engine | Godot 4 | GDScript |
-| `game-rpgm` | Game Engine | RPG Maker MZ/MV | JavaScript |
-| `game-renpy` | Game Engine | Ren'Py | Python |
-| `backend-rust` | Backend | Axum + Tokio | Rust |
-| `backend-go` | Backend | Net/HTTP 1.22+ | Go |
-| `backend-java` | Backend | Spring Boot 3 | Java 21 |
-| `backend-python` | Backend | FastAPI + uv | Python |
+- **Vanilla discord.js**: Plain `new Client()` with `GatewayIntentBits` — no decorator frameworks
+- **CommandDefinition interface**: Unified type with `execute(context)` handling both prefix and slash
+- **No index files**: Only entry points (`index.ts`) at root, `src/`, and `dashboard/`
+- **Named exports only**: All command and event files use named exports
+- **Handler-based discovery**: Auto-discovers via `import.meta.glob`
+- **Language Plugin System**: Plugin repos read `config.json` manifest, load individual `plugin.json` manifests
+- **Database**: SQLite with `node:sqlite` `DatabaseSync`, autonomous migrations on startup
 
 ---
 
-## Architecture & Development
-- [`docs/`](docs/index.md): Multi-page architectural specifications, deployment guides, and template catalogs.
-- [`tests/`](tests/README.md): Automated unit and integration test suite with Vitest.
-- `src/`: Modular TypeScript source code (CLI, Scaffolding Engine, NextAuth Dashboard, and Built-in Discord Bot).
-- [`CONTRIBUTING.md`](CONTRIBUTING.md): Contribution workflow, pull request guidelines, and local setup.
-- [`PRIVACY.md`](PRIVACY.md): Privacy policy and zero-telemetry architecture overview.
-- [`CITATION.cff`](CITATION.cff): Academic and open-source citation metadata.
+## Plugin System
+
+Both built-in (`helix-origin`) and community plugin repos use identical structure:
+
+```
+my-plugin-repo/
+├── config.json          # Repo-level manifest (entry point)
+├── typescript/          # Plugin folder
+│   ├── plugin.json      # Individual plugin manifest
+│   ├── linter.ts        # Linter implementation
+│   ├── patterns.ts      # Common patterns & anti-patterns
+│   ├── docs-cache.ts    # Cached official doc references
+│   └── examples/        # Code examples by topic
+└── python/              # Same structure for other languages
+```
+
+- `config.json`: Lists all plugins in the repo with `id` and `path`
+- `plugin.json`: Individual plugin manifest with `id`, `name`, `version`, `fileExtensions`, `capabilities`, `entry`
+- Bot reads repo config first, then loads each plugin's manifest and entry point
+
+Only `PORT` env var needed for local development. Public URLs auto-detected on Heroku/Render/Railway/custom domains.
 
 ---
 
 ## Documentation
 
-Explore the complete multi-page documentation suite in [`docs/`](docs/index.md):
-- [Architecture Overview](docs/index.md)
-- [Discord Bot Architecture & Slash Commands](docs/discord-bot.md)
-- [NextAuth Web Dashboard & Zero-Lag Direct Engine](docs/web-dashboard.md)
-- [Free-Tier Heroku 1-Click Deployment & GitHub Secrets](docs/deployment-heroku.md)
-- [Docker & Self-Hosting Deployment Guide](docs/deployment-docker.md)
-- [14 Multi-Framework Starter Templates](docs/scaffolding-templates.md)
-- [Multi-Tiered AI Integration & Discovery](docs/ai-integration.md)
+Explore the documentation suite:
+
+- [Discord Bot Architecture](docs/discord-bot.md)
+- [Web Dashboard Guide](docs/web-dashboard.md)
+- [Deployment Guides](docs/deployment-heroku.md), [docs/deployment-docker.md]
+- [Plugin System Design](docs/plugin-system.md)
 
 ---
 
 ## License
 
-Released under the [BSD 3-Clause License](LICENSE.md). Copyright © 2026 HELIX CLI Team & Contributors.
+Released under the [BSD 3-Clause License](LICENSE.md). Copyright © 2026 HELIX Team & Contributors.
 
+---
+
+## Links
+
+- **GitHub**: https://github.com/HELIX-Origin/HELIX-CLI
+- **Discord Community**: https://discord.gg/Ww3XBZC2HV
+- **Documentation**: [docs/index.md](docs/index.md)

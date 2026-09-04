@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
-import { executeScaffold } from '../../src/commands/create/scaffold.js';
+import { executeScaffold } from '../../HELIX/src/scaffolding/scaffold.js';
 
 describe('Domain Generators & CI/CD Pipelines Integration', () => {
   let tempDir: string;

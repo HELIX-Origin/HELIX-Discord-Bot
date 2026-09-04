@@ -17,8 +17,8 @@ AGENTS.md
 # Local SQLite databases (created via npm run setup)
 data/*.sqlite
 data/*.sqlite-journal
-bot/data/*.sqlite
-bot/data/*.sqlite-journal
+HELIX/data/*.sqlite
+HELIX/data/*.sqlite-journal
 *.sqlite
 *.sqlite-journal
 
@@ -26,7 +26,7 @@ bot/data/*.sqlite-journal
 .cli/
 
 # Bot compiled dist
-bot/src/dist/*
-!bot/src/dist/.gitkeep
+HELIX/src/dist/*
+!HELIX/src/dist/.gitkeep
 
 

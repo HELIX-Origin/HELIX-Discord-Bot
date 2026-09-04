@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { compareVersions } from '../../src/commands/update/index.js';
+import { compareVersions } from '../../HELIX/src/utils/version.js';
 
 describe('Version Comparison', () => {
   it('identifies identical versions', () => {

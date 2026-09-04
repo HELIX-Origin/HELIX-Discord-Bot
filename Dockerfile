@@ -1,5 +1,7 @@
 # ==============================================================================
 # HELIX Discord Bot & Web Dashboard — Production Multi-Stage Dockerfile
+# The HELIX bot is fully self-contained under HELIX/ (its own package.json).
+# This build treats HELIX/ as the application root inside the container.
 # ==============================================================================
 
 # ─── Stage 1: Build & Dependencies ────────────────────────────────────────────
@@ -13,18 +15,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
  && rm -rf /var/lib/apt/lists/*
 
-# Copy package manifests first for optimal layer caching
-COPY package.json package-lock.json ./
+# Copy the HELIX project (its own package.json drives npm ci + build)
+COPY HELIX/ ./HELIX/
 
-# Install all dependencies (including devDependencies for TypeScript and tsup)
+# Install all dependencies (including devDependencies for TypeScript)
+WORKDIR /app/HELIX
 RUN npm ci
 
-# Copy source code and build configs
-COPY tsconfig.json tsup.config.ts ./
-COPY src/ ./src/
-COPY bot/ ./bot/
-
-# Compile TypeScript to standalone dual ESM distribution in dist/
+# Compile TypeScript to standalone ESM distribution in src/dist/ (tsc)
 RUN npm run build
 
 # Prune devDependencies to keep only runtime dependencies for production
@@ -46,11 +44,8 @@ ENV NODE_ENV=production \
     PORT=5000 \
     DISCORD_DB_PATH=/app/data/helix-bot.sqlite
 
-# Copy production dependencies and compiled artifacts from builder
-COPY --from=builder /app/package.json ./
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/bot/icon.jpg ./bot/icon.jpg
+# Copy the compiled HELIX project from the builder
+COPY --from=builder /app/HELIX ./HELIX
 
 # Prepare persistent data storage for the zero-cost SQLite database
 RUN mkdir -p /app/data && chmod 777 /app/data
@@ -64,4 +59,4 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
   CMD node -e "fetch('http://localhost:' + (process.env.PORT || 5000) + '/health').then(r => r.ok ? process.exit(0) : process.exit(1)).catch(() => process.exit(1))"
 
 # Launch HELIX Discord Bot & Web Dashboard subsystem
-CMD ["node", "dist/bot/index.js"]
+CMD ["node", "HELIX/src/dist/index.js"]

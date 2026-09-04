@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { getNextAuthConfig, createSessionToken, verifySessionToken } from '../../bot/dashboard/auth/config.js';
-import { parseCookies } from '../../bot/dashboard/auth/handlers.js';
+import { getNextAuthConfig, createSessionToken, verifySessionToken } from '../../HELIX/dashboard/auth/config.js';
+import { parseCookies } from '../../HELIX/dashboard/auth/handlers.js';
 
 describe('NextAuth Dashboard Configuration & Session Tokens', () => {
   const originalEnv = process.env;

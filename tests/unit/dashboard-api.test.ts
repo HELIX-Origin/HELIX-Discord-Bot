@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import http from 'node:http';
-import { BotCallbackServer } from '../../bot/src/server.js';
+import { BotCallbackServer } from '../../HELIX/src/server.js';
 
 describe('Discord Bot Web Dashboard & NextAuth Endpoints', () => {
   let server: BotCallbackServer;

@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
-import { saveEnvValue, loadEnv } from '../../src/utils/env/index.js';
+import { saveBotEnvValue } from '../../HELIX/src/env.js';
 
 describe('Environment Loader & .env Management', () => {
   let tempDir: string;
@@ -18,8 +18,8 @@ describe('Environment Loader & .env Management', () => {
   });
 
   it('saves new environment variables to .env file', () => {
-    saveEnvValue('DISCORD_TOKEN', 'test_token_123', tempEnvPath);
-    saveEnvValue('DISCORD_CLIENT_ID', 'test_client_id_456', tempEnvPath);
+    saveBotEnvValue('DISCORD_TOKEN', 'test_token_123', tempEnvPath);
+    saveBotEnvValue('DISCORD_CLIENT_ID', 'test_client_id_456', tempEnvPath);
 
     const content = fs.readFileSync(tempEnvPath, 'utf-8');
     expect(content).toContain('DISCORD_TOKEN=test_token_123');
@@ -29,8 +29,8 @@ describe('Environment Loader & .env Management', () => {
   });
 
   it('updates existing environment variables without duplicating', () => {
-    saveEnvValue('DISCORD_CALLBACK_URL', 'http://localhost:5000', tempEnvPath);
-    saveEnvValue('DISCORD_CALLBACK_URL', 'http://localhost:6000', tempEnvPath);
+    saveBotEnvValue('DISCORD_CALLBACK_URL', 'http://localhost:5000', tempEnvPath);
+    saveBotEnvValue('DISCORD_CALLBACK_URL', 'http://localhost:6000', tempEnvPath);
 
     const content = fs.readFileSync(tempEnvPath, 'utf-8');
     const matches = content.match(/DISCORD_CALLBACK_URL=/g);

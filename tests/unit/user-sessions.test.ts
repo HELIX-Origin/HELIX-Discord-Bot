@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
-import { BotDatabase } from '../../bot/src/db/index.js';
+import { BotDatabase } from '../../HELIX/src/db/index.js';
 
 describe('Discord Bot Per-User Authentication Sessions', () => {
   let tempDir: string;

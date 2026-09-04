@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { botCommands } from '../../bot/src/commands/index.js';
-import { deployBotCommands } from '../../bot/src/deploy.js';
+import { botCommands } from '../../HELIX/src/commands/index.js';
+import { deployBotCommands } from '../../HELIX/src/deploy.js';
 
 describe('Built-in Discord Bot Commands', () => {
   it('registers all required slash commands', () => {
@@ -56,7 +56,7 @@ describe('Built-in Discord Bot Commands', () => {
 
   describe('Tiered AI Model Access & Owner Protection', () => {
     it('correctly resolves bot owner from environment variable', async () => {
-      const { isBotOwner } = await import('../../bot/src/client.js');
+      const { isBotOwner } = await import('../../HELIX/src/client.js');
       process.env.DISCORD_OWNER_ID = 'owner-12345';
       expect(await isBotOwner('owner-12345')).toBe(true);
       expect(await isBotOwner('stranger-99999')).toBe(false);
@@ -64,7 +64,7 @@ describe('Built-in Discord Bot Commands', () => {
     });
 
     it('auto-runs OpenCode Zen BigPickle by default on Free Tier for non-owner without an API key', async () => {
-      const { aiCommand } = await import('../../bot/src/commands/ai.js');
+      const { aiCommand } = await import('../../HELIX/src/commands/ai.js');
       delete process.env.DISCORD_OWNER_ID;
       delete process.env.BOT_OWNER_ID;
 
@@ -89,7 +89,7 @@ describe('Built-in Discord Bot Commands', () => {
     });
 
     it('allows non-owner without an API key to select free Google Gemini Flash or GitHub GPT-4o Mini', async () => {
-      const { aiCommand } = await import('../../bot/src/commands/ai.js');
+      const { aiCommand } = await import('../../HELIX/src/commands/ai.js');
       delete process.env.DISCORD_OWNER_ID;
       delete process.env.BOT_OWNER_ID;
 
@@ -117,7 +117,7 @@ describe('Built-in Discord Bot Commands', () => {
     });
 
     it('gracefully downgrades to free counterpart when non-owner requests a key-required model', async () => {
-      const { aiCommand } = await import('../../bot/src/commands/ai.js');
+      const { aiCommand } = await import('../../HELIX/src/commands/ai.js');
       delete process.env.DISCORD_OWNER_ID;
       delete process.env.BOT_OWNER_ID;
 
@@ -145,7 +145,7 @@ describe('Built-in Discord Bot Commands', () => {
     });
 
     it('auto-runs Free Tier for Explain command for non-owner without an API key', async () => {
-      const { explainCommand } = await import('../../bot/src/commands/explain.js');
+      const { explainCommand } = await import('../../HELIX/src/commands/explain.js');
       delete process.env.DISCORD_OWNER_ID;
       delete process.env.BOT_OWNER_ID;
 
@@ -170,7 +170,7 @@ describe('Built-in Discord Bot Commands', () => {
     });
 
     it('allows bot owner to select key-required models with host credentials', async () => {
-      const { aiCommand } = await import('../../bot/src/commands/ai.js');
+      const { aiCommand } = await import('../../HELIX/src/commands/ai.js');
       process.env.DISCORD_OWNER_ID = 'owner-12345';
 
       let editReplyData: any = null;
@@ -201,7 +201,7 @@ describe('Built-in Discord Bot Commands', () => {
 
   describe('Merged In-Process Command Executions', () => {
     it('executes helix-create and returns complete scaffold blueprint', async () => {
-      const { createCommand } = await import('../../bot/src/commands/create.js');
+      const { createCommand } = await import('../../HELIX/src/commands/create.js');
       let replyData: any = null;
       const mockInteraction: any = {
         user: { id: 'user-scaffold-1', username: 'Developer' },
@@ -233,7 +233,7 @@ describe('Built-in Discord Bot Commands', () => {
     });
 
     it('executes helix-list across templates, agents, and platforms', async () => {
-      const { listCommand } = await import('../../bot/src/commands/list.js');
+      const { listCommand } = await import('../../HELIX/src/commands/list.js');
       let replyData: any = null;
       const mockInteraction: any = {
         deferReply: async () => {},
@@ -256,7 +256,7 @@ describe('Built-in Discord Bot Commands', () => {
     });
 
     it('executes helix-info and returns comprehensive bot diagnostics', async () => {
-      const { infoCommand } = await import('../../bot/src/commands/info.js');
+      const { infoCommand } = await import('../../HELIX/src/commands/info.js');
       let replyData: any = null;
       const mockInteraction: any = {
         deferReply: async () => {},
@@ -276,7 +276,7 @@ describe('Built-in Discord Bot Commands', () => {
     });
 
     it('executes helix-mod warn and warnings subcommands', async () => {
-      const { modCommand } = await import('../../bot/src/commands/mod.js');
+      const { modCommand } = await import('../../HELIX/src/commands/mod.js');
       let replyData: any = null;
       const mockInteraction: any = {
         guild: { id: 'guild-test-mod', channels: { fetch: async () => null } },
@@ -301,7 +301,7 @@ describe('Built-in Discord Bot Commands', () => {
     });
 
     it('executes helix-util ping and snowflake subcommands', async () => {
-      const { utilCommand } = await import('../../bot/src/commands/util.js');
+      const { utilCommand } = await import('../../HELIX/src/commands/util.js');
       let replyData: any = null;
       const mockInteraction: any = {
         deferReply: async () => {},
@@ -322,7 +322,7 @@ describe('Built-in Discord Bot Commands', () => {
     });
 
     it('executes helix-ticket setup-hub subcommand', async () => {
-      const { ticketCommand } = await import('../../bot/src/commands/ticket.js');
+      const { ticketCommand } = await import('../../HELIX/src/commands/ticket.js');
       let replyData: any = null;
       let sentData: any = null;
       const mockChannel: any = {
@@ -352,7 +352,7 @@ describe('Built-in Discord Bot Commands', () => {
     });
 
     it('executes helix-set guild and user view subcommands', async () => {
-      const { setCommand } = await import('../../bot/src/commands/set.js');
+      const { setCommand } = await import('../../HELIX/src/commands/set.js');
       let replyData: any = null;
       const mockInteraction: any = {
         guild: { id: 'guild-set-test', name: 'Dev Guild' },
@@ -376,8 +376,8 @@ describe('Built-in Discord Bot Commands', () => {
     });
 
     it('executes helix-set user model subcommand and updates user settings', async () => {
-      const { setCommand } = await import('../../bot/src/commands/set.js');
-      const { BotDatabase } = await import('../../bot/src/db/index.js');
+      const { setCommand } = await import('../../HELIX/src/commands/set.js');
+      const { BotDatabase } = await import('../../HELIX/src/db/index.js');
       let replyData: any = null;
       const mockInteraction: any = {
         user: { id: 'user-model-test-1', username: 'ModelTester' },

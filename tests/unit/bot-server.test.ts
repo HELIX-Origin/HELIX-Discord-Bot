@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parsePortFromUrl, getAuthorizationUrl, BotCallbackServer } from '../../bot/src/server.js';
+import { parsePortFromUrl, getAuthorizationUrl, BotCallbackServer } from '../../HELIX/src/server.js';
 import http from 'node:http';
 
 describe('Discord Bot Callback Server', () => {

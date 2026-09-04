@@ -1,69 +1,25 @@
 {
-  "name": "helix-cli",
-  "version": "0.1.0",
-  "description": "Universal CLI development assistant for multi-framework scaffolding, AI agents, companion dashboard, and Discord bot automation",
+  "name": "helix-workspace",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Local development & test toolchain for the HELIX Discord bot (tests import from HELIX/src). The bot itself is fully self-contained under HELIX/.",
   "type": "module",
-  "main": "./dist/index.js",
-  "bin": {
-    "helix": "./dist/index.js"
-  },
   "scripts": {
-    "start": "node dist/bot/index.js",
-    "start:cli": "node dist/index.js",
-    "start:bot": "node dist/bot/index.js",
-    "build": "tsup",
-    "dev": "tsx src/index.ts",
-    "dev:bot": "tsx bot/index.ts",
     "test": "vitest run",
     "test:unit": "vitest run tests/unit",
     "test:integration": "vitest run tests/integration",
     "test:watch": "vitest",
-    "typecheck": "tsc --noEmit",
-    "setup": "npm run build",
-    "heroku-postbuild": "npm run build",
-    "docker:build": "docker build -t helix-discord-bot .",
-    "docker:run": "docker run -d -p 5000:5000 --env-file .env -v ./data:/app/data --name helix-discord-bot helix-discord-bot",
-    "docker:up": "docker compose up -d",
-    "docker:down": "docker compose down",
-    "docker:logs": "docker compose logs -f"
+    "test:types": "tsc --noEmit -p tsconfig.test.json",
+    "build": "npm --prefix HELIX run build",
+    "start": "npm --prefix HELIX start",
+    "dev": "npm --prefix HELIX run dev",
+    "typecheck": "npm --prefix HELIX run typecheck"
   },
-  "keywords": [
-    "cli",
-    "scaffolding",
-    "developer-tools",
-    "discord-bot",
-    "react",
-    "vue",
-    "electron",
-    "tauri",
-    "flutter",
-    "unity",
-    "godot",
-    "rust",
-    "go",
-    "python",
-    "ai-agents",
-    "github-copilot",
-    "antigravity"
-  ],
-  "author": "HELIX CLI Team",
-  "license": "BSD-3-Clause",
   "engines": {
     "node": ">=22.0.0"
   },
-  "dependencies": {
-    "commander": "^12.1.0",
-    "discord.js": "^14.15.3",
-    "dotenv": "^16.4.5",
-    "ora": "^8.1.0",
-    "picocolors": "^1.1.0",
-    "prompts": "^2.4.2",
-    "yaml": "^2.5.1"
-  },
   "devDependencies": {
     "@types/node": "^22.5.4",
-    "@types/prompts": "^2.4.9",
-    "tsup": "^8.2.4",
     "tsx": "^4.19.1",
     "typescript": "^5.5.4",
     "vitest": "^2.0.5"

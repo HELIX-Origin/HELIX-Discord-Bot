@@ -1,0 +1,370 @@
+{
+  "errors": {
+    "generic": "An unexpected error occurred. Please try again later.",
+    "permission_denied": "You don't have permission to use this command.",
+    "bot_permission_denied": "I don't have the required permissions to perform this action.",
+    "command_not_found": "Command not found. Use `{prefix}help` to see available commands.",
+    "subcommand_not_found": "Subcommand not found.",
+    "missing_argument": "Missing required argument: {arg}",
+    "invalid_argument": "Invalid value for `{arg}`: {value}",
+    "invalid_user": "Could not find user: {input}",
+    "invalid_channel": "Could not find channel: {input}",
+    "invalid_role": "Could not find role: {input}",
+    "invalid_duration": "Invalid duration format. Use formats like `10m`, `1h`, `7d`.",
+    "duration_too_long": "Duration exceeds maximum of {max}.",
+    "guild_only": "This command can only be used in a server.",
+    "dm_only": "This command can only be used in DMs.",
+    "not_in_voice": "You must be in a voice channel to use this command.",
+    "bot_not_in_voice": "I'm not connected to a voice channel.",
+    "no_music_playing": "Nothing is currently playing.",
+    "queue_empty": "The queue is empty.",
+    "database_error": "Database operation failed. Please try again.",
+    "api_error": "External API request failed.",
+    "rate_limited": "You're using commands too quickly. Please wait a moment.",
+    "feature_disabled": "This feature is currently disabled.",
+    "plugin_not_found": "Language plugin `{name}` not found.",
+    "plugin_load_failed": "Failed to load plugin `{name}`: {reason}",
+    "plugin_already_enabled": "Plugin `{name}` is already enabled.",
+    "plugin_already_disabled": "Plugin `{name}` is already disabled.",
+    "install_failed": "Failed to install plugin: {reason}",
+    "repo_not_found": "Repository not found: {repo}",
+    "clone_failed": "Failed to clone repository: {reason}",
+    "config_invalid": "Invalid configuration in config.json: {errors}",
+    "manifest_invalid": "Invalid plugin manifest in plugin.json: {errors}",
+    "no_plugins_loaded": "No language plugins are currently loaded.",
+    "no_code_provided": "No code provided for analysis.",
+    "unsupported_language": "Language `{lang}` is not supported by any loaded plugin.",
+    "lint_failed": "Linting failed: {reason}",
+    "explain_failed": "Explanation failed: {reason}",
+    "docs_not_found": "No documentation found for topic: {topic}",
+    "file_too_large": "File exceeds maximum size of {max} MB.",
+    "invalid_file_type": "File type not supported. Supported: {types}"
+  },
+  "moderation": {
+    "kick": {
+      "success": "Kicked {user} from the server.",
+      "reason": "Reason: {reason}",
+      "no_reason": "No reason provided.",
+      "cannot_kick_self": "You cannot kick yourself.",
+      "cannot_kick_bot": "I cannot kick other bots.",
+      "cannot_kick_owner": "You cannot kick the server owner.",
+      "hierarchy": "You cannot kick this user due to role hierarchy.",
+      "bot_hierarchy": "I cannot kick this user due to role hierarchy."
+    },
+    "ban": {
+      "success": "Banned {user} from the server.",
+      "reason": "Reason: {reason}",
+      "no_reason": "No reason provided.",
+      "days": "Deleted {days} days of messages.",
+      "cannot_ban_self": "You cannot ban yourself.",
+      "cannot_ban_bot": "I cannot ban other bots.",
+      "cannot_ban_owner": "You cannot ban the server owner.",
+      "hierarchy": "You cannot ban this user due to role hierarchy.",
+      "bot_hierarchy": "I cannot ban this user due to role hierarchy."
+    },
+    "unban": {
+      "success": "Unbanned {user}.",
+      "not_banned": "User is not banned.",
+      "invalid_id": "Invalid user ID.",
+      "failed": "Failed to unban user."
+    },
+    "timeout": {
+      "success": "Timed out {user} for {duration}.",
+      "reason": "Reason: {reason}",
+      "no_reason": "No reason provided.",
+      "already_timed_out": "User is already timed out.",
+      "cannot_timeout_self": "You cannot timeout yourself.",
+      "cannot_timeout_bot": "I cannot timeout bots.",
+      "cannot_timeout_owner": "You cannot timeout the server owner.",
+      "hierarchy": "You cannot timeout this user due to role hierarchy.",
+      "bot_hierarchy": "I cannot timeout this user due to role hierarchy."
+    },
+    "untimeout": {
+      "success": "Removed timeout from {user}.",
+      "not_timed_out": "User is not timed out.",
+      "failed": "Failed to remove timeout."
+    },
+    "purge": {
+      "success": "Deleted {count} message(s).",
+      "confirm": "Are you sure you want to delete {count} messages? Reply with `yes` to confirm.",
+      "cancelled": "Purge cancelled.",
+      "too_many": "Cannot delete more than {max} messages at once.",
+      "too_few": "Must delete at least {min} message.",
+      "no_messages": "No messages found to delete.",
+      "failed": "Failed to delete messages."
+    },
+    "warn": {
+      "success": "Warned {user}.",
+      "reason": "Reason: {reason}",
+      "no_reason": "No reason provided.",
+      "dm_sent": "Warning sent via DM.",
+      "dm_failed": "Could not DM user (DMs disabled).",
+      "list_empty": "No warnings for {user}.",
+      "list_header": "Warnings for {user} ({count}):",
+      "list_entry": "`{id}` | {date} | {moderator} | {reason}",
+      "remove_success": "Removed warning #{id} from {user}.",
+      "remove_not_found": "Warning #{id} not found.",
+      "clear_success": "Cleared all warnings for {user}.",
+      "clear_none": "No warnings to clear."
+    }
+  },
+  "utility": {
+    "ping": {
+      "title": "🏓 Pong!",
+      "gateway": "Gateway",
+      "uptime": "Uptime",
+      "ms": "ms"
+    },
+    "avatar": {
+      "title": "Avatar for {user}",
+      "download": "Download",
+      "no_avatar": "This user has no avatar."
+    },
+    "serverinfo": {
+      "title": "Server Information",
+      "owner": "Owner",
+      "created": "Created",
+      "members": "Members",
+      "channels": "Channels",
+      "roles": "Roles",
+      "boosts": "Boosts",
+      "boost_level": "Boost Level",
+      "verification": "Verification Level",
+      "features": "Features"
+    },
+    "userinfo": {
+      "title": "User Information",
+      "username": "Username",
+      "id": "ID",
+      "discriminator": "Discriminator",
+      "bot": "Bot",
+      "created": "Account Created",
+      "joined": "Joined Server",
+      "roles": "Roles",
+      "badges": "Badges"
+    },
+    "poll": {
+      "title": "Poll: {question}",
+      "vote": "Vote by reacting!",
+      "ended": "Poll ended.",
+      "results": "Results:",
+      "option": "Option {letter}: {text} — {count} vote(s)"
+    },
+    "snowflake": {
+      "title": "Snowflake Information",
+      "timestamp": "Timestamp",
+      "date": "Date",
+      "worker_id": "Worker ID",
+      "process_id": "Process ID",
+      "increment": "Increment",
+      "binary": "Binary"
+    },
+    "remind": {
+      "set": "I'll remind you in {duration}: {message}",
+      "cancelled": "Cancelled your reminder.",
+      "none": "No active reminders.",
+      "list_header": "Your Reminders:",
+      "list_entry": "{index}. {message} — in {duration}",
+      "triggered": "⏰ Reminder: {message}"
+    }
+  },
+  "plugins": {
+    "lint": {
+      "title": "Lint Results — {language}",
+      "file": "File: {file}",
+      "no_issues": "✅ No issues found!",
+      "summary": "Errors: {errors} | Warnings: {warnings} | Info: {info}",
+      "issue": "`{file}:{line}:{col}` [{severity}] {code}: {message}",
+      "fix_available": "💡 Fix: {fix}",
+      "doc_link": "📖 {link}",
+      "error": "Error",
+      "warning": "Warning",
+      "info": "Info"
+    },
+    "explain": {
+      "title": "Code Explanation — {language}",
+      "summary": "Summary: {summary}",
+      "line_by_line": "Line-by-Line:",
+      "line": "Line {line}: `{code}` — {explanation}",
+      "doc_refs": "Documentation References:",
+      "doc": "• [{title}]({url}) — {summary}"
+    },
+    "docs": {
+      "title": "Documentation — {language}",
+      "topic": "Topic: {topic}",
+      "results": "Found {count} result(s):",
+      "result": "• [{title}]({url}) — {summary}",
+      "examples": "Examples:",
+      "example": "```{lang}\n{code}\n```"
+    },
+    "plugin": {
+      "list_title": "Installed Language Plugins",
+      "list_empty": "No plugins installed. Use `{prefix}plugin install <repo>` to add one.",
+      "list_entry": "`{id}` v{version} — {name} [{capabilities}]",
+      "install_start": "Installing plugin from `{repo}`...",
+      "install_success": "Successfully installed `{name}` (v{version}) from `{repo}`.",
+      "install_already": "Plugin `{id}` is already installed.",
+      "remove_success": "Removed plugin `{id}`.",
+      "remove_not_found": "Plugin `{id}` not installed.",
+      "info_title": "Plugin Info — {id}",
+      "info_version": "Version: {version}",
+      "info_description": "Description: {description}",
+      "info_author": "Author: {author}",
+      "info_extensions": "Extensions: {extensions}",
+      "info_capabilities": "Capabilities: {capabilities}",
+      "info_repo": "Repository: {repo}",
+      "enable_success": "Enabled plugin `{id}`.",
+      "disable_success": "Disabled plugin `{id}`.",
+      "reload_success": "Reloaded all plugins.",
+      "builtin_repo": "Built-in: {repo}",
+      "community_repo": "Community: {repo}"
+    }
+  },
+  "info": {
+    "help": {
+      "title": "HELIX Commands",
+      "description": "Prefix: `{prefix}` | Slash commands also available",
+      "category": "Category: {category}",
+      "usage": "Usage: {usage}",
+      "permissions": "Permissions: {permissions}",
+      "aliases": "Aliases: {aliases}",
+      "subcommands": "Subcommands: {subcommands}",
+      "footer": "Use `{prefix}help <command>` for detailed help on a specific command."
+    },
+    "info": {
+      "title": "HELIX Bot Information",
+      "version": "Version: {version}",
+      "uptime": "Uptime: {uptime}",
+      "guilds": "Guilds: {count}",
+      "users": "Users: {count}",
+      "node": "Node.js: {version}",
+      "discord_js": "discord.js: {version}",
+      "memory": "Memory: {used} MB / {total} MB",
+      "description": "A developer-focused Discord bot with code intelligence, moderation, ticketing, and project scaffolding."
+    },
+    "status": {
+      "title": "💚 HELIX Status",
+      "guilds": "Guilds",
+      "sessions": "Sessions",
+      "scaffolds": "Scaffolds",
+      "tickets": "Tickets",
+      "mod_actions": "Mod Actions",
+      "warnings": "Warnings"
+    },
+    "list": {
+      "title": "Available Commands",
+      "none": "No commands in this category."
+    }
+  },
+  "project": {
+    "create": {
+      "start": "Creating project `{name}` from template `{template}`...",
+      "success": "Project `{name}` created at `{path}`.",
+      "exists": "Directory `{path}` already exists.",
+      "invalid_template": "Unknown template: `{template}`. Use `{prefix}list` to see available templates.",
+      "invalid_name": "Invalid project name. Use alphanumeric, hyphens, underscores only.",
+      "failed": "Failed to create project: {reason}"
+    },
+    "scaffold": {
+      "start": "Scaffolding `{name}` ({type})...",
+      "success": "Scaffolded `{name}` at `{path}`.",
+      "dry_run": "Dry run complete. No files written.",
+      "invalid_type": "Invalid project type. Available: web, desktop, mobile, game-engine, backend, discord-bot.",
+      "failed": "Scaffolding failed: {reason}"
+    }
+  },
+  "config": {
+    "set": {
+      "prefix": {
+        "success": "Prefix changed to `{prefix}` for this server.",
+        "reset": "Prefix reset to default (`{default_prefix}`).",
+        "too_long": "Prefix must be {max} characters or fewer."
+      },
+      "tickets_hub": {
+        "success": "Tickets hub set to {channel}.",
+        "cleared": "Tickets hub cleared."
+      },
+      "ticket_manager_role": {
+        "success": "Ticket manager role set to {role}.",
+        "cleared": "Ticket manager role cleared."
+      },
+      "mod_log_channel": {
+        "success": "Mod log channel set to {channel}.",
+        "cleared": "Mod log channel cleared."
+      },
+      "welcome_channel": {
+        "success": "Welcome channel set to {channel}.",
+        "cleared": "Welcome channel cleared."
+      },
+      "view": {
+        "title": "Server Configuration",
+        "prefix": "Prefix",
+        "tickets_hub": "Tickets Hub",
+        "ticket_manager_role": "Ticket Manager Role",
+        "mod_log_channel": "Mod Log Channel",
+        "welcome_channel": "Welcome Channel",
+        "not_set": "Not set"
+      }
+    },
+    "ticket": {
+      "create": {
+        "success": "Created ticket thread: {thread}",
+        "subject": "Subject: {subject}",
+        "no_subject": "No subject provided.",
+        "details": "Details: {details}",
+        "welcome": "Welcome {user}! {role} will be with you shortly.\n\nDescribe your issue below. When resolved, click **Close Ticket**.",
+        "hub_not_set": "Tickets hub not configured. Use `>set tickets-hub <channel>`."
+      },
+      "close": {
+        "success": "Ticket closed and archived.",
+        "already_closed": "This ticket is already closed.",
+        "not_a_ticket": "This is not a ticket thread.",
+        "no_permission": "You don't have permission to close this ticket.",
+        "transcript_saved": "Transcript saved to {channel}."
+      },
+      "setup_hub": {
+        "success": "Ticket hub panel posted in {channel}.",
+        "already_exists": "Hub panel already exists in {channel}."
+      },
+      "add": {
+        "success": "Added {user} to the ticket.",
+        "already_in": "User is already in this ticket."
+      },
+      "remove": {
+        "success": "Removed {user} from the ticket.",
+        "not_in": "User is not in this ticket.",
+        "cannot_remove_self": "You cannot remove yourself from the ticket."
+      },
+      "transcript": {
+        "title": "Ticket Transcript — {subject}",
+        "created_by": "Created by {user}",
+        "closed_by": "Closed by {user}",
+        "messages": "Messages",
+        "no_messages": "No messages in this ticket.",
+        "exported": "Transcript exported to {channel}."
+      }
+    }
+  },
+  "events": {
+    "ready": "HELIX bot is ready! Logged in as {tag} ({id})",
+    "guild_create": "Joined new guild: {name} ({id}) — {memberCount} members",
+    "guild_delete": "Left guild: {name} ({id})",
+    "member_join": "{user} joined the server.",
+    "member_leave": "{user} left the server.",
+    "message_delete": "Message deleted in {channel} by {user}",
+    "message_edit": "Message edited in {channel} by {user}"
+  },
+  "system": {
+    "starting": "Starting HELIX bot...",
+    "database_ready": "Database initialized at {path}",
+    "handlers_loaded": "Loaded {count} handler(s)",
+    "commands_loaded": "Loaded {count} command(s) across {categories} categories",
+    "events_loaded": "Loaded {count} event(s)",
+    "plugins_loaded": "Loaded {count} language plugin(s)",
+    "slash_registered": "Registered {count} slash command(s)",
+    "login": "Logging in to Discord...",
+    "ready": "Bot is ready!",
+    "shutdown": "Shutting down...",
+    "restart": "Restarting bot..."
+  }
+}

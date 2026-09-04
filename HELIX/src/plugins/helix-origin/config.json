@@ -1,0 +1,22 @@
+{
+  "repository": "helix-origin",
+  "name": "HELIX Official Language Plugins",
+  "version": "1.0.0",
+  "description": "Built-in language plugins for linting, documentation, and code analysis",
+  "author": "HELIX-Origin",
+  "plugins": [
+    { "id": "typescript", "path": "./typescript" },
+    { "id": "javascript", "path": "./javascript" },
+    { "id": "python", "path": "./python" },
+    { "id": "csharp", "path": "./csharp" },
+    { "id": "gdscript", "path": "./gdscript" },
+    { "id": "rust", "path": "./rust" },
+    { "id": "go", "path": "./go" },
+    { "id": "java", "path": "./java" },
+    { "id": "php", "path": "./php" },
+    { "id": "sql", "path": "./sql" },
+    { "id": "html-css", "path": "./html-css" },
+    { "id": "flutter-dart", "path": "./flutter-dart" },
+    { "id": "lua", "path": "./lua" }
+  ]
+}

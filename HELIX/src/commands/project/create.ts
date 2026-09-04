@@ -1,0 +1,44 @@
+import { EmbedBuilder } from 'discord.js';
+import { BotDatabase } from '../../db/database.js';
+import type { CommandDefinition } from '../../types/command.js';
+
+const TEMPLATES = [
+  { value: 'discord-bot', label: 'Discord Bot (discord.js + TypeScript)' },
+  { value: 'web-react', label: 'Web App (React + Vite)' },
+  { value: 'web-vue', label: 'Web App (Vue 3 + Vite)' },
+  { value: 'desktop-tauri', label: 'Desktop App (Tauri v2)' },
+  { value: 'desktop-electron', label: 'Desktop App (Electron)' },
+  { value: 'mobile-flutter', label: 'Mobile App (Flutter)' },
+  { value: 'mobile-react-native', label: 'Mobile App (React Native)' },
+  { value: 'game-unity', label: 'Game (Unity C#)' },
+  { value: 'game-godot', label: 'Game (Godot 4)' },
+  { value: 'game-rpgm', label: 'Game (RPG Maker MZ)' },
+  { value: 'game-renpy', label: 'Visual Novel (Ren\'Py)' },
+  { value: 'backend-rust', label: 'Backend (Rust + Tokio)' },
+  { value: 'backend-go', label: 'Backend (Go)' },
+  { value: 'backend-python', label: 'Backend (Python + FastAPI)' },
+];
+
+export const create: CommandDefinition = {
+  name: 'create', description: 'Scaffold a new project from starter templates', category: 'project',
+  options: [
+    { name: 'template', description: 'Template ID', type: 'string', required: true, choices: TEMPLATES.map(t => ({ name: t.label, value: t.value })) },
+    { name: 'name', description: 'Project name', type: 'string', required: true },
+    { name: 'git_platform', description: 'Git platform', type: 'string', required: false, choices: [{ name: 'GitHub', value: 'github' }, { name: 'GitLab', value: 'gitlab' }, { name: 'Bitbucket', value: 'bitbucket' }] },
+    { name: 'dry_run', description: 'Preview without writing files', type: 'boolean', required: false },
+  ],
+  async execute({ message, interaction, getOption, user }) {
+    const template = getOption<string>('template');
+    const name = getOption<string>('name');
+    const dryRun = getOption<boolean>('dry_run') || false;
+    if (!template || !name) { const r = '❌ Template and name required.'; if (message) return message.reply(r); return interaction!.reply({ content: r, ephemeral: true }); }
+
+    BotDatabase.getInstance().logScaffold({ userId: user.id, templateId: template, projectName: name });
+
+    const embed = new EmbedBuilder().setTitle('🛠️ Project Scaffold').setColor(0x00ff88)
+      .addFields({ name: 'Template', value: template, inline: true }, { name: 'Project', value: name, inline: true }, { name: 'Dry Run', value: dryRun ? 'Yes' : 'No', inline: true })
+      .setDescription(`Scaffold${dryRun ? ' preview' : ''} for **${name}** using \`${template}\` template.`)
+      .setTimestamp();
+    if (message) await message.reply({ embeds: [embed] }); else await interaction!.reply({ embeds: [embed] });
+  },
+};

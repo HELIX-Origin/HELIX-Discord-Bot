@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { getBotInviteUrl, resolveBotInviteUrl } from '../../bot/src/server.js';
+import { getBotInviteUrl, resolveBotInviteUrl } from '../../HELIX/src/server.js';
 
 describe('Discord Bot Invite URL Generation & Dynamic Callback Resolution', () => {
   const originalEnv = process.env;

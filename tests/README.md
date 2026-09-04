@@ -1,6 +1,6 @@
-# HELIX CLI - Testing Suite & Verification Infrastructure
+# HELIX - Testing Suite & Verification Infrastructure
 
-This directory houses the automated test suites, fixtures, and mocks used to verify, test, and debug the HELIX CLI tool.
+This directory houses the automated test suites, fixtures, and mocks used to verify, test, and debug the HELIX Discord bot.
 
 ## Directory Layout
 
@@ -15,19 +15,19 @@ tests/
 │   ├── auth-opencode.test.ts # OpenCode config & session detector
 │   └── code-hosting.test.ts  # gh and glab CLI detection and commands
 ├── integration/              # Integration test suites (filesystem & sub-processes)
-│   ├── scaffolding-discord.test.ts # Scaffolding discord bot projects
-│   ├── scaffolding-web.test.ts     # Scaffolding React, Vue, Svelte web projects
-│   ├── scaffolding-desktop.test.ts # Scaffolding Electron and Tauri projects
-│   ├── scaffolding-mobile.test.ts  # Scaffolding Flutter and Expo projects
-│   ├── scaffolding-games.test.ts   # Scaffolding Unity, Godot, RPGM, Ren'Py
-│   ├── scaffolding-backend.test.ts # Scaffolding Rust, Go, Java, Python
+│   ├── scaffolding-discord.test.ts # Discord bot project scaffolding
+│   ├── scaffolding-web.test.ts     # Web dashboard projects
+│   ├── scaffolding-desktop.test.ts # Desktop electron/tauri projects
+│   ├── scaffolding-mobile.test.ts  # Flutter and Expo projects
+│   ├── scaffolding-games.test.ts   # Godot, RPGM, Ren'Py games
+│   ├── scaffolding-backend.test.ts # Rust, Go, Java, Python backends
 │   └── repo-remote.test.ts         # Remote repository initialization & git remotes
 ├── fixtures/                 # Static mock environments
-│   ├── mock-configs/         # Fake hosts.json, auth.json, and .env files
-│   │   ├── github-copilot/
-│   │   ├── antigravity/
-│   │   └── opencode/
-│   ├── mock-templates/       # Sample valid and invalid YAML template files
+│   ├── mock-configs/         # Fake .env files and auth configs
+│   │   ├── .env.example
+│   │   ├── mock-antigravity.json
+│   │   └── mock-opencode.json
+│   ├── mock-templates/       # Sample valid and invalid template files
 │   └── golden-trees/         # Expected directory outputs for validation
 └── helpers/                  # Test utilities
     ├── temp-dir.ts           # Isolated temporary directory generator & cleanup
@@ -58,12 +58,32 @@ npm run test:watch
 - Validates that binary files (`.png`, `.ico`, `.wav`, etc.) are preserved in byte-exact condition without UTF-8 corruption.
 - Validates that missing mandatory variables trigger informative validation errors.
 
-### 2. Multi-Tiered AI Credential Waterfall
-- **Priority 1**: Simulates `gh auth token` returning a valid token -> confirms Copilot provider authenticated via client.
-- **Priority 2**: Simulates client missing, but `.env` containing `ANTIGRAVITY_API_KEY` -> confirms Antigravity authenticated via `.env`.
-- **Priority 3**: Simulates neither present -> confirms graceful degradation without unhandled exceptions.
+### 2. Plugin System Validation
+- Validates repo `config.json` schema and plugin `plugin.json` manifests
+- Verifies plugin interface compliance (lint, explain, suggestFixes, getDocumentation)
+- Tests plugin loader discovery via `import.meta.glob`
+- Validates extension-to-plugin mapping in the registry
 
-### 3. Code Hosting CLI Integration
-- Simulates presence of `gh` CLI -> confirms `gh repo create` invoked with expected arguments.
-- Simulates presence of `glab` CLI -> confirms `glab repo create` invoked with expected arguments.
-- Simulates absence of official CLIs -> confirms fallback to standard `git remote add origin`.
+### 3. Environment Configuration
+- Validates `.env.example` format and required keys
+- Tests URL auto-detection logic (Heroku, Render, Railway, custom domain)
+- Validates SQLite database schema creation and migration
+- Tests prefix configuration per-guild
+
+### 4. Bot Functionality
+- Verifies slash command deployment and registration
+- Tests prefix command handling with per-guild prefix
+- Validates ticket thread creation and closure
+- Confirms moderation command permissions and hierarchy checks
+
+### 5. Message Handler
+- Tests message interpolation with `{prefix}` and `{arg}` placeholders
+- Verifies message loading from `messages.json`
+- Tests fallback for missing message keys
+- Validates category-based message grouping
+
+### 6. Message Handler Tests
+- Message loading and fallback behavior
+- Interpolation of `{prefix}` and `{arg}` placeholders
+- Category-based message grouping
+- Missing message detection and warnings
