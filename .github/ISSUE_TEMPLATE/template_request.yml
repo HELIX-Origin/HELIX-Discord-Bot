@@ -1,0 +1,69 @@
+name: "New Starter Template Request"
+description: "Propose a new language, framework, or game engine scaffolding template"
+title: "[Template]: "
+labels: ["template-request", "scaffolding"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ### Propose a New Framework Starter Template
+        HELIX CLI supports 14 multi-framework templates. Propose a new production-ready starter template here!
+
+  - type: dropdown
+    id: domain
+    attributes:
+      label: Project Domain
+      options:
+        - "Web Applications (e.g. Next.js, Nuxt, SvelteKit, Astro)"
+        - "Desktop Applications (e.g. Wails, Tauri + React, Qt)"
+        - "Mobile Applications (e.g. Kotlin Multiplatform, Ionic)"
+        - "Game Engines (e.g. Godot C#, Unreal Engine, Bevy Rust)"
+        - "Backend Services & APIs (e.g. Bun Elysia, Elixir Phoenix, NestJS)"
+        - "Developer Tooling / CLI Starter"
+        - "Other"
+    validations:
+      required: true
+
+  - type: input
+    id: framework-name
+    attributes:
+      label: Framework / Engine & Language
+      description: Name the target framework and programming language
+      placeholder: "e.g. Next.js 15 (TypeScript) or Bevy 0.14 (Rust)"
+    validations:
+      required: true
+
+  - type: textarea
+    id: structure
+    attributes:
+      label: Proposed Project Directory Structure
+      description: Outline the essential files and directories for a clean, idiomatic starter.
+      placeholder: |
+        my-project/
+        ├── src/
+        ├── package.json (or Cargo.toml / go.mod)
+        ├── README.md
+        └── ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: commands
+    attributes:
+      label: Recommended Commands & Toolchain
+      description: What are the standard setup, dev, build, and test commands?
+      placeholder: |
+        - Setup: npm install / cargo build
+        - Dev: npm run dev / cargo run
+        - Build: npm run build / cargo build --release
+    validations:
+      required: true
+
+  - type: textarea
+    id: ci-pipeline
+    attributes:
+      label: CI/CD Pipeline Expectations
+      description: What checks should the generated GitHub Actions / GitLab CI pipeline run?
+      placeholder: "e.g., Run linter, typecheck, unit tests, and build step"
+    validations:
+      required: false

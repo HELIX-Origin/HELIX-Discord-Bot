@@ -1,0 +1,107 @@
+name: "Bug Report"
+description: "Report unexpected behavior, crashes, or errors in HELIX CLI, Scaffolding, or Bot"
+title: "[Bug]: "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ### Thank you for reporting a bug!
+        Please search existing issues to avoid filing duplicates. Ensure you are running the latest version of HELIX CLI.
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: Affected Component
+      description: Which part of HELIX is encountering the issue?
+      options:
+        - "CLI Core (helix commands, parser, config)"
+        - "Scaffolding Engine & Atomic Generator"
+        - "Starter Templates (Web, Desktop, Mobile, Game, Backend)"
+        - "AI Agent Integration (Google Antigravity, GitHub Copilot, Open Code)"
+        - "Code Hosting Automation (GitHub gh, GitLab glab, Bitbucket)"
+        - "Discord Bot Gateway Client & Slash Commands"
+        - "Web Dashboard & NextAuth OAuth2"
+        - "Docker Container & Self-Hosting"
+        - "CI/CD Workflows & Packaging"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating System
+      description: What operating system are you running HELIX on?
+      options:
+        - "Windows 11 / 10 (PowerShell)"
+        - "Windows 11 / 10 (CMD / Git Bash)"
+        - "macOS (Apple Silicon)"
+        - "macOS (Intel)"
+        - "Linux (Ubuntu / Debian / Mint)"
+        - "Linux (Arch / Fedora / RHEL)"
+        - "Docker Container"
+    validations:
+      required: true
+
+  - type: input
+    id: node-version
+    attributes:
+      label: Node.js Runtime Version
+      description: Run `node -v` in your terminal
+      placeholder: "e.g. v22.5.0, v20.12.0, v26.8.1"
+    validations:
+      required: true
+
+  - type: input
+    id: helix-version
+    attributes:
+      label: HELIX CLI Version
+      description: Run `helix --version` or `helix info`
+      placeholder: "e.g. 0.1.0"
+    validations:
+      required: true
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Bug Summary
+      description: A clear and concise description of the problem.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      description: Exact steps to reproduce the bug.
+      placeholder: |
+        1. Run `helix create ...` or `helix bot start`
+        2. Enter parameters: ...
+        3. Observe error: ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What did you expect to happen instead?
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Terminal Output / Stack Trace
+      description: Paste any relevant terminal logs, stack traces, or diagnostic output.
+      render: shell
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Pre-submission Checklist
+      options:
+        - label: I have verified this is not a duplicate of an existing issue.
+          required: true
+        - label: I am running a supported Node.js LTS version (v18, v20, v22, or newer).
+          required: true

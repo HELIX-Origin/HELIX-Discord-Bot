@@ -1,0 +1,61 @@
+name: "Feature Request"
+description: "Suggest a new feature, CLI command, or improvement for HELIX"
+title: "[Feature]: "
+labels: ["enhancement", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ### Have a feature idea for HELIX?
+        We welcome proposals for new developer tools, commands, UI features, and integrations!
+
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Target Feature Scope
+      description: Which part of HELIX does this feature enhance?
+      options:
+        - "CLI Command (new subcommand or options)"
+        - "Scaffolding Engine & Generators"
+        - "AI Context Detection & Prompt Synthesis"
+        - "Code Hosting Platforms & CI/CD Pipelines"
+        - "Discord Bot Slash Commands & Server Tools"
+        - "Web Dashboard Interface & Analytics"
+        - "Developer Experience & Tooling"
+        - "Other"
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Statement / Motivation
+      description: Is your feature request related to a specific problem or workflow limitation?
+      placeholder: "e.g., I'm always frustrated when..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed-solution
+    attributes:
+      label: Proposed Solution
+      description: A clear and detailed description of what you want to happen.
+      placeholder: "e.g., Add a new command `helix ...` that accepts `--flag` and automatically..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternative Solutions Considered
+      description: What other approaches or workarounds have you considered?
+    validations:
+      required: false
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context / Mockups
+      description: Add any mockups, screenshots, sample terminal outputs, or architectural sketches.
+    validations:
+      required: false
