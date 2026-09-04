@@ -36,7 +36,7 @@ export async function launchBotAndDashboard(options: LaunchBotOptions = {}): Pro
       console.error(`❌ Discord Gateway connection error: ${err.message}`);
     }
   } else {
-    console.log('⚠️  No DISCORD_BOT_TOKEN found in environment.');
+    console.log('⚠️  No DISCORD_TOKEN found in environment.');
     console.log('ℹ️  Web dashboard is running. Configure your bot token or visit the dashboard to setup.');
   }
 

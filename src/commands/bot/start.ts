@@ -4,7 +4,7 @@ import { logger } from '../../utils/logger/index.js';
 import { showBanner } from '../../utils/banner/index.js';
 
 export async function startBot(options: { token?: string; callbackUrl?: string } = {}): Promise<void> {
-  const token = options.token || process.env.DISCORD_BOT_TOKEN || process.env.DISCORD_TOKEN;
+  const token = options.token || process.env.DISCORD_TOKEN || process.env.DISCORD_BOT_TOKEN;
 
   showBanner();
   logger.title('Starting Built-in HELIX Discord Bot');
@@ -15,7 +15,7 @@ export async function startBot(options: { token?: string; callbackUrl?: string }
 
   if (!token) {
     logger.error('No bot token provided.');
-    logger.info('Please set DISCORD_BOT_TOKEN in .env or pass --token <token>');
+    logger.info('Please set DISCORD_TOKEN in .env or pass --token <token>');
     logger.info('Callback server is active for authorization handling. Press Ctrl+C to stop.');
 
     process.on('SIGINT', async () => {

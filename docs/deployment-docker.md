@@ -37,7 +37,7 @@ cp .env.example .env
 
 Edit `.env` with your Discord application credentials:
 ```env
-DISCORD_BOT_TOKEN=your_bot_token_here
+DISCORD_TOKEN=your_bot_token_here
 DISCORD_CLIENT_ID=your_application_client_id_here
 DISCORD_CLIENT_SECRET=your_client_secret_here
 DISCORD_CALLBACK_URL=http://localhost:5000

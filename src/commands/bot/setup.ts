@@ -15,7 +15,7 @@ export async function runInteractiveBotSetup(): Promise<void> {
       type: 'password',
       name: 'botToken',
       message: 'Discord Bot Token (Required):',
-      initial: process.env.DISCORD_BOT_TOKEN || '',
+      initial: process.env.DISCORD_TOKEN || process.env.DISCORD_BOT_TOKEN || '',
       validate: (val: string) => (val.trim().length > 0 ? true : 'Bot token is required for the bot to run'),
     },
     {
@@ -73,7 +73,7 @@ export async function runInteractiveBotSetup(): Promise<void> {
   const envPath = path.resolve(process.cwd(), '.env');
 
   // Save bot keys
-  saveEnvValue('DISCORD_BOT_TOKEN', answers.botToken.trim(), envPath);
+  saveEnvValue('DISCORD_TOKEN', answers.botToken.trim(), envPath);
   saveEnvValue('DISCORD_CLIENT_ID', answers.clientId.trim(), envPath);
   const callbackBase = (answers.callbackUrl || 'http://localhost:5000').trim();
   saveEnvValue('DISCORD_CALLBACK_URL', callbackBase, envPath);

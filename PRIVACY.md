@@ -24,7 +24,7 @@ When you deploy or launch the built-in Discord bot and companion web dashboard, 
 > This SQLite database resides entirely within your local filesystem or mounted container volume (`./data:/app/data`). It is never uploaded to HELIX CLI maintainers or remote telemetry endpoints.
 
 ### B. Environment Variables & Credentials
-- Credentials stored in `.env` (such as `DISCORD_BOT_TOKEN`, `DISCORD_CLIENT_SECRET`, `NEXTAUTH_SECRET`, and AI API keys) are read exclusively at runtime to establish authenticated connections.
+- Credentials stored in `.env` (such as `DISCORD_TOKEN`, `DISCORD_CLIENT_SECRET`, `NEXTAUTH_SECRET`, and AI API keys) are read exclusively at runtime to establish authenticated connections.
 - `.env` files are explicitly excluded by `.gitignore` to prevent accidental commits.
 - When running `helix repo sync-secrets`, values are securely piped via standard input into GitHub Secrets (`gh secret set`) without being saved to temporary disk files or logged to the console.
 

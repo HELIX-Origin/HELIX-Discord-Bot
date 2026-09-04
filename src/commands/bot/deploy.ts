@@ -8,7 +8,7 @@ export async function deployBot(options: {
   guildId?: string;
   dryRun?: boolean;
 }): Promise<void> {
-  const token = options.token || process.env.DISCORD_BOT_TOKEN || process.env.DISCORD_TOKEN || '';
+  const token = options.token || process.env.DISCORD_TOKEN || process.env.DISCORD_BOT_TOKEN || '';
   const clientId = options.clientId || process.env.DISCORD_CLIENT_ID || process.env.CLIENT_ID || '';
   const guildId = options.guildId; // Explicit --guild-id flag only (scoped dev deployments)
 
@@ -21,7 +21,7 @@ export async function deployBot(options: {
   }
 
   if (!token || !clientId) {
-    logger.error('Missing DISCORD_BOT_TOKEN or DISCORD_CLIENT_ID.');
+    logger.error('Missing DISCORD_TOKEN or DISCORD_CLIENT_ID.');
     logger.info('Set them in .env or pass via --token and --client-id');
     return;
   }

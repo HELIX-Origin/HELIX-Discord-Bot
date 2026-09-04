@@ -58,7 +58,7 @@ loadBotEnv();
 
 /** Discord Bot Token — required for gateway connection. */
 export function getBotToken(): string {
-  return process.env.DISCORD_BOT_TOKEN || process.env.DISCORD_TOKEN || '';
+  return process.env.DISCORD_TOKEN || process.env.DISCORD_BOT_TOKEN || '';
 }
 
 /** Discord Application Client ID — required for OAuth2 and slash commands. */
@@ -212,10 +212,16 @@ export function getNextAuthSecret(): string {
 
 /**
  * Absolute path to the SQLite database file.
- * Override with `DISCORD_DB_PATH` env var; defaults to `<root>/data/helix-bot.sqlite`.
+ * Automatically detected and managed by the bot and dashboard (defaults to `<root>/data/helix-bot.sqlite`).
  */
 export function getDbPath(): string {
-  return process.env.DISCORD_DB_PATH || path.resolve(BOT_ROOT_DIR, 'data', 'helix-bot.sqlite');
+  const defaultDir = path.resolve(BOT_ROOT_DIR, 'data');
+  if (!fs.existsSync(defaultDir)) {
+    try {
+      fs.mkdirSync(defaultDir, { recursive: true });
+    } catch {}
+  }
+  return process.env.DISCORD_DB_PATH || path.resolve(defaultDir, 'helix-bot.sqlite');
 }
 
 // ─── Convenience snapshot ────────────────────────────────────────────────────
@@ -259,7 +265,7 @@ export function getBotEnv(): BotEnvConfig {
  * Also sets `process.env[key]` immediately so the running process reflects
  * the new value without a restart.
  *
- * @param key       The env variable name (e.g. 'DISCORD_BOT_TOKEN')
+ * @param key       The env variable name (e.g. 'DISCORD_TOKEN')
  * @param value     The value to write
  * @param envPath   Optional override path; defaults to `<root>/.env`
  * @returns         The resolved path of the file that was written

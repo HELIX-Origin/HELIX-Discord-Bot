@@ -3,6 +3,7 @@ import { AuthResolver } from '../../../src/core/auth/index.js';
 import { ProviderDispatcher } from '../../../src/core/ai/index.js';
 import { LocalCliRunner } from '../../../src/core/cli/index.js';
 import { BotDatabase } from '../db/index.js';
+import { HelixBotClient } from '../client.js';
 
 export const aiCommand = {
   data: new SlashCommandBuilder()
@@ -36,10 +37,39 @@ export const aiCommand = {
 
     const db = BotDatabase.getInstance();
     const userSession = db.getUserSession(userId, providerChoice || undefined);
-    const systemProvider = ProviderDispatcher.selectBestProvider(providerChoice || undefined);
+
+    // Verify if the executing member is the bot application owner
+    const botClient = HelixBotClient.getInstance();
+    const isOwner = botClient ? await botClient.isOwner(userId) : Boolean(
+      (process.env.DISCORD_OWNER_ID && process.env.DISCORD_OWNER_ID.trim() === userId) ||
+      (process.env.BOT_OWNER_ID && process.env.BOT_OWNER_ID.trim() === userId)
+    );
+
+    // API keys provided by environment variables or secrets are strictly reserved for the bot's owner.
+    // Non-owners MUST have their own personal session configured via /helix-auth.
+    if (!isOwner && !userSession) {
+      const restrictedEmbed = new EmbedBuilder()
+        .setTitle('🔒 Bot Owner API Key Protection')
+        .setColor(0xffa500)
+        .setDescription(
+          'API keys configured in the environment or repository secrets are strictly restricted to the bot application owner.'
+        )
+        .addFields({
+          name: 'How to use HELIX AI',
+          value:
+            'You can authenticate your personal account with your own AI provider key using `/helix-auth action:login`.\nYour credentials are encrypted in your private SQLite member session and never exposed to other members.',
+        })
+        .setFooter({ text: 'HELIX Security • Per-user credential isolation' });
+
+      await interaction.editReply({ embeds: [restrictedEmbed] });
+      return;
+    }
+
+    // Only bot owners can use systemProvider fallback (host's env/secret API keys)
+    const systemProvider = isOwner ? ProviderDispatcher.selectBestProvider(providerChoice || undefined) : null;
 
     let activeProviderName = userSession ? userSession.provider : (systemProvider ? systemProvider.displayName : null);
-    let activeSource = userSession ? `User Session (${username})` : (systemProvider ? systemProvider.source : null);
+    let activeSource = userSession ? `User Session (${username})` : (systemProvider ? `${systemProvider.source} (Bot Owner)` : null);
 
     if (!activeProviderName) {
       await interaction.editReply({
@@ -57,7 +87,7 @@ export const aiCommand = {
       provider: activeProviderName,
     });
 
-    // Execute through the bot's hosted local copy of the CLI using the user's personal session token
+    // Execute through the bot's hosted local copy of the CLI
     const cliArgs = ['ai', 'query', prompt];
     if (providerChoice) {
       cliArgs.push('--provider', providerChoice);
@@ -65,6 +95,7 @@ export const aiCommand = {
 
     const cliResult = await LocalCliRunner.execute(cliArgs, {
       userId,
+      isOwner,
       provider: providerChoice || activeProviderName,
     });
 
@@ -77,7 +108,7 @@ export const aiCommand = {
       .setColor(cliResult.success ? 0x00ff88 : 0xffaa00)
       .addFields(
         { name: 'Authenticated Session', value: `\`${activeSource}\``, inline: true },
-        { name: 'Session Mode', value: userSession ? 'Personal Member Session' : 'Host Shared Session', inline: true },
+        { name: 'Session Mode', value: userSession ? 'Personal Member Session' : 'Bot Owner Master Session', inline: true },
         { name: 'Local CLI Host', value: `\`helix v${LocalCliRunner.getStatus().version}\``, inline: true }
       )
       .setFooter({ text: 'HELIX AI • Hosted Local CLI Engine' })

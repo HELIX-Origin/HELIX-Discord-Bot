@@ -23,7 +23,7 @@ export async function deployBotCommands(options: {
   if (!token || !clientId) {
     return {
       success: false,
-      message: 'Missing DISCORD_BOT_TOKEN or DISCORD_CLIENT_ID',
+      message: 'Missing DISCORD_TOKEN or DISCORD_CLIENT_ID',
       count: 0,
     };
   }

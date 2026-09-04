@@ -3,7 +3,7 @@ import { logger } from '../../utils/logger/index.js';
 import { getAuthorizationUrl, getBotInviteUrl, resolveBotInviteUrl, BotDatabase, HelixBotClient } from '../../../bot/index.js';
 
 export function showBotStatus(): void {
-  const token = process.env.DISCORD_BOT_TOKEN || process.env.DISCORD_TOKEN;
+  const token = process.env.DISCORD_TOKEN || process.env.DISCORD_BOT_TOKEN;
   const clientId = process.env.DISCORD_CLIENT_ID || process.env.CLIENT_ID;
   const callbackBase = process.env.DISCORD_CALLBACK_URL || 'http://localhost:5000';
   const callbackUrl = `${callbackBase.replace(/\/$/, '')}/api/auth/callback/discord`;
@@ -41,7 +41,7 @@ export function showBotStatus(): void {
     console.log(`  2. Add the OAuth2 redirect URL in Discord Portal:`);
     console.log(`     ${pc.yellow(callbackUrl)}`);
     console.log(`  3. Run ${pc.bold('helix bot setup')} or set variables in ${pc.bold('.env')}:`);
-    console.log(pc.dim(`     DISCORD_BOT_TOKEN=your_token_here`));
+    console.log(pc.dim(`     DISCORD_TOKEN=your_token_here`));
     console.log(pc.dim(`     DISCORD_CLIENT_ID=your_client_id_here`));
     console.log(pc.dim(`     DISCORD_CALLBACK_URL=http://localhost:5000`));
     console.log(pc.dim(`     NEXT_PUBLIC_INVITE_URL="https://discord.com/api/oauth2/authorize?client_id=yourclientid&permissions=8&scope=bot"\n`));

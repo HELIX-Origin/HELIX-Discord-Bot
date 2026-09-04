@@ -11,7 +11,7 @@
       "description": "Heroku application name (automatically injected by Heroku during deploy)",
       "required": false
     },
-    "DISCORD_BOT_TOKEN": {
+    "DISCORD_TOKEN": {
       "description": "Discord Bot Token from Discord Developer Portal (Bot tab -> Reset Token)",
       "required": true
     },
@@ -33,11 +33,6 @@
     },
     "NEXT_PUBLIC_INVITE_URL": {
       "description": "Administrator Discord bot invite URL (leave empty to automatically generate from Client ID and Heroku domain)",
-      "required": false
-    },
-    "CLONE_CLI": {
-      "description": "Set to 'true' to clone and install the HELIX CLI into .cli/ so the bot can run /helix slash commands. Leave empty to run standalone.",
-      "value": "",
       "required": false
     },
     "NEXTAUTH_INTERNAL_URL": {

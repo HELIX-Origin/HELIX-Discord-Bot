@@ -31,7 +31,7 @@ jobs:
       - name: Sync GitHub Secrets to Heroku & Deploy
         if: env.HEROKU_API_KEY != '' && env.HEROKU_APP_NAME != ''
         env:
-          DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
+          DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
           DISCORD_CLIENT_ID: ${{ secrets.DISCORD_CLIENT_ID }}
           DISCORD_CLIENT_SECRET: ${{ secrets.DISCORD_CLIENT_SECRET }}
           DISCORD_CALLBACK_URL: ${{ secrets.DISCORD_CALLBACK_URL }}
@@ -75,7 +75,7 @@ jobs:
           # Set Heroku config vars from GitHub Secrets & dynamically resolved URLs
           heroku config:set \
             HEROKU_APP_NAME="$HEROKU_APP_NAME" \
-            DISCORD_BOT_TOKEN="$DISCORD_BOT_TOKEN" \
+            DISCORD_TOKEN="$DISCORD_TOKEN" \
             DISCORD_CLIENT_ID="$DISCORD_CLIENT_ID" \
             DISCORD_CLIENT_SECRET="$DISCORD_CLIENT_SECRET" \
             DISCORD_CALLBACK_URL="$EFFECTIVE_CALLBACK" \

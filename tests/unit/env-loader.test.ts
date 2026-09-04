@@ -18,13 +18,13 @@ describe('Environment Loader & .env Management', () => {
   });
 
   it('saves new environment variables to .env file', () => {
-    saveEnvValue('DISCORD_BOT_TOKEN', 'test_token_123', tempEnvPath);
+    saveEnvValue('DISCORD_TOKEN', 'test_token_123', tempEnvPath);
     saveEnvValue('DISCORD_CLIENT_ID', 'test_client_id_456', tempEnvPath);
 
     const content = fs.readFileSync(tempEnvPath, 'utf-8');
-    expect(content).toContain('DISCORD_BOT_TOKEN=test_token_123');
+    expect(content).toContain('DISCORD_TOKEN=test_token_123');
     expect(content).toContain('DISCORD_CLIENT_ID=test_client_id_456');
-    expect(process.env.DISCORD_BOT_TOKEN).toBe('test_token_123');
+    expect(process.env.DISCORD_TOKEN).toBe('test_token_123');
     expect(process.env.DISCORD_CLIENT_ID).toBe('test_client_id_456');
   });
 

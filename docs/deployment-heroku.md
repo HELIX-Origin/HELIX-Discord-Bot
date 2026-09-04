@@ -29,7 +29,7 @@ The included GitHub Actions workflow (`.github/workflows/heroku-deploy.yml`) aut
 ### Required GitHub Secrets:
 1. `HEROKU_API_KEY`: Your Heroku API key from Account Settings.
 2. `HEROKU_APP_NAME`: The name of your Heroku application.
-3. `DISCORD_BOT_TOKEN`: Discord Bot Token.
+3. `DISCORD_TOKEN`: Discord Bot Token.
 4. `DISCORD_CLIENT_ID`: Discord Application Client ID.
 5. `DISCORD_CALLBACK_URL`: Public base URL (`https://<app-name>.herokuapp.com`).
 6. `NEXTAUTH_URL`: Public base URL (`https://<app-name>.herokuapp.com`).

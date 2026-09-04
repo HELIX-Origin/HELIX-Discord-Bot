@@ -264,6 +264,10 @@ export class TemplateEngine {
     return this.defaultTemplates[templateName] || null;
   }
 
+  public static getAllDefaultTemplates(): Record<string, ProjectTemplate> {
+    return { ...this.defaultTemplates };
+  }
+
   public static loadTemplate(templateName: string, filePath?: string): ProjectTemplate {
     if (filePath && fs.existsSync(filePath)) {
       try {

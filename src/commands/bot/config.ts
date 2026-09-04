@@ -16,8 +16,8 @@ export function configureBotEnv(options: {
   let updatedCount = 0;
 
   if (options.token) {
-    saveEnvValue('DISCORD_BOT_TOKEN', options.token, targetEnv);
-    logger.success(`Saved DISCORD_BOT_TOKEN to ${pc.bold(targetEnv)}`);
+    saveEnvValue('DISCORD_TOKEN', options.token, targetEnv);
+    logger.success(`Saved DISCORD_TOKEN to ${pc.bold(targetEnv)}`);
     updatedCount++;
   }
 
@@ -44,7 +44,7 @@ export function configureBotEnv(options: {
     console.log('\nUsage example:');
     console.log(pc.cyan('  helix bot config --token <your_bot_token> --client-id <your_client_id>\n'));
     console.log('You can also edit your .env file directly:');
-    console.log(pc.dim('  DISCORD_BOT_TOKEN=...'));
+    console.log(pc.dim('  DISCORD_TOKEN=...'));
     console.log(pc.dim('  DISCORD_CLIENT_ID=...'));
     console.log(pc.dim('  DISCORD_CALLBACK_URL=http://localhost:5000\n'));
   }

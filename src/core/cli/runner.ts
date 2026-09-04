@@ -10,6 +10,7 @@ const projectRoot = path.resolve(__dirname, '../../..');
 
 export interface CliExecutionOptions {
   userId?: string;
+  isOwner?: boolean;
   provider?: string;
   envOverrides?: Record<string, string>;
   cwd?: string;
@@ -56,7 +57,7 @@ export class LocalCliRunner {
   }
 
   public static getRepoUrl(): string {
-    return process.env.HELIX_CLI_REPO_URL || 'https://github.com/HELIX-Origin/helix-cli.git';
+    return process.env.HELIX_CLI_REPO_URL || 'https://github.com/HELIX-Origin/HELIX-CLI.git';
   }
 
   public static getStatus(): CliHostStatus {
@@ -112,6 +113,16 @@ export class LocalCliRunner {
           }
         }
       } catch {}
+    }
+
+    // API keys provided by environment variables or secrets are strictly reserved for the bot owner.
+    // If a non-owner executes a command without a personal session token, strip all host AI keys.
+    if (options.userId && !options.isOwner && !userSessionUsed) {
+      delete env.ANTIGRAVITY_API_KEY;
+      delete env.GEMINI_API_KEY;
+      delete env.GITHUB_TOKEN;
+      delete env.COPILOT_API_KEY;
+      delete env.OPENCODE_API_KEY;
     }
 
     return new Promise((resolve) => {

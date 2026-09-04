@@ -1,6 +1,7 @@
 import { SlashCommandBuilder, ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
 import { LocalCliRunner } from '../../../src/core/cli/index.js';
 import { BotDatabase } from '../db/index.js';
+import { HelixBotClient } from '../client.js';
 
 export const explainCommand = {
   data: new SlashCommandBuilder()
@@ -28,6 +29,34 @@ export const explainCommand = {
     await interaction.deferReply();
 
     const db = BotDatabase.getInstance();
+    const userSession = db.getUserSession(userId);
+
+    // Verify if the executing member is the bot application owner
+    const botClient = HelixBotClient.getInstance();
+    const isOwner = botClient ? await botClient.isOwner(userId) : Boolean(
+      (process.env.DISCORD_OWNER_ID && process.env.DISCORD_OWNER_ID.trim() === userId) ||
+      (process.env.BOT_OWNER_ID && process.env.BOT_OWNER_ID.trim() === userId)
+    );
+
+    // API keys provided by environment variables or secrets are strictly reserved for the bot's owner.
+    if (!isOwner && !userSession) {
+      const restrictedEmbed = new EmbedBuilder()
+        .setTitle('🔒 Bot Owner API Key Protection')
+        .setColor(0xffa500)
+        .setDescription(
+          'API keys configured in the environment or repository secrets are strictly restricted to the bot application owner.'
+        )
+        .addFields({
+          name: 'How to use HELIX AI',
+          value:
+            'You can authenticate your personal account with your own AI provider key using `/helix-auth action:login`.\nYour credentials are encrypted in your private SQLite member session and never exposed to other members.',
+        })
+        .setFooter({ text: 'HELIX Security • Per-user credential isolation' });
+
+      await interaction.editReply({ embeds: [restrictedEmbed] });
+      return;
+    }
+
     const prompt = `Explain this ${language} code snippet:\n\`\`\`${language}\n${code}\n\`\`\``;
 
     // Log query to SQLite database
@@ -36,12 +65,13 @@ export const explainCommand = {
       username,
       guildId: interaction.guildId || undefined,
       prompt,
-      provider: 'ai-explain',
+      provider: userSession ? userSession.provider : 'ai-explain (Bot Owner)',
     });
 
     // Execute through the bot's hosted local CLI
     const cliResult = await LocalCliRunner.execute(['ai', 'query', prompt], {
       userId,
+      isOwner,
     });
 
     const responseText = cliResult.stdout || cliResult.stderr || 'Analyzed code structure. Evaluated syntax, typing, and patterns.';
