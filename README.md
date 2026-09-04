@@ -1,4 +1,4 @@
-﻿<p align="center">
+<p align="center">
   <img src=".github/assets/images/icon.jpg" alt="HELIX Icon" width="128" height="128">
 </p>
 
@@ -37,8 +37,9 @@ Fill in `DISCORD_TOKEN`, `DISCORD_CLIENT_ID`, `DISCORD_CLIENT_SECRET`, and `NEXT
 - [Bot Reference](docs/discord-bot.md) -- commands, database, configuration
 - [Web Dashboard](docs/web-dashboard.md) -- admin panel and OAuth2 flow
 - [Language Plugins](docs/plugin-system.md) -- code intelligence plugin architecture
+- [Plugin Authoring](docs/plugin-authoring.md) -- build and distribute custom language plugins
 - [Scaffolding Templates](docs/scaffolding-templates.md) -- 17 project starters
-- [Heroku Deployment](docs/deployment-heroku.md) -- 1-click free-tier deploy
+- [Heroku Deployment](docs/deployment-heroku.md) -- deploy guide
 - [Docker / Self-Hosting](docs/deployment-docker.md) -- containerized setup
 
 ---
