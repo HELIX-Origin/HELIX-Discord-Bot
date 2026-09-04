@@ -16,7 +16,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: 'npm'
 
       - name: Install dependencies
@@ -26,7 +26,7 @@ jobs:
         run: npm test
 
       - name: Sync GitHub Secrets to Heroku & Deploy
-        if: env.HEROKU_API_KEY != '' && env.HEROKU_APP_NAME != ''
+        if: ${{ secrets.HEROKU_API_KEY != '' && secrets.HEROKU_APP_NAME != '' }}
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
           HEROKU_APP_NAME: ${{ secrets.HEROKU_APP_NAME }}
