@@ -13,19 +13,11 @@ Redistribution and use in source and binary forms, with or without modification,
 
 ---
 
-### Conditions of Redistribution
+1. Redistributions of source code must retain the above copyright notice, this list of conditions, and the following disclaimer.
 
-> [!IMPORTANT]
-> **Clause 1: Source Code Retentions**  
-> Redistributions of source code must retain the above copyright notice, this list of conditions, and the following disclaimer.
+2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions, and the following disclaimer in the documentation and/or other materials provided with the distribution.
 
-> [!IMPORTANT]
-> **Clause 2: Binary Form Reproductions**  
-> Redistributions in binary form must reproduce the above copyright notice, this list of conditions, and the following disclaimer in the documentation and/or other materials provided with the distribution.
-
-> [!WARNING]
-> **Clause 3: Endorsement & Promotion Restriction**  
-> Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
 
 ---
 
