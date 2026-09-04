@@ -1,6 +1,8 @@
-﻿# Plugin Repository Structural Specification
+# Plugin Repository Structural Specification
 
 This document defines the complete architectural and structural specification for creating and hosting HELIX language plugin repositories on GitHub.
+
+> **Official Starter Template**: Fork or generate your repository from [HELIX-Origin/helix-plugin-template](https://github.com/HELIX-Origin/helix-plugin-template) to start with a fully-typed, pre-tested structure.
 
 ```mermaid
 flowchart TD

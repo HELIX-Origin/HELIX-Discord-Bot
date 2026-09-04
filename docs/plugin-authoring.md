@@ -14,6 +14,8 @@ This guide walks through creating, testing, and distributing language plugins an
 
 ## 2. Repository Structure
 
+> **Starter Template**: You can get started immediately by using the official [HELIX Plugin Template](https://github.com/HELIX-Origin/helix-plugin-template) (click **"Use this template"** on GitHub).
+>
 > For complete JSON schemas, capability matrices, and TypeScript type contracts, see [Plugin Repository Structural Specification](plugin-repository-structure.md).
 
 A plugin repository contains a root manifest (`config.json`) and one or more plugin folders:
