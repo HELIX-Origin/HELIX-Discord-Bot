@@ -1,0 +1,77 @@
+﻿{
+  "$schema": "https://opencode.ai/config.json",
+  "name": "HELIX",
+  "description": "Developer Discord bot with language plugin code intelligence, moderation, and ticketing",
+  "version": "0.1.0",
+  "agents": {
+    "discord-bot": ".agents/agents/discord-bot.md",
+    "web": ".agents/agents/web.md",
+    "desktop": ".agents/agents/desktop.md",
+    "mobile": ".agents/agents/mobile.md",
+    "game-engine": ".agents/agents/game-engine.md",
+    "backend": ".agents/agents/backend.md",
+    "code-hosting": ".agents/agents/code-hosting.md"
+  },
+  "skills": {
+    "discord-bot-setup": ".agents/skills/discord-bot-setup.md",
+    "web-basics": ".agents/skills/web-basics.md",
+    "react-development": ".agents/skills/react-development.md",
+    "vue-development": ".agents/skills/vue-development.md",
+    "angular-development": ".agents/skills/angular-development.md",
+    "svelte-development": ".agents/skills/svelte-development.md",
+    "electron-setup": ".agents/skills/electron-setup.md",
+    "tauri-setup": ".agents/skills/tauri-setup.md",
+    "flutter": ".agents/skills/flutter.md",
+    "react-native": ".agents/skills/react-native.md",
+    "unity": ".agents/skills/unity.md",
+    "rpgm": ".agents/skills/rpgm.md",
+    "ren-py": ".agents/skills/ren-py.md",
+    "godot": ".agents/skills/godot.md",
+    "rust": ".agents/skills/rust.md",
+    "go": ".agents/skills/go.md",
+    "java": ".agents/skills/java.md",
+    "python": ".agents/skills/python.md",
+    "code-hosting-platforms": ".agents/skills/code-hosting-platforms.md"
+  },
+  "plans": {
+    "roadmap": ".agents/plans/roadmap.md",
+    "phase1": ".agents/plans/phase1.md",
+    "phase2": ".agents/plans/phase2.md",
+    "phase3": ".agents/plans/phase3.md",
+    "phase4": ".agents/plans/phase4.md",
+    "phase5": ".agents/plans/phase5.md",
+    "phase6": ".agents/plans/phase6.md",
+    "phase7": ".agents/plans/phase7.md",
+    "phase8": ".agents/plans/phase8.md"
+  },
+  "bugs": {
+    "index": ".agents/bugs/bug-tracking.md",
+    "template": ".agents/bugs/template.md",
+    "bug-001": ".agents/bugs/BUG-001-credential-discovery-path.md",
+    "bug-002": ".agents/bugs/BUG-002-game-engine-template-placeholders.md",
+    "bug-003": ".agents/bugs/BUG-003-heroku-deploy-dynamic-url-detection.md",
+    "bug-004": ".agents/bugs/BUG-004-auto-resolve-url-env.md",
+    "bug-005": ".agents/bugs/BUG-005-typescript-strict-mode-errors.md"
+  },
+  "templates": {
+    "index": ".agents/templates/index.md",
+    "discord-bot": ".agents/templates/discord-bot.yml",
+    "web-react": ".agents/templates/web-react.yml",
+    "web-vue": ".agents/templates/web-vue.yml",
+    "desktop-electron": ".agents/templates/desktop-electron.yml",
+    "desktop-tauri": ".agents/templates/desktop-tauri.yml",
+    "mobile-flutter": ".agents/templates/mobile-flutter.yml",
+    "mobile-react-native": ".agents/templates/mobile-react-native.yml",
+    "game-unity": ".agents/templates/game-unity.yml",
+    "game-godot": ".agents/templates/game-godot.yml",
+    "game-rpgm": ".agents/templates/game-rpgm.yml",
+    "game-renpy": ".agents/templates/game-renpy.yml",
+    "backend-rust": ".agents/templates/backend-rust.yml",
+    "backend-go": ".agents/templates/backend-go.yml",
+    "backend-java": ".agents/templates/backend-java.yml",
+    "backend-python": ".agents/templates/backend-python.yml"
+  },
+  "tests": {
+    "readme": "tests/README.md"
+  }
+}

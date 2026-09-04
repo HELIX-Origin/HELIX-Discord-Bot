@@ -1,0 +1,19 @@
+{
+  "name": "HELIX CLI",
+  "description": "Universal CLI tool for adding development projects",
+  "version": "0.1.0",
+  "copilot": {
+    "agents": ".copilot/agents/",
+    "skills": ".copilot/skills/",
+    "plans": ".copilot/plans/",
+    "bugs": ".copilot/bugs/",
+    "templates": ".copilot/templates/"
+  },
+  "gemini": {
+    "agents": ".gemini/agents/",
+    "skills": ".gemini/skills/",
+    "plans": ".gemini/plans/",
+    "bugs": ".gemini/bugs/",
+    "templates": ".gemini/templates/"
+  }
+}
