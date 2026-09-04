@@ -1,6 +1,6 @@
 import { createBot, getBot } from './src/client.js';
 import { BotCallbackServer } from './src/server.js';
-import { getBotToken, getPort, getCallbackUrl } from './src/env.js';
+import { getBotToken, getClientId, getPort, getCallbackUrl } from './src/env.js';
 import { logs } from './src/handlers/logs-handler.js';
 import { loadPrefixCommands, handlePrefixMessage } from './src/handlers/command-handler.js';
 import { loadSlashCommands, registerGlobalSlashCommands, handleSlashInteraction } from './src/handlers/slash-handler.js';
