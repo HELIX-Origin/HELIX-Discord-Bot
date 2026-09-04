@@ -1,6 +1,6 @@
-# Contributing to HELIX CLI
+# Contributing to HELIX
 
-Thank you for your interest in contributing to HELIX CLI! We welcome contributions from developers of all skill levels.
+Thank you for your interest in contributing to HELIX! We welcome contributions from developers of all skill levels.
 
 ## Code of Conduct
 
@@ -15,11 +15,10 @@ All contributors and maintainers are expected to adhere to our [Code of Conduct]
 
 ### Development Setup
 
-1. Fork the repository on GitHub: `https://github.com/HELIX-Origin/HELIX-CLI`
+1. Fork the repository on GitHub: `https://github.com/HELIX-Origin/HELIX`
 2. Clone your fork locally:
    ```bash
-   git clone https://github.com/<your-username>/HELIX-CLI.git
-   cd HELIX-CLI
+   git clone https://github.com/<your-username>/HELIX
    ```
 3. Install dependencies:
    ```bash
@@ -48,7 +47,7 @@ All contributors and maintainers are expected to adhere to our [Code of Conduct]
    npm run typecheck       # Verify TypeScript types without errors
    npm run test:unit       # In-memory unit tests
    npm run test:integration # Filesystem scaffolding integration tests
-   npm run build           # Verify dual ESM bundling
+   npm run build           # Verify production build
    ```
 4. Commit your changes using conventional commit messages:
    - `feat(area): description`

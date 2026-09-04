@@ -1,22 +1,21 @@
 cff-version: 1.2.0
-message: "If you use HELIX CLI in your research, development workflows, or software projects, please cite it using the metadata below."
-title: "HELIX CLI"
-abstract: "Universal CLI development assistant for multi-framework scaffolding, AI agent integration, companion NextAuth dashboard, and Discord bot automation."
+message: "If you use HELIX in your research, development workflows, or software projects, please cite it using the metadata below."
+title: "HELIX"
+abstract: "Standalone Discord bot with code intelligence via language plugins, developer moderation, and thread-based support ticketing."
 version: 0.1.0
 date-released: 2026-09-04
 license: BSD-3-Clause
-repository-code: "https://github.com/HELIX-Origin/HELIX-CLI"
-url: "https://github.com/HELIX-Origin/HELIX-CLI"
+repository-code: "https://github.com/HELIX-Origin/HELIX"
+url: "https://github.com/HELIX-Origin/HELIX"
 keywords:
   - "cli"
   - "developer-tools"
   - "scaffolding"
-  - "ai-agents"
   - "discord-bot"
   - "nextauth"
   - "sqlite"
-  - "multi-framework"
-  - "automation"
+  - "code-intelligence"
+  - "language-plugins"
 authors:
-  - name: "HELIX CLI Team & Contributors"
-    website: "https://github.com/HELIX-Origin/HELIX-CLI"
+  - name: "HELIX Team & Contributors"
+    website: "https://github.com/HELIX-Origin/HELIX"
