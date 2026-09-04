@@ -8,6 +8,8 @@ HELIX uses GitHub-hosted plugin repositories for code intelligence. No AI APIs. 
 
 ## Plugin Repository Structure
 
+> For complete JSON schemas, capability matrices, and TypeScript type contracts, see [Plugin Repository Structural Specification](plugin-repository-structure.md).
+
 Both the built-in `helix-origin` repo and community repos use the same layout:
 
 ```

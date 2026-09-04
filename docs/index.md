@@ -6,6 +6,7 @@
 | [Web Dashboard](web-dashboard.md) | Dashboard endpoints, OAuth2 flow, bot connection |
 | [Language Plugins](plugin-system.md) | Plugin architecture, manifest spec, built-in plugin list |
 | [Plugin Authoring](plugin-authoring.md) | How to build, test, and publish custom language plugins & source providers |
+| [Plugin Repo Structure](plugin-repository-structure.md) | Detailed file layout, JSON schemas, capability matrix & TypeScript contracts |
 | [Scaffolding Templates](scaffolding-templates.md) | All 17 supported project templates |
 | [Heroku Deployment](deployment-heroku.md) | 1-click free-tier deploy |
 | [Docker / Self-Hosting](deployment-docker.md) | Containerized self-hosted setup |

@@ -1,4 +1,4 @@
-﻿# Plugin Authoring Guide
+# Plugin Authoring Guide
 
 This guide walks through creating, testing, and distributing language plugins and source providers for the HELIX Discord bot.
 
@@ -13,6 +13,8 @@ This guide walks through creating, testing, and distributing language plugins an
 ---
 
 ## 2. Repository Structure
+
+> For complete JSON schemas, capability matrices, and TypeScript type contracts, see [Plugin Repository Structural Specification](plugin-repository-structure.md).
 
 A plugin repository contains a root manifest (`config.json`) and one or more plugin folders:
 

@@ -38,6 +38,7 @@ Fill in `DISCORD_TOKEN`, `DISCORD_CLIENT_ID`, `DISCORD_CLIENT_SECRET`, and `NEXT
 - [Web Dashboard](docs/web-dashboard.md) -- admin panel and OAuth2 flow
 - [Language Plugins](docs/plugin-system.md) -- code intelligence plugin architecture
 - [Plugin Authoring](docs/plugin-authoring.md) -- build and distribute custom language plugins
+- [Plugin Repo Structure](docs/plugin-repository-structure.md) -- file layout, JSON schemas & TypeScript contracts
 - [Scaffolding Templates](docs/scaffolding-templates.md) -- 17 project starters
 - [Heroku Deployment](docs/deployment-heroku.md) -- deploy guide
 - [Docker / Self-Hosting](docs/deployment-docker.md) -- containerized setup
