@@ -6,6 +6,9 @@ import {
   getHelpByCategory,
   getCategoryEmoji,
   getCategoryLabel,
+  getCategoryDescription,
+  getCategoryColor,
+  getCommandHelp,
   helpCount,
 } from '../../../HELIX/src/handlers/help-registrar.js';
 
@@ -53,12 +56,22 @@ describe('help-registrar — structure', () => {
     expect(getAllHelp().length).toBe(helpCount());
   });
 
-  it('maps known categories to emoji and labels', () => {
+  it('maps known categories to emoji, labels, colors, and descriptions', () => {
     expect(getCategoryEmoji('moderation')).toBe('🛡️');
     expect(getCategoryEmoji('utility')).toBe('🧰');
     expect(getCategoryEmoji('plugins')).toBe('🧩');
     expect(getCategoryEmoji('unknown')).toBe('📋');
     expect(getCategoryLabel('moderation')).toBe('Moderation Suite');
     expect(getCategoryLabel('unknown-cat')).toBe('unknown-cat');
+    expect(getCategoryColor('moderation')).toBe('#ff5252');
+    expect(getCategoryDescription('moderation')).toContain('Enforce server rules');
+  });
+
+  it('looks up command help by name or alias', () => {
+    registerHelp(createHelp('scaffold', 'Scaffold projects', 'project', { aliases: ['init', 'gen'] }));
+    expect(getCommandHelp('scaffold')?.name).toBe('scaffold');
+    expect(getCommandHelp('>scaffold')?.name).toBe('scaffold');
+    expect(getCommandHelp('init')?.name).toBe('scaffold');
+    expect(getCommandHelp('nonexistent')).toBeUndefined();
   });
 });

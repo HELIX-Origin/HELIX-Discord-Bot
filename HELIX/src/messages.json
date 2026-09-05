@@ -193,11 +193,31 @@
   "info": {
     "help": {
       "embed": {
-        "title": "📖 HELIX Commands",
+        "title": "🧬 HELIX Command Center",
         "color": "#00d2ff",
-        "description": "Use `{prefix}<command>` or `/<command>` to run any command.",
-        "footer": "{count} commands across {categories} categories"
-      }
+        "description": "Welcome to **HELIX** — developer community assistant with moderation, multi-framework scaffolding, ticket management, and code intelligence language plugins.\n\nUse `{prefix}help <command>` for detailed syntax, or use the **dropdown menu** below to explore commands by category.",
+        "footer": "Prefix: {prefix} • Total Commands: {count} • {categories} Categories"
+      },
+      "category_embed": {
+        "title": "{emoji} {categoryLabel}",
+        "color": "{color}",
+        "description": "*{categoryDescription}*\n\n{commandList}",
+        "footer": "Category: {categoryLabel} • Page {page}/{totalPages} • Prefix: {prefix}"
+      },
+      "detail_embed": {
+        "title": "📖 Command Details: `{prefix}{name}`",
+        "color": "#00d2ff",
+        "description": "{description}",
+        "fields": [
+          { "name": "Category", "value": "`{category}`", "inline": true },
+          { "name": "Usage", "value": "`{usage}`", "inline": true },
+          { "name": "Aliases", "value": "{aliases}", "inline": true },
+          { "name": "Permissions", "value": "{permissions}", "inline": false },
+          { "name": "Subcommands", "value": "{subcommands}", "inline": false }
+        ],
+        "footer": "Use {prefix}help to return to the main menu"
+      },
+      "command_not_found": "❌ Command `{name}` was not found. Use `{prefix}help` to view all available commands."
     },
     "info": {
       "embed": {
