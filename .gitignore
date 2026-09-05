@@ -21,18 +21,3 @@ HELIX/data/*.sqlite-journal
 # Bot compiled dist
 HELIX/src/dist/*
 !HELIX/src/dist/.gitkeep
-
-# OS-specific runner / startup scripts
-run-start.bat
-run-start.cmd
-run-start.sh
-run-dev.sh
-run-dev.bat
-run-dev.cmd
-run-start.ps1
-run-dev.ps1
-run.command
-*.command
-silent.vbs
-*.vbs
-
