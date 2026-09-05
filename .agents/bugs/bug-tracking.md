@@ -59,6 +59,8 @@ flowchart TD
 | **BUG-025** | Instant Guild Slash Command Category Registration, Normalization & REST Synchronization | High | Resolved | 4 Sub-Tasks | [#90](https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues/90) | [BUG-025](BUG-025-instant-guild-slash-category-sync.md) |
 | **BUG-026** | Universal Subcommand & Command Missing Arguments Help Response Engine | High | Resolved | 4 Sub-Tasks | [#95](https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues/95) | [BUG-026](BUG-026-subcommand-and-command-missing-args-help.md) |
 | **BUG-027** | Database-Backed Scaffolding Architecture, In-Memory ZIP Archive Generation & Discord Attachment Delivery | High | Resolved | 4 Sub-Tasks | [#100](https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues/100) | [BUG-027](BUG-027-database-backed-scaffolding-and-zip-archive-delivery.md) |
+| **BUG-028** | Start Command Environment Resolution, Prestart Build Lifecycle Hook & Legacy Platform Reference Deprecation | High | Resolved | 4 Sub-Tasks | [#105](https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues/105) | [BUG-028](BUG-028-start-command-env-resolution-and-render-deprecation.md) |
+| **BUG-029** | Derived Dashboard Port Range Architecture & Multi-Server Listener Isolation | High | Resolved | 4 Sub-Tasks | [#110](https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues/110) | [BUG-029](BUG-029-derived-dashboard-port-range-and-server-isolation.md) |
 
 ---
 

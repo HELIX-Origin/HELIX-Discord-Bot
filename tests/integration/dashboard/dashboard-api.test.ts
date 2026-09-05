@@ -15,13 +15,17 @@ describe('integration — dashboard full stack', () => {
   it('resolves URLs for dashboard with static NEXTAUTH_URL configuration', async () => {
     sandbox.set('NEXTAUTH_URL', 'https://bot.example.com');
     sandbox.set('DISCORD_CALLBACK_URL', undefined);
+    sandbox.set('PORT', '5000');
 
-    expect(getCallbackUrl()).toBe('https://bot.example.com');
+    expect(getCallbackUrl()).toBe('http://localhost:5000');
     expect(getNextAuthUrl()).toBe('https://bot.example.com');
 
     const config = getNextAuthConfig();
     expect(config.url).toBe('https://bot.example.com');
     expect(config.url + '/api/auth/callback/discord').toBe('https://bot.example.com/api/auth/callback/discord');
+
+    sandbox.set('DISCORD_CALLBACK_URL', 'https://callback.example.com');
+    expect(getCallbackUrl()).toBe('https://callback.example.com');
   });
 
   it('tracks a user session through the bot database and into the stats route', async () => {

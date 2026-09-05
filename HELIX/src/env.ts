@@ -51,34 +51,45 @@ export const BOT_ROOT_DIR = resolveBotRootDir();
 
 let _loaded = false;
 
-/**
- * Load all .env files in priority order.
- * Called automatically on first import of this module.
- * Safe to call multiple times — subsequent calls are no-ops.
- */
-export function loadBotEnv(): void {
-  if (_loaded) return;
+export function loadBotEnv(forceReload: boolean = false): void {
+  if (_loaded && !forceReload) return;
   _loaded = true;
 
+  // Snapshot explicit CLI/process env vars before loading file defaults
+  const explicitEnv: Record<string, string | undefined> = {};
+  for (const k of Object.keys(process.env)) {
+    explicitEnv[k] = process.env[k];
+  }
+
+  // Load in ascending priority order (lowest priority first, highest priority last)
   const candidates: string[] = [
+    path.resolve(os.homedir(), '.env'),
+    path.resolve(os.homedir(), '.helix', '.env'),
+    path.resolve(__dirname, '..', '..', '..', '.env'),
+    path.resolve(__dirname, '..', '..', '.env'),
+    path.resolve(__dirname, '..', '.env'),
+    path.resolve(__dirname, '.env'),
+    path.resolve(process.cwd(), '..', '.env'),
+    path.resolve(BOT_ROOT_DIR, 'HELIX', '.env'),
     path.resolve(BOT_ROOT_DIR, '.env'),
     path.resolve(process.cwd(), '.env'),
-    path.resolve(process.cwd(), '..', '.env'),
-    path.resolve(__dirname, '.env'),
-    path.resolve(__dirname, '..', '.env'),
-    path.resolve(__dirname, '..', '..', '.env'),
-    path.resolve(__dirname, '..', '..', '..', '.env'),
-    path.resolve(os.homedir(), '.helix', '.env'),
-    path.resolve(os.homedir(), '.env'),
   ];
 
+  const seen = new Set<string>();
   for (const p of candidates) {
-    if (fs.existsSync(p)) {
-      dotenv.config({ path: p });
+    const normalized = path.normalize(p);
+    if (!seen.has(normalized) && fs.existsSync(normalized)) {
+      seen.add(normalized);
+      dotenv.config({ path: normalized, override: true });
     }
   }
-  // Standard dotenv CWD lookup as final fallback
-  dotenv.config();
+
+  // Re-apply explicit process.env variables that were set before loading
+  for (const [k, v] of Object.entries(explicitEnv)) {
+    if (v !== undefined) {
+      process.env[k] = v;
+    }
+  }
 }
 
 // Load immediately on import
@@ -167,7 +178,7 @@ export function normalizeCallbackBaseUrl(raw: string): string {
   return base.replace(/\/+$/, '');
 }
 
-/** HTTP port the dashboard and OAuth2 server listens on. Defaults to 5000. */
+/** HTTP port the bot callback and health check server listens on. Defaults to 5000. */
 export function getPort(): number {
   const raw = process.env.PORT;
   if (raw) {
@@ -178,12 +189,26 @@ export function getPort(): number {
 }
 
 /**
+ * HTTP port the web dashboard listens on.
+ * Derived as an increment of getPort() (default: getPort() + 1), aligned in port range
+ * to avoid interference with the bot's callback server.
+ */
+export function getDashboardPort(): number {
+  const raw = process.env.DASHBOARD_PORT;
+  if (raw) {
+    const n = parseInt(raw, 10);
+    if (!isNaN(n)) return n;
+  }
+  return getPort() + 1;
+}
+
+/**
  * Public-facing NextAuth / Dashboard URL (e.g. `https://bot.example.com`).
  * Explicitly configured via `NEXTAUTH_URL` for public deployments.
- * Defaults to `http://localhost:<PORT>` when running locally.
+ * Defaults to `http://localhost:<DASHBOARD_PORT>` when running locally.
  */
 export function getNextAuthUrl(): string {
-  const port = getPort();
+  const dashPort = getDashboardPort();
   const explicit = (process.env.NEXTAUTH_URL || '').trim();
   if (explicit) {
     const clean = explicit.replace(/\/+$/, '');
@@ -191,7 +216,7 @@ export function getNextAuthUrl(): string {
     try {
       const u = new URL(url);
       if (!u.port && (u.hostname === 'localhost' || u.hostname === '127.0.0.1')) {
-        u.port = String(port);
+        u.port = String(dashPort);
       }
       return u.toString().replace(/\/+$/, '');
     } catch {
@@ -204,35 +229,28 @@ export function getNextAuthUrl(): string {
     return explicitCallback;
   }
 
-  return `http://localhost:${port}`;
+  return `http://localhost:${dashPort}`;
 }
 
 /**
  * Internal URL NextAuth uses for server-side self-requests.
- * Explicitly configured via `NEXTAUTH_INTERNAL_URL` (defaults to `http://localhost:<port>`).
+ * Always resolves to `http://localhost:<DASHBOARD_PORT>`.
  */
 export function getNextAuthInternalUrl(): string {
-  const port = getPort();
-  const raw = (process.env.NEXTAUTH_INTERNAL_URL || 'http://localhost').trim().replace(/\/+$/, '');
-  try {
-    const u = new URL(raw.includes('://') ? raw : `http://${raw}`);
-    if (!u.port) u.port = String(port);
-    return u.toString().replace(/\/+$/, '');
-  } catch {
-    return `http://localhost:${port}`;
-  }
+  const dashPort = getDashboardPort();
+  return `http://localhost:${dashPort}`;
 }
 
 /**
  * Base OAuth2 callback URL (no trailing slash).
- * Returns `DISCORD_CALLBACK_URL` if set, otherwise defaults to `getNextAuthUrl()`.
+ * Returns `DISCORD_CALLBACK_URL` if set, otherwise defaults to `http://localhost:<PORT>`.
  */
 export function getCallbackUrl(): string {
   const explicit = normalizeCallbackBaseUrl(process.env.DISCORD_CALLBACK_URL || '');
   if (explicit) {
     return explicit;
   }
-  return getNextAuthUrl();
+  return `http://localhost:${getPort()}`;
 }
 
 /**
@@ -327,6 +345,7 @@ export interface BotEnvConfig {
   callbackUrl: string;
   inviteUrl: string;
   port: number;
+  dashboardPort: number;
   nextAuthUrl: string;
   nextAuthInternalUrl: string;
   nextAuthSecret: string;
@@ -346,6 +365,7 @@ export function getBotEnv(): BotEnvConfig {
     callbackUrl:         getCallbackUrl(),
     inviteUrl:           getInviteUrl(),
     port:                getPort(),
+    dashboardPort:       getDashboardPort(),
     nextAuthUrl:         getNextAuthUrl(),
     nextAuthInternalUrl: getNextAuthInternalUrl(),
     nextAuthSecret:      getNextAuthSecret(),

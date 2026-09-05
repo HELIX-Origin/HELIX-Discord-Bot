@@ -40,7 +40,7 @@ describe('KeepAliveService — autonomous self-ping engine', () => {
     });
     vi.stubGlobal('fetch', mockFetch);
 
-    const result = await pingOnce('https://my-app.onrender.com/api/health');
+    const result = await pingOnce('https://bot.example.com/api/health');
     expect(result).toBe(true);
 
     const status = getKeepAliveStatus();
@@ -58,7 +58,7 @@ describe('KeepAliveService — autonomous self-ping engine', () => {
     });
     vi.stubGlobal('fetch', mockFetch);
 
-    const result = await pingOnce('https://my-app.onrender.com/api/health');
+    const result = await pingOnce('https://bot.example.com/api/health');
     expect(result).toBe(false);
 
     const status = getKeepAliveStatus();
@@ -71,7 +71,7 @@ describe('KeepAliveService — autonomous self-ping engine', () => {
     const mockFetch = vi.fn().mockRejectedValue(new Error('Connection timed out'));
     vi.stubGlobal('fetch', mockFetch);
 
-    const result = await pingOnce('https://my-app.onrender.com/api/health');
+    const result = await pingOnce('https://bot.example.com/api/health');
     expect(result).toBe(false);
 
     const status = getKeepAliveStatus();
@@ -82,20 +82,20 @@ describe('KeepAliveService — autonomous self-ping engine', () => {
   it('starts keep-alive when targetUrl is provided', () => {
     startKeepAlive({
       enabled: true,
-      targetUrl: 'https://my-app.onrender.com/api/health',
+      targetUrl: 'https://bot.example.com/api/health',
       intervalMs: 300_000,
     });
 
     const status = getKeepAliveStatus();
     expect(status.enabled).toBe(true);
-    expect(status.targetUrl).toBe('https://my-app.onrender.com/api/health');
+    expect(status.targetUrl).toBe('https://bot.example.com/api/health');
     expect(status.intervalMs).toBe(300_000);
   });
 
   it('stops keep-alive cleanly', () => {
     startKeepAlive({
       enabled: true,
-      targetUrl: 'https://my-app.onrender.com/api/health',
+      targetUrl: 'https://bot.example.com/api/health',
     });
 
     expect(getKeepAliveStatus().enabled).toBe(true);
@@ -104,17 +104,17 @@ describe('KeepAliveService — autonomous self-ping engine', () => {
   });
 
   it('auto-activates when public NEXTAUTH_URL is configured', () => {
-    sandbox.set('NEXTAUTH_URL', 'https://my-render-bot.onrender.com');
+    sandbox.set('NEXTAUTH_URL', 'https://helix-bot.example.com');
     startKeepAlive();
 
     const status = getKeepAliveStatus();
     expect(status.enabled).toBe(true);
-    expect(status.targetUrl).toBe('https://my-render-bot.onrender.com/api/health');
+    expect(status.targetUrl).toBe('https://helix-bot.example.com/api/health');
     expect(status.intervalMs).toBe(600_000);
   });
 
   it('respects HELIX_SELF_PING=false to disable self-ping', () => {
-    sandbox.set('NEXTAUTH_URL', 'https://my-render-bot.onrender.com');
+    sandbox.set('NEXTAUTH_URL', 'https://helix-bot.example.com');
     sandbox.set('HELIX_SELF_PING', 'false');
     startKeepAlive();
 

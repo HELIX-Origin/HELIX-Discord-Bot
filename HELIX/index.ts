@@ -1,6 +1,10 @@
+import { loadBotEnv, getBotToken, getClientId, getPort, getCallbackUrl } from './src/env.js';
+
+// Ensure environment variables are loaded immediately before initializing subsystems
+loadBotEnv();
+
 import { createBot, getBot } from './src/client.js';
 import { BotCallbackServer } from './src/server.js';
-import { getBotToken, getClientId, getPort, getCallbackUrl } from './src/env.js';
 import { logs } from './src/handlers/logs-handler.js';
 import { loadPrefixCommands, handlePrefixMessage } from './src/handlers/command-handler.js';
 import { loadSlashCommands, registerGlobalSlashCommands, handleSlashInteraction } from './src/handlers/slash-handler.js';

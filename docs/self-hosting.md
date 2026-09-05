@@ -104,10 +104,6 @@ NEXTAUTH_SECRET=your_random_32_character_secret_here
 # If omitted, defaults to http://localhost:5000
 NEXTAUTH_URL=
 
-# Optional: Internal loopback URL for server-side NextAuth self-requests
-# Defaults to http://localhost:5000
-NEXTAUTH_INTERNAL_URL=http://localhost:5000
-
 # ==============================================================================
 # SERVER CONFIGURATION
 # ==============================================================================
@@ -350,19 +346,19 @@ launchctl start com.helix.bot
 
 ---
 
-### ☁️ Cloud Platforms (Render, Koyeb, Railway, Heroku, Cloud VPS)
+### ☁️ Cloud VPS & Web Services (Custom Domain / Cloud Host)
 
-If you choose to host HELIX on cloud platforms or container-free PaaS web services:
+If you choose to host HELIX on a Cloud VPS or Web Service:
 
-#### Requirements for Cloud Platforms:
-1. **Static Domain**: You must specify your assigned or custom static domain in `NEXTAUTH_URL` (e.g. `https://your-app.onrender.com` or `https://bot.yourdomain.com`).
-2. **Discord OAuth2 Redirect**: Add `https://your-app.onrender.com/api/auth/callback/discord` to **Discord Developer Portal → Application → OAuth2 → Redirects**.
+#### Requirements for Cloud Hosting:
+1. **Static Domain**: You must specify your assigned or custom static domain in `NEXTAUTH_URL` (e.g. `https://bot.yourdomain.com`).
+2. **Discord OAuth2 Redirect**: Add `https://bot.yourdomain.com/api/auth/callback/discord` to **Discord Developer Portal → Application → OAuth2 → Redirects**.
 3. **Autonomous Keep-Alive (Self-Pinger)**:
-   - Free cloud tiers (such as Render Free Web Services) automatically spin down after 15 minutes of inbound HTTP inactivity, which disconnects the Discord Gateway.
+   - Free or idle-spindown cloud tiers automatically suspend after 15 minutes of inbound HTTP inactivity, which disconnects the Discord Gateway.
    - Set `HELIX_SELF_PING=true` in your platform's environment variables.
-   - HELIX will automatically ping its own `/api/health` endpoint every 10 minutes (`600000` ms), keeping the cloud instance awake 24/7 without requiring external cron services.
+   - HELIX will automatically ping its own `/api/health` endpoint every 10 minutes (`600000` ms), keeping the instance active 24/7 without requiring external cron services.
 
-#### Recommended Cloud Platform Settings:
+#### Recommended Settings:
 - **Runtime**: Node.js 22 LTS
 - **Build Command**: `npm ci --include=dev && npm --prefix HELIX ci --include=dev && npm run build`
 - **Start Command**: `npm start`
@@ -373,7 +369,7 @@ If you choose to host HELIX on cloud platforms or container-free PaaS web servic
   DISCORD_CLIENT_ID=your_client_id
   DISCORD_CLIENT_SECRET=your_client_secret
   NEXTAUTH_SECRET=your_32_char_secret
-  NEXTAUTH_URL=https://your-app.onrender.com
+  NEXTAUTH_URL=https://bot.yourdomain.com
   NODE_ENV=production
   PORT=5000
   HELIX_SELF_PING=true

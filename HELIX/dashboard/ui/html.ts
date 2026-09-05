@@ -3,8 +3,11 @@ import { BotDatabase } from '../../src/db/database.js';
 import { resolveBotInviteUrl } from '../../src/server.js';
 import { getBotToken, getCallbackUrl, getInviteUrl, getClientId } from '../../src/env.js';
 
-export function renderDashboardHtml(): string {
+export function renderDashboardHtml(dashboardOrigin?: string): string {
   const config = getNextAuthConfig();
+  if (dashboardOrigin) {
+    config.url = dashboardOrigin;
+  }
   const dbStats = BotDatabase.getInstance().getStats();
   const botTokenSet = !!getBotToken();
   const callbackUrl = getCallbackUrl();
@@ -458,7 +461,7 @@ export function renderDashboardHtml(): string {
             <div class="p-4 rounded-xl bg-gray-900 border border-gray-800 space-y-2">
               <span class="font-bold text-emerald-400">Discord OAuth2 Callback</span>
               <p class="text-xs text-gray-400">Target redirect URI configured in Discord Developer Portal.</p>
-              <div class="font-mono text-xs text-gray-300 bg-black/40 p-2.5 rounded-lg border border-gray-800 break-all">${config.url}/api/auth/callback/discord</div>
+              <div class="font-mono text-xs text-gray-300 bg-black/40 p-2.5 rounded-lg border border-gray-800 break-all">${callbackUrl}/api/auth/callback/discord</div>
             </div>
             <div class="p-4 rounded-xl bg-gray-900 border border-gray-800 space-y-2">
               <span class="font-bold text-amber-400">SQLite Database Path</span>

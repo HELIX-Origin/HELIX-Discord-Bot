@@ -126,5 +126,4 @@ Schema is created and migrated automatically at startup. No setup step needed.
 | `NEXT_PUBLIC_INVITE_URL` | No | Pre-built bot invite URL — auto-generated from `CLIENT_ID` if unset |
 | `DISCORD_CALLBACK_URL` | No | OAuth2 base URL — defaults to `NEXTAUTH_URL` or `http://localhost:<PORT>` |
 | `NEXTAUTH_URL` | No | Public NextAuth / Dashboard URL for production (e.g. `https://bot.example.com`) |
-| `NEXTAUTH_INTERNAL_URL` | No | Internal loopback URL for NextAuth — defaults to `http://localhost:<PORT>` |
 | `DISCORD_DB_PATH` | No | Custom SQLite file path — defaults to `data/helix-bot.sqlite` |

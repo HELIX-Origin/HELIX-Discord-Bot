@@ -1,5 +1,5 @@
-import crypto from 'crypto';
-import { getPort, getNextAuthUrl, getNextAuthSecret, getClientId, getClientSecret } from '../../src/env.js';
+import crypto from 'node:crypto';
+import { getPort, getDashboardPort, getNextAuthUrl, getNextAuthInternalUrl, getNextAuthSecret, getClientId, getClientSecret } from '../../src/env.js';
 
 export interface NextAuthConfig {
   url: string;
@@ -9,26 +9,27 @@ export interface NextAuthConfig {
   clientSecret: string;
 }
 
-export function resolveInternalUrl(rawInternal?: string, botPort: number = getPort()): string {
-  let target = rawInternal || process.env.NEXTAUTH_INTERNAL_URL || 'http://localhost';
-  target = target.replace(/\/$/, '');
+export function resolveInternalUrl(rawInternal?: string, port: number = getDashboardPort()): string {
+  if (!rawInternal) {
+    return `http://localhost:${port}`;
+  }
+  let target = rawInternal.replace(/\/$/, '');
 
   try {
     const parsed = new URL(target.includes('://') ? target : `http://${target}`);
-    // If port is omitted, automatically attach the dashboard/bot port
+    // If port is omitted, automatically attach the dashboard port
     if (!parsed.port) {
-      parsed.port = String(botPort);
+      parsed.port = String(port);
     }
     return parsed.toString().replace(/\/$/, '');
   } catch {
-    return `http://localhost:${botPort}`;
+    return `http://localhost:${port}`;
   }
 }
 
 export function getNextAuthConfig(): NextAuthConfig {
-  const botPort = getPort();
   const url = getNextAuthUrl();
-  const internalUrl = resolveInternalUrl(process.env.NEXTAUTH_INTERNAL_URL, botPort);
+  const internalUrl = getNextAuthInternalUrl();
   const secret = getNextAuthSecret();
   const clientId = getClientId();
   const clientSecret = getClientSecret();

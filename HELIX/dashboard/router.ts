@@ -7,21 +7,25 @@ import { handleDashboardStats } from './api/stats.js';
 import { handleDashboardScaffold, handleDashboardScaffoldDownload } from './api/scaffold.js';
 import { handleDashboardGuilds } from './api/guilds.js';
 import { renderDashboardHtml } from './ui/html.js';
-import { getClientId, getCallbackUrl, BOT_ROOT_DIR } from '../src/env.js';
+import { getClientId, getCallbackUrl, getNextAuthUrl, BOT_ROOT_DIR } from '../src/env.js';
 
 export async function routeDashboardRequest(
   req: http.IncomingMessage,
   res: http.ServerResponse,
-  baseUrl: string = 'http://localhost:5000'
+  baseUrl: string = getNextAuthUrl()
 ): Promise<boolean> {
+  const hostHeader = (req.headers['x-forwarded-host'] as string) || req.headers.host;
+  const protoHeader = (req.headers['x-forwarded-proto'] as string) || (baseUrl.startsWith('https') ? 'https' : 'http');
+  const requestOrigin = hostHeader ? `${protoHeader}://${hostHeader}` : baseUrl;
+
   const reqUrl = req.url || '/';
-  const parsed = new URL(reqUrl, baseUrl);
+  const parsed = new URL(reqUrl, requestOrigin);
   const pathname = parsed.pathname;
 
   // 1. Dashboard UI Shell
   if (pathname === '/dashboard' || pathname === '/') {
     res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-    res.end(renderDashboardHtml());
+    res.end(renderDashboardHtml(requestOrigin));
     return true;
   }
 

@@ -27,13 +27,11 @@ describe('auth/config — resolveInternalUrl', () => {
     expect(resolveInternalUrl('localhost:9999', 5000)).toBe('http://localhost:9999');
   });
 
-  it('falls back to the env-provided internal URL when no raw value is given', () => {
-    sandbox.set('NEXTAUTH_INTERNAL_URL', 'http://internal.example.com/');
-    expect(resolveInternalUrl(undefined, 5000)).toBe('http://internal.example.com:5000');
+  it('resolves explicit raw internal URL', () => {
+    expect(resolveInternalUrl('http://internal.example.com/', 5000)).toBe('http://internal.example.com:5000');
   });
 
-  it('falls back to localhost when rawInternal alone', () => {
-    sandbox.set('NEXTAUTH_INTERNAL_URL', undefined);
+  it('falls back to localhost when rawInternal is omitted', () => {
     expect(resolveInternalUrl(undefined, 4040)).toBe('http://localhost:4040');
   });
 
@@ -43,20 +41,30 @@ describe('auth/config — resolveInternalUrl', () => {
 });
 
 describe('auth/config — getNextAuthConfig', () => {
-  it('returns a complete config using the env PORT exclusively', () => {
+  it('returns a complete config using the derived dashboard port (PORT + 1)', () => {
     sandbox.set('NEXTAUTH_URL', undefined);
-    sandbox.set('NEXTAUTH_INTERNAL_URL', undefined);
     sandbox.set('NEXTAUTH_SECRET', undefined);
     sandbox.set('DISCORD_CLIENT_ID', undefined);
     sandbox.set('DISCORD_CLIENT_SECRET', undefined);
     sandbox.set('PORT', '4321');
+    sandbox.set('DASHBOARD_PORT', undefined);
 
     const config = getNextAuthConfig();
-    expect(config.url).toBe('http://localhost:4321');
-    expect(config.internalUrl).toBe('http://localhost:4321');
+    expect(config.url).toBe('http://localhost:4322');
+    expect(config.internalUrl).toBe('http://localhost:4322');
     expect(config.secret.length).toBeGreaterThanOrEqual(32);
     expect(config.clientId).toBe('');
     expect(config.clientSecret).toBe('');
+  });
+
+  it('respects DASHBOARD_PORT override in getNextAuthConfig', () => {
+    sandbox.set('NEXTAUTH_URL', undefined);
+    sandbox.set('PORT', '4321');
+    sandbox.set('DASHBOARD_PORT', '4325');
+
+    const config = getNextAuthConfig();
+    expect(config.url).toBe('http://localhost:4325');
+    expect(config.internalUrl).toBe('http://localhost:4325');
   });
 
   it('honors a configured client id', () => {

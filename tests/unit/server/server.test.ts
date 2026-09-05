@@ -5,6 +5,7 @@ import {
   getBotInviteUrl,
   resolveBotInviteUrl,
   getAuthorizationUrl,
+  BotCallbackServer,
 } from '../../../HELIX/src/server.js';
 
 describe('server — parsePortFromUrl', () => {
@@ -107,5 +108,51 @@ describe('server — getAuthorizationUrl', () => {
     expect(url).toContain('permissions=8');
     expect(url).toContain('redirect_uri=' + encodeURIComponent('http://localhost:5000/api/auth/callback/discord'));
     expect(url).toContain('response_type=code');
+  });
+});
+
+describe('server — BotCallbackServer port derivation & isolation', () => {
+  it('derives dashboardPort alongside botPort by default (PORT + 1)', () => {
+    const sandbox = new EnvSandbox();
+    sandbox.set('PORT', '5000');
+    sandbox.set('DASHBOARD_PORT', undefined);
+    try {
+      const server = new BotCallbackServer();
+      const ports = server.getPorts();
+      expect(ports.botPort).toBe(5000);
+      expect(ports.dashboardPort).toBe(5001);
+    } finally {
+      sandbox.restore();
+    }
+  });
+
+  it('respects DASHBOARD_PORT override when explicitly specified', () => {
+    const sandbox = new EnvSandbox();
+    sandbox.set('PORT', '5000');
+    sandbox.set('DASHBOARD_PORT', '5555');
+    try {
+      const server = new BotCallbackServer();
+      const ports = server.getPorts();
+      expect(ports.botPort).toBe(5000);
+      expect(ports.dashboardPort).toBe(5555);
+    } finally {
+      sandbox.restore();
+    }
+  });
+
+  it('preserves base port from environment while placing dashboard in the same range', () => {
+    const sandbox = new EnvSandbox();
+    sandbox.set('PORT', '6000');
+    sandbox.set('DASHBOARD_PORT', undefined);
+    try {
+      const server = new BotCallbackServer();
+      const ports = server.getPorts();
+      expect(ports.botPort).toBe(6000);
+      expect(ports.dashboardPort).toBe(6001);
+      expect(ports.dashboardPort).toBeGreaterThanOrEqual(6000);
+      expect(ports.dashboardPort).toBeLessThan(7000);
+    } finally {
+      sandbox.restore();
+    }
   });
 });

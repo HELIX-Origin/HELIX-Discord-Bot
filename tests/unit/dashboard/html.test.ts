@@ -7,7 +7,6 @@ import { EnvSandbox } from '../../helpers/env.js';
 const env = withTempDbEnvironment();
 const sandbox = new EnvSandbox();
 sandbox.set('NEXTAUTH_URL', undefined);
-sandbox.set('NEXTAUTH_INTERNAL_URL', undefined);
 sandbox.set('NEXTAUTH_SECRET', undefined);
 sandbox.set('PORT', '4321');
 

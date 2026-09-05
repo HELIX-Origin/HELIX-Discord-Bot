@@ -150,6 +150,8 @@ flowchart LR
 - [BUG-025](.agents/bugs/BUG-025-instant-guild-slash-category-sync.md) — Instant Guild Slash Command Category Registration, Normalization & REST Synchronization — **Resolved** (4 Sub-Tasks)
 - [BUG-026](.agents/bugs/BUG-026-subcommand-and-command-missing-args-help.md) — Universal Subcommand & Command Missing Arguments Help Response Engine — **Resolved** (4 Sub-Tasks)
 - [BUG-027](.agents/bugs/BUG-027-database-backed-scaffolding-and-zip-archive-delivery.md) — Database-Backed Scaffolding Architecture, In-Memory ZIP Archive Generation & Discord Attachment Delivery — **Resolved** (4 Sub-Tasks)
+- [BUG-028](.agents/bugs/BUG-028-start-command-env-resolution-and-render-deprecation.md) — Start Command Environment Resolution, Prestart Build Lifecycle Hook & Legacy Platform Reference Deprecation — **Resolved** (4 Sub-Tasks)
+- [BUG-029](.agents/bugs/BUG-029-derived-dashboard-port-range-and-server-isolation.md) — Derived Dashboard Port Range Architecture & Multi-Server Listener Isolation — **Resolved** (4 Sub-Tasks)
 
 ---
 

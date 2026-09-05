@@ -69,11 +69,9 @@ npx vitest run tests/unit/dashboard/auth-config.test.ts
 - **Text-only fixtures.** All fixtures are `.ts` exports — no loose JSON/YAML
   snaphots that can drift from the source schema.
 
-## Platform URL auto-resolution
+## Static Domain URL normalization
 
-`src/env.ts` derives `DISCORD_CALLBACK_URL` / `NEXTAUTH_URL` from one-click
-platform vars (`RENDER_EXTERNAL_URL`, `KOYEB_PUBLIC_DOMAIN`, `RAILWAY_STATIC_URL`,
-`RAILWAY_PUBLIC_DOMAIN`, `FLY_APP_NAME`, Heroku, `DOMAIN`) and normalizes any
-`.../api/auth/callback/discord` suffix back to its base, so the full Discord
-developer-portal callback form works without a double path. See `tests/unit/env/env.test.ts`
-and `tests/integration/dashboard/dashboard-api.test.ts`.
+`src/env.ts` normalizes `DISCORD_CALLBACK_URL` / `NEXTAUTH_URL` and strips any
+redundant `.../api/auth/callback/discord` suffix back to its base form, so that
+the full Discord developer-portal callback URL can be configured safely without
+double paths. See `tests/unit/utils/env.test.ts` and `tests/integration/dashboard/dashboard-api.test.ts`.

@@ -9,6 +9,7 @@ import {
   normalizeCallbackBaseUrl,
   getInviteUrl,
   getPort,
+  getDashboardPort,
   getNextAuthUrl,
   getNextAuthInternalUrl,
   getNextAuthSecret,
@@ -57,10 +58,23 @@ describe('src/env.ts — bot environment accessors', () => {
     expect(getPort()).toBe(5000);
   });
 
-  it('resolves NextAuth URLs with static NEXTAUTH_URL and defaults to localhost', () => {
+  it('derives DASHBOARD_PORT as an increment of PORT and honors overrides', () => {
+    sandbox.set('PORT', '5000');
+    sandbox.set('DASHBOARD_PORT', undefined);
+    expect(getDashboardPort()).toBe(5001);
+
+    sandbox.set('PORT', '8080');
+    expect(getDashboardPort()).toBe(8081);
+
+    sandbox.set('DASHBOARD_PORT', '9000');
+    expect(getDashboardPort()).toBe(9000);
+  });
+
+  it('resolves NextAuth URLs with static NEXTAUTH_URL and defaults to derived dashboard port', () => {
     sandbox.set('NEXTAUTH_URL', undefined);
     sandbox.set('PORT', '5000');
-    expect(getNextAuthUrl()).toBe('http://localhost:5000');
+    sandbox.set('DASHBOARD_PORT', undefined);
+    expect(getNextAuthUrl()).toBe('http://localhost:5001');
 
     sandbox.set('NEXTAUTH_URL', 'https://bot.example.com/');
     expect(getNextAuthUrl()).toBe('https://bot.example.com');
@@ -69,13 +83,13 @@ describe('src/env.ts — bot environment accessors', () => {
     expect(getNextAuthUrl()).toBe('https://bot.example.com');
   });
 
-  it('resolves NextAuth internal URL with fallback to localhost port', () => {
-    sandbox.set('NEXTAUTH_INTERNAL_URL', undefined);
+  it('resolves NextAuth internal URL with fallback to derived dashboard port', () => {
     sandbox.set('PORT', '5000');
-    expect(getNextAuthInternalUrl()).toBe('http://localhost:5000');
+    sandbox.set('DASHBOARD_PORT', undefined);
+    expect(getNextAuthInternalUrl()).toBe('http://localhost:5001');
 
-    sandbox.set('NEXTAUTH_INTERNAL_URL', 'http://127.0.0.1');
-    expect(getNextAuthInternalUrl()).toBe('http://127.0.0.1:5000');
+    sandbox.set('PORT', '3000');
+    expect(getNextAuthInternalUrl()).toBe('http://localhost:3001');
   });
 
   it('falls back to the local callback URL when no platform is detected', () => {
@@ -138,19 +152,18 @@ describe('src/env.ts — bot environment accessors', () => {
     expect(getNextAuthSecret().length).toBeGreaterThanOrEqual(32);
   });
 
-  it('resolves NextAuth URLs from the env PORT', () => {
+  it('resolves NextAuth URLs from the derived dashboard port', () => {
     sandbox.set('NEXTAUTH_URL', undefined);
     sandbox.set('PORT', '4000');
-    sandbox.set('NEXTAUTH_INTERNAL_URL', 'http://localhost');
-    expect(getNextAuthUrl()).toBe('http://localhost:4000');
-    expect(getNextAuthInternalUrl()).toBe('http://localhost:4000');
+    expect(getNextAuthUrl()).toBe('http://localhost:4001');
+    expect(getNextAuthInternalUrl()).toBe('http://localhost:4001');
   });
 
-  it('uses only the env PORT for localhost NextAuth URLs', () => {
+  it('uses derived dashboard port for localhost NextAuth URLs', () => {
     sandbox.set('NEXTAUTH_URL', undefined);
     sandbox.set('DISCORD_CALLBACK_URL', undefined);
     sandbox.set('PORT', '4321');
-    expect(getNextAuthUrl()).toBe('http://localhost:4321');
+    expect(getNextAuthUrl()).toBe('http://localhost:4322');
   });
 
   it('keeps an external callback base when resolving the NextAuth URL', () => {

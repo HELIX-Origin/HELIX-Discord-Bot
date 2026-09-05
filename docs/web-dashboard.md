@@ -50,7 +50,6 @@ The dashboard uses Discord OAuth2. Sessions are stored securely in the `user_ses
 | `DISCORD_CLIENT_ID` / `DISCORD_CLIENT_SECRET` | Discord application credentials |
 | `NEXTAUTH_SECRET` | HMAC signing key for session tokens (32+ chars) |
 | `NEXTAUTH_URL` | Public base URL (optional, e.g. `https://bot.example.com`), falls back to `http://localhost:<PORT>` |
-| `NEXTAUTH_INTERNAL_URL` | Internal loopback URL for NextAuth (optional, defaults to `http://localhost:<PORT>`) |
 
 ---
 

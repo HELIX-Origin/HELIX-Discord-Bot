@@ -2,8 +2,8 @@
  * HELIX Keep-Alive Service
  * ──────────────────────────────────────────────────────────────────────────
  * Autonomous background service that periodically pings the public
- * /api/health endpoint to prevent cloud hosting platforms (e.g. Render Free Tier)
- * from spinning down the service after 15 minutes of inactivity.
+ * /api/health endpoint to maintain active connection health and prevent
+ * cloud/reverse proxy idle timeouts.
  *
  * Runs 100% in-process with zero external monitoring dependencies.
  * ──────────────────────────────────────────────────────────────────────────

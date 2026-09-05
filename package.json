@@ -11,6 +11,7 @@
     "test:watch": "vitest",
     "test:types": "tsc --noEmit -p tsconfig.test.json",
     "build": "npm --prefix HELIX run build",
+    "prestart": "npm run build",
     "start": "npm --prefix HELIX start",
     "dev": "npm --prefix HELIX run dev",
     "typecheck": "npm --prefix HELIX run typecheck"
