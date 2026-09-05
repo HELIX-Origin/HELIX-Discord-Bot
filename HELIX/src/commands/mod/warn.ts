@@ -1,4 +1,4 @@
-﻿import { GuildMember } from 'discord.js';
+import { GuildMember, PermissionFlagsBits } from 'discord.js';
 import { BotDatabase } from '../../db/database.js';
 import { createEmbed, formatError, getMessage } from '../../handlers/message-handler.js';
 import type { CommandDefinition } from '../../types/command.js';
@@ -7,7 +7,7 @@ export const warn: CommandDefinition = {
   name: 'warn',
   description: 'Issue, view, or clear member warnings',
   category: 'moderation',
-  permissions: ['1099511627776' as any],
+  permissions: [PermissionFlagsBits.ModerateMembers],
   options: [
     { name: 'subcommand', description: 'Action (user, list, clear)', type: 'string', required: true, choices: [{ name: 'user', value: 'user' }, { name: 'list', value: 'list' }, { name: 'clear', value: 'clear' }] },
     { name: 'user', description: 'Target user', type: 'user', required: true },

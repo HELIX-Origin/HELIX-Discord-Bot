@@ -1,4 +1,4 @@
-import { Collection, Message } from 'discord.js';
+import { Collection, Message, PermissionFlagsBits } from 'discord.js';
 import { CommandDefinition, ExecuteContext } from '../types/command.js';
 import { BotDatabase } from '../db/database.js';
 import { registerHelp, createHelp } from './help-registrar.js';
@@ -14,6 +14,16 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const commands = new Collection<string, CommandDefinition>();
+
+function formatPermissionName(perm: any): string {
+  if (typeof perm === 'string') return perm;
+  for (const [key, value] of Object.entries(PermissionFlagsBits)) {
+    if (value === perm) {
+      return key.replace(/([A-Z])/g, ' $1').trim();
+    }
+  }
+  return String(perm);
+}
 
 function scanCommandFiles(dir: string): string[] {
   if (!fs.existsSync(dir)) return [];
@@ -59,7 +69,7 @@ export async function loadPrefixCommands(): Promise<void> {
 
         registerHelp(createHelp(cmd.name, cmd.description, cmd.category, {
           usage: `>${cmd.name}`,
-          permissions: (cmd.permissions || []).map(String),
+          permissions: (cmd.permissions || []).map(formatPermissionName),
           aliases: cmd.aliases,
           subcommands: cmd.subcommands?.map(s => s.name),
         }));

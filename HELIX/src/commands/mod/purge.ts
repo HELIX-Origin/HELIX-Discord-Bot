@@ -1,3 +1,4 @@
+import { PermissionFlagsBits } from 'discord.js';
 import { createEmbed, formatError, getMessage } from '../../handlers/message-handler.js';
 import type { CommandDefinition } from '../../types/command.js';
 
@@ -5,7 +6,7 @@ export const purge: CommandDefinition = {
   name: 'purge',
   description: 'Bulk delete messages from the current channel',
   category: 'moderation',
-  permissions: ['8192' as any],
+  permissions: [PermissionFlagsBits.ManageMessages],
   options: [
     { name: 'amount', description: 'Number of messages to delete (1-100)', type: 'integer', required: true, minValue: 1, maxValue: 100 },
   ],

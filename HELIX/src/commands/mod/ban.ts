@@ -1,4 +1,4 @@
-﻿import { GuildMember } from 'discord.js';
+import { GuildMember, PermissionFlagsBits } from 'discord.js';
 import { BotDatabase } from '../../db/database.js';
 import { createEmbed, formatError, getMessage } from '../../handlers/message-handler.js';
 import type { CommandDefinition } from '../../types/command.js';
@@ -7,7 +7,7 @@ export const ban: CommandDefinition = {
   name: 'ban',
   description: 'Ban a member from the server',
   category: 'moderation',
-  permissions: ['4' as any],
+  permissions: [PermissionFlagsBits.BanMembers],
   options: [
     { name: 'user', description: 'Target user', type: 'user', required: true },
     { name: 'reason', description: 'Reason', type: 'string', required: false },

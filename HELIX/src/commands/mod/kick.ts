@@ -1,4 +1,4 @@
-﻿import { GuildMember } from 'discord.js';
+import { GuildMember, PermissionFlagsBits } from 'discord.js';
 import { BotDatabase } from '../../db/database.js';
 import { createEmbed, formatError, getMessage } from '../../handlers/message-handler.js';
 import type { CommandDefinition } from '../../types/command.js';
@@ -7,7 +7,7 @@ export const kick: CommandDefinition = {
   name: 'kick',
   description: 'Kick a member from the server',
   category: 'moderation',
-  permissions: ['2' as any],
+  permissions: [PermissionFlagsBits.KickMembers],
   options: [
     { name: 'user', description: 'Target user', type: 'user', required: true },
     { name: 'reason', description: 'Reason', type: 'string', required: false },

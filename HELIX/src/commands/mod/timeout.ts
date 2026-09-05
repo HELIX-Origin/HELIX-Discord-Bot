@@ -1,4 +1,4 @@
-﻿import { GuildMember } from 'discord.js';
+import { GuildMember, PermissionFlagsBits } from 'discord.js';
 import { BotDatabase } from '../../db/database.js';
 import { createEmbed, formatError, getMessage } from '../../handlers/message-handler.js';
 import type { CommandDefinition } from '../../types/command.js';
@@ -7,7 +7,7 @@ export const timeout: CommandDefinition = {
   name: 'timeout',
   description: 'Timeout a member',
   category: 'moderation',
-  permissions: ['1099511627776' as any],
+  permissions: [PermissionFlagsBits.ModerateMembers],
   options: [
     { name: 'user', description: 'Target user', type: 'user', required: true },
     { name: 'minutes', description: 'Duration in minutes (1-40320)', type: 'integer', required: true, minValue: 1, maxValue: 40320 },

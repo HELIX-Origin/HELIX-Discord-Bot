@@ -9,7 +9,7 @@ export const set: CommandDefinition = {
   name: 'set',
   description: 'Configure guild and user settings',
   category: 'config',
-  permissions: ['32' as any],
+  permissions: [PermissionFlagsBits.ManageGuild],
   subcommands: [
     {
       name: 'prefix',
@@ -80,7 +80,7 @@ export const set: CommandDefinition = {
     },
     { name: 'view', description: 'View current server configuration' },
   ],
-  async execute({ message, interaction, guild, user }) {
+  async execute({ message, interaction, guild, user, args = [] }) {
     const db = BotDatabase.getInstance();
 
     if (interaction) {
@@ -213,18 +213,17 @@ export const set: CommandDefinition = {
     }
 
     // Prefix: >set <subcommand> ...
-    const args = message!.content.split(/\s+/);
-    const sub = args[1]?.toLowerCase();
+    const sub = (args[0] || 'view').toLowerCase();
 
     if (sub === 'prefix') {
-      const prefix = args[2];
+      const prefix = args[1];
       if (!prefix) return message!.reply({ embeds: [formatError('missing_argument', { arg: 'prefix' })] });
       db.setGuildSettings({ guildId: guild.id, prefix });
       return message!.reply({ embeds: [createEmbed('config.set.embed_success', { setting: 'Command Prefix', value: `\`${prefix}\`` })] });
     }
 
     if (sub === 'tickets-hub') {
-      const chMatch = args[2]?.match(/^<#(\d+)>$/) || args[2];
+      const chMatch = args[1]?.match(/^<#(\d+)>$/) || args[1];
       const chId = Array.isArray(chMatch) ? chMatch[1] : chMatch;
       if (!chId) return message!.reply({ embeds: [formatError('missing_argument', { arg: 'channel' })] });
       db.setGuildSettings({ guildId: guild.id, ticketsHubChannelId: chId });
@@ -232,7 +231,7 @@ export const set: CommandDefinition = {
     }
 
     if (sub === 'ticket-manager-role') {
-      const roleMatch = args[2]?.match(/^<@&(\d+)>$/) || args[2];
+      const roleMatch = args[1]?.match(/^<@&(\d+)>$/) || args[1];
       const roleId = Array.isArray(roleMatch) ? roleMatch[1] : roleMatch;
       if (!roleId) return message!.reply({ embeds: [formatError('missing_argument', { arg: 'role' })] });
       db.setGuildSettings({ guildId: guild.id, ticketManagerRoleId: roleId });
@@ -240,7 +239,7 @@ export const set: CommandDefinition = {
     }
 
     if (sub === 'mod-log-channel') {
-      const chMatch = args[2]?.match(/^<#(\d+)>$/) || args[2];
+      const chMatch = args[1]?.match(/^<#(\d+)>$/) || args[1];
       const chId = Array.isArray(chMatch) ? chMatch[1] : chMatch;
       if (!chId) return message!.reply({ embeds: [formatError('missing_argument', { arg: 'channel' })] });
       db.setGuildSettings({ guildId: guild.id, modLogChannelId: chId });
@@ -248,7 +247,7 @@ export const set: CommandDefinition = {
     }
 
     if (sub === 'welcome-channel') {
-      const chMatch = args[2]?.match(/^<#(\d+)>$/) || args[2];
+      const chMatch = args[1]?.match(/^<#(\d+)>$/) || args[1];
       const chId = Array.isArray(chMatch) ? chMatch[1] : chMatch;
       if (!chId) return message!.reply({ embeds: [formatError('missing_argument', { arg: 'channel' })] });
       db.setGuildSettings({ guildId: guild.id, welcomeChannelId: chId });
@@ -256,8 +255,8 @@ export const set: CommandDefinition = {
     }
 
     if (sub === 'slash') {
-      const action = args[2]?.toLowerCase();
-      const category = args[3]?.toLowerCase();
+      const action = args[1]?.toLowerCase();
+      const category = args[2]?.toLowerCase();
       const current = db.getGuildSettings(guild.id);
       let categories = new Set<string>(current?.enabledSlashCategories || []);
 
