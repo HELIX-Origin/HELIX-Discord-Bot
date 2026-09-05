@@ -1,5 +1,6 @@
 import http from 'node:http';
 import { BotDatabase } from '../../src/db/database.js';
+import { botSettings } from '../../src/handlers/settings-manager.js';
 import { getCallbackUrl } from '../../src/env.js';
 
 export async function handleDashboardGuilds(req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
@@ -14,9 +15,9 @@ export async function handleDashboardGuilds(req: http.IncomingMessage, res: http
 
     const guildSettings: Record<string, any> = {};
     for (const g of liveGuilds) {
-      guildSettings[g.id] = db.getGuildSettings(g.id);
+      guildSettings[g.id] = botSettings.getGuildSettings(g.id);
     }
-    guildSettings['global'] = db.getGuildSettings('global');
+    guildSettings['global'] = botSettings.getGuildSettings('global');
 
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({
@@ -37,9 +38,9 @@ export async function handleDashboardGuilds(req: http.IncomingMessage, res: http
       try {
         const payload = JSON.parse(body || '{}');
         const guildId = payload.guildId || 'global';
-        const existing = db.getGuildSettings(guildId);
+        const existing = botSettings.getGuildSettings(guildId);
 
-        db.setGuildSettings({
+        botSettings.setGuildSettings({
           guildId,
           prefix: payload.prefix !== undefined ? payload.prefix : (existing?.prefix || '>'),
           callbackUrl: payload.callbackUrl !== undefined ? payload.callbackUrl : (existing?.callbackUrl || getCallbackUrl()),

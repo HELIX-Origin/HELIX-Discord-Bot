@@ -7,12 +7,14 @@ import { loadSlashCommands, registerGlobalSlashCommands, handleSlashInteraction 
 import { loadEvents } from './src/handlers/event-handler.js';
 import { loadAllPlugins } from './src/plugins/plugin-loader.js';
 import { registerPlugins } from './src/plugins/registry.js';
+import { botSettings } from './src/handlers/settings-manager.js';
 
 export * from './src/client.js';
 export * from './src/server.js';
 export * from './src/db/database.js';
 export * from './src/env.js';
 export * from './src/keep-alive.js';
+export * from './src/handlers/settings-manager.js';
 
 export interface LaunchBotOptions {
   token?: string;
@@ -30,6 +32,9 @@ export async function launchBotAndDashboard(options: LaunchBotOptions = {}): Pro
   console.log('====================================================');
   console.log('  🤖 HELIX Discord Bot & Web Dashboard');
   console.log('====================================================\n');
+
+  // Preload and hydrate all guild settings into Bot Session Memory
+  botSettings.hydrateFromDatabase();
 
   // Discover and register all language plugins
   try {

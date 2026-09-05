@@ -84,12 +84,17 @@ export interface PluginRepositoryEntry {
 
 export class BotDatabase {
   private static instance: BotDatabase | null = null;
+  private static onSettingsUpdated?: (settings: GuildSettings) => void;
   private db: any = null;
   private dbPath: string;
 
   constructor(customPath?: string) {
     this.dbPath = customPath || getDbPath();
     this.initialize();
+  }
+
+  public static setOnSettingsUpdated(callback?: (settings: GuildSettings) => void): void {
+    BotDatabase.onSettingsUpdated = callback;
   }
 
   public static getInstance(customPath?: string): BotDatabase {
@@ -259,6 +264,39 @@ export class BotDatabase {
     }
   }
 
+  public getAllGuildSettings(): Map<string, GuildSettings> {
+    const map = new Map<string, GuildSettings>();
+    if (!this.db) return map;
+    try {
+      const stmt = this.db.prepare('SELECT * FROM guild_settings');
+      const rows: any[] = stmt.all ? stmt.all() : [];
+      for (const row of rows) {
+        let enabledSlashCategories: string[] | null = null;
+        if (row.enabled_slash_categories) {
+          try {
+            enabledSlashCategories = JSON.parse(row.enabled_slash_categories);
+          } catch {
+            enabledSlashCategories = row.enabled_slash_categories.split(',').map((s: string) => s.trim()).filter(Boolean);
+          }
+        }
+        map.set(row.guild_id, {
+          guildId: row.guild_id,
+          prefix: row.prefix,
+          callbackUrl: row.callback_url,
+          ticketsHubChannelId: row.tickets_hub_channel_id,
+          ticketManagerRoleId: row.ticket_manager_role_id,
+          modLogChannelId: row.mod_log_channel_id,
+          welcomeChannelId: row.welcome_channel_id,
+          enabledSlashCategories,
+          updatedAt: row.updated_at,
+        });
+      }
+    } catch (err: any) {
+      logs.error(`Failed to get all guild settings: ${err?.message || err}`);
+    }
+    return map;
+  }
+
   public getGuildSettings(guildId: string): GuildSettings | null {
     if (!this.db) return null;
     try {
@@ -326,6 +364,10 @@ export class BotDatabase {
         settings.welcomeChannelId !== undefined ? settings.welcomeChannelId : null,
         slashCatJson
       );
+
+      if (BotDatabase.onSettingsUpdated) {
+        BotDatabase.onSettingsUpdated(settings);
+      }
     } catch (err: any) {
       logs.error(`Failed to set guild settings for ${settings.guildId}: ${err?.message || err}`);
     }

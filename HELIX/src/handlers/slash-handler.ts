@@ -192,10 +192,10 @@ export async function reconcileAllGuildSlashCommands(
   clientId: string,
   guildIds: string[]
 ): Promise<void> {
-  const db = (await import('../db/database.js')).BotDatabase.getInstance();
+  const { botSettings } = await import('./settings-manager.js');
   for (const guildId of guildIds) {
     try {
-      const settings = db.getGuildSettings(guildId);
+      const settings = botSettings.getGuildSettings(guildId);
       const categories = settings?.enabledSlashCategories || [];
       if (categories.length > 0) {
         await registerGuildSlashCategories(token, clientId, guildId, categories);

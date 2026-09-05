@@ -1,6 +1,7 @@
 import { Collection, Message, PermissionFlagsBits } from 'discord.js';
 import { CommandDefinition, ExecuteContext } from '../types/command.js';
 import { BotDatabase } from '../db/database.js';
+import { botSettings } from './settings-manager.js';
 import { registerHelp, createHelp, buildCommandHelpEmbed, getCommandHelp } from './help-registrar.js';
 import { logs } from './logs-handler.js';
 import { getMessage, formatError } from './message-handler.js';
@@ -107,7 +108,7 @@ export function getPrefixCommands(): Collection<string, CommandDefinition> {
 
 export function getPrefixForGuild(guildId: string): string {
   if (!guildId) return DEFAULT_PREFIX;
-  return BotDatabase.getInstance().getGuildSettings(guildId)?.prefix || DEFAULT_PREFIX;
+  return botSettings.getPrefix(guildId);
 }
 
 function parseArgs(message: Message, args: string[], cmd: CommandDefinition): (name: string) => any {

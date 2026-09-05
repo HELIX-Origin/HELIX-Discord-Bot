@@ -1,5 +1,6 @@
 import { Events, GuildMember, EmbedBuilder, Colors } from 'discord.js';
 import { BotDatabase } from '../db/database.js';
+import { botSettings } from '../handlers/settings-manager.js';
 import { logs } from '../handlers/logs-handler.js';
 import type { BotEvent } from '../handlers/event-handler.js';
 
@@ -8,9 +9,7 @@ export const guildMemberAdd: BotEvent = {
   async execute(member: GuildMember) {
     if (!member?.guild) return;
 
-    const db = BotDatabase.getInstance();
-    const settings = db.getGuildSettings(member.guild.id);
-    const welcomeChannelId = settings?.welcomeChannelId;
+    const welcomeChannelId = botSettings.getWelcomeChannelId(member.guild.id);
     if (!welcomeChannelId) return;
 
     try {

@@ -1,4 +1,4 @@
-﻿import {
+import {
   ButtonInteraction,
   ModalSubmitInteraction,
   ModalBuilder,
@@ -12,6 +12,7 @@
   PermissionFlagsBits,
 } from 'discord.js';
 import { BotDatabase } from '../db/database.js';
+import { botSettings } from '../handlers/settings-manager.js';
 import { createEmbed, formatError, getMessage } from '../handlers/message-handler.js';
 
 export function createTicketsHubEmbed() {
@@ -68,7 +69,7 @@ export async function handleTicketButton(interaction: ButtonInteraction): Promis
 
     const thread = interaction.channel as ThreadChannel;
     const ticket = db.getTicketByThread(thread.id);
-    const settings = interaction.guildId ? db.getGuildSettings(interaction.guildId) : null;
+    const settings = interaction.guildId ? botSettings.getGuildSettings(interaction.guildId) : null;
 
     const member = interaction.member as any;
     const isOwner = ticket && ticket.userId === interaction.user.id;
@@ -119,7 +120,7 @@ export async function handleTicketModal(interaction: ModalSubmitInteraction): Pr
       return;
     }
 
-    const settings = db.getGuildSettings(interaction.guild.id);
+    const settings = botSettings.getGuildSettings(interaction.guild.id);
     let targetChannel = interaction.channel;
 
     if (settings?.ticketsHubChannelId) {

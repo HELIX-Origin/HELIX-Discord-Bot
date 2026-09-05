@@ -1,5 +1,6 @@
 import { Guild, User, GuildMember, EmbedBuilder, Colors } from 'discord.js';
 import { BotDatabase } from '../db/database.js';
+import { botSettings } from './settings-manager.js';
 import { logs } from './logs-handler.js';
 
 export interface ModLogOptions {
@@ -37,9 +38,7 @@ export async function sendModLog(options: ModLogOptions): Promise<boolean> {
   const { guild, action, target, moderator, reason, durationMinutes, count, db: customDb } = options;
   if (!guild) return false;
 
-  const db = customDb || BotDatabase.getInstance();
-  const settings = db.getGuildSettings(guild.id);
-  const logChannelId = settings?.modLogChannelId;
+  const logChannelId = customDb ? customDb.getGuildSettings(guild.id)?.modLogChannelId : botSettings.getModLogChannelId(guild.id);
   if (!logChannelId) return false;
 
   try {

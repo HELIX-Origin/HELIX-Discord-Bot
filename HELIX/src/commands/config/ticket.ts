@@ -1,5 +1,6 @@
 import { PermissionFlagsBits, ChannelType, ThreadChannel, ActionRowBuilder, ButtonBuilder, ButtonStyle, AttachmentBuilder } from 'discord.js';
 import { BotDatabase } from '../../db/database.js';
+import { botSettings } from '../../handlers/settings-manager.js';
 import { createTicketsHubEmbed } from '../../interactions/tickets.js';
 import { createEmbed, formatError, getMessage } from '../../handlers/message-handler.js';
 import type { CommandDefinition } from '../../types/command.js';
@@ -37,7 +38,7 @@ export const ticket: CommandDefinition = {
         const ch = interaction.options.getChannel('channel') || interaction.channel;
         if (!ch || !('send' in ch)) return interaction.reply({ embeds: [formatError('invalid_channel', { input: 'channel' })], ephemeral: true });
         await (ch as any).send(createTicketsHubEmbed());
-        db.setGuildSettings({ guildId: guild.id, ticketsHubChannelId: ch.id });
+        botSettings.setGuildSettings({ guildId: guild.id, ticketsHubChannelId: ch.id });
         return interaction.reply({ content: `✅ Hub deployed in <#${ch.id}>!`, ephemeral: true });
       }
 
@@ -47,7 +48,7 @@ export const ticket: CommandDefinition = {
         const active = db.getUserActiveTicket(guild.id, user.id);
         if (active) return interaction.reply({ embeds: [formatError(`You already have an active ticket: <#${active.threadId}>`)], ephemeral: true });
 
-        const settings = db.getGuildSettings(guild.id);
+        const settings = botSettings.getGuildSettings(guild.id);
         let targetCh: any = interaction.channel;
         if (settings?.ticketsHubChannelId) { try { const h = await guild.channels.fetch(settings.ticketsHubChannelId); if (h?.isTextBased()) targetCh = h; } catch {} }
         if (!targetCh?.isTextBased() || targetCh.isThread()) return interaction.reply({ embeds: [formatError('Cannot create ticket in this channel.')], ephemeral: true });
@@ -115,7 +116,7 @@ export const ticket: CommandDefinition = {
       const ch = message!.mentions.channels.first() || message!.channel;
       if (!('send' in ch)) return message!.reply({ embeds: [formatError('invalid_channel', { input: 'channel' })] });
       await (ch as any).send(createTicketsHubEmbed());
-      db.setGuildSettings({ guildId: guild.id, ticketsHubChannelId: ch.id });
+      botSettings.setGuildSettings({ guildId: guild.id, ticketsHubChannelId: ch.id });
       return message!.reply(`✅ Hub deployed in <#${ch.id}>!`);
     }
     return message!.reply({ embeds: [formatError('subcommand_not_found')] });

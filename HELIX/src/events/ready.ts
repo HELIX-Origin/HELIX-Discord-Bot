@@ -3,12 +3,14 @@ import { logs } from '../handlers/logs-handler.js';
 import { getMessage } from '../handlers/message-handler.js';
 import { getBotToken, getClientId } from '../env.js';
 import { purgeGlobalSlashCommands, reconcileAllGuildSlashCommands } from '../handlers/slash-handler.js';
+import { botSettings } from '../handlers/settings-manager.js';
 import type { BotEvent } from '../handlers/event-handler.js';
 
 export const ready: BotEvent = {
   name: Events.ClientReady,
   once: true,
   async execute(client) {
+    botSettings.hydrateFromDatabase();
     logs.success(getMessage('events.ready', {
       tag: client.user?.tag || 'HELIX',
       id: client.user?.id || '',
