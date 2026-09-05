@@ -229,13 +229,27 @@ New-NetFirewallRule -DisplayName "HELIX Bot Dashboard" -Direction Inbound -Local
 ```
 
 #### Step 3: Start the Bot
-Open PowerShell in your project folder and run:
+Open PowerShell or Command Prompt in your project folder:
 ```powershell
 # Development mode with hot-reload
 npm run dev
 
 # Production mode
 npm start
+```
+
+#### Step 4: Silent Background Execution (No Console Window)
+To run HELIX in the background without keeping a console window open, use the built-in `silent.vbs` launcher:
+```cmd
+# Start production bot silently in the background
+wscript.exe silent.vbs run-start.bat
+
+# Start development mode silently
+wscript.exe silent.vbs run-dev.bat
+```
+To stop a background Node.js bot process on Windows:
+```powershell
+Stop-Process -Name "node" -Force
 ```
 
 ---
