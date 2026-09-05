@@ -13,7 +13,11 @@
     "code-intelligence",
     "ast"
   ],
-  "stack": "container",
+  "buildpacks": [
+    {
+      "url": "heroku/nodejs"
+    }
+  ],
   "env": {
     "DISCORD_TOKEN": {
       "description": "Discord Bot Token from Discord Developer Portal -> Bot -> Reset Token",

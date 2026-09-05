@@ -2,7 +2,9 @@ name: helix-discord-bot
 services:
   - name: bot
     type: web
-    image: Dockerfile
+    buildpack:
+      build_command: npm ci && npm --prefix HELIX ci && npm run build
+      run_command: npm start
     instance_type: free
     regions:
       - fra

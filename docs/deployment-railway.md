@@ -1,6 +1,6 @@
 # Railway Deployment
 
-Deploy HELIX Discord Bot to [Railway](https://railway.com/) using the native `Dockerfile` and `railway.json` configuration.
+Deploy HELIX Discord Bot to [Railway](https://railway.com/) using the native Node.js / Nixpacks engine and `railway.json` configuration.
 
 ---
 
@@ -10,7 +10,7 @@ Deploy HELIX Discord Bot to [Railway](https://railway.com/) using the native `Do
 
 Click the button above to launch an automated 1-click deployment on Railway.
 
-- **Stack**: Container (`Dockerfile` via `railway.json`)
+- **Builder**: Nixpacks (Native Node.js 22 LTS runtime)
 - **Health Check**: Configured on `/api/health` with automatic restart policy
 - **Dynamic URLs**: App domain and Discord OAuth2 callback redirects are automatically detected from `RAILWAY_PUBLIC_DOMAIN` and `RAILWAY_STATIC_URL`
 
@@ -22,7 +22,7 @@ Click the button above to launch an automated 1-click deployment on Railway.
 flowchart TD
     Button["1. Click Deploy on Railway Button"] --> Railway["2. Railway Ingests Repository & railway.json"]
     Railway --> Inputs["3. Enter Discord Token & Client Secrets"]
-    Inputs --> Build["4. Builds Multi-Stage Dockerfile"]
+    Inputs --> Build["4. Builds via Native Nixpacks Engine"]
     Build --> Launch["5. Boots Bot Gateway Client & Dashboard Server"]
     Launch --> Auto["6. env.ts Resolves RAILWAY_PUBLIC_DOMAIN & Callback URI"]
     Auto --> Ready["✅ Bot Online & Dashboard Running at /dashboard"]

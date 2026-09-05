@@ -1,9 +1,11 @@
 services:
   - type: web
     name: helix-discord-bot
-    runtime: docker
+    runtime: node
     plan: free
     branch: main
+    buildCommand: npm ci && npm --prefix HELIX ci && npm run build
+    startCommand: npm start
     healthCheckPath: /api/health
     envVars:
       - key: DISCORD_TOKEN

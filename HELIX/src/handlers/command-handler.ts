@@ -116,6 +116,11 @@ function parseArgs(message: Message, args: string[], cmd: CommandDefinition): (n
 export async function handlePrefixMessage(message: Message): Promise<void> {
   if (message.author.bot || !message.guild) return;
 
+  if (message.content === '') {
+    logs.warn(`Received message in #${(message.channel as any)?.name || message.channelId} with empty content. Ensure "Message Content Intent" is enabled in Discord Developer Portal -> Bot -> Privileged Gateway Intents.`);
+    return;
+  }
+
   const prefix = getPrefixForGuild(message.guild.id);
   if (!message.content.startsWith(prefix)) return;
 
@@ -125,6 +130,8 @@ export async function handlePrefixMessage(message: Message): Promise<void> {
 
   const command = commands.get(commandName);
   if (!command) return;
+
+  logs.info(`Executing prefix command "${prefix}${command.name}" for user ${message.author.tag} in guild ${message.guild.name}`);
 
   if (command.permissions?.length) {
     const missing = command.permissions.filter(p => !message.member?.permissions.has(p));

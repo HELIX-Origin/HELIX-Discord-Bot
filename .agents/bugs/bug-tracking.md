@@ -49,6 +49,7 @@ flowchart TD
 | **BUG-015** | Slash Command Description Limits & Optional Per-Guild Category Enablement | High | Resolved | 4 Sub-Tasks | [#40](https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues/40) | [BUG-015](BUG-015-slash-command-limits-and-per-guild-enablement.md) |
 | **BUG-016** | Multi-Platform One-Click Deployment Sync & Container Runtime Configuration | High | Resolved | 4 Sub-Tasks | [#45](https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues/45) | [BUG-016](BUG-016-multi-platform-deployment-sync.md) |
 | **BUG-017** | Built-in Autonomous Keep-Alive Self-Ping Service for Cloud Hosting Platforms | High | Resolved | 4 Sub-Tasks | [#50](https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues/50) | [BUG-017](BUG-017-keep-alive-service.md) |
+| **BUG-018** | Full Deprecation & Removal of Docker Containerization in Favor of Native Node.js Runtime Across All Platforms | High | Resolved | 4 Sub-Tasks | [#55](https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues/55) | [BUG-018](BUG-018-remove-docker-support.md) |
 
 ---
 

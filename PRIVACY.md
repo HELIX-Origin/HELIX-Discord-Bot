@@ -26,7 +26,7 @@ When you deploy or launch the built-in Discord bot and companion web dashboard, 
 - **Scaffold History**: Project scaffolding events, template IDs, and project names generated through the bot.
 
 > [!IMPORTANT]
-> This SQLite database resides entirely within your local filesystem or mounted container volume (`./data:/app/data`). It is never uploaded to HELIX maintainers or remote telemetry endpoints.
+> This SQLite database resides entirely within your local filesystem (`data/helix-bot.sqlite`). It is never uploaded to HELIX maintainers or remote telemetry endpoints.
 
 ### B. Environment Variables & Credentials
 
@@ -46,7 +46,7 @@ When utilizing HELIX, you interact directly with the following third-party platf
 
 - **Discord API**: Used by the bot subsystem for gateway events, slash commands, and OAuth2 authorization. Governed by [Discord Privacy Policy](https://discord.com/privacy).
 - **GitHub**: Used for optional community plugin installation via `>plugin install <repo>`. Governed by [GitHub Privacy Statement](https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement).
-- **Render / Koyeb / Heroku / Railway / Docker**: Used for optional 1-click cloud or container deployment. Governed by their respective privacy policies.
+- **Render / Koyeb / Heroku / Railway**: Used for optional 1-click cloud hosting deployment. Governed by their respective privacy policies.
 
 ---
 
@@ -58,7 +58,7 @@ When utilizing HELIX, you interact directly with the following third-party platf
 > - Never share your `.env` file or commit sensitive API tokens to public repositories.
 > - Restrict Discord bot permissions to only the channels and roles necessary for your server.
 
-- OAuth2 session tokens stored in the SQLite database are accessible only to the local operating system user or Docker container process.
+- OAuth2 session tokens stored in the SQLite database are accessible only to the local operating system user or cloud server process.
 - NextAuth sessions are signed with HMAC SHA-256 using your configured `NEXTAUTH_SECRET`.
 
 ---

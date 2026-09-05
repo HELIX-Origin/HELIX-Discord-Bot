@@ -20,7 +20,7 @@
     <img src="https://render.com/images/deploy-to-render-button.svg" alt="Deploy to Render" height="34">
   </a>
   &nbsp;
-  <a href="https://app.koyeb.com/deploy?type=git&repository=github.com/HELIX-Origin/HELIX-Discord-Bot&branch=main&builder=dockerfile&env[DISCORD_TOKEN]=&env[DISCORD_CLIENT_ID]=&env[DISCORD_CLIENT_SECRET]=&env[NEXTAUTH_SECRET]=&env[NODE_ENV]=production&ports=5000;http;/&instance_type=free">
+  <a href="https://app.koyeb.com/deploy?type=git&repository=github.com/HELIX-Origin/HELIX-Discord-Bot&branch=main&builder=buildpack&env[DISCORD_TOKEN]=&env[DISCORD_CLIENT_ID]=&env[DISCORD_CLIENT_SECRET]=&env[NEXTAUTH_SECRET]=&env[NODE_ENV]=production&ports=5000;http;/&instance_type=free">
     <img src="https://www.koyeb.com/static/images/deploy/button.svg" alt="Deploy to Koyeb" height="34">
   </a>
   &nbsp;
@@ -58,10 +58,9 @@ Fill in `DISCORD_TOKEN`, `DISCORD_CLIENT_ID`, `DISCORD_CLIENT_SECRET`, and `NEXT
 - [Plugin Repo Structure](docs/plugin-repository-structure.md) -- file layout, JSON schemas & TypeScript contracts
 - [Scaffolding Templates](docs/scaffolding-templates.md) -- 17 project starters
 - [Render Deployment (Free)](docs/deployment-render.md) -- 1-click free web service
-- [Koyeb Deployment (Free)](docs/deployment-koyeb.md) -- 1-click free nano container
-- [Heroku Deployment](docs/deployment-heroku.md) -- Eco dyno container guide
-- [Railway Deployment](docs/deployment-railway.md) -- 1-click cloud container
-- [Docker / Self-Hosting](docs/deployment-docker.md) -- containerized setup
+- [Koyeb Deployment (Free)](docs/deployment-koyeb.md) -- 1-click free nano instance
+- [Heroku Deployment](docs/deployment-heroku.md) -- Eco dyno deployment guide
+- [Railway Deployment](docs/deployment-railway.md) -- 1-click cloud service
 
 ---
 

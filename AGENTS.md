@@ -140,6 +140,7 @@ flowchart LR
 - [BUG-015](.agents/bugs/BUG-015-slash-command-limits-and-per-guild-enablement.md) — Slash command limits & optional per-guild category enablement — **Resolved** (4 Sub-Tasks)
 - [BUG-016](.agents/bugs/BUG-016-multi-platform-deployment-sync.md) — Multi-platform one-click deployment sync & container runtime configuration — **Resolved** (4 Sub-Tasks)
 - [BUG-017](.agents/bugs/BUG-017-keep-alive-service.md) — Built-in autonomous keep-alive self-ping service for cloud hosting platforms — **Resolved** (4 Sub-Tasks)
+- [BUG-018](.agents/bugs/BUG-018-remove-docker-support.md) — Full deprecation & removal of Docker containerization in favor of native Node.js runtimes — **Resolved** (4 Sub-Tasks)
 
 ---
 

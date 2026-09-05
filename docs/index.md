@@ -12,7 +12,6 @@
 | [Koyeb Deployment](deployment-koyeb.md) | 1-click free nano instance deploy |
 | [Heroku Deployment](deployment-heroku.md) | 1-click Eco dyno deploy |
 | [Railway Deployment](deployment-railway.md) | 1-click cloud container deploy |
-| [Docker / Self-Hosting](deployment-docker.md) | Containerized self-hosted setup |
 
 ---
 
