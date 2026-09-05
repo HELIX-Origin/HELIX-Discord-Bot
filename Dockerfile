@@ -22,7 +22,7 @@ COPY HELIX/ ./HELIX/
 WORKDIR /app/HELIX
 RUN npm ci
 
-# Compile TypeScript to standalone ESM distribution in src/dist/ (tsc)
+# Compile TypeScript to standalone ESM distribution in dist/ (tsc)
 RUN npm run build
 
 # Prune devDependencies to keep only runtime dependencies for production

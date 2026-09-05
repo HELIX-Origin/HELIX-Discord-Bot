@@ -14,7 +14,7 @@ tests/
 │   ├── dashboard/            # NextAuth config, auth handlers, router, dashboard HTML
 │   ├── db/                   # BotDatabase lifecycle, tickets, config, sessions
 │   ├── env/                  # src/env.ts accessors + platform URL auto-resolution
-│   ├── handlers/             # message-handler, help-registrar, logs-handler
+│   ├── handlers/             # message-handler, slash-handler, help-registrar, logs-handler
 │   ├── plugins/              # registry, manifest, repo-config, SDK (ast, snippet, etc.)
 │   ├── scaffolding/          # template-engine, file-generator, scaffold
 │   ├── server/               # invite URL resolution
@@ -73,7 +73,7 @@ npx vitest run tests/unit/dashboard/auth-config.test.ts
 
 `src/env.ts` derives `DISCORD_CALLBACK_URL` / `NEXTAUTH_URL` from one-click
 platform vars (`RENDER_EXTERNAL_URL`, `KOYEB_PUBLIC_DOMAIN`, `RAILWAY_STATIC_URL`,
-Heroku, `DOMAIN`) and normalizes any `.../api/auth/callback/discord` suffix back
-to its base, so the full Discord developer-portal callback form works without a
-double path. See `tests/unit/env/env.test.ts` and
-`tests/integration/dashboard/dashboard-api.test.ts`.
+`RAILWAY_PUBLIC_DOMAIN`, `FLY_APP_NAME`, Heroku, `DOMAIN`) and normalizes any
+`.../api/auth/callback/discord` suffix back to its base, so the full Discord
+developer-portal callback form works without a double path. See `tests/unit/env/env.test.ts`
+and `tests/integration/dashboard/dashboard-api.test.ts`.

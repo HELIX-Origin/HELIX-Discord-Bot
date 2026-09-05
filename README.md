@@ -60,6 +60,7 @@ Fill in `DISCORD_TOKEN`, `DISCORD_CLIENT_ID`, `DISCORD_CLIENT_SECRET`, and `NEXT
 - [Render Deployment (Free)](docs/deployment-render.md) -- 1-click free web service
 - [Koyeb Deployment (Free)](docs/deployment-koyeb.md) -- 1-click free nano container
 - [Heroku Deployment](docs/deployment-heroku.md) -- Eco dyno container guide
+- [Railway Deployment](docs/deployment-railway.md) -- 1-click cloud container
 - [Docker / Self-Hosting](docs/deployment-docker.md) -- containerized setup
 
 ---

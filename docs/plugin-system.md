@@ -108,7 +108,7 @@ Plugins and bot commands seamlessly accept code from diverse sources without man
 >plugin install username/my-plugin-repo
 ```
 
-HELIX clones the repo into `HELIX/src/plugins/community/<repo-name>/`, reads `config.json`, validates each `plugin.json`, and registers all plugins in the runtime registry.
+HELIX fetches the repository via GitHub API/git clone, reads `config.json`, validates each `plugin.json` manifest and entry source code, and persists the plugin bundle directly to the `plugin_repositories` SQLite table for isolated, multi-restart, per-guild runtime execution with zero filesystem dependency.
 
 ---
 

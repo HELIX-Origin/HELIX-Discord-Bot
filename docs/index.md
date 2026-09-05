@@ -11,6 +11,7 @@
 | [Render Deployment](deployment-render.md) | 1-click free web service deploy |
 | [Koyeb Deployment](deployment-koyeb.md) | 1-click free nano instance deploy |
 | [Heroku Deployment](deployment-heroku.md) | 1-click Eco dyno deploy |
+| [Railway Deployment](deployment-railway.md) | 1-click cloud container deploy |
 | [Docker / Self-Hosting](deployment-docker.md) | Containerized self-hosted setup |
 
 ---
@@ -28,7 +29,7 @@ HELIX/
 │   ├── commands/
 │   │   ├── mod/          # kick, ban, unban, timeout, untimeout, purge, warn
 │   │   ├── util/         # ping, avatar, serverinfo, userinfo, poll, snowflake, remind
-│   │   ├── info/         # help, info, status, list
+│   │   ├── info/         # help, info, status, list, lint, explain, inspect, debug, generate, refactor, docs
 │   │   ├── project/      # create, scaffold
 │   │   └── config/       # set, ticket, plugin
 │   ├── handlers/         # command, slash, event, help-registrar, logs, message-handler, errors

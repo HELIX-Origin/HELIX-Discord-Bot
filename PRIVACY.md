@@ -17,11 +17,12 @@
 
 When you deploy or launch the built-in Discord bot and companion web dashboard, the application initializes a zero-cost, self-contained SQLite database. This database stores:
 
-- **Guild Settings**: Per-server preferences including command prefixes, tickets hub channels, ticket manager roles, and moderation log channels.
+- **Guild Settings**: Per-server preferences including command prefixes, tickets hub channels, ticket manager roles, moderation log channels, and enabled slash command categories.
 - **Support Tickets**: Thread IDs, user IDs, ticket subjects, and status (open/closed) for guild support.
 - **Moderation Logs**: Moderation actions (kick, ban, timeout, purge, warn) with moderator IDs, timestamps, and reasons.
 - **Warnings**: Per-user infraction records logged by guild moderators.
 - **User Sessions**: Discord OAuth2 user IDs and session tokens used exclusively for web dashboard login.
+- **Plugin Repositories**: Guild-scoped language plugin repository configurations, manifests, and cache data stored in SQLite.
 - **Scaffold History**: Project scaffolding events, template IDs, and project names generated through the bot.
 
 > [!IMPORTANT]
@@ -45,7 +46,7 @@ When utilizing HELIX, you interact directly with the following third-party platf
 
 - **Discord API**: Used by the bot subsystem for gateway events, slash commands, and OAuth2 authorization. Governed by [Discord Privacy Policy](https://discord.com/privacy).
 - **GitHub**: Used for optional community plugin installation via `>plugin install <repo>`. Governed by [GitHub Privacy Statement](https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement).
-- **Heroku / Docker**: Used for optional 1-click cloud or container deployment.
+- **Render / Koyeb / Heroku / Railway / Docker**: Used for optional 1-click cloud or container deployment. Governed by their respective privacy policies.
 
 ---
 

@@ -66,6 +66,7 @@ See [Scaffolding Templates](scaffolding-templates.md) for all valid `<type>` val
 | `ticket-manager-role <@role>` | Role that can manage all tickets |
 | `mod-log-channel <#channel>` | Channel for moderation action logs |
 | `welcome-channel <#channel>` | Channel for member join messages |
+| `slash <action> [cat]` | Enable/disable optional slash command categories (`info`, `project`, `config`, `mod`, `util`, `all`) |
 | `view` | Display all current guild settings |
 
 **`>ticket <subcommand>`**
@@ -84,7 +85,7 @@ See [Scaffolding Templates](scaffolding-templates.md) for all valid `<type>` val
 | Subcommand | Description |
 |------------|-------------|
 | `list` | List installed plugin repos and their languages |
-| `install <owner/repo>` | Clone a GitHub plugin repo and register all plugins |
+| `install <owner/repo>` | Clone a GitHub plugin repo and register all plugins (persisted to SQLite) |
 | `remove <id>` | Remove a plugin |
 | `info <id>` | Show plugin manifest details |
 | `enable <id>` / `disable <id>` | Toggle a plugin |
@@ -100,13 +101,13 @@ Schema is created and migrated automatically at startup. No setup step needed.
 
 | Table | Contents |
 |-------|----------|
-| `guild_settings` | Per-guild prefix, hub channel, manager role, log channels |
+| `guild_settings` | Per-guild prefix, hub channel, manager role, log channels, enabled slash categories |
 | `tickets` | Open and closed ticket records with thread/channel IDs |
 | `moderation_logs` | Kick, ban, timeout, purge, warn actions with reason and actor |
 | `warnings` | Per-user warning history |
 | `user_sessions` | Discord OAuth2 session tokens (dashboard login) |
 | `user_settings` | Per-user notification preferences |
-| `query_logs` | Prompt/query history and provider metadata |
+| `plugin_repositories` | DB-backed per-guild language plugin repositories and manifests |
 | `scaffold_history` | Project generation records |
 | `bot_kv` | General-purpose key-value store |
 
@@ -116,13 +117,13 @@ Schema is created and migrated automatically at startup. No setup step needed.
 
 | Variable | Required | Description |
 |----------|----------|-------------|
-| `DISCORD_TOKEN` | Yes | Bot token |
+| `DISCORD_TOKEN` | Yes | Bot user token from Discord Developer Portal -> Bot -> Reset Token |
 | `DISCORD_CLIENT_ID` | Yes | Application client ID |
 | `DISCORD_CLIENT_SECRET` | Yes | OAuth2 client secret (dashboard) |
 | `NEXTAUTH_SECRET` | Yes | Session signing secret (32+ chars) |
 | `PORT` | No | HTTP server port — defaults to `5000` |
 | `BOT_OWNER_ID` | No | Discord user ID for bot-owner-only commands |
 | `NEXT_PUBLIC_INVITE_URL` | No | Pre-built bot invite URL — auto-generated from `CLIENT_ID` if unset |
-| `DISCORD_CALLBACK_URL` | No | OAuth2 base URL — auto-detected on Heroku/Render/Railway |
-| `NEXTAUTH_URL` | No | Public NextAuth URL — auto-detected on Heroku/Render/Railway |
+| `DISCORD_CALLBACK_URL` | No | OAuth2 base URL — auto-detected on Heroku / Render / Koyeb / Railway / Fly.io |
+| `NEXTAUTH_URL` | No | Public NextAuth URL — auto-detected on Heroku / Render / Koyeb / Railway / Fly.io |
 | `DISCORD_DB_PATH` | No | Custom SQLite file path — defaults to `data/helix-bot.sqlite` |
