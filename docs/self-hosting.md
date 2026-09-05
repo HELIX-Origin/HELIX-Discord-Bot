@@ -230,15 +230,28 @@ New-NetFirewallRule -DisplayName "HELIX Bot Dashboard" -Direction Inbound -Local
 ```
 
 #### Step 3: Run as 24/7 Background Service via Windows Task Scheduler (Native)
-Windows includes built-in Task Scheduler for starting background Node.js services on boot without third-party utilities:
+Windows includes a built-in Task Scheduler for starting background Node.js services on boot without third-party utilities. 
+
+The script below dynamically resolves `npm` from your system `PATH` (supporting standard installers, NVM for Windows, Volta, fnm, Scoop, and Chocolatey) and registers the task for your current project directory:
 
 ```powershell
-# In Administrator PowerShell:
-$action = New-ScheduledTaskAction -Execute "C:\Program Files\nodejs\npm.cmd" -Argument "start" -WorkingDirectory "d:\Scripts\HELIX CLI"
+# Open PowerShell in your HELIX directory and run:
+$npmPath = (Get-Command npm.cmd -ErrorAction SilentlyContinue).Source
+if (-not $npmPath) { $npmPath = "npm.cmd" }
+$projectDir = (Get-Location).Path
+
+$action = New-ScheduledTaskAction -Execute $npmPath -Argument "start" -WorkingDirectory $projectDir
 $trigger = New-ScheduledTaskTrigger -AtStartup
-$principal = New-ScheduledTaskPrincipal -UserId "SYSTEM" -LogonType ServiceAccount -RunLevel Highest
+$principal = New-ScheduledTaskPrincipal -UserId "$env:USERDOMAIN\$env:USERNAME" -LogonType Interactive -RunLevel Highest
 Register-ScheduledTask -TaskName "HELIX Discord Bot" -Action $action -Trigger $trigger -Principal $principal -Description "HELIX Discord Bot 24/7 Service"
 Start-ScheduledTask -TaskName "HELIX Discord Bot"
+```
+
+To manage the Windows task:
+```powershell
+Stop-ScheduledTask -TaskName "HELIX Discord Bot"        # Stop
+Start-ScheduledTask -TaskName "HELIX Discord Bot"       # Start
+Unregister-ScheduledTask -TaskName "HELIX Discord Bot"  # Remove
 ```
 
 #### Step 4: Run with PM2 (Alternative Process Manager)
@@ -265,6 +278,8 @@ node -v
 ```
 
 #### Step 2: Run as macOS LaunchDaemon (`launchd`)
+Determine your system npm path with `which npm` (typically `/opt/homebrew/bin/npm` on Apple Silicon or `/usr/local/bin/npm` on Intel).
+
 Create `~/Library/LaunchAgents/com.helix.bot.plist`:
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -275,10 +290,12 @@ Create `~/Library/LaunchAgents/com.helix.bot.plist`:
     <string>com.helix.bot</string>
     <key>ProgramArguments</key>
     <array>
-        <string>/usr/local/bin/npm</string>
+        <!-- Replace with output of 'which npm' -->
+        <string>/opt/homebrew/bin/npm</string>
         <string>start</string>
     </array>
     <key>WorkingDirectory</key>
+    <!-- Replace with output of 'pwd' -->
     <string>/Users/yourusername/HELIX-Discord-Bot</string>
     <key>RunAtLoad</key>
     <true/>
