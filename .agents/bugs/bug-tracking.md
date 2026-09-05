@@ -61,6 +61,7 @@ flowchart TD
 | **BUG-027** | Database-Backed Scaffolding Architecture, In-Memory ZIP Archive Generation & Discord Attachment Delivery | High | Resolved | 4 Sub-Tasks | [#100](https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues/100) | [BUG-027](BUG-027-database-backed-scaffolding-and-zip-archive-delivery.md) |
 | **BUG-028** | Start Command Environment Resolution, Prestart Build Lifecycle Hook & Legacy Platform Reference Deprecation | High | Resolved | 4 Sub-Tasks | [#105](https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues/105) | [BUG-028](BUG-028-start-command-env-resolution-and-render-deprecation.md) |
 | **BUG-029** | Derived Dashboard Port Range Architecture & Multi-Server Listener Isolation | High | Resolved | 4 Sub-Tasks | [#110](https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues/110) | [BUG-029](BUG-029-derived-dashboard-port-range-and-server-isolation.md) |
+| **BUG-030** | Explicit BOT_PORT/DASHBOARD_PORT Contract — No Hardcoded Fallbacks or Derivation | High | Resolved | 4 Sub-Tasks | [TBD] | [BUG-030](BUG-030-explicit-bot-port-dashboard-port-contract.md) |
 
 ---
 
