@@ -1,1 +1,1 @@
-web: node HELIX/src/dist/index.js
+web: node HELIX/dist/index.js

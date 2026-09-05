@@ -2,4 +2,4 @@ build:
   docker:
     web: Dockerfile
 run:
-  web: node HELIX/src/dist/index.js
+  web: node HELIX/dist/index.js

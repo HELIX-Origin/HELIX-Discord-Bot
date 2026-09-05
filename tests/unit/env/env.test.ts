@@ -86,10 +86,18 @@ describe('src/env.ts — bot environment accessors', () => {
     expect(detectPlatformUrl()).toBe('https://srvc.koyeb.app');
 
     sandbox.set('KOYEB_APP_NAME', undefined);
+    sandbox.set('RAILWAY_PUBLIC_DOMAIN', 'helix.up.railway.app');
+    expect(detectPlatformUrl()).toBe('https://helix.up.railway.app');
+
+    sandbox.set('RAILWAY_PUBLIC_DOMAIN', undefined);
     sandbox.set('RAILWAY_STATIC_URL', 'https://railway.example.com/');
     expect(detectPlatformUrl()).toBe('https://railway.example.com');
 
     sandbox.set('RAILWAY_STATIC_URL', undefined);
+    sandbox.set('FLY_APP_NAME', 'my-fly-app');
+    expect(detectPlatformUrl()).toBe('https://my-fly-app.fly.dev');
+
+    sandbox.set('FLY_APP_NAME', undefined);
     sandbox.set('DOMAIN', 'gitlab-pages.example.com/');
     expect(detectPlatformUrl()).toBe('https://gitlab-pages.example.com');
 

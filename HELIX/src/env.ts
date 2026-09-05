@@ -138,7 +138,10 @@ export function getHerokuAppUrl(): string | null {
 export function detectPlatformUrl(): string | null {
   // Render.com
   const render = (process.env.RENDER_EXTERNAL_URL || '').trim();
-  if (render) return render.replace(/\/$/, '');
+  if (render) {
+    const url = render.includes('://') ? render : `https://${render}`;
+    return url.replace(/\/$/, '');
+  }
 
   // Koyeb
   const koyebDomain = (process.env.KOYEB_PUBLIC_DOMAIN || '').trim();
@@ -152,8 +155,17 @@ export function detectPlatformUrl(): string | null {
   }
 
   // Railway
-  const railway = (process.env.RAILWAY_STATIC_URL || '').trim();
-  if (railway) return railway.replace(/\/$/, '');
+  const railwayDomain = (process.env.RAILWAY_PUBLIC_DOMAIN || process.env.RAILWAY_STATIC_URL || '').trim();
+  if (railwayDomain) {
+    const url = railwayDomain.includes('://') ? railwayDomain : `https://${railwayDomain}`;
+    return url.replace(/\/$/, '');
+  }
+
+  // Fly.io
+  const flyApp = (process.env.FLY_APP_NAME || '').trim();
+  if (flyApp) {
+    return `https://${flyApp}.fly.dev`;
+  }
 
   // Heroku
   const heroku = getHerokuAppUrl();
