@@ -56,7 +56,9 @@ flowchart TD
 | **BUG-022** | Guild Settings End-to-End Bot State Registration & Stale Slash Command Registry Purge | High | Resolved | 4 Sub-Tasks | [#75](https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues/75) | [BUG-022](BUG-022-guild-settings-registration-and-slash-purge.md) |
 | **BUG-023** | Help Command Embed Overhaul & Automated Missing Arguments Help Response | High | Resolved | 4 Sub-Tasks | [#80](https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues/80) | [BUG-023](BUG-023-help-embed-overhaul-and-command-missing-args-help.md) |
 | **BUG-024** | Universal In-Memory Bot Session State & Unified Database Synchronization | High | Resolved | 4 Sub-Tasks | [#85](https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues/85) | [BUG-024](BUG-024-guild-settings-bot-session-and-db-sync.md) |
+| **BUG-025** | Instant Guild Slash Command Category Registration, Normalization & REST Synchronization | High | Resolved | 4 Sub-Tasks | [#90](https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues/90) | [BUG-025](BUG-025-instant-guild-slash-category-sync.md) |
 | **BUG-026** | Universal Subcommand & Command Missing Arguments Help Response Engine | High | Resolved | 4 Sub-Tasks | [#95](https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues/95) | [BUG-026](BUG-026-subcommand-and-command-missing-args-help.md) |
+| **BUG-027** | Database-Backed Scaffolding Architecture, In-Memory ZIP Archive Generation & Discord Attachment Delivery | High | Resolved | 4 Sub-Tasks | [#100](https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues/100) | [BUG-027](BUG-027-database-backed-scaffolding-and-zip-archive-delivery.md) |
 
 ---
 
