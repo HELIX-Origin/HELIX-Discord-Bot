@@ -59,4 +59,4 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
   CMD node -e "fetch('http://localhost:' + (process.env.PORT || 5000) + '/api/health').then(r => r.ok ? process.exit(0) : process.exit(1)).catch(() => process.exit(1))"
 
 # Launch HELIX Discord Bot & Web Dashboard subsystem
-CMD ["node", "HELIX/src/dist/index.js"]
+CMD ["node", "HELIX/dist/index.js"]

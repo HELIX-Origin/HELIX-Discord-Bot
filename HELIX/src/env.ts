@@ -58,35 +58,59 @@ loadBotEnv();
 
 /** Discord Bot Token — required for gateway connection. */
 export function getBotToken(): string {
-  return (
+  let token = (
     process.env.DISCORD_TOKEN ||
     process.env.DISCORD_BOT_TOKEN ||
     process.env.BOT_TOKEN ||
     process.env.TOKEN ||
     ''
-  );
+  ).trim();
+  if (
+    (token.startsWith('"') && token.endsWith('"')) ||
+    (token.startsWith("'") && token.endsWith("'"))
+  ) {
+    token = token.slice(1, -1).trim();
+  }
+  if (token.startsWith('Bot ')) {
+    token = token.slice(4).trim();
+  }
+  return token;
 }
 
 /** Discord Application Client ID — required for OAuth2 and slash commands. */
 export function getClientId(): string {
-  return (
+  let id = (
     process.env.DISCORD_CLIENT_ID ||
     process.env.CLIENT_ID ||
     process.env.DISCORD_APP_ID ||
     process.env.APPLICATION_ID ||
     process.env.APP_ID ||
     ''
-  );
+  ).trim();
+  if (
+    (id.startsWith('"') && id.endsWith('"')) ||
+    (id.startsWith("'") && id.endsWith("'"))
+  ) {
+    id = id.slice(1, -1).trim();
+  }
+  return id;
 }
 
 /** Discord Application Client Secret — required for the dashboard OAuth2 flow. */
 export function getClientSecret(): string {
-  return (
+  let secret = (
     process.env.DISCORD_CLIENT_SECRET ||
     process.env.CLIENT_SECRET ||
     process.env.DISCORD_SECRET ||
     ''
-  );
+  ).trim();
+  if (
+    (secret.startsWith('"') && secret.endsWith('"')) ||
+    (secret.startsWith("'") && secret.endsWith("'"))
+  ) {
+    secret = secret.slice(1, -1).trim();
+  }
+  return secret;
 }
 
 /**

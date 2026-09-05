@@ -20,6 +20,7 @@ function scanCommandFiles(dir: string): string[] {
   const entries = fs.readdirSync(dir, { withFileTypes: true });
   const files: string[] = [];
   for (const entry of entries) {
+    if (entry.name === 'dist' || entry.name === 'node_modules' || entry.name === '.git' || entry.name.startsWith('.')) continue;
     const fullPath = path.join(dir, entry.name);
     if (entry.isDirectory()) {
       files.push(...scanCommandFiles(fullPath));
@@ -27,7 +28,8 @@ function scanCommandFiles(dir: string): string[] {
       (entry.name.endsWith('.ts') || entry.name.endsWith('.js') || entry.name.endsWith('.mjs')) &&
       !entry.name.endsWith('.d.ts') &&
       !entry.name.endsWith('.test.ts') &&
-      !entry.name.endsWith('.test.js')
+      !entry.name.endsWith('.test.js') &&
+      !entry.name.endsWith('.map')
     ) {
       files.push(fullPath);
     }
@@ -43,9 +45,12 @@ export async function loadPrefixCommands(): Promise<void> {
   for (const filePath of filePaths) {
     try {
       const mod = await import(pathToFileURL(filePath).href);
+      const seenInFile = new Set<string>();
       for (const exp of Object.values(mod as any)) {
         const cmd = exp as CommandDefinition;
         if (!cmd?.name || typeof cmd?.execute !== 'function') continue;
+        if (seenInFile.has(cmd.name)) continue;
+        seenInFile.add(cmd.name);
 
         commands.set(cmd.name, cmd);
         if (cmd.aliases) {

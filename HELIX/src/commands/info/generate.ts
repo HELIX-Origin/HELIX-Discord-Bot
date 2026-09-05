@@ -78,5 +78,3 @@ export const generate: CommandDefinition = {
     }
   },
 };
-
-export default generate;

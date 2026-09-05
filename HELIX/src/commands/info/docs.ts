@@ -81,5 +81,3 @@ export const docs: CommandDefinition = {
     }
   },
 };
-
-export default docs;

@@ -84,5 +84,3 @@ export const inspect: CommandDefinition = {
     }
   },
 };
-
-export default inspect;

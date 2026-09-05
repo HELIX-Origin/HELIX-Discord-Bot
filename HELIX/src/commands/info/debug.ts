@@ -98,5 +98,3 @@ export const debug: CommandDefinition = {
     }
   },
 };
-
-export default debug;

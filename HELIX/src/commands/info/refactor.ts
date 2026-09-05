@@ -83,5 +83,3 @@ export const refactor: CommandDefinition = {
     }
   },
 };
-
-export default refactor;

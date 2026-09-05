@@ -50,9 +50,19 @@ export async function launchBotAndDashboard(options: LaunchBotOptions = {}): Pro
       await loadSlashCommands();
       await loadEvents(client);
 
+      logs.info('Connecting Discord Bot client to gateway...');
+
+      client.on('error', (err) => {
+        logs.error(`Discord client error: ${err.message}`);
+      });
+
+      client.on('shardError', (err) => {
+        logs.error(`Discord WebSocket connection error: ${err.message}`);
+      });
+
       try {
         await client.login(token);
-        logs.success('Discord Bot client connected to gateway.');
+        logs.success(`Discord Bot connected to gateway as ${client.user?.tag || 'HELIX Bot'}.`);
       } catch (err: any) {
         const isDisallowedIntents =
           err?.code === 'DisallowedIntents' ||
@@ -69,8 +79,11 @@ export async function launchBotAndDashboard(options: LaunchBotOptions = {}): Pro
           client = createBot(false);
           await loadEvents(client);
           await client.login(token);
-          logs.success('Discord Bot connected to gateway with fallback intents (Slash commands active).');
+          logs.success(`Discord Bot connected to gateway with fallback intents as ${client.user?.tag || 'HELIX Bot'} (Slash commands active).`);
           logs.info('To enable prefix commands (e.g. >help, >ticket), enable "Message Content Intent" in Discord Developer Portal -> Bot -> Privileged Gateway Intents.');
+        } else if (err?.code === 'TokenInvalid' || (err?.message && err.message.toLowerCase().includes('invalid token'))) {
+          logs.error('Invalid Discord Bot Token provided.');
+          logs.warn('Verify you copied the Bot Token from Discord Developer Portal -> Bot -> Reset Token (do not use Client Secret or Client ID).');
         } else {
           throw err;
         }

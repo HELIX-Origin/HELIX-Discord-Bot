@@ -85,5 +85,3 @@ export const lint: CommandDefinition = {
   },
 };
 
-export default lint;
-
