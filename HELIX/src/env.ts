@@ -20,10 +20,32 @@ import os from 'os';
 import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 
-// Resolve project root from bot/src/ (two levels up)
+// Resolve project root from source (HELIX/src/) or compiled artifact (HELIX/dist/src/)
 const __filename = fileURLToPath(import.meta.url);
 const __dirname  = path.dirname(__filename);
-export const BOT_ROOT_DIR = path.resolve(__dirname, '..', '..');
+
+export function resolveBotRootDir(): string {
+  // Check upwards from __dirname and process.cwd() for root package.json or .env
+  const probes = [
+    process.cwd(),
+    path.resolve(process.cwd(), '..'),
+    __dirname,
+    path.resolve(__dirname, '..'),
+    path.resolve(__dirname, '..', '..'),
+    path.resolve(__dirname, '..', '..', '..'),
+  ];
+  for (const dir of probes) {
+    if (fs.existsSync(path.join(dir, 'HELIX')) && fs.existsSync(path.join(dir, 'package.json'))) {
+      return dir;
+    }
+    if (fs.existsSync(path.join(dir, '.env')) && !dir.endsWith('dist') && !dir.endsWith('src')) {
+      return dir;
+    }
+  }
+  return path.resolve(__dirname, '..', '..');
+}
+
+export const BOT_ROOT_DIR = resolveBotRootDir();
 
 // ─── Bootstrap ───────────────────────────────────────────────────────────────
 
@@ -40,12 +62,20 @@ export function loadBotEnv(): void {
 
   const candidates: string[] = [
     path.resolve(BOT_ROOT_DIR, '.env'),
+    path.resolve(process.cwd(), '.env'),
+    path.resolve(process.cwd(), '..', '.env'),
+    path.resolve(__dirname, '.env'),
+    path.resolve(__dirname, '..', '.env'),
+    path.resolve(__dirname, '..', '..', '.env'),
+    path.resolve(__dirname, '..', '..', '..', '.env'),
     path.resolve(os.homedir(), '.helix', '.env'),
     path.resolve(os.homedir(), '.env'),
   ];
 
   for (const p of candidates) {
-    if (fs.existsSync(p)) dotenv.config({ path: p });
+    if (fs.existsSync(p)) {
+      dotenv.config({ path: p });
+    }
   }
   // Standard dotenv CWD lookup as final fallback
   dotenv.config();

@@ -90,7 +90,7 @@ export async function launchBotAndDashboard(options: LaunchBotOptions = {}): Pro
           logs.error('Invalid Discord Bot Token provided (Discord API returned 401: Unauthorized).');
           logs.warn('👉 The current DISCORD_TOKEN is expired, invalid, or was reset in the Developer Portal.');
           logs.warn(`👉 Go to: https://discord.com/developers/applications/${clientId || ''}/bot`);
-          logs.warn('👉 Click "Reset Token", copy the new token, and paste it into DISCORD_TOKEN in .env (and your cloud hosting platform).');
+          logs.warn('👉 Click "Reset Token", copy the new token, and paste it into DISCORD_TOKEN in your .env file.');
         } else {
           logs.error(`Discord gateway connection failed: ${err.message}`);
           throw err;
@@ -102,9 +102,9 @@ export async function launchBotAndDashboard(options: LaunchBotOptions = {}): Pro
       logs.error(`Gateway error: ${err.message}`);
     }
   } else {
-    logs.warn('No DISCORD_TOKEN found in process environment.');
-    logs.warn('👉 On Render: Go to Render Dashboard -> helix-discord-bot -> Environment -> Add DISCORD_TOKEN.');
-    logs.info('Web dashboard is running. Configure your bot token in Render to connect.');
+    logs.warn('No DISCORD_TOKEN found in process environment or .env file.');
+    logs.warn('👉 Please configure DISCORD_TOKEN in your .env file (or set DISCORD_TOKEN in your environment).');
+    logs.info('Web dashboard is running. Configure your bot token in .env to connect.');
   }
 
   const shutdown = async () => {
