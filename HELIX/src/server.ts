@@ -214,7 +214,7 @@ export class BotCallbackServer {
         resolve(); // Continue even if port is already occupied
       });
 
-      this.server.listen(this.port, () => {
+      this.server.listen(this.port, '0.0.0.0', () => {
         const callbackEndpoint = `${this.baseUrl.replace(/\/$/, '')}/api/auth/callback/discord`;
         const dashboardEndpoint = `${this.baseUrl.replace(/\/$/, '')}/dashboard`;
         logger.info(`OAuth2 Callback Server listening at: ${pc.cyan(callbackEndpoint)}`);

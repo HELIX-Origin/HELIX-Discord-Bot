@@ -42,9 +42,13 @@ export async function launchBotAndDashboard(options: LaunchBotOptions = {}): Pro
   const server = new BotCallbackServer({ callbackUrl });
   await server.start();
 
+  const clientId = getClientId();
   let client = createBot(true);
 
   if (token) {
+    const masked = token.length > 10 ? `${token.slice(0, 6)}...${token.slice(-4)}` : '***';
+    logs.info(`Discord credentials loaded: Token=${masked} (${token.length} chars), ClientID=${clientId || 'Not Set'}`);
+
     try {
       await loadPrefixCommands();
       await loadSlashCommands();
@@ -85,6 +89,7 @@ export async function launchBotAndDashboard(options: LaunchBotOptions = {}): Pro
           logs.error('Invalid Discord Bot Token provided.');
           logs.warn('Verify you copied the Bot Token from Discord Developer Portal -> Bot -> Reset Token (do not use Client Secret or Client ID).');
         } else {
+          logs.error(`Discord gateway connection failed: ${err.message}`);
           throw err;
         }
       }
@@ -94,8 +99,9 @@ export async function launchBotAndDashboard(options: LaunchBotOptions = {}): Pro
       logs.error(`Gateway error: ${err.message}`);
     }
   } else {
-    logs.warn('No DISCORD_TOKEN found.');
-    logs.info('Web dashboard is running. Configure your bot token to start.');
+    logs.warn('No DISCORD_TOKEN found in process environment.');
+    logs.warn('👉 On Render: Go to Render Dashboard -> helix-discord-bot -> Environment -> Add DISCORD_TOKEN.');
+    logs.info('Web dashboard is running. Configure your bot token in Render to connect.');
   }
 
   const shutdown = async () => {
