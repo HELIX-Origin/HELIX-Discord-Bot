@@ -1,10 +1,14 @@
 ' HELIX Silent Background Runner (Windows)
-' Usage: wscript.exe silent.vbs run-start.bat
-'    or: wscript.exe silent.vbs run-dev.bat
+' Executes batch or command scripts silently without opening a console window.
+'
+' Usage:
+'   wscript.exe silent.vbs run-start.bat
+'   wscript.exe silent.vbs run-dev.bat
 
 Set WshShell = CreateObject("WScript.Shell")
 
 If WScript.Arguments.Count = 0 Then
+    WScript.Echo "Usage: wscript.exe silent.vbs <script.bat|script.cmd>"
     WScript.Quit 1
 End If
 

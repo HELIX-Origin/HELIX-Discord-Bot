@@ -126,13 +126,20 @@ HELIX_SELF_PING_INTERVAL_MS=600000
 
 ## 4. Running the Bot
 
-### Development Mode (with hot-reload)
-```bash
-npm run dev
-```
+HELIX includes native cross-platform starter scripts located in the `HELIX/` bot directory. Each script supports running with an interactive console window or silently in the background:
 
-### Production Mode
+| Platform | Interactive Console | Silent Background Runner |
+| :--- | :--- | :--- |
+| **🪟 Windows** | Double-click `run-start.bat` or `run-dev.bat` | `wscript.exe silent.vbs run-start.bat` |
+| **🐧 Linux** | `./run-start.sh` or `./run-dev.sh` | `./run-start.sh --silent` |
+| **🍏 macOS** | Double-click `run-start.command` or `run.command` | `./run-start.command --silent` |
+
+### Command-Line Execution
 ```bash
+# Development Mode (with hot-reload)
+npm run dev
+
+# Production Mode
 npm start
 ```
 
@@ -170,7 +177,23 @@ sudo apt-get install -y nodejs git build-essential
 node -v && npm -v
 ```
 
-#### Step 2: Configure systemd Background Service (Recommended)
+#### Step 2: Launching the Bot
+
+**Option A: Interactive Terminal Window**
+```bash
+cd HELIX
+chmod +x run-start.sh run-dev.sh
+./run-start.sh
+```
+
+**Option B: Silent Background Execution**
+```bash
+cd HELIX
+./run-start.sh --silent
+# Live logs stream to helix.log
+```
+
+**Option C: systemd 24/7 Background Service (Production Recommended)**
 Create `/etc/systemd/system/helix-bot.service`:
 ```ini
 [Unit]
@@ -180,7 +203,7 @@ After=network.target
 [Service]
 Type=simple
 User=ubuntu
-WorkingDirectory=/opt/helix-bot
+WorkingDirectory=/opt/helix-bot/HELIX
 ExecStart=/usr/bin/npm start
 Restart=always
 RestartSec=10
@@ -212,7 +235,7 @@ sudo ufw allow 5000/tcp # (If accessing directly without reverse proxy)
 
 ### 🪟 Windows (Windows 10, 11, Windows Server 2022)
 
-You can run HELIX natively on Windows using PowerShell or Windows Terminal.
+You can run HELIX natively on Windows using PowerShell, Command Prompt, or double-clickable scripts.
 
 #### Step 1: Install Node.js 22 LTS
 1. Download the Windows Installer (.msi) from [nodejs.org](https://nodejs.org/) or install via NVM for Windows (`nvm install 22 && nvm use 22`).
@@ -228,8 +251,10 @@ To allow inbound dashboard connections over your local network or public IP:
 New-NetFirewallRule -DisplayName "HELIX Bot Dashboard" -Direction Inbound -LocalPort 5000 -Protocol TCP -Action Allow
 ```
 
-#### Step 3: Start the Bot
-Open PowerShell or Command Prompt in your project folder:
+#### Step 3: Launching with Console Window
+Double-click `run-start.bat` (production) or `run-dev.bat` (development with TypeScript hot-reloading) inside the `HELIX` folder. A dedicated console window will open displaying live logs, runtime metrics, and error diagnostics.
+
+Alternatively, run from PowerShell:
 ```powershell
 # Development mode with hot-reload
 npm run dev
@@ -239,14 +264,15 @@ npm start
 ```
 
 #### Step 4: Silent Background Execution (No Console Window)
-To run HELIX in the background without keeping a console window open, use the built-in `silent.vbs` launcher:
+To run HELIX in the background without keeping any console window open, use the included `silent.vbs` VBScript runner:
 ```cmd
 # Start production bot silently in the background
 wscript.exe silent.vbs run-start.bat
 
-# Start development mode silently
+# Start development mode silently in the background
 wscript.exe silent.vbs run-dev.bat
 ```
+
 To stop a background Node.js bot process on Windows:
 ```powershell
 Stop-Process -Name "node" -Force
@@ -267,7 +293,24 @@ brew link --overwrite --force node@22
 node -v
 ```
 
-#### Step 2: Run as macOS LaunchDaemon (`launchd`)
+#### Step 2: Launching the Bot
+
+**Option A: Interactive macOS Terminal Window**
+Double-click `run-start.command` (production) or `run-dev.command` (development) in Finder, or run from Terminal:
+```bash
+cd HELIX
+chmod +x run-start.command run-dev.command run.command
+./run-start.command
+```
+
+**Option B: Silent Background Execution**
+```bash
+cd HELIX
+./run-start.command --silent
+# Live logs stream to helix.log
+```
+
+**Option C: 24/7 Background Service via `launchd`**
 Determine your system npm path with `which npm` (typically `/opt/homebrew/bin/npm` on Apple Silicon or `/usr/local/bin/npm` on Intel).
 
 Create `~/Library/LaunchAgents/com.helix.bot.plist`:
@@ -286,7 +329,7 @@ Create `~/Library/LaunchAgents/com.helix.bot.plist`:
     </array>
     <key>WorkingDirectory</key>
     <!-- Replace with output of 'pwd' -->
-    <string>/Users/yourusername/HELIX-Discord-Bot</string>
+    <string>/Users/yourusername/HELIX-Discord-Bot/HELIX</string>
     <key>RunAtLoad</key>
     <true/>
     <key>KeepAlive</key>
