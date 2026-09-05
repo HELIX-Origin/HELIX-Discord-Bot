@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import { generateProjectReadme } from './generators/readme-generator.js';
 
 export interface FileToGenerate {
   relativePath: string;
@@ -32,18 +33,11 @@ export class FileGenerator {
     return writtenFiles;
   }
 
-  public static getBaselineFiles(projectName: string, templateId: string): FileToGenerate[] {
+  public static getBaselineFiles(projectName: string, templateId: string, variables: Record<string, string> = {}): FileToGenerate[] {
     return [
       {
         relativePath: 'README.md',
-        content: `# ${projectName}
-
-Created with **[HELIX](https://github.com/cli)** using template \`${templateId}\`.
-
-## Getting Started
-
-Follow the setup instructions defined in the project architecture guidelines.
-`,
+        content: generateProjectReadme(templateId, projectName, variables),
       },
       {
         relativePath: '.gitignore',
@@ -55,6 +49,10 @@ bin/
 *.log
 .DS_Store
 Thumbs.db
+target/
+.venv/
+__pycache__/
+*.pyc
 `,
       },
     ];

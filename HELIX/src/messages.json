@@ -392,11 +392,22 @@
       "embed": {
         "title": "🚀 Project Scaffolding: {name}",
         "color": "#651fff",
-        "description": "Project scaffolding completed successfully.",
+        "description": "Your starter project has been generated and packaged into a ZIP archive. Download the attached file below.",
         "fields": [
           { "name": "Template ID", "value": "`{template}`", "inline": true },
-          { "name": "Destination", "value": "`./{name}`", "inline": true },
-          { "name": "Files Generated", "value": "{fileCount}", "inline": true }
+          { "name": "Files Generated", "value": "`{fileCount}`", "inline": true },
+          { "name": "Archive Package", "value": "`{archiveName}`", "inline": true },
+          { "name": "Database Record", "value": "`{scaffoldId}`", "inline": true }
+        ]
+      },
+      "preview_embed": {
+        "title": "🔍 Scaffolding Preview: {name}",
+        "color": "#651fff",
+        "description": "Dry-run scaffolding preview (no files created or stored):",
+        "fields": [
+          { "name": "Template ID", "value": "`{template}`", "inline": true },
+          { "name": "Files Planned", "value": "`{fileCount}`", "inline": true },
+          { "name": "Planned Files Manifest", "value": "{manifest}", "inline": false }
         ]
       },
       "failed": "❌ Failed to scaffold project: {reason}"

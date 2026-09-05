@@ -48,6 +48,39 @@ describe('integration — dashboard full stack', () => {
     expect(html).toContain('<!DOCTYPE html>');
     expect(html).toContain('HELIX Discord Bot Dashboard');
   });
+
+  it('handles scaffolding via dashboard API and provides ZIP download', async () => {
+    // 1. Post scaffold request
+    const postReq = createRequest({
+      url: '/api/dashboard/scaffold',
+      method: 'POST',
+      body: JSON.stringify({
+        projectName: 'dash-app',
+        templateId: 'web-react',
+        dryRun: false,
+      }),
+    });
+    const { res: postRes, result: postResult } = createResponse();
+    const handledPost = await routeDashboardRequest(postReq, postRes);
+    expect(handledPost).toBe(true);
+
+    const postData = JSON.parse(postResult.body);
+    expect(postData.success).toBe(true);
+    expect(postData.scaffoldId).toBeGreaterThan(0);
+    expect(postData.downloadUrl).toContain(`/api/dashboard/scaffold/download?id=${postData.scaffoldId}`);
+
+    // 2. Download ZIP archive
+    const getReq = createRequest({
+      url: postData.downloadUrl,
+      method: 'GET',
+    });
+    const { res: getRes, result: getResult } = createResponse();
+    const handledGet = await routeDashboardRequest(getReq, getRes);
+    expect(handledGet).toBe(true);
+    expect(getResult.statusCode).toBe(200);
+    expect(getResult.headers['Content-Type']).toBe('application/zip');
+    expect(getResult.headers['Content-Disposition']).toContain('attachment; filename="dash-app.zip"');
+  });
 });
 
 afterAll(() => {

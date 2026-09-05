@@ -4,7 +4,7 @@ import path from 'node:path';
 import { URL } from 'node:url';
 import { handleNextAuth } from './auth/handlers.js';
 import { handleDashboardStats } from './api/stats.js';
-import { handleDashboardScaffold } from './api/scaffold.js';
+import { handleDashboardScaffold, handleDashboardScaffoldDownload } from './api/scaffold.js';
 import { handleDashboardGuilds } from './api/guilds.js';
 import { renderDashboardHtml } from './ui/html.js';
 import { getClientId, getCallbackUrl, BOT_ROOT_DIR } from '../src/env.js';
@@ -76,6 +76,11 @@ export async function routeDashboardRequest(
 
   if (pathname === '/api/dashboard/scaffold' && req.method === 'POST') {
     await handleDashboardScaffold(req, res);
+    return true;
+  }
+
+  if (pathname === '/api/dashboard/scaffold/download' && req.method === 'GET') {
+    await handleDashboardScaffoldDownload(req, res);
     return true;
   }
 

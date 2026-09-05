@@ -2,6 +2,7 @@ import path from 'path';
 import { TemplateEngine } from './template-engine.js';
 import { FileGenerator, type FileToGenerate } from './file-generator.js';
 import { getDomainFiles } from './generators/generators.js';
+import { createZipArchive } from './archive-builder.js';
 
 export interface CreateOptions {
   template?: string;
@@ -10,6 +11,7 @@ export interface CreateOptions {
   skipInstall?: boolean;
   skipGit?: boolean;
   dryRun?: boolean;
+  writeToDisk?: boolean;
   gitPlatform?: 'github' | 'gitlab' | 'bitbucket' | 'none';
   repoVisibility?: 'public' | 'private';
 }
@@ -17,6 +19,8 @@ export interface CreateOptions {
 export interface ScaffoldResult {
   success: boolean;
   writtenFiles: string[];
+  files: FileToGenerate[];
+  archiveBuffer?: Buffer;
   targetDir: string;
   templateName: string;
   dryRun: boolean;
@@ -25,11 +29,9 @@ export interface ScaffoldResult {
 /**
  * In-process project scaffolding runner for the HELIX bot.
  *
- * Generates a complete starter project on disk (or a dry-run manifest) using the
- * in-repo template engine, domain generators, and optional CI/CD pipeline files.
- * Hosting-platform and package-manager orchestration (git init, remote repo
- * creation, dependency install) are deliberately out of scope for the embedded
- * bot runtime. The bot generates blueprints; the user runs install/setup locally.
+ * Generates a complete starter project in-memory (and optionally on disk or dry-run)
+ * using the in-repo template engine, domain generators, and optional CI/CD pipeline files.
+ * Builds a clean ZIP archive for database persistence and Discord/Dashboard distribution.
  */
 export async function executeScaffold(
   projectType: string,
@@ -47,6 +49,7 @@ export async function executeScaffold(
     return {
       success: false,
       writtenFiles: [],
+      files: [],
       targetDir,
       templateName,
       dryRun: Boolean(options.dryRun),
@@ -54,7 +57,7 @@ export async function executeScaffold(
   }
 
   const files: FileToGenerate[] = [
-    ...FileGenerator.getBaselineFiles(projectName, templateName),
+    ...FileGenerator.getBaselineFiles(projectName, templateName, resolved),
     {
       relativePath: '.env.example',
       content: `# Environment variables for ${projectName}\n` +
@@ -73,11 +76,15 @@ export async function executeScaffold(
   );
   files.push(...domainFiles);
 
-  const written = FileGenerator.writeFiles(targetDir, files, Boolean(options.dryRun));
+  const writeDisk = options.writeToDisk !== undefined ? options.writeToDisk : !options.dryRun;
+  const written = FileGenerator.writeFiles(targetDir, files, !writeDisk || Boolean(options.dryRun));
+  const archiveBuffer = createZipArchive(files, path.basename(projectName));
 
   return {
     success: true,
     writtenFiles: written,
+    files,
+    archiveBuffer,
     targetDir,
     templateName,
     dryRun: Boolean(options.dryRun),

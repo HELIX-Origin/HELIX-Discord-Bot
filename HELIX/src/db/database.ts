@@ -12,6 +12,33 @@ export interface ScaffoldLogEntry {
   projectName: string;
 }
 
+export interface ScaffoldFileRecord {
+  relativePath: string;
+  content: string;
+  isBinary?: boolean;
+}
+
+export interface SaveScaffoldOptions {
+  userId?: string;
+  guildId?: string;
+  templateId: string;
+  projectName: string;
+  files?: Array<{ relativePath: string; content: string | Buffer; isBinary?: boolean }>;
+  archiveBuffer?: Buffer;
+}
+
+export interface ScaffoldRecord {
+  id: number;
+  userId?: string;
+  guildId?: string;
+  templateId: string;
+  projectName: string;
+  fileCount: number;
+  files: ScaffoldFileRecord[];
+  archiveBuffer?: Buffer;
+  createdAt: string;
+}
+
 export interface UserSession {
   userId: string;
   username: string;
@@ -205,6 +232,18 @@ export class BotDatabase {
         timestamp TEXT
       );
 
+      CREATE TABLE IF NOT EXISTS scaffolds (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id TEXT,
+        guild_id TEXT,
+        template_id TEXT NOT NULL,
+        project_name TEXT NOT NULL,
+        file_count INTEGER NOT NULL,
+        files_json TEXT NOT NULL,
+        archive_blob BLOB,
+        created_at TEXT NOT NULL
+      );
+
       CREATE TABLE IF NOT EXISTS bot_kv (
         key TEXT PRIMARY KEY,
         value TEXT,
@@ -250,6 +289,92 @@ export class BotDatabase {
       `);
     } catch {
       // Ignored if table write fails
+    }
+  }
+
+  public saveScaffold(options: SaveScaffoldOptions): number {
+    if (!this.db) return 0;
+    try {
+      const filesFormatted: ScaffoldFileRecord[] = (options.files || []).map(f => ({
+        relativePath: f.relativePath,
+        content: Buffer.isBuffer(f.content) ? f.content.toString('base64') : f.content,
+        isBinary: Boolean(f.isBinary || Buffer.isBuffer(f.content)),
+      }));
+
+      const filesJson = JSON.stringify(filesFormatted);
+      const fileCount = filesFormatted.length;
+      const createdAt = new Date().toISOString();
+
+      const stmt = this.db.prepare(`
+        INSERT INTO scaffolds (user_id, guild_id, template_id, project_name, file_count, files_json, archive_blob, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      `);
+
+      stmt.run(
+        options.userId || null,
+        options.guildId || null,
+        options.templateId,
+        options.projectName,
+        fileCount,
+        filesJson,
+        options.archiveBuffer || null,
+        createdAt
+      );
+
+      // Also log into scaffold_history for backwards compatibility
+      this.logScaffold({
+        userId: options.userId || 'unknown',
+        templateId: options.templateId,
+        projectName: options.projectName,
+      });
+
+      const lastIdRow: any = this.db.prepare('SELECT last_insert_rowid() as id').get();
+      return Number(lastIdRow?.id || 0);
+    } catch (err: any) {
+      logs.warn(`Failed to save scaffold to database: ${err?.message || err}`);
+      return 0;
+    }
+  }
+
+  public getScaffold(id: number): ScaffoldRecord | null {
+    if (!this.db) return null;
+    try {
+      const stmt = this.db.prepare('SELECT * FROM scaffolds WHERE id = ?');
+      const row: any = stmt.get(id);
+      if (!row) return null;
+
+      let files: ScaffoldFileRecord[] = [];
+      try {
+        files = JSON.parse(row.files_json || '[]');
+      } catch {
+        files = [];
+      }
+
+      return {
+        id: row.id,
+        userId: row.user_id,
+        guildId: row.guild_id,
+        templateId: row.template_id,
+        projectName: row.project_name,
+        fileCount: row.file_count,
+        files,
+        archiveBuffer: row.archive_blob ? Buffer.from(row.archive_blob) : undefined,
+        createdAt: row.created_at,
+      };
+    } catch {
+      return null;
+    }
+  }
+
+  public getScaffoldArchive(id: number): Buffer | null {
+    if (!this.db) return null;
+    try {
+      const stmt = this.db.prepare('SELECT archive_blob FROM scaffolds WHERE id = ?');
+      const row: any = stmt.get(id);
+      if (!row || !row.archive_blob) return null;
+      return Buffer.from(row.archive_blob);
+    } catch {
+      return null;
     }
   }
 
@@ -734,9 +859,34 @@ export class BotDatabase {
     templateId: string;
     projectName: string;
     timestamp: string;
+    fileCount?: number;
+    hasArchive?: boolean;
   }> {
     if (!this.db) return [];
     try {
+      try {
+        const stmt = this.db.prepare(`
+          SELECT id, user_id, template_id, project_name, file_count, (archive_blob IS NOT NULL) as has_archive, created_at as timestamp
+          FROM scaffolds
+          ORDER BY id DESC
+          LIMIT ?
+        `);
+        const rows: any[] = stmt.all(limit);
+        if (rows && rows.length > 0) {
+          return rows.map(r => ({
+            id: r.id,
+            userId: r.user_id || 'unknown',
+            templateId: r.template_id,
+            projectName: r.project_name,
+            timestamp: r.timestamp,
+            fileCount: r.file_count || 0,
+            hasArchive: Boolean(r.has_archive),
+          }));
+        }
+      } catch {
+        // Fallback to scaffold_history table
+      }
+
       const stmt = this.db.prepare('SELECT * FROM scaffold_history ORDER BY id DESC LIMIT ?');
       const rows: any[] = stmt.all(limit);
       return rows.map(r => ({
@@ -745,6 +895,8 @@ export class BotDatabase {
         templateId: r.template_id,
         projectName: r.project_name,
         timestamp: r.timestamp,
+        fileCount: 0,
+        hasArchive: false,
       }));
     } catch {
       return [];
