@@ -113,3 +113,4 @@ flowchart LR
 - [x] Pluggable `SourceProvider` registration for custom code repositories
 - [x] Comprehensive community plugin authoring guide (`docs/plugin-authoring.md`)
 - [x] Public plugin installation via `>plugin install <owner/repo>`
+- [ ] **DB-backed per-guild plugin repositories** — replace filesystem `git clone` installs with SQLite-stored, guild-scoped repos (tracking [BUG-007](https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues/13))

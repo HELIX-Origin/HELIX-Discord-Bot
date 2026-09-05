@@ -129,6 +129,12 @@ flowchart LR
 - [BUG-004](.agents/bugs/BUG-004-auto-resolve-url-env.md) — Auto-resolve NEXTAUTH_URL and callback URLs — **Resolved** (4 Sub-Tasks)
 - [BUG-005](.agents/bugs/BUG-005-typescript-strict-mode-errors.md) — TypeScript strict mode errors — **Resolved** (4 Sub-Tasks)
 - [BUG-006](.agents/bugs/BUG-006-messages-json-formatting-refactor.md) — Centralized Message Formatting Engine & messages.json refactor — **Resolved** (4 Sub-Tasks)
+- [BUG-007](.agents/bugs/BUG-007-plugin-repositories-database-backed.md) — DB-backed per-guild plugin repositories — **Open** (4 Sub-Tasks)
+- [BUG-008](.agents/bugs/BUG-008-test-suite-rebuild.md) — Vitest test suite modular rebuild — **Resolved** (4 Sub-Tasks)
+- [BUG-009](.agents/bugs/BUG-009-sdk-circular-import.md) — SDK circular import fix — **Resolved** (4 Sub-Tasks)
+- [BUG-010](.agents/bugs/BUG-010-user-active-ticket-ordering.md) — getUserActiveTicket deterministic ordering — **Resolved** (3 Sub-Tasks)
+- [BUG-011](.agents/bugs/BUG-011-nextauth-botport-dead-arg.md) — Dead botPort argument removal — **Resolved**
+- [BUG-012](.agents/bugs/BUG-012-duplicate-app-json.md) — Root and .github/app.json deduplication — **Resolved**
 
 ---
 

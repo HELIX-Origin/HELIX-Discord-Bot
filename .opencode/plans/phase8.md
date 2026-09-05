@@ -194,6 +194,21 @@ Plugins are GitHub repositories containing a root `config.json` manifest. The bo
 
 ---
 
+## Amendment: DB-Backed Plugin Repositories (BUG-007)
+
+**Status**: Open — [BUG-007](https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues/13)
+
+The original plugin engine cloned installed repositories into `plugins/community/<repo-name>/` and imported entry `.ts` files from disk into a global registry. This is a design mis-sight — the intended model stores plugin repositories in the database:
+
+- Imported / community / custom repos live entirely in SQLite: root `config.json`, each `plugin.json` manifest, and entry source text, all stored with a nullable `guild_id` so repos are scoped per guild (a repo without a guild is global).
+- Per-guild repos let guild owners import, list, and remove their own custom plugin repos scoped only to their guild, with no plugin content downloaded into the bot filesystem.
+- Entries execute via sandboxed evaluation of the stored source (no disk materialization).
+- Built-in `helix-origin` plugins remain first-party source code loaded from the repo tree.
+- `>plugin` is reworked: `list`, `install`, `remove`, `info`, `enable`, `disable`, plus per-guild `repo add` / `repo list` / `repo remove`.
+- The `community/` filesystem install path and `git clone` flow are removed.
+
+---
+
 ## Built-in Language Plugins (Phase 8 Scope)
 
 | Language | Lint Strategy | Documentation Source | Priority |

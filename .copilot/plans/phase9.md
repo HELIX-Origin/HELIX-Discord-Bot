@@ -119,3 +119,16 @@ export interface LanguagePlugin {
 ### 3. Verification & Engine Integration
 - [x] Automated schema validation for `config.json` and `plugin.json` in registry and loader.
 - [x] Vitest test suites demonstrating multi-source code ingestion, custom source providers, and plugin execution.
+
+---
+
+## Amendment: DB-Backed Plugin Repositories (BUG-007)
+
+**Status**: Open — [BUG-007](https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues/13)
+
+Community plugin installation is moving off the filesystem and into the database:
+
+- `>plugin install <owner/repo>` is replaced by the per-guild `>plugin repo add <owner/repo>` / `>plugin repo list` / `>plugin repo remove` flow.
+- Imported repos are stored in SQLite (root `config.json`, per-plugin `plugin.json`, and entry source text) with a nullable `guild_id` for per-guild scoping.
+- Entries execute via sandboxed evaluation of stored source; nothing is cloned into the bot filesystem.
+- `docs/plugin-authoring.md` and `docs/plugin-system.md` will document the DB-backed install path once implemented.

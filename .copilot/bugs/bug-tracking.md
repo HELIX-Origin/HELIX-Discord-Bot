@@ -38,6 +38,12 @@ flowchart TD
 | **BUG-004** | Auto-resolve NEXTAUTH_URL and callback URLs from platform detection | Medium | Resolved | 4 Sub-Tasks | [#9](https://github.com/HELIX-Origin/HELIX/issues/9) | [BUG-004](BUG-004-auto-resolve-url-env.md) |
 | **BUG-005** | TypeScript strict mode errors after discord.js vanilla migration | High | Resolved | 4 Sub-Tasks | [#10](https://github.com/HELIX-Origin/HELIX/issues/10) | [BUG-005](BUG-005-typescript-strict-mode-errors.md) |
 | **BUG-006** | Centralized Message Formatting Engine & messages.json refactor | High | Resolved | 4 Sub-Tasks | [#11](https://github.com/HELIX-Origin/HELIX/issues/11) | [BUG-006](BUG-006-messages-json-formatting-refactor.md) |
+| **BUG-007** | Plugin repositories cloned to filesystem instead of stored in database (per-guild repos) | High | Open | 4 Sub-Tasks | [#13](https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues/13) | [BUG-007](BUG-007-plugin-repositories-database-backed.md) |
+| **BUG-008** | Test suite rebuild incomplete — legacy Vitest suite still active, new modular suite broken | High | Resolved | 4 Sub-Tasks | [#18](https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues/18) | [BUG-008](BUG-008-test-suite-rebuild.md) |
+| **BUG-009** | SDK circular import crash — `registerBuiltInSourceProviders is not a function` via provider entry | High | Resolved | 4 Sub-Tasks | [#23](https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues/23) | [BUG-009](BUG-009-sdk-circular-import.md) |
+| **BUG-010** | `getUserActiveTicket` returns a nondeterministic ticket when multiple open tickets exist | Medium | Resolved | 3 Sub-Tasks | [#28](https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues/28) | [BUG-010](BUG-010-user-active-ticket-ordering.md) |
+| **BUG-011** | `getNextAuthConfig({ botPort })` argument is effectively dead | Low | Resolved | — | [#32](https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues/32) | [BUG-011](BUG-011-nextauth-botport-dead-arg.md) |
+| **BUG-012** | Duplicate `app.json` — root and `.github/app.json` drift risk | Low | Resolved | — | [#33](https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues/33) | [BUG-012](BUG-012-duplicate-app-json.md) |
 
 ---
 
