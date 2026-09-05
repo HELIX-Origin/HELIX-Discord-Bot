@@ -33,3 +33,6 @@ run-start.ps1
 run-dev.ps1
 run.command
 *.command
+silent.vbs
+*.vbs
+
