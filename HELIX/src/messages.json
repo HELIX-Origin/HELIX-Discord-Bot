@@ -33,6 +33,7 @@
       "embed": {
         "title": "🔨 Member Banned",
         "color": "#ff4444",
+        "description": "Member has been permanently banned from the server.",
         "fields": [
           { "name": "Target", "value": "{target}", "inline": true },
           { "name": "Moderator", "value": "<@{moderatorId}>", "inline": true },
@@ -46,6 +47,7 @@
       "embed": {
         "title": "👢 Member Kicked",
         "color": "#ff7744",
+        "description": "Member has been kicked from the server.",
         "fields": [
           { "name": "Target", "value": "{target}", "inline": true },
           { "name": "Moderator", "value": "<@{moderatorId}>", "inline": true },
@@ -59,6 +61,7 @@
       "embed": {
         "title": "🔓 Member Unbanned",
         "color": "#00e676",
+        "description": "User ban has been revoked successfully.",
         "fields": [
           { "name": "User ID", "value": "`{userId}`", "inline": true },
           { "name": "Moderator", "value": "<@{moderatorId}>", "inline": true },
@@ -71,6 +74,7 @@
       "embed": {
         "title": "⏱️ Member Timed Out",
         "color": "#ffaa00",
+        "description": "Member has been placed in timeout.",
         "fields": [
           { "name": "Target", "value": "{target}", "inline": true },
           { "name": "Duration", "value": "{minutes} minute(s)", "inline": true },
@@ -83,6 +87,7 @@
       "embed": {
         "title": "⏱️ Timeout Removed",
         "color": "#00e676",
+        "description": "Member timeout has been removed.",
         "fields": [
           { "name": "Target", "value": "{target}", "inline": true },
           { "name": "Reason", "value": "{reason}", "inline": false }
@@ -93,7 +98,10 @@
       "embed": {
         "title": "🧹 Messages Purged",
         "color": "#00d2ff",
-        "description": "Successfully purged **{count}** message(s) from this channel."
+        "description": "Successfully purged **{count}** message(s) from this channel.",
+        "fields": [
+          { "name": "Purged Count", "value": "**{count}** message(s)", "inline": true }
+        ]
       },
       "failed": "❌ Failed to purge messages: {reason}"
     },
@@ -101,6 +109,7 @@
       "warn_embed": {
         "title": "⚠️ Member Warned",
         "color": "#ffaa00",
+        "description": "A formal warning has been issued to the member.",
         "fields": [
           { "name": "Target", "value": "{target}", "inline": true },
           { "name": "Moderator", "value": "<@{moderatorId}>", "inline": true },
@@ -110,12 +119,19 @@
       "list_embed": {
         "title": "📋 Warnings for {target}",
         "color": "#ffaa00",
-        "description": "{warningsList}"
+        "description": "Active moderation warning history for this member:",
+        "fields": [
+          { "name": "Warning History", "value": "{warningsList}", "inline": false }
+        ]
       },
       "clear_embed": {
         "title": "🧹 Warnings Cleared",
         "color": "#00e676",
-        "description": "Cleared **{count}** warning(s) for {target}."
+        "description": "Moderation warning records have been cleared.",
+        "fields": [
+          { "name": "Target", "value": "{target}", "inline": true },
+          { "name": "Cleared Warnings", "value": "**{count}**", "inline": true }
+        ]
       },
       "no_warnings": "ℹ️ No warnings recorded for {target}."
     }
@@ -125,6 +141,7 @@
       "embed": {
         "title": "🏓 Pong!",
         "color": "#00d2ff",
+        "description": "Current bot latency and operational uptime metrics:",
         "fields": [
           { "name": "Gateway Ping", "value": "`{gateway}ms`", "inline": true },
           { "name": "Bot Uptime", "value": "`{uptime}`", "inline": true }
@@ -135,13 +152,17 @@
       "embed": {
         "title": "🖼️ Avatar for {target}",
         "color": "#00d2ff",
-        "description": "[Click here to view full image]({url})"
+        "description": "Displaying full resolution user avatar.",
+        "fields": [
+          { "name": "Avatar Link", "value": "[Click here to view full image]({url})", "inline": false }
+        ]
       }
     },
     "serverinfo": {
       "embed": {
         "title": "📊 Server Information — {name}",
         "color": "#00d2ff",
+        "description": "Detailed server overview and guild statistics:",
         "fields": [
           { "name": "Server ID", "value": "`{id}`", "inline": true },
           { "name": "Owner", "value": "<@{ownerId}>", "inline": true },
@@ -156,6 +177,7 @@
       "embed": {
         "title": "👤 User Information — {username}",
         "color": "#00d2ff",
+        "description": "Detailed user profile and guild membership data:",
         "fields": [
           { "name": "User ID", "value": "`{id}`", "inline": true },
           { "name": "Account Created", "value": "{createdAt}", "inline": true },
@@ -168,13 +190,17 @@
       "embed": {
         "title": "📊 Poll: {question}",
         "color": "#00d2ff",
-        "description": "{optionsText}\n\n*React below to cast your vote!*"
+        "description": "Community poll initiated. React with the corresponding numbers below to cast your vote.",
+        "fields": [
+          { "name": "Options", "value": "{optionsText}", "inline": false }
+        ]
       }
     },
     "snowflake": {
       "embed": {
         "title": "❄️ Snowflake Decoder — {id}",
         "color": "#00d2ff",
+        "description": "Decoded Discord Snowflake identifier metadata:",
         "fields": [
           { "name": "Timestamp", "value": "{timestamp}", "inline": true },
           { "name": "Worker ID", "value": "`{workerId}`", "inline": true },
@@ -186,7 +212,11 @@
       "embed": {
         "title": "⏰ Reminder Scheduled",
         "color": "#00d2ff",
-        "description": "I will remind you in **{duration}**:\n\n> {message}"
+        "description": "Your reminder has been registered and will trigger automatically.",
+        "fields": [
+          { "name": "Duration", "value": "`{duration}`", "inline": true },
+          { "name": "Reminder Note", "value": "{message}", "inline": false }
+        ]
       }
     }
   },
@@ -222,6 +252,7 @@
       "embed": {
         "title": "🧬 HELIX Bot Information",
         "color": "#00d2ff",
+        "description": "System runtime specifications and instance metrics:",
         "fields": [
           { "name": "Bot Version", "value": "`v{version}`", "inline": true },
           { "name": "Node.js", "value": "`{nodeVersion}`", "inline": true },
@@ -236,6 +267,7 @@
       "embed": {
         "title": "💚 HELIX System Health",
         "color": "#00e676",
+        "description": "Real-time health check and entity counts:",
         "fields": [
           { "name": "Gateway Ping", "value": "`{gateway}ms`", "inline": true },
           { "name": "SQLite DB", "value": "`{dbSize} KB` (in-process)", "inline": true },
@@ -250,34 +282,49 @@
       "embed": {
         "title": "📁 Project Scaffolding Templates",
         "color": "#651fff",
-        "description": "Use `{prefix}create <template> <name>` to scaffold a project.\n\n{templatesList}"
+        "description": "Browse all available project starter templates. Use `{prefix}create <template> <name>` to scaffold.",
+        "fields": [
+          { "name": "Available Templates", "value": "{templatesList}", "inline": false }
+        ]
       }
     },
     "lint": {
       "clean_embed": {
         "title": "✨ Code Diagnostics Clean — {language}",
         "color": "#00e676",
-        "description": "No errors, warnings, or anti-patterns detected in the provided code snippet."
+        "description": "Static code analysis completed successfully.",
+        "fields": [
+          { "name": "Status", "value": "No errors, warnings, or anti-patterns detected in the provided code snippet.", "inline": false }
+        ]
       },
       "issues_embed": {
         "title": "🔍 Code Diagnostics — {language}",
         "color": "#ffaa00",
-        "description": "Found **{errors}** error(s), **{warnings}** warning(s), **{info}** suggestion(s):\n\n{issuesList}"
+        "description": "Static analysis detected issues in the submitted code snippet:",
+        "fields": [
+          { "name": "Summary", "value": "Found **{errors}** error(s), **{warnings}** warning(s), **{info}** suggestion(s)", "inline": false },
+          { "name": "Findings", "value": "{issuesList}", "inline": false }
+        ]
       }
     },
     "explain": {
       "embed": {
         "title": "📖 Code Breakdown — {language}",
         "color": "#00d2ff",
-        "description": "{summary}\n\n{explanationsList}"
+        "description": "Architectural and line-by-line explanation for the provided code snippet:",
+        "fields": [
+          { "name": "Overview", "value": "{summary}", "inline": false },
+          { "name": "Key Concepts & Structure", "value": "{explanationsList}", "inline": false }
+        ]
       }
     },
     "docs": {
       "embed": {
         "title": "📚 Official Documentation — {topic}",
         "color": "#00d2ff",
-        "description": "{summary}",
+        "description": "Official API documentation reference and guide:",
         "fields": [
+          { "name": "Summary", "value": "{summary}", "inline": false },
           { "name": "Official Guide", "value": "[Click to Read Online]({url})", "inline": false }
         ]
       },
@@ -287,33 +334,56 @@
       "embed": {
         "title": "🛠️ Error Diagnostics — {errorType}",
         "color": "#ff334b",
-        "description": "❌ **{errorMessage}**\n\n**🔍 Root Cause:**\n{rootCause}\n\n**💡 Recommended Solution:**\n{suggestedFix}"
+        "description": "Error diagnostic breakdown for the provided runtime exception:",
+        "fields": [
+          { "name": "Error Message", "value": "❌ `{errorMessage}`", "inline": false },
+          { "name": "Root Cause", "value": "{rootCause}", "inline": false },
+          { "name": "Recommended Solution", "value": "{suggestedFix}", "inline": false }
+        ]
       }
     },
     "generate": {
       "embed": {
         "title": "⚡ Code Generator — {name} ({language})",
         "color": "#00e676",
-        "description": "Generated **{snippetType}** for `{name}`:\n\n{description}"
+        "description": "Scaffolded code component generated successfully:",
+        "fields": [
+          { "name": "Snippet Type", "value": "`{snippetType}`", "inline": true },
+          { "name": "Target Name", "value": "`{name}`", "inline": true },
+          { "name": "Generated Implementation", "value": "{description}", "inline": false }
+        ]
       }
     },
     "refactor": {
       "embed": {
         "title": "🔨 Code Modernization & Refactor — {language}",
         "color": "#00d2ff",
-        "description": "📊 **{diffSummary}**\n\n{transformationsList}"
+        "description": "Code refactor analysis completed successfully.",
+        "fields": [
+          { "name": "Summary", "value": "{diffSummary}", "inline": false },
+          { "name": "Transformations Applied", "value": "{transformationsList}", "inline": false }
+        ]
       }
     },
     "inspect": {
       "clean_embed": {
         "title": "🛡️ Security Audit Passed — {language}",
         "color": "#00e676",
-        "description": "Security Score: **100 / 100 (A+)** ✨\n\nNo security vulnerabilities, hardcoded secrets, injection vectors, or hazardous anti-patterns detected in source code."
+        "description": "Static security vulnerability and secret scanning completed.",
+        "fields": [
+          { "name": "Security Score", "value": "⭐ **100 / 100 (A+)**", "inline": true },
+          { "name": "Audit Result", "value": "No security vulnerabilities, hardcoded secrets, injection vectors, or hazardous anti-patterns detected in source code.", "inline": false }
+        ]
       },
       "issues_embed": {
         "title": "🛡️ Security & Anti-Pattern Audit — {language}",
         "color": "#ff334b",
-        "description": "Security Score: **{score} / 100**\nCritical: **{critical}** · High: **{high}** · Medium: **{medium}** · Low: **{low}**\n\n{findingsList}"
+        "description": "Static security scan detected vulnerabilities or anti-patterns in source code:",
+        "fields": [
+          { "name": "Security Score", "value": "**{score} / 100**", "inline": true },
+          { "name": "Severity Breakdown", "value": "Critical: **{critical}** · High: **{high}** · Medium: **{medium}** · Low: **{low}**", "inline": true },
+          { "name": "Vulnerability Findings", "value": "{findingsList}", "inline": false }
+        ]
       }
     }
   },
@@ -322,9 +392,10 @@
       "embed": {
         "title": "🚀 Project Scaffolding: {name}",
         "color": "#651fff",
-        "description": "Successfully scaffolded template **{template}** at `./{name}`.",
+        "description": "Project scaffolding completed successfully.",
         "fields": [
           { "name": "Template ID", "value": "`{template}`", "inline": true },
+          { "name": "Destination", "value": "`./{name}`", "inline": true },
           { "name": "Files Generated", "value": "{fileCount}", "inline": true }
         ]
       },
@@ -334,7 +405,10 @@
       "embed": {
         "title": "📁 Template Blueprint: {type}",
         "color": "#651fff",
-        "description": "Blueprint structure for **{type}**:\n```\n{tree}\n```"
+        "description": "Blueprint structure and starter layout for template `{type}`:",
+        "fields": [
+          { "name": "Directory Layout", "value": "```\n{tree}\n```", "inline": false }
+        ]
       },
       "invalid_type": "❌ Unknown template type `{type}`. Use `{prefix}list` to see valid options."
     }
@@ -344,11 +418,16 @@
       "embed_success": {
         "title": "⚙️ Server Configuration Updated",
         "color": "#00d2ff",
-        "description": "Successfully updated **{setting}** to {value}."
+        "description": "Server configuration has been updated successfully.",
+        "fields": [
+          { "name": "Setting", "value": "{setting}", "inline": true },
+          { "name": "Value", "value": "{value}", "inline": true }
+        ]
       },
       "embed_view": {
         "title": "⚙️ Server Configuration",
         "color": "#00d2ff",
+        "description": "Current server settings and configuration state:",
         "fields": [
           { "name": "Command Prefix", "value": "`{prefix}`", "inline": true },
           { "name": "Tickets Hub", "value": "{ticketsHub}", "inline": true },
@@ -361,7 +440,10 @@
       "embed_slash_updated": {
         "title": "⚡ Slash Commands Updated",
         "color": "#00d2ff",
-        "description": "{description}"
+        "description": "Slash command category synchronization completed.",
+        "fields": [
+          { "name": "Category Status", "value": "{description}", "inline": false }
+        ]
       }
     },
     "ticket": {
@@ -389,18 +471,25 @@
       "closed_embed": {
         "title": "🔒 Ticket Closed",
         "color": "#ff4444",
-        "description": "This ticket has been closed by <@{closedBy}>.\n\nThis thread is now locked and archived."
+        "description": "This ticket thread has been closed, locked, and archived.",
+        "fields": [
+          { "name": "Closed By", "value": "<@{closedBy}>", "inline": true }
+        ]
       }
     },
     "plugin": {
       "list_embed": {
         "title": "🧩 Installed Language Plugins",
         "color": "#00e5ff",
-        "description": "{pluginsList}"
+        "description": "Listing all active language intelligence plugins in the database registry:",
+        "fields": [
+          { "name": "Plugin Registry", "value": "{pluginsList}", "inline": false }
+        ]
       },
       "info_embed": {
         "title": "🧩 Plugin Details — {name}",
         "color": "#00e5ff",
+        "description": "Detailed manifest information for language plugin `{name}`:",
         "fields": [
           { "name": "Plugin ID", "value": "`{id}`", "inline": true },
           { "name": "Version", "value": "`v{version}`", "inline": true },
@@ -413,12 +502,20 @@
       "install_embed": {
         "title": "📦 Installing Plugin",
         "color": "#00e5ff",
-        "description": "Fetching repository `{repo}` into database plugin registry..."
+        "description": "Registering language intelligence plugins...",
+        "fields": [
+          { "name": "Repository", "value": "`{repo}`", "inline": true },
+          { "name": "Status", "value": "Fetching repository into database plugin registry...", "inline": true }
+        ]
       },
       "install_success_embed": {
         "title": "✅ Plugin Installed",
         "color": "#00e676",
-        "description": "Successfully installed `{count}` plugin(s) from `{repo}` into database registry."
+        "description": "Repository plugins have been registered into the database registry.",
+        "fields": [
+          { "name": "Repository", "value": "`{repo}`", "inline": true },
+          { "name": "Plugins Loaded", "value": "`{count}`", "inline": true }
+        ]
       },
       "remove_success": "🗑️ Successfully removed plugin `{id}`.",
       "enable_success": "✅ Enabled language plugin `{id}`.",
@@ -426,7 +523,10 @@
       "repo_list_embed": {
         "title": "📦 Configured Plugin Repositories",
         "color": "#00e5ff",
-        "description": "{reposList}"
+        "description": "Listing all configured plugin repositories for this server:",
+        "fields": [
+          { "name": "Repositories", "value": "{reposList}", "inline": false }
+        ]
       },
       "repo_remove_success": "🗑️ Successfully removed repository `{repo}`."
     }

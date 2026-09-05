@@ -52,8 +52,12 @@ describe('commands/config/set — execute and permissions', () => {
     expect(repliedPayload).toBeDefined();
     expect(repliedPayload.embeds).toHaveLength(1);
     const embedData = repliedPayload.embeds[0].toJSON();
-    expect(embedData.description).toContain('Command Prefix');
-    expect(embedData.description).toContain('`.`');
+    expect(embedData.title).toContain('Server Configuration Updated');
+    expect(embedData.fields).toBeDefined();
+    const settingField = embedData.fields.find((f: any) => f.name === 'Setting');
+    const valueField = embedData.fields.find((f: any) => f.name === 'Value');
+    expect(settingField?.value).toContain('Command Prefix');
+    expect(valueField?.value).toContain('`.`');
 
     const updated = db.getGuildSettings(testGuildId);
     expect(updated?.prefix).toBe('.');

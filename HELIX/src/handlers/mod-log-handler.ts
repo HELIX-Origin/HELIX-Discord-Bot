@@ -56,6 +56,7 @@ export async function sendModLog(options: ModLogOptions): Promise<boolean> {
     const embed = new EmbedBuilder()
       .setColor(ACTION_COLORS[action] || Colors.Blue)
       .setTitle(`${emoji} Moderation Log: ${actionTitle}`)
+      .setDescription('Moderation action has been logged for audit trail.')
       .addFields(
         { name: 'Target User', value: `${targetTag} (\`${targetId}\`)`, inline: true },
         { name: 'Moderator', value: `${modTag} (\`${modId}\`)`, inline: true },
