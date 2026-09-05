@@ -212,61 +212,30 @@ sudo ufw allow 5000/tcp # (If accessing directly without reverse proxy)
 
 ### 🪟 Windows (Windows 10, 11, Windows Server 2022)
 
-You can host HELIX natively on Windows using PowerShell, PM2, or Windows Task Scheduler.
+You can run HELIX natively on Windows using PowerShell or Windows Terminal.
 
 #### Step 1: Install Node.js 22 LTS
-1. Download the Windows Installer (.msi) from [nodejs.org](https://nodejs.org/).
-2. Run the installer and ensure **Add to PATH** is checked.
-3. Open PowerShell and verify:
+1. Download the Windows Installer (.msi) from [nodejs.org](https://nodejs.org/) or install via NVM for Windows (`nvm install 22 && nvm use 22`).
+2. Verify installation in PowerShell:
    ```powershell
    node -v
    npm -v
    ```
 
-#### Step 2: Allow Port in Windows Defender Firewall
+#### Step 2: Allow Port in Windows Defender Firewall (Optional)
 To allow inbound dashboard connections over your local network or public IP:
 ```powershell
 New-NetFirewallRule -DisplayName "HELIX Bot Dashboard" -Direction Inbound -LocalPort 5000 -Protocol TCP -Action Allow
 ```
 
-#### Step 3: Run as 24/7 Background Service via Windows Task Scheduler (Headless / No Console Window)
-Windows includes a built-in Task Scheduler for starting background Node.js services on boot without spawning a command prompt or console window on screen.
-
-The script below dynamically resolves `npm` from your system `PATH` (supporting standard installers, NVM for Windows, Volta, fnm, Scoop, and Chocolatey) and launches HELIX silently in the background:
-
+#### Step 3: Start the Bot
+Open PowerShell in your project folder and run:
 ```powershell
-# Open PowerShell in your HELIX directory and run:
-$npmPath = (Get-Command npm.cmd -ErrorAction SilentlyContinue).Source
-if (-not $npmPath) { $npmPath = "npm.cmd" }
-$projectDir = (Get-Location).Path
+# Development mode with hot-reload
+npm run dev
 
-# Launch invisibly with -WindowStyle Hidden and unlimited execution lifetime
-$action = New-ScheduledTaskAction `
-    -Execute "powershell.exe" `
-    -Argument "-WindowStyle Hidden -NoProfile -NonInteractive -ExecutionPolicy Bypass -Command `"Set-Location '$projectDir'; & '$npmPath' start`"" `
-    -WorkingDirectory $projectDir
-
-$trigger = New-ScheduledTaskTrigger -AtStartup
-$settings = New-ScheduledTaskSettingsSet -Hidden -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -ExecutionTimeLimit (New-TimeSpan -Days 0)
-$principal = New-ScheduledTaskPrincipal -UserId "$env:USERDOMAIN\$env:USERNAME" -LogonType Interactive -RunLevel Highest
-
-Register-ScheduledTask -TaskName "HELIX Discord Bot" -Action $action -Trigger $trigger -Principal $principal -Settings $settings -Description "HELIX Discord Bot 24/7 Service" -Force
-Start-ScheduledTask -TaskName "HELIX Discord Bot"
-```
-
-To manage the background service:
-```powershell
-Stop-ScheduledTask -TaskName "HELIX Discord Bot"        # Stop
-Start-ScheduledTask -TaskName "HELIX Discord Bot"       # Start
-Unregister-ScheduledTask -TaskName "HELIX Discord Bot"  # Remove
-```
-
-#### Step 4: Run with PM2 (Alternative Process Manager)
-```powershell
-npm install -g pm2 pm2-windows-service
-pm2-service-install
-pm2 start npm --name "helix-bot" -- start
-pm2 save
+# Production mode
+npm start
 ```
 
 ---
