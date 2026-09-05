@@ -2,9 +2,13 @@ import { Client, GatewayIntentBits, TextChannel } from 'discord.js';
 
 let client: Client | null = null;
 
-export function createBot(): Client {
+export function createBot(privileged: boolean = true): Client {
+  const intents = privileged
+    ? [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent]
+    : [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages];
+
   client = new Client({
-    intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent],
+    intents,
   });
   return client;
 }
@@ -14,7 +18,7 @@ export function getBot(): Client | null {
 }
 
 export function isBotOwner(userId: string): boolean {
-  const ownerId = process.env.DISCORD_OWNER_ID || process.env.BOT_OWNER_ID;
+  const ownerId = process.env.DISCORD_OWNER_ID || process.env.BOT_OWNER_ID || process.env.OWNER_ID;
   if (ownerId) return userId === ownerId;
   if (client?.application?.owner) return userId === client.application.owner.id;
   return false;

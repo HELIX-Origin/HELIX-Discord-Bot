@@ -42,7 +42,7 @@ export async function launchBotAndDashboard(options: LaunchBotOptions = {}): Pro
   const server = new BotCallbackServer({ callbackUrl });
   await server.start();
 
-  const client = createBot();
+  let client = createBot(true);
 
   if (token) {
     try {
@@ -50,8 +50,31 @@ export async function launchBotAndDashboard(options: LaunchBotOptions = {}): Pro
       await loadSlashCommands();
       await loadEvents(client);
 
-      await client.login(token);
-      logs.success('Discord Bot client connected to gateway.');
+      try {
+        await client.login(token);
+        logs.success('Discord Bot client connected to gateway.');
+      } catch (err: any) {
+        const isDisallowedIntents =
+          err?.code === 'DisallowedIntents' ||
+          (typeof err?.message === 'string' &&
+            (err.message.toLowerCase().includes('disallowed intents') ||
+              err.message.toLowerCase().includes('disallowedintents')));
+
+        if (isDisallowedIntents) {
+          logs.warn('Privileged Gateway Intent (MessageContent) is disabled in Discord Developer Portal.');
+          logs.info('Retrying connection with standard intents (Guilds, GuildMessages)...');
+          try {
+            await client.destroy();
+          } catch {}
+          client = createBot(false);
+          await loadEvents(client);
+          await client.login(token);
+          logs.success('Discord Bot connected to gateway with fallback intents (Slash commands active).');
+          logs.info('To enable prefix commands (e.g. >help, >ticket), enable "Message Content Intent" in Discord Developer Portal -> Bot -> Privileged Gateway Intents.');
+        } else {
+          throw err;
+        }
+      }
 
       const appId = client.user?.id || getClientId() || '';
       if (appId) {
@@ -59,9 +82,6 @@ export async function launchBotAndDashboard(options: LaunchBotOptions = {}): Pro
       }
     } catch (err: any) {
       logs.error(`Gateway error: ${err.message}`);
-      if (err.message && err.message.includes('disallowed intents')) {
-        logs.warn('Privileged Intent Required: Please enable "Message Content Intent" in Discord Developer Portal -> Bot -> Privileged Gateway Intents.');
-      }
     }
   } else {
     logs.warn('No DISCORD_TOKEN found.');

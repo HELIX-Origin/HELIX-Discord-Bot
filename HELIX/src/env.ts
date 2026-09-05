@@ -58,17 +58,35 @@ loadBotEnv();
 
 /** Discord Bot Token — required for gateway connection. */
 export function getBotToken(): string {
-  return process.env.DISCORD_TOKEN || process.env.DISCORD_BOT_TOKEN || '';
+  return (
+    process.env.DISCORD_TOKEN ||
+    process.env.DISCORD_BOT_TOKEN ||
+    process.env.BOT_TOKEN ||
+    process.env.TOKEN ||
+    ''
+  );
 }
 
 /** Discord Application Client ID — required for OAuth2 and slash commands. */
 export function getClientId(): string {
-  return process.env.DISCORD_CLIENT_ID || '';
+  return (
+    process.env.DISCORD_CLIENT_ID ||
+    process.env.CLIENT_ID ||
+    process.env.DISCORD_APP_ID ||
+    process.env.APPLICATION_ID ||
+    process.env.APP_ID ||
+    ''
+  );
 }
 
 /** Discord Application Client Secret — required for the dashboard OAuth2 flow. */
 export function getClientSecret(): string {
-  return process.env.DISCORD_CLIENT_SECRET || '';
+  return (
+    process.env.DISCORD_CLIENT_SECRET ||
+    process.env.CLIENT_SECRET ||
+    process.env.DISCORD_SECRET ||
+    ''
+  );
 }
 
 /**

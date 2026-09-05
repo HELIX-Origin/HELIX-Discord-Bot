@@ -34,7 +34,22 @@ describe('router — bot invite', () => {
       expect(result.statusCode).toBe(302);
       expect(result.headers['Location']).toContain('https://discord.com/oauth2/authorize?client_id=111222333');
       expect(result.headers['Location']).toContain('scope=bot%20applications.commands');
+      expect(result.headers['Location']).toContain('permissions=8');
+    } finally {
+      sandbox.restore();
+    }
+  });
+
+  it('supports explicit redirect_uri parameter when provided', async () => {
+    sandbox.set('DISCORD_CLIENT_ID', '111222333');
+    try {
+      const req = createRequest({ url: '/invite?redirect_uri=http%3A%2F%2Flocalhost%3A5000%2Fapi%2Fauth%2Fcallback%2Fdiscord' });
+      const { res, result } = createResponse();
+      const handled = await routeDashboardRequest(req, res);
+      expect(handled).toBe(true);
+      expect(result.statusCode).toBe(302);
       expect(result.headers['Location']).toContain('redirect_uri=http%3A%2F%2Flocalhost%3A5000%2Fapi%2Fauth%2Fcallback%2Fdiscord');
+      expect(result.headers['Location']).toContain('response_type=code');
     } finally {
       sandbox.restore();
     }
