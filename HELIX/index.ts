@@ -15,7 +15,6 @@ export * from './src/env.js';
 
 export interface LaunchBotOptions {
   token?: string;
-  port?: number;
   callbackUrl?: string;
 }
 
@@ -24,7 +23,7 @@ export async function launchBotAndDashboard(options: LaunchBotOptions = {}): Pro
   server: BotCallbackServer;
 }> {
   const token = options.token || getBotToken();
-  const port = options.port || getPort();
+  const port = getPort();
   const callbackUrl = options.callbackUrl || getCallbackUrl();
 
   console.log('====================================================');
@@ -40,7 +39,7 @@ export async function launchBotAndDashboard(options: LaunchBotOptions = {}): Pro
     logs.warn(`Plugin loader initialization warning: ${err.message}`);
   }
 
-  const server = new BotCallbackServer({ callbackUrl, port });
+  const server = new BotCallbackServer({ callbackUrl });
   await server.start();
 
   const client = createBot();

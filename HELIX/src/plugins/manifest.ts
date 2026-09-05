@@ -92,7 +92,7 @@ export function loadManifest(pluginDir: string): PluginManifest | null {
   }
 
   try {
-    const raw = fs.readFileSync(manifestPath, 'utf-8');
+    const raw = fs.readFileSync(manifestPath, 'utf-8').replace(/^\uFEFF/, '');
     const parsed = JSON.parse(raw);
     const validation = validateManifest(parsed);
     if (!validation.valid) {

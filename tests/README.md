@@ -1,89 +1,79 @@
-# HELIX - Testing Suite & Verification Infrastructure
+# HELIX Test Suite
 
-This directory houses the automated test suites, fixtures, and mocks used to verify, test, and debug the HELIX Discord bot.
+Vitest-based test suite for the HELIX Discord Bot workspace. The suite is split
+into unit and integration layers so fast per-module checks run separately from
+cross-module end-to-end coverage.
 
-## Directory Layout
+## Layout
 
 ```
 tests/
-├── README.md                 # This testing documentation
-├── unit/                     # Unit test suites (in-memory, fast)
-│   ├── cli-args.test.ts      # Command line parser and options
-│   ├── template-engine.test.ts # Variable substitution, loops, conditionals
-│   ├── auth-copilot.test.ts  # GitHub CLI token & hosts.json resolver
-│   ├── auth-antigravity.test.ts # Antigravity config & session detector
-│   ├── auth-opencode.test.ts # OpenCode config & session detector
-│   └── code-hosting.test.ts  # gh and glab CLI detection and commands
-├── integration/              # Integration test suites (filesystem & sub-processes)
-│   ├── scaffolding-discord.test.ts # Discord bot project scaffolding
-│   ├── scaffolding-web.test.ts     # Web dashboard projects
-│   ├── scaffolding-desktop.test.ts # Desktop electron/tauri projects
-│   ├── scaffolding-mobile.test.ts  # Flutter and Expo projects
-│   ├── scaffolding-games.test.ts   # Godot, RPGM, Ren'Py games
-│   ├── scaffolding-backend.test.ts # Rust, Go, Java, Python backends
-│   └── repo-remote.test.ts         # Remote repository initialization & git remotes
-├── fixtures/                 # Static mock environments
-│   ├── mock-configs/         # Fake .env files and auth configs
-│   │   ├── .env.example
-│   │   ├── mock-antigravity.json
-│   │   └── mock-opencode.json
-│   ├── mock-templates/       # Sample valid and invalid template files
-│   └── golden-trees/         # Expected directory outputs for validation
-└── helpers/                  # Test utilities
-    ├── temp-dir.ts           # Isolated temporary directory generator & cleanup
-    ├── mock-exec.ts          # Process execution spy/mocker
-    └── env-sandbox.ts        # Environment variable override sandbox
+├── unit/                     # Fast, isolated module tests
+│   ├── commands/             # CommandDefinition metadata integrity (metadata.test.ts)
+│   ├── config.test.ts        # Runtime config defaults
+│   ├── dashboard/            # NextAuth config, auth handlers, router, dashboard HTML
+│   ├── db/                   # BotDatabase lifecycle, tickets, config, sessions
+│   ├── env/                  # src/env.ts accessors + platform URL auto-resolution
+│   ├── handlers/             # message-handler, help-registrar, logs-handler
+│   ├── plugins/              # registry, manifest, repo-config, SDK (ast, snippet, etc.)
+│   ├── scaffolding/          # template-engine, file-generator, scaffold
+│   ├── server/               # invite URL resolution
+│   └── utils/, version.test.ts
+├── integration/              # Cross-module, temp-dir / temp-DB end-to-end
+│   ├── dashboard/            # full-stack: DB sessions → stats route → HTML
+│   ├── events/               # BotEvent modules match discord.js gateway names
+│   ├── plugins/              # whole built-in helix-origin plugin ecosystem via registry
+│   └── scaffolding/          # executeScaffold e2e + dry-run into temp dirs
+└── fixtures/                 # Shared test data (templates, code samples, plugin repos)
+    ├── template-files.ts
+    ├── code-samples.ts
+    └── plugin-repo.ts
 ```
 
-## Running Tests
+## Running
+
+| Command | Scope |
+|---------|-------|
+| `npm test` | Full suite (unit + integration) |
+| `npm run test:unit` | `tests/unit` only |
+| `npm run test:integration` | `tests/integration` only |
+| `npm run test:types` | Type-check the test tree (`tsconfig.test.json`) |
+| `npm run typecheck` | `HELIX` package type-check (`tsc --noEmit`) |
+
+Single file:
 
 ```bash
-# Run all unit tests
-npm run test:unit
-
-# Run all integration tests
-npm run test:integration
-
-# Run entire test suite with coverage
-npm run test:coverage
-
-# Run tests in watch mode during development
-npm run test:watch
+npx vitest run tests/unit/dashboard/auth-config.test.ts
 ```
 
-## Key Test Scenarios
+## Conventions
 
-### 1. Template Engine & Variable Interpolation
-- Validates that `${VARIABLE_NAME}` strings inside template files are correctly replaced with user inputs.
-- Validates that binary files (`.png`, `.ico`, `.wav`, etc.) are preserved in byte-exact condition without UTF-8 corruption.
-- Validates that missing mandatory variables trigger informative validation errors.
+- **No sub-index files.** Test modules export named definitions (`export const
+  ping: CommandDefinition`) exactly as the source does — the metadata test
+  validates export-name/definition-name symmetry.
+- **Import from source via relative `.js` specifiers.**
+  `tests/unit/... -> ../../../HELIX/src/...` and `tests/integration/... -> ../../../HELIX/src/...`.
+- **Env isolation.** Never read live `.env` values: use `tests/helpers/env.ts`
+  (`new EnvSandbox()`, `set(key, undefined)` deletes the key, `restore()` in
+  `afterEach`). Discord OAuth env keys are loaded into `process.env` on import
+  of `src/env.ts`, so dashboard/server tests must clear them explicitly.
+- **Temp databases.** Anything touching `BotDatabase.getInstance()` must call
+  `withTempDbEnvironment()` at module scope (`tests/helpers/db.ts`) before the
+  first `getInstance()`; close the singleton in `afterAll` before `env.cleanup()`
+  to avoid Windows file locks.
+- **Dynamic imports of source.** Vite cannot resolve `pathToFileURL()` URLs for
+  paths containing spaces, so runtime loaders (`loadPrefixCommands`,
+  `loadEvents`, `loadAllPlugins`) are not exercised directly. Tests import the
+  modules they would load using relative specifiers derived from the test file
+  location and validate them through the real registry APIs.
+- **Text-only fixtures.** All fixtures are `.ts` exports — no loose JSON/YAML
+  snaphots that can drift from the source schema.
 
-### 2. Plugin System Validation
-- Validates repo `config.json` schema and plugin `plugin.json` manifests
-- Verifies plugin interface compliance (lint, explain, suggestFixes, getDocumentation)
-- Tests plugin loader discovery via `import.meta.glob`
-- Validates extension-to-plugin mapping in the registry
+## Platform URL auto-resolution
 
-### 3. Environment Configuration
-- Validates `.env.example` format and required keys
-- Tests URL auto-detection logic (Heroku, Render, Railway, custom domain)
-- Validates SQLite database schema creation and migration
-- Tests prefix configuration per-guild
-
-### 4. Bot Functionality
-- Verifies slash command deployment and registration
-- Tests prefix command handling with per-guild prefix
-- Validates ticket thread creation and closure
-- Confirms moderation command permissions and hierarchy checks
-
-### 5. Message Handler
-- Tests message interpolation with `{prefix}` and `{arg}` placeholders
-- Verifies message loading from `messages.json`
-- Tests fallback for missing message keys
-- Validates category-based message grouping
-
-### 6. Message Handler Tests
-- Message loading and fallback behavior
-- Interpolation of `{prefix}` and `{arg}` placeholders
-- Category-based message grouping
-- Missing message detection and warnings
+`src/env.ts` derives `DISCORD_CALLBACK_URL` / `NEXTAUTH_URL` from one-click
+platform vars (`RENDER_EXTERNAL_URL`, `KOYEB_PUBLIC_DOMAIN`, `RAILWAY_STATIC_URL`,
+Heroku, `DOMAIN`) and normalizes any `.../api/auth/callback/discord` suffix back
+to its base, so the full Discord developer-portal callback form works without a
+double path. See `tests/unit/env/env.test.ts` and
+`tests/integration/dashboard/dashboard-api.test.ts`.

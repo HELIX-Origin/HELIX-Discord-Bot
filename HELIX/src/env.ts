@@ -144,6 +144,23 @@ function formatBotInviteUrl(
 }
 
 /**
+ * Normalizes a callback URL to its BASE URL form.
+ * Accepts either a bare base (`https://app.example.com`) or the full callback
+ * path pasted from the Discord developer portal
+ * (`https://app.example.com/api/auth/callback/discord`) and strips any trailing
+ * auth/callback path so callers can safely append `/api/auth/callback/discord`
+ * again without doubling it.
+ */
+export function normalizeCallbackBaseUrl(raw: string): string {
+  const trimmed = (raw || '').trim();
+  if (!trimmed) return '';
+  const lower = trimmed.toLowerCase();
+  const marker = lower.indexOf('/api/auth/callback/');
+  const base = marker !== -1 ? trimmed.slice(0, marker) : trimmed;
+  return base.replace(/\/+$/, '');
+}
+
+/**
  * Base OAuth2 callback URL (no trailing slash).
  * The server appends `/api/auth/callback/discord` internally.
  * Automatically resolves from platform env vars (Heroku, Render, Railway, DOMAIN)
@@ -152,15 +169,15 @@ function formatBotInviteUrl(
  * @example 'http://localhost:5000' | 'https://myapp.herokuapp.com'
  */
 export function getCallbackUrl(): string {
-  const explicit = (process.env.DISCORD_CALLBACK_URL || '').trim();
+  const explicit = normalizeCallbackBaseUrl(process.env.DISCORD_CALLBACK_URL || '');
   if (explicit && !explicit.includes('localhost') && !explicit.includes('127.0.0.1')) {
-    return explicit.replace(/\/$/, '');
+    return explicit;
   }
   const platformUrl = detectPlatformUrl();
   if (platformUrl) {
     return platformUrl;
   }
-  return (explicit || `http://localhost:${getPort()}`).replace(/\/$/, '');
+  return (explicit || `http://localhost:${getPort()}`);
 }
 
 /**
@@ -201,8 +218,8 @@ export function getPort(): number {
  * Automatically resolves from platform env vars (Heroku, Render, Railway, DOMAIN).
  * Falls back to `http://localhost:<PORT>` when running locally.
  */
-export function getNextAuthUrl(customPort?: number): string {
-  const port = customPort ?? getPort();
+export function getNextAuthUrl(): string {
+  const port = getPort();
   const explicit = (process.env.NEXTAUTH_URL || '').trim();
   if (explicit && !explicit.includes('localhost') && !explicit.includes('127.0.0.1')) {
     return explicit.replace(/\/$/, '');
@@ -211,7 +228,10 @@ export function getNextAuthUrl(customPort?: number): string {
   if (platformUrl) {
     return platformUrl;
   }
-  const raw = (explicit || getCallbackUrl()).replace(/\/$/, '');
+  const callbackUrl = getCallbackUrl();
+  const callbackIsLocal =
+    callbackUrl.includes('localhost') || callbackUrl.includes('127.0.0.1');
+  const raw = (explicit || (callbackIsLocal ? `http://localhost:${port}` : callbackUrl)).replace(/\/$/, '');
   try {
     const u = new URL(raw.includes('://') ? raw : `http://${raw}`);
     if (!u.port && (u.hostname === 'localhost' || u.hostname === '127.0.0.1')) {
@@ -227,8 +247,8 @@ export function getNextAuthUrl(customPort?: number): string {
  * Internal URL NextAuth uses for server-side self-requests.
  * Defaults to `http://localhost:<port>`.
  */
-export function getNextAuthInternalUrl(customPort?: number): string {
-  const port = customPort ?? getPort();
+export function getNextAuthInternalUrl(): string {
+  const port = getPort();
   const raw = (process.env.NEXTAUTH_INTERNAL_URL || 'http://localhost').replace(/\/$/, '');
   try {
     const u = new URL(raw.includes('://') ? raw : `http://${raw}`);

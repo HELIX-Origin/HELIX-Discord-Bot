@@ -49,18 +49,51 @@ function addOption(builder: any, opt: CommandOption): void {
   });
 }
 
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+function scanSlashCommandFiles(dir: string): string[] {
+  if (!fs.existsSync(dir)) return [];
+  const entries = fs.readdirSync(dir, { withFileTypes: true });
+  const files: string[] = [];
+  for (const entry of entries) {
+    const fullPath = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      files.push(...scanSlashCommandFiles(fullPath));
+    } else if (
+      (entry.name.endsWith('.ts') || entry.name.endsWith('.js') || entry.name.endsWith('.mjs')) &&
+      !entry.name.endsWith('.d.ts') &&
+      !entry.name.endsWith('.test.ts') &&
+      !entry.name.endsWith('.test.js')
+    ) {
+      files.push(fullPath);
+    }
+  }
+  return files;
+}
+
 export async function loadSlashCommands(): Promise<void> {
-  const modules = import.meta.glob('../commands/**/*.ts', { eager: true });
+  const commandsDir = path.resolve(__dirname, '..', 'commands');
+  const filePaths = scanSlashCommandFiles(commandsDir);
   let count = 0;
 
-  for (const [, mod] of Object.entries(modules)) {
-    for (const exp of Object.values(mod as any)) {
-      const cmd = exp as CommandDefinition;
-      if (!cmd?.name || typeof cmd?.execute !== 'function') continue;
+  for (const filePath of filePaths) {
+    try {
+      const mod = await import(pathToFileURL(filePath).href);
+      for (const exp of Object.values(mod as any)) {
+        const cmd = exp as CommandDefinition;
+        if (!cmd?.name || typeof cmd?.execute !== 'function') continue;
 
-      const builder = buildSlashData(cmd);
-      slashCommands.set(cmd.name, { def: cmd, builder });
-      count++;
+        const builder = buildSlashData(cmd);
+        slashCommands.set(cmd.name, { def: cmd, builder });
+        count++;
+      }
+    } catch (err: any) {
+      logs.warn(`Failed to load slash command file ${filePath}: ${err.message}`);
     }
   }
 

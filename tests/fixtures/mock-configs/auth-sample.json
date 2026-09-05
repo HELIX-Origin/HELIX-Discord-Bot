@@ -1,6 +1,0 @@
-{
-  "zen": {
-    "apiKey": "mock_opencode_zen_key_12345",
-    "model": "claude-3-5-sonnet"
-  }
-}

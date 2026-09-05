@@ -327,7 +327,7 @@ export class BotDatabase {
   public getUserActiveTicket(guildId: string, userId: string): TicketRecord | null {
     if (!this.db) return null;
     try {
-      const stmt = this.db.prepare("SELECT * FROM tickets WHERE guild_id = ? AND user_id = ? AND status = 'open' LIMIT 1");
+      const stmt = this.db.prepare("SELECT * FROM tickets WHERE guild_id = ? AND user_id = ? AND status = 'open' ORDER BY id DESC LIMIT 1");
       const row: any = stmt.get(guildId, userId);
       if (!row) return null;
       return {

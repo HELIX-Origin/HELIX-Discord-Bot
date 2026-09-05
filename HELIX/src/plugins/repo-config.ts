@@ -1,4 +1,4 @@
-﻿/**
+/**
  * src/plugins/repo-config.ts
  * ──────────────────────────────────────────────────────────────────────────
  * Repository config (config.json) schema and validation.
@@ -92,7 +92,7 @@ export function loadRepoConfig(repoDir: string): RepoConfig | null {
   }
 
   try {
-    const raw = fs.readFileSync(configPath, 'utf-8');
+    const raw = fs.readFileSync(configPath, 'utf-8').replace(/^\uFEFF/, '');
     const parsed = JSON.parse(raw);
     const validation = validateRepoConfig(parsed);
     if (!validation.valid) {

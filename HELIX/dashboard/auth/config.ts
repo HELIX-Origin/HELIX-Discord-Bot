@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { getPort, getNextAuthUrl, getNextAuthInternalUrl, getNextAuthSecret, getClientId, getClientSecret } from '../../src/env.js';
+import { getPort, getNextAuthUrl, getNextAuthSecret, getClientId, getClientSecret } from '../../src/env.js';
 
 export interface NextAuthConfig {
   url: string;
@@ -9,8 +9,8 @@ export interface NextAuthConfig {
   clientSecret: string;
 }
 
-export function resolveInternalUrl(rawInternal?: string, botPort: number = 5000): string {
-  let target = rawInternal || getNextAuthInternalUrl(botPort);
+export function resolveInternalUrl(rawInternal?: string, botPort: number = getPort()): string {
+  let target = rawInternal || process.env.NEXTAUTH_INTERNAL_URL || 'http://localhost';
   target = target.replace(/\/$/, '');
 
   try {
@@ -25,9 +25,9 @@ export function resolveInternalUrl(rawInternal?: string, botPort: number = 5000)
   }
 }
 
-export function getNextAuthConfig(options: { botPort?: number } = {}): NextAuthConfig {
-  const botPort = options.botPort || getPort();
-  const url = getNextAuthUrl(botPort);
+export function getNextAuthConfig(): NextAuthConfig {
+  const botPort = getPort();
+  const url = getNextAuthUrl();
   const internalUrl = resolveInternalUrl(process.env.NEXTAUTH_INTERNAL_URL, botPort);
   const secret = getNextAuthSecret();
   const clientId = getClientId();

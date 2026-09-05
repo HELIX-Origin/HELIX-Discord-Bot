@@ -12,8 +12,7 @@ import { getClientId, getCallbackUrl, BOT_ROOT_DIR } from '../src/env.js';
 export async function routeDashboardRequest(
   req: http.IncomingMessage,
   res: http.ServerResponse,
-  baseUrl: string = 'http://localhost:5000',
-  botPort?: number
+  baseUrl: string = 'http://localhost:5000'
 ): Promise<boolean> {
   const reqUrl = req.url || '/';
   const parsed = new URL(reqUrl, baseUrl);
@@ -22,7 +21,7 @@ export async function routeDashboardRequest(
   // 1. Dashboard UI Shell
   if (pathname === '/dashboard' || pathname === '/') {
     res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-    res.end(renderDashboardHtml(botPort));
+    res.end(renderDashboardHtml());
     return true;
   }
 

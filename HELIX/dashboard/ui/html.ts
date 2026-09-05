@@ -3,8 +3,8 @@ import { BotDatabase } from '../../src/db/database.js';
 import { resolveBotInviteUrl } from '../../src/server.js';
 import { getBotToken, getCallbackUrl, getInviteUrl, getClientId } from '../../src/env.js';
 
-export function renderDashboardHtml(botPort?: number): string {
-  const config = getNextAuthConfig({ botPort });
+export function renderDashboardHtml(): string {
+  const config = getNextAuthConfig();
   const dbStats = BotDatabase.getInstance().getStats();
   const botTokenSet = !!getBotToken();
   const callbackUrl = getCallbackUrl();

@@ -1,7 +1,0 @@
-{
-  "github.com": {
-    "user": "helix-test-user",
-    "oauth_token": "gho_mock_token_1234567890abcdef",
-    "git_protocol": "https"
-  }
-}

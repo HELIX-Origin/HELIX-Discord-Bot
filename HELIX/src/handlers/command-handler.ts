@@ -6,30 +6,63 @@ import { logs } from './logs-handler.js';
 import { getMessage, formatError } from './message-handler.js';
 import { DEFAULT_PREFIX } from '../config.js';
 
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const commands = new Collection<string, CommandDefinition>();
 
+function scanCommandFiles(dir: string): string[] {
+  if (!fs.existsSync(dir)) return [];
+  const entries = fs.readdirSync(dir, { withFileTypes: true });
+  const files: string[] = [];
+  for (const entry of entries) {
+    const fullPath = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      files.push(...scanCommandFiles(fullPath));
+    } else if (
+      (entry.name.endsWith('.ts') || entry.name.endsWith('.js') || entry.name.endsWith('.mjs')) &&
+      !entry.name.endsWith('.d.ts') &&
+      !entry.name.endsWith('.test.ts') &&
+      !entry.name.endsWith('.test.js')
+    ) {
+      files.push(fullPath);
+    }
+  }
+  return files;
+}
+
 export async function loadPrefixCommands(): Promise<void> {
-  const modules = import.meta.glob('../commands/**/*.ts', { eager: true });
+  const commandsDir = path.resolve(__dirname, '..', 'commands');
+  const filePaths = scanCommandFiles(commandsDir);
   let count = 0;
 
-  for (const [, mod] of Object.entries(modules)) {
-    for (const exp of Object.values(mod as any)) {
-      const cmd = exp as CommandDefinition;
-      if (!cmd?.name || typeof cmd?.execute !== 'function') continue;
+  for (const filePath of filePaths) {
+    try {
+      const mod = await import(pathToFileURL(filePath).href);
+      for (const exp of Object.values(mod as any)) {
+        const cmd = exp as CommandDefinition;
+        if (!cmd?.name || typeof cmd?.execute !== 'function') continue;
 
-      commands.set(cmd.name, cmd);
-      if (cmd.aliases) {
-        for (const alias of cmd.aliases) commands.set(alias, cmd);
+        commands.set(cmd.name, cmd);
+        if (cmd.aliases) {
+          for (const alias of cmd.aliases) commands.set(alias, cmd);
+        }
+
+        registerHelp(createHelp(cmd.name, cmd.description, cmd.category, {
+          usage: `>${cmd.name}`,
+          permissions: (cmd.permissions || []).map(String),
+          aliases: cmd.aliases,
+          subcommands: cmd.subcommands?.map(s => s.name),
+        }));
+
+        count++;
       }
-
-      registerHelp(createHelp(cmd.name, cmd.description, cmd.category, {
-        usage: `>${cmd.name}`,
-        permissions: (cmd.permissions || []).map(String),
-        aliases: cmd.aliases,
-        subcommands: cmd.subcommands?.map(s => s.name),
-      }));
-
-      count++;
+    } catch (err: any) {
+      logs.warn(`Failed to load command file ${filePath}: ${err.message}`);
     }
   }
 

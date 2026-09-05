@@ -3,11 +3,10 @@ import { URL } from 'node:url';
 import pc from 'picocolors';
 import { logs as logger } from './handlers/logs-handler.js';
 import { routeDashboardRequest } from '../dashboard/router.js';
-import { getClientId, getCallbackUrl, getInviteUrl, getPort } from './env.js';
+import { getClientId, getCallbackUrl, getInviteUrl, getPort, normalizeCallbackBaseUrl } from './env.js';
 
 export interface BotServerOptions {
   callbackUrl?: string;
-  port?: number;
 }
 
 export function parsePortFromUrl(urlStr: string, fallbackPort: number = 5000): number {
@@ -117,15 +116,15 @@ export class BotCallbackServer {
   private baseUrl: string;
 
   constructor(options: BotServerOptions = {}) {
-    this.baseUrl = options.callbackUrl || getCallbackUrl();
-    this.port = options.port || getPort();
+    this.baseUrl = normalizeCallbackBaseUrl(options.callbackUrl || getCallbackUrl());
+    this.port = getPort();
   }
 
   public start(): Promise<void> {
     return new Promise((resolve, reject) => {
       this.server = http.createServer(async (req, res) => {
         // First try routing to Dashboard & NextAuth endpoints
-        const dashboardHandled = await routeDashboardRequest(req, res, this.baseUrl, this.port);
+        const dashboardHandled = await routeDashboardRequest(req, res, this.baseUrl);
         if (dashboardHandled) return;
 
         const reqUrl = req.url || '/';

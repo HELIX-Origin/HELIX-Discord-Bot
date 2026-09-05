@@ -6,7 +6,7 @@
  */
 
 import type { SourceProvider, SourceProviderResolution } from '../../types.js';
-import { detectLanguageFromPath } from '../source-resolver.js';
+import { detectLanguageFromPath } from '../detect-language.js';
 
 export const gitlabSourceProvider: SourceProvider = {
   id: 'gitlab',
