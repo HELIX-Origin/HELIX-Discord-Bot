@@ -135,6 +135,7 @@ flowchart LR
 - [BUG-010](.agents/bugs/BUG-010-user-active-ticket-ordering.md) — getUserActiveTicket deterministic ordering — **Resolved** (3 Sub-Tasks)
 - [BUG-011](.agents/bugs/BUG-011-nextauth-botport-dead-arg.md) — Dead botPort argument removal — **Resolved**
 - [BUG-012](.agents/bugs/BUG-012-duplicate-app-json.md) — Root and .github/app.json deduplication — **Resolved**
+- [BUG-013](.agents/bugs/BUG-013-gateway-intent-fallback-and-clean-invite.md) — Gateway DisallowedIntents fallback & clean invite URL — **Resolved**
 
 ---
 

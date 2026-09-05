@@ -44,6 +44,7 @@ flowchart TD
 | **BUG-010** | `getUserActiveTicket` returns a nondeterministic ticket when multiple open tickets exist | Medium | Resolved | 3 Sub-Tasks | [#28](https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues/28) | [BUG-010](BUG-010-user-active-ticket-ordering.md) |
 | **BUG-011** | `getNextAuthConfig({ botPort })` argument is effectively dead | Low | Resolved | — | [#32](https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues/32) | [BUG-011](BUG-011-nextauth-botport-dead-arg.md) |
 | **BUG-012** | Duplicate `app.json` — root and `.github/app.json` drift risk | Low | Resolved | — | [#33](https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues/33) | [BUG-012](BUG-012-duplicate-app-json.md) |
+| **BUG-013** | Discord Gateway DisallowedIntents crash & OAuth2 invite redirect_uri error | High | Resolved | — | [#34](https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues/34) | [BUG-013](BUG-013-gateway-intent-fallback-and-clean-invite.md) |
 
 ---
 
