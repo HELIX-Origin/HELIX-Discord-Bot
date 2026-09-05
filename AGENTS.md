@@ -129,7 +129,7 @@ flowchart LR
 - [BUG-004](.agents/bugs/BUG-004-auto-resolve-url-env.md) — Auto-resolve NEXTAUTH_URL and callback URLs — **Resolved** (4 Sub-Tasks)
 - [BUG-005](.agents/bugs/BUG-005-typescript-strict-mode-errors.md) — TypeScript strict mode errors — **Resolved** (4 Sub-Tasks)
 - [BUG-006](.agents/bugs/BUG-006-messages-json-formatting-refactor.md) — Centralized Message Formatting Engine & messages.json refactor — **Resolved** (4 Sub-Tasks)
-- [BUG-007](.agents/bugs/BUG-007-plugin-repositories-database-backed.md) — DB-backed per-guild plugin repositories — **Open** (4 Sub-Tasks)
+- [BUG-007](.agents/bugs/BUG-007-plugin-repositories-database-backed.md) — DB-backed per-guild plugin repositories — **Resolved** (4 Sub-Tasks)
 - [BUG-008](.agents/bugs/BUG-008-test-suite-rebuild.md) — Vitest test suite modular rebuild — **Resolved** (4 Sub-Tasks)
 - [BUG-009](.agents/bugs/BUG-009-sdk-circular-import.md) — SDK circular import fix — **Resolved** (4 Sub-Tasks)
 - [BUG-010](.agents/bugs/BUG-010-user-active-ticket-ordering.md) — getUserActiveTicket deterministic ordering — **Resolved** (3 Sub-Tasks)
@@ -147,7 +147,8 @@ All templates indexed in [.agents/templates/index.md](.agents/templates/index.md
 `mobile-flutter.md`, `mobile-react-native.md`,
 `game-unity.md`, `game-godot.md`, `game-rpgm.md`, `game-renpy.md`,
 `backend-rust.md`, `backend-go.md`, `backend-java.md`, `backend-python.md`,
-[mermaid-diagram-guide.md](.agents/templates/mermaid-diagram-guide.md)
+[mermaid-diagram-guide.md](.agents/templates/mermaid-diagram-guide.md),
+[commit-message-guide.md](.agents/templates/commit-message-guide.md)
 
 ---
 

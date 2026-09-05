@@ -68,6 +68,18 @@ export interface UserSettings {
   updatedAt?: string;
 }
 
+export interface PluginRepositoryEntry {
+  id?: number;
+  repoName: string;
+  guildId?: string | null;
+  configJson: string;
+  manifestJson: string;
+  entrySource: string;
+  enabled?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 export class BotDatabase {
   private static instance: BotDatabase | null = null;
   private db: any = null;
@@ -186,6 +198,18 @@ export class BotDatabase {
       CREATE TABLE IF NOT EXISTS bot_kv (
         key TEXT PRIMARY KEY,
         value TEXT,
+        updated_at TEXT
+      );
+
+      CREATE TABLE IF NOT EXISTS plugin_repositories (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        repo_name TEXT NOT NULL,
+        guild_id TEXT,
+        config_json TEXT NOT NULL,
+        manifest_json TEXT NOT NULL,
+        entry_source TEXT NOT NULL,
+        enabled INTEGER DEFAULT 1,
+        created_at TEXT,
         updated_at TEXT
       );
     `);
@@ -672,6 +696,7 @@ export class BotDatabase {
     ticketCount: number;
     moderationCount: number;
     warningCount: number;
+    pluginRepoCount: number;
   } {
     const exists = fs.existsSync(this.dbPath);
     let sizeBytes = 0;
@@ -689,6 +714,7 @@ export class BotDatabase {
     let ticketCount = 0;
     let moderationCount = 0;
     let warningCount = 0;
+    let pluginRepoCount = 0;
 
     if (this.db) {
       try {
@@ -709,6 +735,9 @@ export class BotDatabase {
 
         const wRow: any = this.db.prepare('SELECT COUNT(*) as count FROM warnings').get();
         warningCount = wRow?.count || 0;
+
+        const pRow: any = this.db.prepare('SELECT COUNT(*) as count FROM plugin_repositories').get();
+        pluginRepoCount = pRow?.count || 0;
       } catch {
         // Fallback to 0 if tables aren't readable
       }
@@ -724,7 +753,161 @@ export class BotDatabase {
       ticketCount,
       moderationCount,
       warningCount,
+      pluginRepoCount,
     };
+  }
+
+  // --- PLUGIN REPOSITORY METHODS ---
+  public addPluginRepository(entry: PluginRepositoryEntry): number | null {
+    if (!this.db) return null;
+    try {
+      const existing = this.getPluginRepository(entry.repoName, entry.guildId);
+      if (existing && existing.id) {
+        const stmt = this.db.prepare(`
+          UPDATE plugin_repositories
+          SET config_json = ?, manifest_json = ?, entry_source = ?, enabled = ?, updated_at = datetime('now')
+          WHERE id = ?
+        `);
+        stmt.run(
+          entry.configJson,
+          entry.manifestJson,
+          entry.entrySource,
+          entry.enabled === undefined || entry.enabled ? 1 : 0,
+          existing.id
+        );
+        return existing.id;
+      } else {
+        const stmt = this.db.prepare(`
+          INSERT INTO plugin_repositories (repo_name, guild_id, config_json, manifest_json, entry_source, enabled, created_at, updated_at)
+          VALUES (?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
+        `);
+        const info: any = stmt.run(
+          entry.repoName,
+          entry.guildId || null,
+          entry.configJson,
+          entry.manifestJson,
+          entry.entrySource,
+          entry.enabled === undefined || entry.enabled ? 1 : 0
+        );
+        return Number(info?.lastInsertRowid || 0);
+      }
+    } catch {
+      return null;
+    }
+  }
+
+  public getPluginRepository(repoName: string, guildId?: string | null): PluginRepositoryEntry | null {
+    if (!this.db) return null;
+    try {
+      let stmt;
+      let row: any;
+      if (guildId !== undefined && guildId !== null) {
+        stmt = this.db.prepare('SELECT * FROM plugin_repositories WHERE repo_name = ? AND guild_id = ?');
+        row = stmt.get(repoName, guildId);
+      } else {
+        stmt = this.db.prepare('SELECT * FROM plugin_repositories WHERE repo_name = ? AND guild_id IS NULL');
+        row = stmt.get(repoName);
+      }
+      if (!row) return null;
+      return {
+        id: row.id,
+        repoName: row.repo_name,
+        guildId: row.guild_id,
+        configJson: row.config_json,
+        manifestJson: row.manifest_json,
+        entrySource: row.entry_source,
+        enabled: row.enabled === 1,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at,
+      };
+    } catch {
+      return null;
+    }
+  }
+
+  public listPluginRepositories(guildId?: string | null): PluginRepositoryEntry[] {
+    if (!this.db) return [];
+    try {
+      let stmt;
+      let rows: any[];
+      if (guildId !== undefined && guildId !== null) {
+        stmt = this.db.prepare('SELECT * FROM plugin_repositories WHERE guild_id = ? OR guild_id IS NULL ORDER BY id ASC');
+        rows = stmt.all(guildId);
+      } else {
+        stmt = this.db.prepare('SELECT * FROM plugin_repositories WHERE guild_id IS NULL ORDER BY id ASC');
+        rows = stmt.all();
+      }
+      return (rows || []).map((row: any) => ({
+        id: row.id,
+        repoName: row.repo_name,
+        guildId: row.guild_id,
+        configJson: row.config_json,
+        manifestJson: row.manifest_json,
+        entrySource: row.entry_source,
+        enabled: row.enabled === 1,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at,
+      }));
+    } catch {
+      return [];
+    }
+  }
+
+  public removePluginRepository(repoName: string, guildId?: string | null): boolean {
+    if (!this.db) return false;
+    try {
+      let stmt;
+      let info: any;
+      if (guildId !== undefined && guildId !== null) {
+        stmt = this.db.prepare('DELETE FROM plugin_repositories WHERE repo_name = ? AND (guild_id = ? OR guild_id IS NULL)');
+        info = stmt.run(repoName, guildId);
+      } else {
+        stmt = this.db.prepare('DELETE FROM plugin_repositories WHERE repo_name = ?');
+        info = stmt.run(repoName);
+      }
+      return Boolean(info && info.changes > 0);
+    } catch {
+      return false;
+    }
+  }
+
+  public setPluginRepositoryEnabled(repoName: string, enabled: boolean, guildId?: string | null): boolean {
+    if (!this.db) return false;
+    try {
+      let stmt;
+      let info: any;
+      if (guildId !== undefined && guildId !== null) {
+        stmt = this.db.prepare('UPDATE plugin_repositories SET enabled = ?, updated_at = datetime(\'now\') WHERE repo_name = ? AND (guild_id = ? OR guild_id IS NULL)');
+        info = stmt.run(enabled ? 1 : 0, repoName, guildId);
+      } else {
+        stmt = this.db.prepare('UPDATE plugin_repositories SET enabled = ?, updated_at = datetime(\'now\') WHERE repo_name = ?');
+        info = stmt.run(enabled ? 1 : 0, repoName);
+      }
+      return Boolean(info && info.changes > 0);
+    } catch {
+      return false;
+    }
+  }
+
+  public getAllStoredPluginRepositories(): PluginRepositoryEntry[] {
+    if (!this.db) return [];
+    try {
+      const stmt = this.db.prepare('SELECT * FROM plugin_repositories ORDER BY id ASC');
+      const rows: any[] = stmt.all();
+      return (rows || []).map((row: any) => ({
+        id: row.id,
+        repoName: row.repo_name,
+        guildId: row.guild_id,
+        configJson: row.config_json,
+        manifestJson: row.manifest_json,
+        entrySource: row.entry_source,
+        enabled: row.enabled === 1,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at,
+      }));
+    } catch {
+      return [];
+    }
   }
 
   public getKv(key: string): string | null {

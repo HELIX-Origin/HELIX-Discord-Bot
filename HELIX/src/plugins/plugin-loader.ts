@@ -3,9 +3,9 @@
  * ──────────────────────────────────────────────────────────────────────────
  * Plugin discovery, validation, and loading engine.
  *
- * Reads config.json from plugin repos (helix-origin + community),
- * validates each plugin's manifest, dynamically imports the entry file,
- * and returns loaded LanguagePlugin instances.
+ * Reads config.json from first-party built-in plugins (helix-origin) on disk
+ * and loads custom/community plugins securely from the SQLite database
+ * via sandboxed execution with per-guild repository scoping.
  * ──────────────────────────────────────────────────────────────────────────
  */
 
@@ -13,17 +13,21 @@ import fs from 'fs';
 import path from 'path';
 import { pathToFileURL } from 'url';
 import { BOT_ROOT_DIR } from '../env.js';
-import { loadRepoConfig, type RepoConfig } from './repo-config.js';
-import { loadManifest, type PluginManifest } from './manifest.js';
+import { loadRepoConfig, validateRepoConfig, type RepoConfig } from './repo-config.js';
+import { loadManifest, validateManifest, type PluginManifest } from './manifest.js';
 import type { LanguagePlugin } from './types.js';
+import { executePluginSandbox } from './sandbox.js';
+import { BotDatabase } from '../db/database.js';
+import { registerPlugin, registerPlugins } from './registry.js';
 
 /** A fully loaded plugin with its manifest and instance. */
 export interface LoadedPlugin {
   manifest: PluginManifest;
   instance: LanguagePlugin;
   repoName: string;
-  repoDir: string;
-  pluginDir: string;
+  repoDir?: string;
+  pluginDir?: string;
+  guildId?: string | null;
 }
 
 function getPluginsDir(): string {
@@ -41,9 +45,6 @@ function getPluginsDir(): string {
 
 /** Plugins directory root. */
 const PLUGINS_DIR = getPluginsDir();
-
-/** Community plugins directory. */
-const COMMUNITY_DIR = path.join(PLUGINS_DIR, 'community');
 
 /** Built-in helix-origin directory. */
 const HELIX_ORIGIN_DIR = path.join(PLUGINS_DIR, 'helix-origin');
@@ -79,10 +80,9 @@ function resolvePluginEntry(pluginDir: string, entry: string): string {
 }
 
 /**
- * Load all plugins from a single repo directory.
- * Reads config.json, then iterates each plugin entry.
+ * Load all plugins from a single repo directory on disk (used for first-party built-ins).
  */
-async function loadPluginsFromRepo(repoDir: string): Promise<LoadedPlugin[]> {
+export async function loadPluginsFromRepo(repoDir: string): Promise<LoadedPlugin[]> {
   const loaded: LoadedPlugin[] = [];
 
   const config = loadRepoConfig(repoDir);
@@ -107,7 +107,6 @@ async function loadPluginsFromRepo(repoDir: string): Promise<LoadedPlugin[]> {
       continue;
     }
 
-    // Verify manifest id matches config entry id
     if (manifest.id !== entry.id) {
       console.warn(`[PluginLoader] Plugin id mismatch: config says "${entry.id}", manifest says "${manifest.id}" — using manifest`);
     }
@@ -117,13 +116,11 @@ async function loadPluginsFromRepo(repoDir: string): Promise<LoadedPlugin[]> {
       const entryUrl = pathToFileURL(entryPath).href;
       const mod = await import(entryUrl);
 
-      // Find the LanguagePlugin instance — look for a default export or a named export matching the plugin id
       let instance: LanguagePlugin | null = null;
 
       if (mod.default && typeof mod.default === 'object' && typeof mod.default.id === 'string') {
         instance = mod.default as LanguagePlugin;
       } else {
-        // Search named exports for a LanguagePlugin
         for (const key of Object.keys(mod)) {
           const exp = mod[key];
           if (exp && typeof exp === 'object' && typeof (exp as LanguagePlugin).id === 'string' && typeof (exp as LanguagePlugin).lint === 'function') {
@@ -144,9 +141,10 @@ async function loadPluginsFromRepo(repoDir: string): Promise<LoadedPlugin[]> {
         repoName: config.repository,
         repoDir,
         pluginDir,
+        guildId: null,
       });
 
-      console.log(`[PluginLoader] Loaded plugin "${manifest.id}" v${manifest.version} from "${config.name}"`);
+      console.log(`[PluginLoader] Loaded built-in plugin "${manifest.id}" v${manifest.version} from "${config.name}"`);
     } catch (err) {
       console.error(`[PluginLoader] Failed to load plugin "${manifest.id}":`, err);
     }
@@ -156,40 +154,137 @@ async function loadPluginsFromRepo(repoDir: string): Promise<LoadedPlugin[]> {
 }
 
 /**
- * Load all plugins from helix-origin (built-in) and community repos.
- * This is the main entry point called on bot startup.
+ * Load all custom plugins stored in SQLite database.
+ */
+export async function loadStoredPlugins(): Promise<LoadedPlugin[]> {
+  const loaded: LoadedPlugin[] = [];
+  const db = BotDatabase.getInstance();
+  const records = db.getAllStoredPluginRepositories();
+
+  for (const record of records) {
+    if (!record.enabled) continue;
+    try {
+      const manifest: PluginManifest = JSON.parse(record.manifestJson);
+      const instance = executePluginSandbox(record.entrySource, manifest);
+
+      loaded.push({
+        manifest,
+        instance,
+        repoName: record.repoName,
+        guildId: record.guildId,
+      });
+
+      console.log(`[PluginLoader] Loaded DB plugin "${manifest.id}" v${manifest.version} (guild: ${record.guildId || 'global'})`);
+    } catch (err) {
+      console.error(`[PluginLoader] Failed to instantiate stored plugin repository "${record.repoName}":`, err);
+    }
+  }
+
+  return loaded;
+}
+
+/**
+ * Helper to fetch text with branch fallbacks (main -> master).
+ */
+async function fetchGithubRaw(repo: string, filePath: string): Promise<string> {
+  const branches = ['main', 'master'];
+  for (const branch of branches) {
+    const url = `https://raw.githubusercontent.com/${repo}/${branch}/${filePath}`;
+    try {
+      const res = await fetch(url);
+      if (res.ok) {
+        return await res.text();
+      }
+    } catch {
+      // Try next branch
+    }
+  }
+  throw new Error(`Failed to fetch ${filePath} from ${repo} on branches: main, master`);
+}
+
+/**
+ * Fetch a remote GitHub plugin repository via HTTPS, validate manifests,
+ * sandbox-evaluate the entry code, store directly in SQLite, and register into runtime.
+ */
+export async function fetchAndStorePluginRepo(
+  repoName: string,
+  guildId?: string | null
+): Promise<LoadedPlugin[]> {
+  // 1. Fetch config.json
+  const configRaw = await fetchGithubRaw(repoName, 'config.json');
+  const configJson = JSON.parse(configRaw.replace(/^\uFEFF/, ''));
+  const configValidation = validateRepoConfig(configJson);
+  if (!configValidation.valid) {
+    throw new Error(`Invalid repository config: ${configValidation.errors.join(', ')}`);
+  }
+  const config = configJson as RepoConfig;
+
+  const loadedPlugins: LoadedPlugin[] = [];
+  const db = BotDatabase.getInstance();
+
+  for (const p of config.plugins) {
+    const manifestPath = `${p.path}/plugin.json`.replace(/\/+/g, '/');
+    const manifestRaw = await fetchGithubRaw(repoName, manifestPath);
+    const manifestJson = JSON.parse(manifestRaw.replace(/^\uFEFF/, ''));
+    const manifestValidation = validateManifest(manifestJson);
+    if (!manifestValidation.valid) {
+      throw new Error(`Invalid manifest for ${p.id}: ${manifestValidation.errors.join(', ')}`);
+    }
+    const manifest = manifestJson as PluginManifest;
+
+    const entryPath = `${p.path}/${manifest.entry}`.replace(/\/+/g, '/');
+    const entrySource = await fetchGithubRaw(repoName, entryPath);
+
+    // Sandbox validation & instantiation
+    const instance = executePluginSandbox(entrySource, manifest);
+
+    // Persist to database
+    db.addPluginRepository({
+      repoName,
+      guildId: guildId || null,
+      configJson: JSON.stringify(config),
+      manifestJson: JSON.stringify(manifest),
+      entrySource,
+      enabled: true,
+    });
+
+    const loadedPlugin: LoadedPlugin = {
+      manifest,
+      instance,
+      repoName,
+      guildId: guildId || null,
+    };
+
+    registerPlugin(loadedPlugin, guildId || null);
+    loadedPlugins.push(loadedPlugin);
+  }
+
+  return loadedPlugins;
+}
+
+/**
+ * Load all plugins from helix-origin (built-in) and SQLite database.
+ * Main entry point called on bot startup.
  */
 export async function loadAllPlugins(): Promise<LoadedPlugin[]> {
   const allLoaded: LoadedPlugin[] = [];
 
-  // Load built-in helix-origin plugins
+  // 1. Load built-in helix-origin plugins
   if (fs.existsSync(HELIX_ORIGIN_DIR)) {
     const helixPlugins = await loadPluginsFromRepo(HELIX_ORIGIN_DIR);
     allLoaded.push(...helixPlugins);
+    registerPlugins(helixPlugins, null);
   } else {
     console.warn('[PluginLoader] helix-origin directory not found — no built-in plugins loaded');
   }
 
-  // Load community plugins
-  if (fs.existsSync(COMMUNITY_DIR)) {
-    const repos = fs.readdirSync(COMMUNITY_DIR, { withFileTypes: true })
-      .filter(d => d.isDirectory())
-      .map(d => path.join(COMMUNITY_DIR, d.name));
-
-    for (const repoDir of repos) {
-      const communityPlugins = await loadPluginsFromRepo(repoDir);
-      allLoaded.push(...communityPlugins);
-    }
+  // 2. Load DB stored plugins
+  const dbPlugins = await loadStoredPlugins();
+  for (const p of dbPlugins) {
+    allLoaded.push(p);
+    registerPlugin(p, p.guildId);
   }
 
   console.log(`[PluginLoader] Total plugins loaded: ${allLoaded.length}`);
   return allLoaded;
-}
-
-/**
- * Load plugins from a single community repo directory.
- * Used by the installer after cloning a new repo.
- */
-export async function loadCommunityPlugins(repoDir: string): Promise<LoadedPlugin[]> {
-  return loadPluginsFromRepo(repoDir);
 }

@@ -158,3 +158,34 @@ describe('registry — source providers', () => {
     expect(findSourceProviderForUrl('not a url')).toBeNull();
   });
 });
+
+describe('registry — guild repository scoping', () => {
+  it('supports registering and overriding plugins per guild with global fallback', () => {
+    const globalPlugin = makePlugin('custom-lang', ['.custom']);
+    registerPlugin(globalPlugin, null);
+
+    const guildPlugin = makePlugin('custom-lang', ['.custom']);
+    (guildPlugin.instance as any).version = '2.0.0-guild';
+    registerPlugin(guildPlugin, 'guild-42');
+
+    // Guild-scoped lookup gets guild override
+    const inGuild = getPlugin('custom-lang', 'guild-42');
+    expect(inGuild?.version).toBe('2.0.0-guild');
+
+    // Other guild gets global version
+    const inOtherGuild = getPlugin('custom-lang', 'guild-99');
+    expect(inOtherGuild?.version).toBe('1.0.0');
+
+    // Extension lookup respects guild scope
+    expect(getPluginByExtension('.custom', 'guild-42')?.version).toBe('2.0.0-guild');
+    expect(getPluginByExtension('.custom', 'guild-99')?.version).toBe('1.0.0');
+
+    // Disabling in guild disables only in that guild
+    disablePlugin('custom-lang', 'guild-42');
+    expect(getPlugin('custom-lang', 'guild-42')).toBeNull();
+    expect(getPlugin('custom-lang', 'guild-99')?.version).toBe('1.0.0');
+
+    unregisterPlugin('custom-lang', 'guild-42');
+    unregisterPlugin('custom-lang', null);
+  });
+});

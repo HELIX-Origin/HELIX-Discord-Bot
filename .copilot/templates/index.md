@@ -1,4 +1,4 @@
-﻿# Templates Index
+# Templates Index
 
 This directory contains reusable Markdown template definitions and engineering guides for HELIX CLI and Discord Bot project generation.
 
@@ -24,6 +24,7 @@ This directory contains reusable Markdown template definitions and engineering g
 | **backend-java** | Backend | Spring Boot 3 | Java 21 | [backend-java.md](backend-java.md) |
 | **backend-python** | Backend | FastAPI + uv | Python | [backend-python.md](backend-python.md) |
 | **mermaid-guide** | Standards | Mermaid Diagrams | Markdown | [mermaid-diagram-guide.md](mermaid-diagram-guide.md) |
+| **commit-guide** | Standards | Commit & PR Message Conventions | Markdown | [commit-message-guide.md](commit-message-guide.md) |
 
 ---
 

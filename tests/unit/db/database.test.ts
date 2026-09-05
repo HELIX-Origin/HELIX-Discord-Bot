@@ -247,3 +247,57 @@ describe('database — key/value store and stats', () => {
     first.close();
   });
 });
+
+describe('database — plugin repositories', () => {
+  it('adds, gets, lists, enables/disables, and removes database-backed plugin repos with guild scoping', () => {
+    const h = createTestDb();
+    try {
+      const id1 = h.db.addPluginRepository({
+        repoName: 'community/awesome-plugins',
+        guildId: 'guild-100',
+        configJson: JSON.stringify({ name: 'awesome', version: '1.0.0' }),
+        manifestJson: JSON.stringify({ id: 'awesome-linter', version: '1.0.0' }),
+        entrySource: 'exports.default = { id: "awesome-linter", lint: () => ({}) };',
+        enabled: true,
+      });
+      expect(id1).toBeGreaterThan(0);
+
+      const id2 = h.db.addPluginRepository({
+        repoName: 'global/shared-plugins',
+        guildId: null,
+        configJson: JSON.stringify({ name: 'shared', version: '1.0.0' }),
+        manifestJson: JSON.stringify({ id: 'shared-plugin', version: '1.0.0' }),
+        entrySource: 'exports.default = { id: "shared-plugin", lint: () => ({}) };',
+        enabled: true,
+      });
+      expect(id2).toBeGreaterThan(0);
+
+      // Scoped lookup
+      const gRepo = h.db.getPluginRepository('community/awesome-plugins', 'guild-100');
+      expect(gRepo).not.toBeNull();
+      expect(gRepo?.repoName).toBe('community/awesome-plugins');
+      expect(gRepo?.guildId).toBe('guild-100');
+
+      // Guild-aware list returns guild + global
+      const guildList = h.db.listPluginRepositories('guild-100');
+      expect(guildList).toHaveLength(2);
+
+      // Global-only list
+      const globalList = h.db.listPluginRepositories(null);
+      expect(globalList).toHaveLength(1);
+      expect(globalList[0].repoName).toBe('global/shared-plugins');
+
+      // Toggle enabled
+      expect(h.db.setPluginRepositoryEnabled('community/awesome-plugins', false, 'guild-100')).toBe(true);
+      expect(h.db.getPluginRepository('community/awesome-plugins', 'guild-100')?.enabled).toBe(false);
+
+      // Remove
+      expect(h.db.removePluginRepository('community/awesome-plugins', 'guild-100')).toBe(true);
+      expect(h.db.getPluginRepository('community/awesome-plugins', 'guild-100')).toBeNull();
+      expect(h.db.listPluginRepositories('guild-100')).toHaveLength(1);
+      expect(h.db.getStats().pluginRepoCount).toBe(1);
+    } finally {
+      h.cleanup();
+    }
+  });
+});

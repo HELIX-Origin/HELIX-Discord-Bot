@@ -1,14 +1,17 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType, Message } from 'discord.js';
+import { Message } from 'discord.js';
 import type { CommandDefinition, ExecuteContext } from '../../types/command.js';
 import { getMessage, createEmbed, formatError } from '../../handlers/message-handler.js';
-import { registerPlugins, getAllPlugins, getEnabledPluginIds, getPlugin, enablePlugin, disablePlugin, unregisterPlugin, getRegistryStats } from '../../plugins/registry.js';
-import { loadCommunityPlugins, loadAllPlugins } from '../../plugins/plugin-loader.js';
-import { BOT_ROOT_DIR } from '../../env.js';
-import fs from 'fs';
-import path from 'path';
-
-const PLUGINS_DIR = path.resolve(BOT_ROOT_DIR, 'src', 'plugins');
-const COMMUNITY_DIR = path.join(PLUGINS_DIR, 'community');
+import {
+  getAllPlugins,
+  getEnabledPluginIds,
+  getPlugin,
+  enablePlugin,
+  disablePlugin,
+  unregisterPlugin,
+  getRegistryStats,
+} from '../../plugins/registry.js';
+import { fetchAndStorePluginRepo, loadAllPlugins } from '../../plugins/plugin-loader.js';
+import { BotDatabase } from '../../db/database.js';
 
 function isMessageResponse(res: Message | any): res is Message {
   return res && typeof res.edit === 'function' && 'channelId' in res;
@@ -16,29 +19,59 @@ function isMessageResponse(res: Message | any): res is Message {
 
 export const plugin: CommandDefinition = {
   name: 'plugin',
-  description: 'Manage language plugins',
+  description: 'Manage language plugins and database-backed repositories',
   category: 'plugins',
   subcommands: [
-    { name: 'list', description: 'List installed plugins' },
-    { name: 'install', description: 'Install plugin from GitHub', options: [
-      { name: 'repository', description: 'GitHub repository (owner/repo)', type: 'string', required: true }
-    ]},
-    { name: 'remove', description: 'Remove installed plugin', options: [
-      { name: 'plugin_id', description: 'Plugin ID to remove', type: 'string', required: true }
-    ]},
-    { name: 'info', description: 'Show plugin details', options: [
-      { name: 'plugin_id', description: 'Plugin ID', type: 'string', required: true }
-    ]},
-    { name: 'enable', description: 'Enable a plugin', options: [
-      { name: 'plugin_id', description: 'Plugin ID to enable', type: 'string', required: true }
-    ]},
-    { name: 'disable', description: 'Disable a plugin', options: [
-      { name: 'plugin_id', description: 'Plugin ID to disable', type: 'string', required: true }
-    ]},
-    { name: 'reload', description: 'Reload all plugins' },
+    { name: 'list', description: 'List installed plugins for this server' },
+    {
+      name: 'install',
+      description: 'Install and store a plugin repository from GitHub into the database',
+      options: [
+        { name: 'repository', description: 'GitHub repository (owner/repo)', type: 'string', required: true },
+      ],
+    },
+    {
+      name: 'remove',
+      description: 'Remove an installed plugin or repository',
+      options: [
+        { name: 'identifier', description: 'Plugin ID or repository (owner/repo) to remove', type: 'string', required: true },
+      ],
+    },
+    {
+      name: 'info',
+      description: 'Show plugin details',
+      options: [
+        { name: 'plugin_id', description: 'Plugin ID', type: 'string', required: true },
+      ],
+    },
+    {
+      name: 'enable',
+      description: 'Enable a plugin',
+      options: [
+        { name: 'plugin_id', description: 'Plugin ID to enable', type: 'string', required: true },
+      ],
+    },
+    {
+      name: 'disable',
+      description: 'Disable a plugin',
+      options: [
+        { name: 'plugin_id', description: 'Plugin ID to disable', type: 'string', required: true },
+      ],
+    },
+    {
+      name: 'repo',
+      description: 'Manage database plugin repositories',
+      options: [
+        { name: 'action', description: 'Repository action: add, list, or remove', type: 'string', required: true },
+        { name: 'repository', description: 'GitHub repository (owner/repo)', type: 'string', required: false },
+      ],
+    },
+    { name: 'reload', description: 'Reload all plugins from disk and database' },
   ],
   async execute(ctx: ExecuteContext) {
     const { message, interaction, args, getOption } = ctx;
+    const guildId = ctx.interaction?.guildId || ctx.message?.guildId || null;
+    const db = BotDatabase.getInstance();
 
     const reply = async (content: any) => {
       if (message) return message.reply(content);
@@ -50,24 +83,97 @@ export const plugin: CommandDefinition = {
       return interaction!.editReply(content);
     };
 
-    const sub = getOption<string>('subcommand') || args[0];
+    const rawSub = getOption<string>('subcommand') || args[0];
 
-    switch (sub) {
+    // Handle `>plugin repo <action>` or slash options
+    if (rawSub === 'repo') {
+      const action = getOption<string>('action') || args[1];
+      const repoArg = getOption<string>('repository') || args[2];
+
+      if (action === 'add' || action === 'install') {
+        if (!repoArg) {
+          return reply({ embeds: [formatError('missing_argument', { arg: 'repository' })], ephemeral: true });
+        }
+        const waitMsg = await reply({ embeds: [createEmbed('config.plugin.install_embed', { repo: repoArg })] });
+        try {
+          const loaded = await fetchAndStorePluginRepo(repoArg, guildId);
+          return editReply(waitMsg, {
+            embeds: [
+              createEmbed('config.plugin.install_success_embed', {
+                count: String(loaded.length),
+                repo: repoArg,
+              }),
+            ],
+          });
+        } catch (err: any) {
+          return editReply(waitMsg, { embeds: [formatError('install_failed', { reason: err.message })] });
+        }
+      }
+
+      if (action === 'remove' || action === 'delete') {
+        if (!repoArg) {
+          return reply({ embeds: [formatError('missing_argument', { arg: 'repository' })], ephemeral: true });
+        }
+        const existing = db.getPluginRepository(repoArg, guildId);
+        if (!existing) {
+          return reply({ embeds: [formatError('repo_not_found', { repo: repoArg })] });
+        }
+
+        try {
+          const config = JSON.parse(existing.configJson);
+          if (Array.isArray(config.plugins)) {
+            for (const p of config.plugins) {
+              unregisterPlugin(p.id, guildId);
+            }
+          }
+        } catch {}
+
+        db.removePluginRepository(repoArg, guildId);
+        return reply({ content: getMessage('config.plugin.repo_remove_success', { repo: repoArg }) });
+      }
+
+      // Default: list repos
+      const repos = db.listPluginRepositories(guildId);
+      if (repos.length === 0) {
+        return reply({
+          embeds: [
+            createEmbed('config.plugin.repo_list_embed', {
+              reposList: 'ℹ️ No custom plugin repositories are configured for this server.',
+            }),
+          ],
+        });
+      }
+
+      const lines = repos.map((r) => {
+        const status = r.enabled ? '🟢' : '🔴';
+        const scope = r.guildId ? `Server (${r.guildId})` : 'Global';
+        return `${status} \`${r.repoName}\` — [${scope}] (updated: ${r.updatedAt || 'n/a'})`;
+      });
+
+      return reply({
+        embeds: [
+          createEmbed('config.plugin.repo_list_embed', {
+            reposList: lines.join('\n'),
+          }),
+        ],
+      });
+    }
+
+    switch (rawSub) {
       case 'list': {
-        const stats = getRegistryStats();
-        const enabledIds = getEnabledPluginIds();
-        const allPlugins = getAllPlugins();
+        const enabledIds = getEnabledPluginIds(guildId);
+        const allPlugins = getAllPlugins(guildId);
 
         if (allPlugins.length === 0) {
           return reply({ embeds: [formatError('no_plugins_loaded')] });
         }
 
-        const lines = allPlugins.map(p => {
+        const lines = allPlugins.map((p) => {
           const manifest = (p as any).manifest || {};
-          const id = manifest.id || 'unknown';
-          const version = manifest.version || '0.0.0';
-          const name = manifest.name || id;
-          const caps = manifest.capabilities?.join(', ') || 'none';
+          const id = manifest.id || p.id || 'unknown';
+          const version = manifest.version || p.version || '0.0.0';
+          const name = manifest.name || p.name || id;
+          const caps = (manifest.capabilities || p.capabilities)?.join(', ') || 'none';
           const enabled = enabledIds.includes(id) ? '🟢' : '🔴';
           return `${enabled} \`${id}\` v${version} — ${name} [${caps}]`;
         });
@@ -84,76 +190,64 @@ export const plugin: CommandDefinition = {
           return reply({ embeds: [formatError('missing_argument', { arg: 'repository' })], ephemeral: true });
         }
 
-        if (!fs.existsSync(COMMUNITY_DIR)) {
-          fs.mkdirSync(COMMUNITY_DIR, { recursive: true });
-        }
-
-        const repoName = repo.replace('/', '-');
-        const targetDir = path.join(COMMUNITY_DIR, repoName);
-
-        if (fs.existsSync(targetDir)) {
-          return reply({ embeds: [formatError(`Repository \`${repo}\` is already cloned locally.`)] });
-        }
-
         const waitMsg = await reply({ embeds: [createEmbed('config.plugin.install_embed', { repo })] });
 
         try {
-          const { execSync } = await import('child_process');
-          execSync(`git clone --depth 1 https://github.com/${repo}.git "${targetDir}"`, {
-            stdio: 'pipe',
-            timeout: 60000,
+          const loaded = await fetchAndStorePluginRepo(repo, guildId);
+          return editReply(waitMsg, {
+            embeds: [
+              createEmbed('config.plugin.install_success_embed', {
+                count: String(loaded.length),
+                repo,
+              }),
+            ],
           });
-
-          const loaded = await loadCommunityPlugins(targetDir);
-          registerPlugins(loaded);
-
-          return editReply(waitMsg, { embeds: [createEmbed('config.plugin.install_success_embed', { count: String(loaded.length), repo })] });
         } catch (err: any) {
-          if (fs.existsSync(targetDir)) {
-            fs.rmSync(targetDir, { recursive: true, force: true });
-          }
           return editReply(waitMsg, { embeds: [formatError('install_failed', { reason: err.message })] });
         }
       }
 
       case 'remove': {
-        const pluginId = getOption<string>('plugin_id') || args[1];
-        if (!pluginId) {
-          return reply({ embeds: [formatError('missing_argument', { arg: 'plugin_id' })], ephemeral: true });
+        const target = getOption<string>('identifier') || getOption<string>('plugin_id') || args[1];
+        if (!target) {
+          return reply({ embeds: [formatError('missing_argument', { arg: 'identifier' })], ephemeral: true });
         }
 
-        const plugin = getPlugin(pluginId);
-        if (!plugin) {
-          return reply({ embeds: [formatError('plugin_not_found', { name: pluginId })] });
-        }
-
-        const communityRepos = fs.existsSync(COMMUNITY_DIR)
-          ? fs.readdirSync(COMMUNITY_DIR, { withFileTypes: true }).filter(d => d.isDirectory()).map(d => d.name)
-          : [];
-
-        let removed = false;
-        for (const repoName of communityRepos) {
-          const repoDir = path.join(COMMUNITY_DIR, repoName);
-          const configPath = path.join(repoDir, 'config.json');
-          if (fs.existsSync(configPath)) {
-            try {
-              const config = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
-              if (config.plugins?.some((p: any) => p.id === pluginId)) {
-                fs.rmSync(repoDir, { recursive: true, force: true });
-                removed = true;
-                break;
+        // 1. Check if target is a repo
+        const existingRepo = db.getPluginRepository(target, guildId);
+        if (existingRepo) {
+          try {
+            const config = JSON.parse(existingRepo.configJson);
+            if (Array.isArray(config.plugins)) {
+              for (const p of config.plugins) {
+                unregisterPlugin(p.id, guildId);
               }
-            } catch {}
-          }
+            }
+          } catch {}
+          db.removePluginRepository(target, guildId);
+          return reply({ content: getMessage('config.plugin.repo_remove_success', { repo: target }) });
         }
 
-        unregisterPlugin(pluginId);
-
-        if (removed) {
-          return reply({ content: getMessage('config.plugin.remove_success', { id: pluginId }) });
-        } else {
-          return reply({ embeds: [formatError('plugin_not_found', { name: pluginId })] });
+        // 2. Check if target is a plugin ID
+        const pluginInstance = getPlugin(target, guildId);
+        if (!pluginInstance) {
+          return reply({ embeds: [formatError('plugin_not_found', { name: target })] });
         }
+
+        // Find and clean up repository from DB if present
+        const repos = db.listPluginRepositories(guildId);
+        for (const r of repos) {
+          try {
+            const config = JSON.parse(r.configJson);
+            if (config.plugins?.some((p: any) => p.id === target)) {
+              db.removePluginRepository(r.repoName, r.guildId);
+              break;
+            }
+          } catch {}
+        }
+
+        unregisterPlugin(target, guildId);
+        return reply({ content: getMessage('config.plugin.remove_success', { id: target }) });
       }
 
       case 'info': {
@@ -162,20 +256,20 @@ export const plugin: CommandDefinition = {
           return reply({ embeds: [formatError('missing_argument', { arg: 'plugin_id' })], ephemeral: true });
         }
 
-        const plugin = getPlugin(pluginId);
-        if (!plugin) {
+        const pluginInstance = getPlugin(pluginId, guildId);
+        if (!pluginInstance) {
           return reply({ embeds: [formatError('plugin_not_found', { name: pluginId })] });
         }
 
-        const manifest = (plugin as any).manifest || {};
+        const manifest = (pluginInstance as any).manifest || {};
 
         const embed = createEmbed('config.plugin.info_embed', {
           id: pluginId,
-          name: manifest.name || pluginId,
-          version: manifest.version || '0.0.0',
+          name: manifest.name || pluginInstance.name || pluginId,
+          version: manifest.version || pluginInstance.version || '0.0.0',
           author: manifest.author || 'Community',
-          extensions: manifest.fileExtensions?.join(', ') || 'none',
-          capabilities: manifest.capabilities?.join(', ') || 'none',
+          extensions: (manifest.fileExtensions || pluginInstance.fileExtensions)?.join(', ') || 'none',
+          capabilities: (manifest.capabilities || pluginInstance.capabilities)?.join(', ') || 'none',
           description: manifest.description || 'No description provided',
         });
 
@@ -188,7 +282,7 @@ export const plugin: CommandDefinition = {
           return reply({ embeds: [formatError('missing_argument', { arg: 'plugin_id' })], ephemeral: true });
         }
 
-        if (enablePlugin(pluginId)) {
+        if (enablePlugin(pluginId, guildId)) {
           return reply({ content: getMessage('config.plugin.enable_success', { id: pluginId }) });
         } else {
           return reply({ embeds: [formatError('plugin_not_found', { name: pluginId })] });
@@ -201,7 +295,7 @@ export const plugin: CommandDefinition = {
           return reply({ embeds: [formatError('missing_argument', { arg: 'plugin_id' })], ephemeral: true });
         }
 
-        if (disablePlugin(pluginId)) {
+        if (disablePlugin(pluginId, guildId)) {
           return reply({ content: getMessage('config.plugin.disable_success', { id: pluginId }) });
         } else {
           return reply({ embeds: [formatError('plugin_not_found', { name: pluginId })] });
@@ -209,11 +303,9 @@ export const plugin: CommandDefinition = {
       }
 
       case 'reload': {
-        const loaded = await loadAllPlugins();
-        registerPlugins(loaded);
-
-        const s = getRegistryStats();
-        return reply({ content: `🔄 Reloaded language plugins. Active: ${s.enabled} plugin(s).` });
+        await loadAllPlugins();
+        const s = getRegistryStats(guildId);
+        return reply({ content: `🔄 Reloaded language plugins. Active: ${s.enabled} plugin(s) (total ${s.total}).` });
       }
 
       default: {

@@ -388,16 +388,22 @@
       "install_embed": {
         "title": "📦 Installing Plugin",
         "color": "#00e5ff",
-        "description": "Cloning repository `{repo}` into local plugin registry..."
+        "description": "Fetching repository `{repo}` into database plugin registry..."
       },
       "install_success_embed": {
         "title": "✅ Plugin Installed",
         "color": "#00e676",
-        "description": "Successfully installed `{count}` plugin(s) from `{repo}`."
+        "description": "Successfully installed `{count}` plugin(s) from `{repo}` into database registry."
       },
       "remove_success": "🗑️ Successfully removed plugin `{id}`.",
       "enable_success": "✅ Enabled language plugin `{id}`.",
-      "disable_success": "⏸️ Disabled language plugin `{id}`."
+      "disable_success": "⏸️ Disabled language plugin `{id}`.",
+      "repo_list_embed": {
+        "title": "📦 Configured Plugin Repositories",
+        "color": "#00e5ff",
+        "description": "{reposList}"
+      },
+      "repo_remove_success": "🗑️ Successfully removed repository `{repo}`."
     }
   },
   "events": {
