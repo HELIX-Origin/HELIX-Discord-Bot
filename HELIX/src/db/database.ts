@@ -1,7 +1,10 @@
 import fs from 'fs';
 import path from 'path';
+import { createRequire } from 'node:module';
 import { getDbPath } from '../env.js';
 import { logs } from '../handlers/logs-handler.js';
+
+const require = createRequire(import.meta.url);
 
 export interface ScaffoldLogEntry {
   userId: string;
@@ -115,15 +118,14 @@ export class BotDatabase {
     }
 
     try {
-      // Dynamic require or import of node:sqlite
       const { DatabaseSync } = (globalThis as any).DatabaseSync
         ? { DatabaseSync: (globalThis as any).DatabaseSync }
         : require('node:sqlite');
 
       this.db = new DatabaseSync(this.dbPath);
       this.ensureSchema();
-    } catch {
-      // Graceful fallback if node:sqlite isn't accessible
+    } catch (err: any) {
+      logs.error(`Failed to initialize SQLite database at ${this.dbPath}: ${err?.message || err}`);
       this.db = null;
     }
   }

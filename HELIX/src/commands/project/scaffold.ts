@@ -1,4 +1,6 @@
 import { createEmbed, formatError } from '../../handlers/message-handler.js';
+import { getCommandHelpEmbed } from '../../handlers/help-registrar.js';
+import { botSettings } from '../../handlers/settings-manager.js';
 import type { CommandDefinition } from '../../types/command.js';
 
 export const scaffold: CommandDefinition = {
@@ -11,13 +13,16 @@ export const scaffold: CommandDefinition = {
     { name: 'type', description: 'Project type', type: 'string', required: true },
     { name: 'name', description: 'Project name', type: 'string', required: true },
   ],
-  async execute({ message, interaction, getOption }) {
+  async execute({ message, interaction, getOption, guild }) {
     const type = getOption<string>('type');
     const name = getOption<string>('name');
     if (!type || !name) {
-      const errEmbed = formatError('missing_argument', { arg: 'type, name' });
-      if (message) return message.reply({ embeds: [errEmbed] });
-      return interaction!.reply({ embeds: [errEmbed], ephemeral: true });
+      const prefix = guild ? botSettings.getPrefix(guild.id) : '>';
+      const helpEmbed = getCommandHelpEmbed('scaffold', prefix, {
+        missingNotice: 'Please provide both `<type>` and `<name>` to preview scaffolding.',
+      });
+      if (message) return message.reply({ embeds: [helpEmbed!] });
+      return interaction!.reply({ embeds: [helpEmbed!], ephemeral: true });
     }
 
     const previewTree = `${name}/\n├── package.json\n├── src/\n│   └── index.ts\n├── README.md\n└── tsconfig.json`;

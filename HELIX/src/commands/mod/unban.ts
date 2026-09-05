@@ -1,6 +1,8 @@
 import { PermissionFlagsBits } from 'discord.js';
 import { BotDatabase } from '../../db/database.js';
 import { createEmbed, formatError, getMessage } from '../../handlers/message-handler.js';
+import { getCommandHelpEmbed } from '../../handlers/help-registrar.js';
+import { botSettings } from '../../handlers/settings-manager.js';
 import { sendModLog } from '../../handlers/mod-log-handler.js';
 import type { CommandDefinition } from '../../types/command.js';
 
@@ -21,9 +23,12 @@ export const unban: CommandDefinition = {
     const modUser = message?.author || interaction!.user;
 
     if (!userId) {
-      const err = formatError(getMessage('errors.missing_argument', { arg: 'user_id' }));
-      if (message) return message.reply({ embeds: [err] });
-      return interaction!.reply({ embeds: [err], ephemeral: true });
+      const prefix = guild ? botSettings.getPrefix(guild.id) : '>';
+      const helpEmbed = getCommandHelpEmbed('unban', prefix, {
+        missingNotice: 'Please provide a `<user_id>` to unban.',
+      });
+      if (message) return message.reply({ embeds: [helpEmbed!] });
+      return interaction!.reply({ embeds: [helpEmbed!], ephemeral: true });
     }
 
     try {

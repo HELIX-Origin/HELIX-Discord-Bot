@@ -3,6 +3,7 @@ import { BotDatabase } from '../../db/database.js';
 import { botSettings } from '../../handlers/settings-manager.js';
 import { createTicketsHubEmbed } from '../../interactions/tickets.js';
 import { createEmbed, formatError, getMessage } from '../../handlers/message-handler.js';
+import { getCommandHelpEmbed } from '../../handlers/help-registrar.js';
 import type { CommandDefinition } from '../../types/command.js';
 
 export const ticket: CommandDefinition = {
@@ -26,7 +27,7 @@ export const ticket: CommandDefinition = {
     { name: 'remove', description: 'Remove user from ticket', options: [{ name: 'user', description: 'User', type: 'user', required: true }] },
     { name: 'transcript', description: 'Generate ticket transcript' },
   ],
-  async execute({ message, interaction, guild, user }) {
+  async execute({ message, interaction, guild, user, args = [] }) {
     const db = BotDatabase.getInstance();
 
     if (interaction) {
@@ -107,9 +108,10 @@ export const ticket: CommandDefinition = {
       return;
     }
 
-    // Prefix: >ticket create "subject" | >ticket close | >ticket setup-hub #channel
-    const args = message!.content.split(/\s+/);
-    const sub = args[1]?.toLowerCase();
+    // Prefix: >ticket <create|close|setup-hub|add|remove|transcript>
+    const sub = args[0]?.toLowerCase();
+    const prefix = botSettings.getPrefix(guild.id);
+
     if (sub === 'setup-hub') {
       const member = message!.member;
       if (!member?.permissions.has(PermissionFlagsBits.ManageGuild)) return message!.reply({ embeds: [formatError('permission_denied')] });
@@ -119,6 +121,51 @@ export const ticket: CommandDefinition = {
       botSettings.setGuildSettings({ guildId: guild.id, ticketsHubChannelId: ch.id });
       return message!.reply(`✅ Hub deployed in <#${ch.id}>!`);
     }
-    return message!.reply({ embeds: [formatError('subcommand_not_found')] });
+
+    if (sub === 'create') {
+      const subject = args.slice(1).join(' ').trim();
+      if (!subject) {
+        const helpEmbed = getCommandHelpEmbed('ticket', prefix, {
+          missingNotice: 'Please provide a `<subject>` to create a ticket.',
+          customUsage: `${prefix}ticket create <subject>`,
+        });
+        return message!.reply({ embeds: [helpEmbed!] });
+      }
+      const active = db.getUserActiveTicket(guild.id, user.id);
+      if (active) return message!.reply({ embeds: [formatError(`You already have an active ticket: <#${active.threadId}>`)] });
+
+      const settings = botSettings.getGuildSettings(guild.id);
+      let targetCh: any = message!.channel;
+      if (settings?.ticketsHubChannelId) { try { const h = await guild.channels.fetch(settings.ticketsHubChannelId); if (h?.isTextBased()) targetCh = h; } catch {} }
+      if (!targetCh?.isTextBased() || targetCh.isThread()) return message!.reply({ embeds: [formatError('Cannot create ticket in this channel.')] });
+
+      const clean = user.username.replace(/[^a-zA-Z0-9]/g, '').slice(0, 12).toLowerCase() || 'user';
+      let thread: ThreadChannel;
+      try { thread = await targetCh.threads.create({ name: `ticket-${clean}-${Date.now().toString().slice(-4)}`, autoArchiveDuration: 10080, type: ChannelType.PrivateThread }); }
+      catch { thread = await targetCh.threads.create({ name: `ticket-${clean}-${Date.now().toString().slice(-4)}`, autoArchiveDuration: 10080, type: ChannelType.PublicThread }); }
+
+      try { await thread.members.add(user.id); } catch {}
+      const mgr = settings?.ticketManagerRoleId ? `<@&${settings.ticketManagerRoleId}>` : 'Support Team';
+      const embed = createEmbed('config.ticket.welcome_embed', { subject, userId: user.id, staffMention: mgr });
+      const btn = new ActionRowBuilder<ButtonBuilder>().addComponents(new ButtonBuilder().setCustomId('helix_ticket_close').setLabel('Close Ticket').setStyle(ButtonStyle.Danger).setEmoji('🔒'));
+      await thread.send({ content: `<@${user.id}> ${mgr}`, embeds: [embed], components: [btn] });
+      db.createTicket({ guildId: guild.id, channelId: targetCh.id, threadId: thread.id, userId: user.id, subject });
+      return message!.reply(`✅ Ticket opened: <#${thread.id}>`);
+    }
+
+    if (sub === 'close') {
+      if (!message!.channel?.isThread()) return message!.reply({ embeds: [formatError('Use this command inside a ticket thread.')] });
+      const reason = args.slice(1).join(' ').trim() || 'Resolved';
+      db.closeTicket(message!.channel.id, user.id);
+      const embed = createEmbed('config.ticket.closed_embed', { closedBy: user.id });
+      await message!.reply({ embeds: [embed] });
+      try { await (message!.channel as ThreadChannel).setLocked(true, reason); await (message!.channel as ThreadChannel).setArchived(true, reason); } catch {}
+      return;
+    }
+
+    const helpEmbed = getCommandHelpEmbed('ticket', prefix, {
+      missingNotice: `Unknown subcommand "${sub || ''}". Available: \`create\`, \`close\`, \`setup-hub\`, \`add\`, \`remove\`, \`transcript\``,
+    });
+    return message!.reply({ embeds: [helpEmbed!] });
   },
 };

@@ -8,6 +8,12 @@ export interface CommandHelpOption {
   required?: boolean;
 }
 
+export interface CommandHelpSubcommand {
+  name: string;
+  description: string;
+  options?: CommandHelpOption[];
+}
+
 export interface CommandHelp {
   name: string;
   description: string;
@@ -15,7 +21,7 @@ export interface CommandHelp {
   usage: string;
   permissions: string[];
   aliases?: string[];
-  subcommands?: string[];
+  subcommands?: (string | CommandHelpSubcommand)[];
   options?: CommandHelpOption[];
   examples?: string[];
 }
@@ -30,7 +36,7 @@ export function createHelp(
     usage?: string;
     permissions?: string[];
     aliases?: string[];
-    subcommands?: string[];
+    subcommands?: (string | CommandHelpSubcommand)[];
     options?: CommandHelpOption[];
     examples?: string[];
   } = {},
@@ -207,9 +213,17 @@ export function buildCommandHelpEmbed(
 
   // Subcommands (if any)
   if (help.subcommands && help.subcommands.length > 0) {
-    const subLines = help.subcommands.map(s => `• \`${prefix}${help.name} ${s}\``);
+    const subLines = help.subcommands.map(s => {
+      if (typeof s === 'object' && s !== null) {
+        const optStr = s.options && s.options.length > 0
+          ? ' ' + s.options.map(o => o.required ? `<${o.name}>` : `[${o.name}]`).join(' ')
+          : '';
+        return `• \`${prefix}${help.name} ${s.name}${optStr}\` — ${s.description}`;
+      }
+      return `• \`${prefix}${help.name} ${s}\``;
+    });
     embed.addFields({
-      name: 'Available Subcommands',
+      name: 'Available Subcommands & Features',
       value: subLines.join('\n'),
       inline: false,
     });
@@ -235,4 +249,32 @@ export function buildCommandHelpEmbed(
   });
 
   return embed;
+}
+
+export function getCommandHelpEmbed(
+  commandName: string,
+  prefix: string,
+  opts?: { missingNotice?: string; customUsage?: string }
+): EmbedBuilder {
+  const help = getCommandHelp(commandName);
+  if (!help) {
+    const notice = opts?.missingNotice || `Missing required arguments for command \`${prefix}${commandName}\`.`;
+    const embed = new EmbedBuilder()
+      .setColor('#ff5252')
+      .setTitle(`⚠️ Command Help: \`${prefix}${commandName}\``)
+      .setDescription(`> ⚠️ **Missing Required Parameter:** ${notice}`)
+      .setTimestamp()
+      .setFooter({ text: `Prefix: ${prefix} • Type ${prefix}help to browse all categories` });
+
+    if (opts?.customUsage) {
+      embed.addFields({
+        name: 'Syntax & Usage',
+        value: `\`\`\`syntax\n${opts.customUsage}\n\`\`\``,
+        inline: false,
+      });
+    }
+
+    return embed;
+  }
+  return buildCommandHelpEmbed(help, prefix, opts);
 }

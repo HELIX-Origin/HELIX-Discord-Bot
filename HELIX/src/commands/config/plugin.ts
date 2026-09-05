@@ -1,6 +1,8 @@
 import { Message } from 'discord.js';
 import type { CommandDefinition, ExecuteContext } from '../../types/command.js';
 import { getMessage, createEmbed, formatError } from '../../handlers/message-handler.js';
+import { getCommandHelpEmbed } from '../../handlers/help-registrar.js';
+import { botSettings } from '../../handlers/settings-manager.js';
 import {
   getAllPlugins,
   getEnabledPluginIds,
@@ -87,6 +89,8 @@ export const plugin: CommandDefinition = {
 
     const rawSub = getOption<string>('subcommand') || args[0];
 
+    const prefix = botSettings.getPrefix(guildId);
+
     // Handle `>plugin repo <action>` or slash options
     if (rawSub === 'repo') {
       const action = getOption<string>('action') || args[1];
@@ -94,7 +98,11 @@ export const plugin: CommandDefinition = {
 
       if (action === 'add' || action === 'install') {
         if (!repoArg) {
-          return reply({ embeds: [formatError('missing_argument', { arg: 'repository' })], ephemeral: true });
+          const helpEmbed = getCommandHelpEmbed('plugin', prefix, {
+            missingNotice: `Please provide a GitHub repository (owner/repo) for subcommand \`plugin repo ${action}\`.`,
+            customUsage: `${prefix}plugin repo ${action} <owner/repo>`,
+          });
+          return reply({ embeds: [helpEmbed || formatError('missing_argument', { arg: 'repository' })], ephemeral: true });
         }
         const waitMsg = await reply({ embeds: [createEmbed('config.plugin.install_embed', { repo: repoArg })] });
         try {
@@ -114,7 +122,11 @@ export const plugin: CommandDefinition = {
 
       if (action === 'remove' || action === 'delete') {
         if (!repoArg) {
-          return reply({ embeds: [formatError('missing_argument', { arg: 'repository' })], ephemeral: true });
+          const helpEmbed = getCommandHelpEmbed('plugin', prefix, {
+            missingNotice: `Please provide a GitHub repository (owner/repo) for subcommand \`plugin repo ${action}\`.`,
+            customUsage: `${prefix}plugin repo ${action} <owner/repo>`,
+          });
+          return reply({ embeds: [helpEmbed || formatError('missing_argument', { arg: 'repository' })], ephemeral: true });
         }
         const existing = db.getPluginRepository(repoArg, guildId);
         if (!existing) {
@@ -189,7 +201,11 @@ export const plugin: CommandDefinition = {
       case 'install': {
         const repo = getOption<string>('repository') || args[1];
         if (!repo) {
-          return reply({ embeds: [formatError('missing_argument', { arg: 'repository' })], ephemeral: true });
+          const helpEmbed = getCommandHelpEmbed('plugin', prefix, {
+            missingNotice: `Please provide a GitHub repository (owner/repo) for subcommand \`plugin install\`.`,
+            customUsage: `${prefix}plugin install <owner/repo>`,
+          });
+          return reply({ embeds: [helpEmbed || formatError('missing_argument', { arg: 'repository' })], ephemeral: true });
         }
 
         const waitMsg = await reply({ embeds: [createEmbed('config.plugin.install_embed', { repo })] });
@@ -212,7 +228,11 @@ export const plugin: CommandDefinition = {
       case 'remove': {
         const target = getOption<string>('identifier') || getOption<string>('plugin_id') || args[1];
         if (!target) {
-          return reply({ embeds: [formatError('missing_argument', { arg: 'identifier' })], ephemeral: true });
+          const helpEmbed = getCommandHelpEmbed('plugin', prefix, {
+            missingNotice: `Please provide an identifier or plugin ID for subcommand \`plugin remove\`.`,
+            customUsage: `${prefix}plugin remove <plugin_id|owner/repo>`,
+          });
+          return reply({ embeds: [helpEmbed || formatError('missing_argument', { arg: 'identifier' })], ephemeral: true });
         }
 
         // 1. Check if target is a repo
@@ -255,7 +275,11 @@ export const plugin: CommandDefinition = {
       case 'info': {
         const pluginId = getOption<string>('plugin_id') || args[1];
         if (!pluginId) {
-          return reply({ embeds: [formatError('missing_argument', { arg: 'plugin_id' })], ephemeral: true });
+          const helpEmbed = getCommandHelpEmbed('plugin', prefix, {
+            missingNotice: `Please provide a plugin ID for subcommand \`plugin info\`.`,
+            customUsage: `${prefix}plugin info <plugin_id>`,
+          });
+          return reply({ embeds: [helpEmbed || formatError('missing_argument', { arg: 'plugin_id' })], ephemeral: true });
         }
 
         const pluginInstance = getPlugin(pluginId, guildId);
@@ -281,7 +305,11 @@ export const plugin: CommandDefinition = {
       case 'enable': {
         const pluginId = getOption<string>('plugin_id') || args[1];
         if (!pluginId) {
-          return reply({ embeds: [formatError('missing_argument', { arg: 'plugin_id' })], ephemeral: true });
+          const helpEmbed = getCommandHelpEmbed('plugin', prefix, {
+            missingNotice: `Please provide a plugin ID for subcommand \`plugin enable\`.`,
+            customUsage: `${prefix}plugin enable <plugin_id>`,
+          });
+          return reply({ embeds: [helpEmbed || formatError('missing_argument', { arg: 'plugin_id' })], ephemeral: true });
         }
 
         if (enablePlugin(pluginId, guildId)) {
@@ -294,7 +322,11 @@ export const plugin: CommandDefinition = {
       case 'disable': {
         const pluginId = getOption<string>('plugin_id') || args[1];
         if (!pluginId) {
-          return reply({ embeds: [formatError('missing_argument', { arg: 'plugin_id' })], ephemeral: true });
+          const helpEmbed = getCommandHelpEmbed('plugin', prefix, {
+            missingNotice: `Please provide a plugin ID for subcommand \`plugin disable\`.`,
+            customUsage: `${prefix}plugin disable <plugin_id>`,
+          });
+          return reply({ embeds: [helpEmbed || formatError('missing_argument', { arg: 'plugin_id' })], ephemeral: true });
         }
 
         if (disablePlugin(pluginId, guildId)) {

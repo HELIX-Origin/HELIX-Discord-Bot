@@ -165,4 +165,34 @@ describe('handlers/command-handler — prefix resolution & execution', () => {
     expect(syntaxField).toBeDefined();
     expect(syntaxField?.value).toContain('>ban <user>');
   });
+
+  it('delivers command help embed when subcommand missing required arguments', async () => {
+    let repliedPayload: any = null;
+    const mockMessage: any = {
+      author: { bot: false, id: 'user-admin', tag: 'Admin#0001' },
+      guild: { id: testGuildId, name: 'Test Guild' },
+      member: {
+        permissions: {
+          has: () => true,
+        },
+      },
+      channel: { name: 'general' },
+      channelId: 'channel-123',
+      content: '>set slash enable', // Missing required 'category' argument
+      reply: async (p: any) => {
+        repliedPayload = p;
+        return p;
+      },
+    };
+
+    await handlePrefixMessage(mockMessage);
+    expect(repliedPayload).toBeDefined();
+    expect(repliedPayload.embeds).toHaveLength(1);
+
+    const embedData = repliedPayload.embeds[0].toJSON();
+    expect(embedData.title).toContain('Command Help: `>set`');
+    expect(embedData.description).toContain('Missing Required Parameter');
+    expect(embedData.description).toContain('category');
+    expect(embedData.fields?.some((f: any) => f.name.includes('Subcommands'))).toBe(true);
+  });
 });

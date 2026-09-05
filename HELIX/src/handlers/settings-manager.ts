@@ -34,7 +34,10 @@ export class GuildSettingsManager {
       const db = BotDatabase.getInstance();
       const allSettings = db.getAllGuildSettings();
       for (const [guildId, settings] of allSettings.entries()) {
-        this.cache.set(guildId, { ...settings });
+        this.cache.set(guildId, {
+          ...settings,
+          prefix: settings.prefix || DEFAULT_PREFIX,
+        });
       }
       this.hydrated = true;
       logs.info(`Bot Session State hydrated with ${this.cache.size} guild configuration(s).`);
@@ -65,8 +68,9 @@ export class GuildSettingsManager {
       const db = BotDatabase.getInstance();
       const loaded = db.getGuildSettings(guildId);
       if (loaded) {
-        this.cache.set(guildId, loaded);
-        return loaded;
+        const full = { ...loaded, prefix: loaded.prefix || DEFAULT_PREFIX };
+        this.cache.set(guildId, full);
+        return full;
       }
     } catch {
       // Fallback on error
@@ -112,7 +116,7 @@ export class GuildSettingsManager {
     // 2. Persist to SQLite
     try {
       const db = BotDatabase.getInstance();
-      db.setGuildSettings(settings);
+      db.setGuildSettings(merged);
     } catch (err: any) {
       logs.error(`Failed to persist guild settings for ${settings.guildId} to database: ${err?.message || err}`);
     }

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach, afterAll } from 'vitest';
 import {
   getSlashCommandCategories,
   getSlashCommands,
@@ -19,12 +19,22 @@ import { ping } from '../../../HELIX/src/commands/util/ping.js';
 import { help } from '../../../HELIX/src/commands/info/help.js';
 import { warn } from '../../../HELIX/src/commands/mod/warn.js';
 import { REST } from 'discord.js';
-import fs from 'node:fs';
-import path from 'node:path';
-import os from 'node:os';
+import { withTempDbEnvironment } from '../../helpers/db.js';
+import { botSettings } from '../../../HELIX/src/handlers/settings-manager.js';
+
+const tempEnv = withTempDbEnvironment();
 
 describe('slash-handler', () => {
   let db: BotDatabase;
+
+  afterAll(() => {
+    tempEnv.cleanup();
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+    clearSlashCommands();
+  });
 
   beforeEach(() => {
     vi.spyOn(REST.prototype, 'setToken').mockReturnThis();
@@ -37,11 +47,6 @@ describe('slash-handler', () => {
     registerSlashCommand(ping);
     registerSlashCommand(help);
     registerSlashCommand(warn);
-  });
-
-  afterEach(() => {
-    vi.restoreAllMocks();
-    clearSlashCommands();
   });
 
   it('registers slash commands and retrieves them', () => {

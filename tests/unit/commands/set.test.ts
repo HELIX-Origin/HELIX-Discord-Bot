@@ -78,7 +78,8 @@ describe('commands/config/set — execute and permissions', () => {
     expect(repliedPayload).toBeDefined();
     expect(repliedPayload.embeds).toHaveLength(1);
     const embedData = repliedPayload.embeds[0].toJSON();
-    expect(embedData.description).toContain('Missing required argument: `prefix`');
+    expect(embedData.description).toContain('Missing Required Parameter');
+    expect(embedData.description).toContain('prefix');
   });
 
   it('updates tickets-hub channel with mention format', async () => {

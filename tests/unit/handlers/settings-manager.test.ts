@@ -86,4 +86,43 @@ describe('handlers/settings-manager — in-memory bot session state & DB sync', 
     expect(fetched.prefix).toBe('~');
     expect(botSettings.hasCached(lazyGuild)).toBe(true);
   });
+
+  it('guarantees complete guild settings persistence across simulated bot relaunches', () => {
+    const relaunchGuildId = `guild-relaunch-${Date.now()}`;
+
+    // 1. Initial bot session: User configures server settings
+    botSettings.setGuildSettings({
+      guildId: relaunchGuildId,
+      prefix: '?',
+      ticketsHubChannelId: '999888777',
+      ticketManagerRoleId: '111222333',
+      modLogChannelId: '444555666',
+      welcomeChannelId: '777888999',
+      enabledSlashCategories: ['utility', 'moderation', 'config'],
+    });
+
+    // 2. Verify in-memory state before shutdown
+    expect(botSettings.getPrefix(relaunchGuildId)).toBe('?');
+    expect(botSettings.getTicketsHubChannelId(relaunchGuildId)).toBe('999888777');
+    expect(botSettings.getTicketManagerRoleId(relaunchGuildId)).toBe('111222333');
+    expect(botSettings.getModLogChannelId(relaunchGuildId)).toBe('444555666');
+    expect(botSettings.getWelcomeChannelId(relaunchGuildId)).toBe('777888999');
+    expect(botSettings.getEnabledSlashCategories(relaunchGuildId)).toEqual(['utility', 'moderation', 'config']);
+
+    // 3. Simulate full bot shutdown & relaunch (purge in-memory session cache)
+    botSettings.clearCache();
+    expect(botSettings.hasCached(relaunchGuildId)).toBe(false);
+
+    // 4. Simulate bot startup hydration
+    botSettings.hydrateFromDatabase();
+    expect(botSettings.hasCached(relaunchGuildId)).toBe(true);
+
+    // 5. Assert all settings restored exactly as configured from SQLite persistence
+    expect(botSettings.getPrefix(relaunchGuildId)).toBe('?');
+    expect(botSettings.getTicketsHubChannelId(relaunchGuildId)).toBe('999888777');
+    expect(botSettings.getTicketManagerRoleId(relaunchGuildId)).toBe('111222333');
+    expect(botSettings.getModLogChannelId(relaunchGuildId)).toBe('444555666');
+    expect(botSettings.getWelcomeChannelId(relaunchGuildId)).toBe('777888999');
+    expect(botSettings.getEnabledSlashCategories(relaunchGuildId)).toEqual(['utility', 'moderation', 'config']);
+  });
 });

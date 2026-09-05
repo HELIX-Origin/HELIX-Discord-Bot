@@ -148,6 +148,7 @@ flowchart LR
 - [BUG-023](.agents/bugs/BUG-023-help-embed-overhaul-and-command-missing-args-help.md) — Help Command Embed Overhaul & Automated Missing Arguments Help Response — **Resolved** (4 Sub-Tasks)
 - [BUG-024](.agents/bugs/BUG-024-guild-settings-bot-session-and-db-sync.md) — Universal In-Memory Bot Session State & Unified Database Synchronization — **Resolved** (4 Sub-Tasks)
 - [BUG-025](.agents/bugs/BUG-025-instant-guild-slash-category-sync.md) — Instant Guild Slash Command Category Registration, Normalization & REST Synchronization — **Resolved** (4 Sub-Tasks)
+- [BUG-026](.agents/bugs/BUG-026-subcommand-and-command-missing-args-help.md) — Universal Subcommand & Command Missing Arguments Help Response Engine — **Resolved** (4 Sub-Tasks)
 
 ---
 

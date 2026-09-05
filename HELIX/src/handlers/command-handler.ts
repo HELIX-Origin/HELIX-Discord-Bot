@@ -87,7 +87,11 @@ export async function loadPrefixCommands(): Promise<void> {
           usage: generatedUsage,
           permissions: (cmd.permissions || []).map(formatPermissionName),
           aliases: cmd.aliases,
-          subcommands: cmd.subcommands?.map(s => s.name),
+          subcommands: cmd.subcommands?.map(s => ({
+            name: s.name,
+            description: s.description,
+            options: s.options,
+          })),
           options: cmd.options,
           examples: cmd.examples,
         }));
@@ -176,7 +180,7 @@ export async function handlePrefixMessage(message: Message): Promise<void> {
   try {
     const getOption = parseArgs(message, args, command);
 
-    // Validate required options defined on the command
+    // 1. Validate top-level required options defined on the command
     if (command.options && command.options.length > 0) {
       const missingOptions = command.options.filter(o => o.required && (getOption(o.name) === null || getOption(o.name) === undefined || getOption(o.name) === ''));
       if (missingOptions.length > 0) {
@@ -188,6 +192,81 @@ export async function handlePrefixMessage(message: Message): Promise<void> {
           });
           await message.reply({ embeds: [helpEmbed] });
           return;
+        }
+      }
+    }
+
+    // 2. Validate subcommand-based commands
+    if (command.subcommands && command.subcommands.length > 0) {
+      const helpEntry = getCommandHelp(command.name);
+      // If no subcommand argument was passed (e.g. >set, >ticket, >plugin)
+      if (args.length === 0) {
+        if (helpEntry) {
+          const helpEmbed = buildCommandHelpEmbed(helpEntry, prefix, {
+            missingNotice: `Please specify a subcommand to execute.`,
+          });
+          await message.reply({ embeds: [helpEmbed] });
+          return;
+        }
+      }
+
+      const subName = args[0]?.toLowerCase();
+      const subDef = command.subcommands.find(s => s.name.toLowerCase() === subName);
+
+      if (!subDef) {
+        // Unknown subcommand (e.g. >set foo)
+        if (helpEntry) {
+          const validSubList = command.subcommands.map(s => `\`${s.name}\``).join(', ');
+          const helpEmbed = buildCommandHelpEmbed(helpEntry, prefix, {
+            missingNotice: `Unknown subcommand \`${args[0]}\`. Available subcommands: ${validSubList}`,
+          });
+          await message.reply({ embeds: [helpEmbed] });
+          return;
+        }
+      } else {
+        // Subcommand is valid. Check required options for this subcommand
+        const subArgs = args.slice(1);
+        const subOpts = subDef.options || [];
+
+        // Special handling for nested subcommands / actions like `set slash enable <category>`
+        if (command.name === 'set' && subDef.name === 'slash') {
+          const action = subArgs[0]?.toLowerCase();
+          if (!action) {
+            if (helpEntry) {
+              const helpEmbed = buildCommandHelpEmbed(helpEntry, prefix, {
+                missingNotice: `Please provide action (\`enable\`, \`disable\`, \`view\`, \`clear\`) for \`${prefix}set slash\`.`,
+                customUsage: `${prefix}set slash <action> [category]`,
+              });
+              await message.reply({ embeds: [helpEmbed] });
+              return;
+            }
+          }
+          if ((action === 'enable' || action === 'disable') && !subArgs[1]) {
+            if (helpEntry) {
+              const helpEmbed = buildCommandHelpEmbed(helpEntry, prefix, {
+                missingNotice: `Please provide a \`<category>\` (e.g. \`moderation\`, \`utility\`, \`plugins\`, \`info\`, \`project\`, \`config\`, \`all\`) to ${action}.`,
+                customUsage: `${prefix}set slash ${action} <category>`,
+              });
+              await message.reply({ embeds: [helpEmbed] });
+              return;
+            }
+          }
+        } else {
+          // Standard subcommand options validation
+          for (let i = 0; i < subOpts.length; i++) {
+            const opt = subOpts[i];
+            if (opt.required && (subArgs[i] === undefined || subArgs[i] === null || subArgs[i] === '')) {
+              if (helpEntry) {
+                const subUsage = `${prefix}${command.name} ${subDef.name} ${subOpts.map(o => o.required ? `<${o.name}>` : `[${o.name}]`).join(' ')}`.trim();
+                const helpEmbed = buildCommandHelpEmbed(helpEntry, prefix, {
+                  missingNotice: `Please provide \`<${opt.name}>\` for subcommand \`${prefix}${command.name} ${subDef.name}\`.`,
+                  customUsage: subUsage,
+                });
+                await message.reply({ embeds: [helpEmbed] });
+                return;
+              }
+            }
+          }
         }
       }
     }

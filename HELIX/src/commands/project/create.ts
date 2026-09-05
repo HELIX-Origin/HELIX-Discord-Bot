@@ -1,5 +1,7 @@
 import { BotDatabase } from '../../db/database.js';
 import { createEmbed, formatError } from '../../handlers/message-handler.js';
+import { getCommandHelpEmbed } from '../../handlers/help-registrar.js';
+import { botSettings } from '../../handlers/settings-manager.js';
 import type { CommandDefinition } from '../../types/command.js';
 
 const TEMPLATES = [
@@ -31,14 +33,17 @@ export const create: CommandDefinition = {
     { name: 'git_platform', description: 'Git platform', type: 'string', required: false, choices: [{ name: 'GitHub', value: 'github' }, { name: 'GitLab', value: 'gitlab' }, { name: 'Bitbucket', value: 'bitbucket' }] },
     { name: 'dry_run', description: 'Preview without writing files', type: 'boolean', required: false },
   ],
-  async execute({ message, interaction, getOption, user }) {
+  async execute({ message, interaction, getOption, user, guild }) {
     const template = getOption<string>('template');
     const name = getOption<string>('name');
     const dryRun = getOption<boolean>('dry_run') || false;
     if (!template || !name) {
-      const errEmbed = formatError('missing_argument', { arg: 'template, name' });
-      if (message) return message.reply({ embeds: [errEmbed] });
-      return interaction!.reply({ embeds: [errEmbed], ephemeral: true });
+      const prefix = guild ? botSettings.getPrefix(guild.id) : '>';
+      const helpEmbed = getCommandHelpEmbed('create', prefix, {
+        missingNotice: 'Please provide both `<template>` and `<name>` to scaffold a project.',
+      });
+      if (message) return message.reply({ embeds: [helpEmbed!] });
+      return interaction!.reply({ embeds: [helpEmbed!], ephemeral: true });
     }
 
     BotDatabase.getInstance().logScaffold({ userId: user.id, templateId: template, projectName: name });

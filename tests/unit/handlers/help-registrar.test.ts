@@ -9,6 +9,7 @@ import {
   getCategoryDescription,
   getCategoryColor,
   getCommandHelp,
+  buildCommandHelpEmbed,
   helpCount,
 } from '../../../HELIX/src/handlers/help-registrar.js';
 
@@ -130,5 +131,28 @@ describe('help-registrar — structure', () => {
     expect(examplesField).toBeDefined();
     expect(examplesField?.inline).toBe(false);
     expect(examplesField?.value).toContain('>ban @spammer Excessive spam');
+  });
+
+  it('renders rich subcommands and actions with descriptions and options', () => {
+    const helpEntry = createHelp('ticket', 'Manage support tickets', 'config', {
+      subcommands: [
+        {
+          name: 'create',
+          description: 'Create a new ticket thread',
+          options: [{ name: 'subject', description: 'Subject of ticket', type: 'string', required: true }],
+        },
+        {
+          name: 'close',
+          description: 'Close the current ticket thread',
+        },
+      ],
+    });
+
+    const embed = buildCommandHelpEmbed(helpEntry, '>');
+    const data = embed.toJSON();
+    const subField = data.fields?.find(f => f.name === 'Available Subcommands & Features');
+    expect(subField).toBeDefined();
+    expect(subField?.value).toContain('• `>ticket create <subject>` — Create a new ticket thread');
+    expect(subField?.value).toContain('• `>ticket close` — Close the current ticket thread');
   });
 });

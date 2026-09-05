@@ -131,7 +131,7 @@ export function buildHelpPayload(
     embed = new EmbedBuilder()
       .setColor(color as any)
       .setTitle(`${emoji} ${label}`)
-      .setDescription(`*${description}*`)
+      .setDescription(`${description}\n\n> 💡 *Use \`${prefix}help <command>\` for detailed parameter specifications, options, and examples.*`)
       .setTimestamp()
       .setFooter({
         text: `Category ${catIndex}/${categoryOrder.length} • ${cmds.length} command(s) • Prefix: ${prefix}`,
@@ -155,11 +155,18 @@ export function buildHelpPayload(
         } else {
           usage = `${prefix}${c.name} ${c.usage}`;
         }
-        const aliasStr = c.aliases && c.aliases.length ? `\n*Aliases:* ${c.aliases.map(a => `\`${prefix}${a}\``).join(', ')}` : '';
-        const permsStr = c.permissions && c.permissions.length ? ` \`[${c.permissions.join(', ')}]\`` : '';
+        const aliasStr = c.aliases && c.aliases.length ? ` • *Aliases:* ${c.aliases.map(a => `\`${prefix}${a}\``).join(', ')}` : '';
+        const permsStr = c.permissions && c.permissions.length ? ` • 🔒 \`${c.permissions.join(', ')}\`` : '';
+
+        let subStr = '';
+        if (c.subcommands && c.subcommands.length > 0) {
+          const subNames = c.subcommands.map(s => typeof s === 'string' ? s : s.name);
+          subStr = `\n**Subcommands:** ${subNames.map(s => `\`${s}\``).join(', ')}`;
+        }
+
         embed.addFields({
           name: `\`${prefix}${c.name}\`${permsStr}`,
-          value: `${c.description}\n\`\`\`syntax\n${usage}\n\`\`\`${aliasStr}`,
+          value: `${c.description}\n**Usage:** \`${usage}\`${aliasStr}${subStr}`,
           inline: false,
         });
       }

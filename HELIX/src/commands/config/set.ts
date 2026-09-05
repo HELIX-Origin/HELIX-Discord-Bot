@@ -2,6 +2,7 @@ import { PermissionFlagsBits } from 'discord.js';
 import { BotDatabase } from '../../db/database.js';
 import { getBotToken, getClientId } from '../../env.js';
 import { createEmbed, formatError, getMessage } from '../../handlers/message-handler.js';
+import { getCommandHelpEmbed } from '../../handlers/help-registrar.js';
 import {
   syncGuildSlashCategories,
   clearGuildSlashCommands,
@@ -155,7 +156,12 @@ export const set: CommandDefinition = {
 
         if (action === 'enable') {
           if (!rawCategory) {
-            return interaction.reply({ embeds: [formatError('missing_argument', { arg: 'category' })], ephemeral: true });
+            const prefix = botSettings.getPrefix(guild.id);
+            const helpEmbed = getCommandHelpEmbed('set', prefix, {
+              missingNotice: `Please provide a category for subcommand \`slash enable\` (e.g. \`${prefix}set slash enable moderation\`).`,
+              customUsage: `${prefix}set slash enable <category|all>`,
+            });
+            return interaction.reply({ embeds: [helpEmbed || formatError('missing_argument', { arg: 'category' })], ephemeral: true });
           }
           if (rawCategory === 'all') {
             categories = new Set(CANONICAL_SLASH_CATEGORIES);
@@ -191,7 +197,12 @@ export const set: CommandDefinition = {
 
         if (action === 'disable') {
           if (!rawCategory) {
-            return interaction.reply({ embeds: [formatError('missing_argument', { arg: 'category' })], ephemeral: true });
+            const prefix = botSettings.getPrefix(guild.id);
+            const helpEmbed = getCommandHelpEmbed('set', prefix, {
+              missingNotice: `Please provide a category for subcommand \`slash disable\` (e.g. \`${prefix}set slash disable moderation\`).`,
+              customUsage: `${prefix}set slash disable <category|all>`,
+            });
+            return interaction.reply({ embeds: [helpEmbed || formatError('missing_argument', { arg: 'category' })], ephemeral: true });
           }
           if (rawCategory === 'all') {
             categories.clear();
@@ -245,18 +256,31 @@ export const set: CommandDefinition = {
 
     // Prefix: >set <subcommand> ...
     const sub = (args[0] || 'view').toLowerCase();
+    const prefix = botSettings.getPrefix(guild.id);
 
     if (sub === 'prefix') {
-      const prefix = args[1];
-      if (!prefix) return message!.reply({ embeds: [formatError('missing_argument', { arg: 'prefix' })] });
-      botSettings.setGuildSettings({ guildId: guild.id, prefix });
-      return message!.reply({ embeds: [createEmbed('config.set.embed_success', { setting: 'Command Prefix', value: `\`${prefix}\`` })] });
+      const newPrefix = args[1];
+      if (!newPrefix) {
+        const helpEmbed = getCommandHelpEmbed('set', prefix, {
+          missingNotice: 'Please provide a `<prefix>` character to set.',
+          customUsage: `${prefix}set prefix <prefix>`,
+        });
+        return message!.reply({ embeds: [helpEmbed!] });
+      }
+      botSettings.setGuildSettings({ guildId: guild.id, prefix: newPrefix });
+      return message!.reply({ embeds: [createEmbed('config.set.embed_success', { setting: 'Command Prefix', value: `\`${newPrefix}\`` })] });
     }
 
     if (sub === 'tickets-hub') {
       const chMatch = args[1]?.match(/^<#(\d+)>$/) || args[1];
       const chId = Array.isArray(chMatch) ? chMatch[1] : chMatch;
-      if (!chId) return message!.reply({ embeds: [formatError('missing_argument', { arg: 'channel' })] });
+      if (!chId) {
+        const helpEmbed = getCommandHelpEmbed('set', prefix, {
+          missingNotice: 'Please provide a `#channel` for the tickets hub.',
+          customUsage: `${prefix}set tickets-hub <channel>`,
+        });
+        return message!.reply({ embeds: [helpEmbed!] });
+      }
       botSettings.setGuildSettings({ guildId: guild.id, ticketsHubChannelId: chId });
       return message!.reply({ embeds: [createEmbed('config.set.embed_success', { setting: 'Tickets Hub Channel', value: `<#${chId}>` })] });
     }
@@ -264,7 +288,13 @@ export const set: CommandDefinition = {
     if (sub === 'ticket-manager-role') {
       const roleMatch = args[1]?.match(/^<@&(\d+)>$/) || args[1];
       const roleId = Array.isArray(roleMatch) ? roleMatch[1] : roleMatch;
-      if (!roleId) return message!.reply({ embeds: [formatError('missing_argument', { arg: 'role' })] });
+      if (!roleId) {
+        const helpEmbed = getCommandHelpEmbed('set', prefix, {
+          missingNotice: 'Please provide a `@role` for the ticket manager role.',
+          customUsage: `${prefix}set ticket-manager-role <role>`,
+        });
+        return message!.reply({ embeds: [helpEmbed!] });
+      }
       botSettings.setGuildSettings({ guildId: guild.id, ticketManagerRoleId: roleId });
       return message!.reply({ embeds: [createEmbed('config.set.embed_success', { setting: 'Ticket Manager Role', value: `<@&${roleId}>` })] });
     }
@@ -272,7 +302,13 @@ export const set: CommandDefinition = {
     if (sub === 'mod-log-channel') {
       const chMatch = args[1]?.match(/^<#(\d+)>$/) || args[1];
       const chId = Array.isArray(chMatch) ? chMatch[1] : chMatch;
-      if (!chId) return message!.reply({ embeds: [formatError('missing_argument', { arg: 'channel' })] });
+      if (!chId) {
+        const helpEmbed = getCommandHelpEmbed('set', prefix, {
+          missingNotice: 'Please provide a `#channel` for moderation log output.',
+          customUsage: `${prefix}set mod-log-channel <channel>`,
+        });
+        return message!.reply({ embeds: [helpEmbed!] });
+      }
       botSettings.setGuildSettings({ guildId: guild.id, modLogChannelId: chId });
       return message!.reply({ embeds: [createEmbed('config.set.embed_success', { setting: 'Moderation Log Channel', value: `<#${chId}>` })] });
     }
@@ -280,7 +316,13 @@ export const set: CommandDefinition = {
     if (sub === 'welcome-channel') {
       const chMatch = args[1]?.match(/^<#(\d+)>$/) || args[1];
       const chId = Array.isArray(chMatch) ? chMatch[1] : chMatch;
-      if (!chId) return message!.reply({ embeds: [formatError('missing_argument', { arg: 'channel' })] });
+      if (!chId) {
+        const helpEmbed = getCommandHelpEmbed('set', prefix, {
+          missingNotice: 'Please provide a `#channel` for welcome message dispatch.',
+          customUsage: `${prefix}set welcome-channel <channel>`,
+        });
+        return message!.reply({ embeds: [helpEmbed!] });
+      }
       botSettings.setGuildSettings({ guildId: guild.id, welcomeChannelId: chId });
       return message!.reply({ embeds: [createEmbed('config.set.embed_success', { setting: 'Welcome Channel', value: `<#${chId}>` })] });
     }
@@ -314,7 +356,11 @@ export const set: CommandDefinition = {
 
       if (action === 'enable') {
         if (!rawCategory) {
-          return message!.reply({ embeds: [formatError('missing_argument', { arg: 'category' })] });
+          const helpEmbed = getCommandHelpEmbed('set', prefix, {
+            missingNotice: 'Please provide a `<category>` (e.g. `moderation`, `utility`, `plugins`, `info`, `project`, `config`, `all`) to enable.',
+            customUsage: `${prefix}set slash enable <category>`,
+          });
+          return message!.reply({ embeds: [helpEmbed!] });
         }
         if (rawCategory === 'all') {
           categories = new Set(CANONICAL_SLASH_CATEGORIES);
@@ -350,7 +396,11 @@ export const set: CommandDefinition = {
 
       if (action === 'disable') {
         if (!rawCategory) {
-          return message!.reply({ embeds: [formatError('missing_argument', { arg: 'category' })] });
+          const helpEmbed = getCommandHelpEmbed('set', prefix, {
+            missingNotice: 'Please provide a `<category>` to disable.',
+            customUsage: `${prefix}set slash disable <category>`,
+          });
+          return message!.reply({ embeds: [helpEmbed!] });
         }
         if (rawCategory === 'all') {
           categories.clear();
@@ -384,7 +434,11 @@ export const set: CommandDefinition = {
         });
       }
 
-      return message!.reply({ embeds: [formatError('invalid_argument', { arg: 'action', value: action || 'empty' })] });
+      const helpEmbed = getCommandHelpEmbed('set', prefix, {
+        missingNotice: `Unknown slash action "${action || ''}". Available: \`enable\`, \`disable\`, \`view\`, \`clear\``,
+        customUsage: `${prefix}set slash <enable|disable|view|clear> [category]`,
+      });
+      return message!.reply({ embeds: [helpEmbed!] });
     }
 
     if (sub === 'view') {
@@ -396,13 +450,16 @@ export const set: CommandDefinition = {
         prefix: s?.prefix || '>',
         ticketsHub: s?.ticketsHubChannelId ? `<#${s.ticketsHubChannelId}>` : '`Not Set`',
         managerRole: s?.ticketManagerRoleId ? `<@&${s.ticketManagerRoleId}>` : '`Not Set`',
-        modLog: s?.modLogChannelId ? `<#${s.modLogChannelId}>` : '`Not Set`',
-        welcome: s?.welcomeChannelId ? `<#${s.welcomeChannelId}>` : '`Not Set`',
+        modLogChannel: s?.modLogChannelId ? `<#${s.modLogChannelId}>` : '`Not Set`',
+        welcomeChannel: s?.welcomeChannelId ? `<#${s.welcomeChannelId}>` : '`Not Set`',
         slashCategories: slashText,
       });
       return message!.reply({ embeds: [embed] });
     }
 
-    return message!.reply({ embeds: [formatError('subcommand_not_found')] });
+    const helpEmbed = getCommandHelpEmbed('set', prefix, {
+      missingNotice: `Unknown setting or subcommand "${sub}". Available: \`prefix\`, \`tickets-hub\`, \`ticket-manager-role\`, \`mod-log-channel\`, \`welcome-channel\`, \`slash\`, \`view\``,
+    });
+    return message!.reply({ embeds: [helpEmbed!] });
   },
 };
