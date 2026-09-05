@@ -45,6 +45,7 @@ flowchart TD
 | **BUG-011** | `getNextAuthConfig({ botPort })` argument is effectively dead | Low | Resolved | — | [#32](https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues/32) | [BUG-011](BUG-011-nextauth-botport-dead-arg.md) |
 | **BUG-012** | Duplicate `app.json` — root and `.github/app.json` drift risk | Low | Resolved | — | [#33](https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues/33) | [BUG-012](BUG-012-duplicate-app-json.md) |
 | **BUG-013** | Discord Gateway DisallowedIntents crash & OAuth2 invite redirect_uri error | High | Resolved | — | [#34](https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues/34) | [BUG-013](BUG-013-gateway-intent-fallback-and-clean-invite.md) |
+| **BUG-014** | Build artifact nesting in src/dist causes recursion crash & duplicate export defaults | High | Resolved | 4 Sub-Tasks | [#35](https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues/35) | [BUG-014](BUG-014-build-artifact-nesting-and-export-default.md) |
 
 ---
 
