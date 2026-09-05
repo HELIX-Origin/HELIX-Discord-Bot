@@ -212,11 +212,11 @@ sudo ufw allow 5000/tcp # (If accessing directly without reverse proxy)
 
 ### 🪟 Windows (Windows 10, 11, Windows Server 2022)
 
-You can host HELIX natively on Windows using PowerShell, PM2, or NSSM.
+You can host HELIX natively on Windows using PowerShell, PM2, or Windows Task Scheduler.
 
 #### Step 1: Install Node.js 22 LTS
 1. Download the Windows Installer (.msi) from [nodejs.org](https://nodejs.org/).
-2. Run installer and ensure **Add to PATH** is checked.
+2. Run the installer and ensure **Add to PATH** is checked.
 3. Open PowerShell and verify:
    ```powershell
    node -v
@@ -224,23 +224,24 @@ You can host HELIX natively on Windows using PowerShell, PM2, or NSSM.
    ```
 
 #### Step 2: Allow Port in Windows Defender Firewall
-To allow inbound dashboard connections over local network or public IP:
+To allow inbound dashboard connections over your local network or public IP:
 ```powershell
 New-NetFirewallRule -DisplayName "HELIX Bot Dashboard" -Direction Inbound -LocalPort 5000 -Protocol TCP -Action Allow
 ```
 
-#### Step 3: Run as Windows Service with NSSM (Recommended for 24/7)
-1. Download NSSM from [nssm.cc](https://nssm.cc/download).
-2. Install service:
-   ```powershell
-   # In administrative PowerShell:
-   nssm.exe install HELIXBot "C:\Program Files\nodejs\node.exe" "d:\Scripts\HELIX CLI\HELIX\dist\index.js"
-   nssm.exe set HELIXBot AppDirectory "d:\Scripts\HELIX CLI"
-   nssm.exe set HELIXBot AppRestartDelay 5000
-   nssm.exe start HELIXBot
-   ```
+#### Step 3: Run as 24/7 Background Service via Windows Task Scheduler (Native)
+Windows includes built-in Task Scheduler for starting background Node.js services on boot without third-party utilities:
 
-#### Step 4: Run as Windows Service with PM2 (Alternative)
+```powershell
+# In Administrator PowerShell:
+$action = New-ScheduledTaskAction -Execute "C:\Program Files\nodejs\npm.cmd" -Argument "start" -WorkingDirectory "d:\Scripts\HELIX CLI"
+$trigger = New-ScheduledTaskTrigger -AtStartup
+$principal = New-ScheduledTaskPrincipal -UserId "SYSTEM" -LogonType ServiceAccount -RunLevel Highest
+Register-ScheduledTask -TaskName "HELIX Discord Bot" -Action $action -Trigger $trigger -Principal $principal -Description "HELIX Discord Bot 24/7 Service"
+Start-ScheduledTask -TaskName "HELIX Discord Bot"
+```
+
+#### Step 4: Run with PM2 (Alternative Process Manager)
 ```powershell
 npm install -g pm2 pm2-windows-service
 pm2-service-install
