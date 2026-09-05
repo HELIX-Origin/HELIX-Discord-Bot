@@ -7,6 +7,8 @@ import { EnvSandbox } from '../../helpers/env.js';
 
 const env = withTempDbEnvironment();
 const sandbox = new EnvSandbox();
+sandbox.set('BOT_PORT', '5000');
+sandbox.set('DASHBOARD_PORT', '5000');
 
 describe('router — UI shell', () => {
   it('serves the dashboard at /dashboard and /', async () => {
@@ -81,6 +83,8 @@ describe('router — API endpoints', () => {
   });
 
   it('serves live dashboard stats from the temp database', async () => {
+    sandbox.set('BOT_PORT', '5000');
+    sandbox.set('DASHBOARD_PORT', '5000');
     const req = createRequest({ url: '/api/dashboard/stats' });
     const { res, result } = createResponse();
     const handled = await routeDashboardRequest(req, res);

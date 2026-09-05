@@ -178,35 +178,34 @@ export function normalizeCallbackBaseUrl(raw: string): string {
   return base.replace(/\/+$/, '');
 }
 
-/** HTTP port the bot callback and health check server listens on. Defaults to 5000. */
+/** HTTP port the bot callback and health check server listens on. Always read from the BOT_PORT env variable; no hardcoded fallback. */
 export function getPort(): number {
-  const raw = process.env.PORT;
+  const raw = process.env.BOT_PORT;
   if (raw) {
     const n = parseInt(raw, 10);
     if (!isNaN(n)) return n;
   }
-  return 5000;
+  throw new Error('BOT_PORT environment variable is required and must be a valid number.');
 }
 
 /**
- * HTTP port the web dashboard listens on.
- * Derived as an increment of getPort() (default: getPort() + 1), aligned in port range
- * to avoid interference with the bot's callback server.
- */
+  * HTTP port the web dashboard listens on.
+  * Always read from the DASHBOARD_PORT env variable; no hardcoded fallback.
+  */
 export function getDashboardPort(): number {
   const raw = process.env.DASHBOARD_PORT;
   if (raw) {
     const n = parseInt(raw, 10);
     if (!isNaN(n)) return n;
   }
-  return getPort() + 1;
+  throw new Error('DASHBOARD_PORT environment variable is required and must be a valid number.');
 }
 
 /**
- * Public-facing NextAuth / Dashboard URL (e.g. `https://bot.example.com`).
- * Explicitly configured via `NEXTAUTH_URL` for public deployments.
- * Defaults to `http://localhost:<DASHBOARD_PORT>` when running locally.
- */
+  * Public-facing NextAuth / Dashboard URL (e.g. `https://bot.example.com`).
+  * Explicitly configured via `NEXTAUTH_URL` for public deployments.
+  * Auto-resolves to `http://localhost:<DASHBOARD_PORT>` when running locally.
+  */
 export function getNextAuthUrl(): string {
   const dashPort = getDashboardPort();
   const explicit = (process.env.NEXTAUTH_URL || '').trim();
@@ -233,18 +232,18 @@ export function getNextAuthUrl(): string {
 }
 
 /**
- * Internal URL NextAuth uses for server-side self-requests.
- * Always resolves to `http://localhost:<DASHBOARD_PORT>`.
- */
+  * Internal URL NextAuth uses for server-side self-requests.
+  * Auto-resolves to `http://localhost:<DASHBOARD_PORT>`.
+  */
 export function getNextAuthInternalUrl(): string {
   const dashPort = getDashboardPort();
   return `http://localhost:${dashPort}`;
 }
 
 /**
- * Base OAuth2 callback URL (no trailing slash).
- * Returns `DISCORD_CALLBACK_URL` if set, otherwise defaults to `http://localhost:<PORT>`.
- */
+  * Base OAuth2 callback URL (no trailing slash).
+  * Returns `DISCORD_CALLBACK_URL` if set, otherwise auto-resolves from `BOT_PORT`.
+  */
 export function getCallbackUrl(): string {
   const explicit = normalizeCallbackBaseUrl(process.env.DISCORD_CALLBACK_URL || '');
   if (explicit) {

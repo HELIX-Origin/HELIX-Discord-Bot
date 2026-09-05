@@ -8,7 +8,8 @@ const env = withTempDbEnvironment();
 const sandbox = new EnvSandbox();
 sandbox.set('NEXTAUTH_URL', undefined);
 sandbox.set('NEXTAUTH_SECRET', undefined);
-sandbox.set('PORT', '4321');
+sandbox.set('BOT_PORT', '4321');
+sandbox.set('DASHBOARD_PORT', '4321');
 
 describe('dashboard/ui/html', () => {
   it('renders a complete dashboard shell', () => {

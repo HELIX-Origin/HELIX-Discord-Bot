@@ -2,7 +2,7 @@
 
 The dashboard runs in the same Node process as the bot — no separate service, no network hop.
 
-**URL:** `http://localhost:5000/dashboard` (or your public domain in production)
+**URL:** `http://localhost:5001/dashboard` (or your public domain in production)
 
 ---
 

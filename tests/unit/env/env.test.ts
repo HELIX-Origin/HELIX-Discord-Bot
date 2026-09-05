@@ -49,31 +49,30 @@ describe('src/env.ts — bot environment accessors', () => {
     expect(fs.existsSync(path.join(BOT_ROOT_DIR, 'package.json'))).toBe(true);
   });
 
-  it('parses numeric PORT values and defaults to 5000', () => {
-    sandbox.set('PORT', '8080');
+  it('parses numeric BOT_PORT values and throws when unset or invalid', () => {
+    sandbox.set('BOT_PORT', '8080');
     expect(getPort()).toBe(8080);
-    sandbox.set('PORT', 'not-a-number');
-    expect(getPort()).toBe(5000);
-    sandbox.set('PORT', undefined);
-    expect(getPort()).toBe(5000);
+    sandbox.set('BOT_PORT', 'not-a-number');
+    expect(() => getPort()).toThrow();
+    sandbox.set('BOT_PORT', undefined);
+    expect(() => getPort()).toThrow();
   });
 
-  it('derives DASHBOARD_PORT as an increment of PORT and honors overrides', () => {
-    sandbox.set('PORT', '5000');
-    sandbox.set('DASHBOARD_PORT', undefined);
+  it('reads DASHBOARD_PORT directly and throws when unset', () => {
+    sandbox.set('DASHBOARD_PORT', '5001');
     expect(getDashboardPort()).toBe(5001);
-
-    sandbox.set('PORT', '8080');
-    expect(getDashboardPort()).toBe(8081);
 
     sandbox.set('DASHBOARD_PORT', '9000');
     expect(getDashboardPort()).toBe(9000);
+
+    sandbox.set('DASHBOARD_PORT', undefined);
+    expect(() => getDashboardPort()).toThrow();
   });
 
   it('resolves NextAuth URLs with static NEXTAUTH_URL and defaults to derived dashboard port', () => {
     sandbox.set('NEXTAUTH_URL', undefined);
-    sandbox.set('PORT', '5000');
-    sandbox.set('DASHBOARD_PORT', undefined);
+    sandbox.set('BOT_PORT', '5000');
+    sandbox.set('DASHBOARD_PORT', '5001');
     expect(getNextAuthUrl()).toBe('http://localhost:5001');
 
     sandbox.set('NEXTAUTH_URL', 'https://bot.example.com/');
@@ -83,18 +82,17 @@ describe('src/env.ts — bot environment accessors', () => {
     expect(getNextAuthUrl()).toBe('https://bot.example.com');
   });
 
-  it('resolves NextAuth internal URL with fallback to derived dashboard port', () => {
-    sandbox.set('PORT', '5000');
-    sandbox.set('DASHBOARD_PORT', undefined);
+  it('resolves NextAuth internal URL with explicit DASHBOARD_PORT', () => {
+    sandbox.set('DASHBOARD_PORT', '5001');
     expect(getNextAuthInternalUrl()).toBe('http://localhost:5001');
 
-    sandbox.set('PORT', '3000');
-    expect(getNextAuthInternalUrl()).toBe('http://localhost:3001');
+    sandbox.set('DASHBOARD_PORT', '3000');
+    expect(getNextAuthInternalUrl()).toBe('http://localhost:3000');
   });
 
   it('falls back to the local callback URL when no platform is detected', () => {
     sandbox.set('DISCORD_CALLBACK_URL', undefined);
-    sandbox.set('PORT', '5000');
+    sandbox.set('BOT_PORT', '5000');
     expect(getCallbackUrl()).toBe('http://localhost:5000');
   });
 
@@ -124,7 +122,7 @@ describe('src/env.ts — bot environment accessors', () => {
 
   it('keeps the full-path localhost callback form usable too', () => {
     sandbox.set('DISCORD_CALLBACK_URL', 'http://localhost:5000/api/auth/callback/discord');
-    sandbox.set('PORT', '5000');
+    sandbox.set('BOT_PORT', '5000');
     expect(getCallbackUrl()).toBe('http://localhost:5000');
   });
 
@@ -152,30 +150,30 @@ describe('src/env.ts — bot environment accessors', () => {
     expect(getNextAuthSecret().length).toBeGreaterThanOrEqual(32);
   });
 
-  it('resolves NextAuth URLs from the derived dashboard port', () => {
+  it('resolves NextAuth URLs from explicit DASHBOARD_PORT', () => {
     sandbox.set('NEXTAUTH_URL', undefined);
-    sandbox.set('PORT', '4000');
+    sandbox.set('DASHBOARD_PORT', '4001');
     expect(getNextAuthUrl()).toBe('http://localhost:4001');
     expect(getNextAuthInternalUrl()).toBe('http://localhost:4001');
   });
 
-  it('uses derived dashboard port for localhost NextAuth URLs', () => {
+  it('uses explicit DASHBOARD_PORT for localhost NextAuth URLs', () => {
     sandbox.set('NEXTAUTH_URL', undefined);
     sandbox.set('DISCORD_CALLBACK_URL', undefined);
-    sandbox.set('PORT', '4321');
+    sandbox.set('DASHBOARD_PORT', '4322');
     expect(getNextAuthUrl()).toBe('http://localhost:4322');
   });
 
   it('keeps an external callback base when resolving the NextAuth URL', () => {
     sandbox.set('NEXTAUTH_URL', undefined);
     sandbox.set('DISCORD_CALLBACK_URL', 'https://myapp.herokuapp.com');
-    sandbox.set('PORT', '4000');
+    sandbox.set('BOT_PORT', '4000');
     expect(getNextAuthUrl()).toBe('https://myapp.herokuapp.com');
   });
 
   it('honors explicit non-localhost NextAuth URLs', () => {
     sandbox.set('NEXTAUTH_URL', 'https://auth.example.com/');
-    sandbox.set('PORT', '5000');
+    sandbox.set('BOT_PORT', '5000');
     expect(getNextAuthUrl()).toBe('https://auth.example.com');
   });
 
@@ -194,7 +192,8 @@ describe('src/env.ts — bot environment accessors', () => {
     sandbox.set('DISCORD_CLIENT_ID', 'cid');
     sandbox.set('DISCORD_CLIENT_SECRET', 'secret');
     sandbox.set('NEXTAUTH_SECRET', undefined);
-    sandbox.set('PORT', '5060');
+    sandbox.set('BOT_PORT', '5060');
+    sandbox.set('DASHBOARD_PORT', '5060');
     const env = getBotEnv();
     expect(env.botToken).toBe('tok');
     expect(env.clientId).toBe('cid');
@@ -239,6 +238,7 @@ describe('src/env.ts — getSelfPingConfig', () => {
   it('returns disabled when on localhost without public NEXTAUTH_URL', () => {
     sandbox.set('NEXTAUTH_URL', undefined);
     sandbox.set('DISCORD_CALLBACK_URL', undefined);
+    sandbox.set('DASHBOARD_PORT', '5000');
     const config = getSelfPingConfig();
     expect(config.enabled).toBe(false);
     expect(config.intervalMs).toBe(600000);
@@ -246,6 +246,7 @@ describe('src/env.ts — getSelfPingConfig', () => {
 
   it('auto-enables with targetUrl when a public NEXTAUTH_URL is configured', () => {
     sandbox.set('NEXTAUTH_URL', 'https://bot.example.com');
+    sandbox.set('DASHBOARD_PORT', '5000');
     const config = getSelfPingConfig();
     expect(config.enabled).toBe(true);
     expect(config.targetUrl).toBe('https://bot.example.com/api/health');
@@ -253,6 +254,7 @@ describe('src/env.ts — getSelfPingConfig', () => {
 
   it('supports custom interval via HELIX_SELF_PING_INTERVAL_MS', () => {
     sandbox.set('NEXTAUTH_URL', 'https://bot.example.com');
+    sandbox.set('DASHBOARD_PORT', '5000');
     sandbox.set('HELIX_SELF_PING_INTERVAL_MS', '300000');
     const config = getSelfPingConfig();
     expect(config.intervalMs).toBe(300000);
@@ -260,6 +262,7 @@ describe('src/env.ts — getSelfPingConfig', () => {
 
   it('supports explicit disable via HELIX_SELF_PING=false', () => {
     sandbox.set('NEXTAUTH_URL', 'https://bot.example.com');
+    sandbox.set('DASHBOARD_PORT', '5000');
     sandbox.set('HELIX_SELF_PING', 'false');
     const config = getSelfPingConfig();
     expect(config.enabled).toBe(false);

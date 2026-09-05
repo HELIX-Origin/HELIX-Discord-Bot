@@ -41,13 +41,13 @@ describe('auth/config — resolveInternalUrl', () => {
 });
 
 describe('auth/config — getNextAuthConfig', () => {
-  it('returns a complete config using the derived dashboard port (PORT + 1)', () => {
+  it('returns a complete config using explicit DASHBOARD_PORT', () => {
     sandbox.set('NEXTAUTH_URL', undefined);
     sandbox.set('NEXTAUTH_SECRET', undefined);
     sandbox.set('DISCORD_CLIENT_ID', undefined);
     sandbox.set('DISCORD_CLIENT_SECRET', undefined);
-    sandbox.set('PORT', '4321');
-    sandbox.set('DASHBOARD_PORT', undefined);
+    sandbox.set('BOT_PORT', '4321');
+    sandbox.set('DASHBOARD_PORT', '4322');
 
     const config = getNextAuthConfig();
     expect(config.url).toBe('http://localhost:4322');
@@ -59,7 +59,7 @@ describe('auth/config — getNextAuthConfig', () => {
 
   it('respects DASHBOARD_PORT override in getNextAuthConfig', () => {
     sandbox.set('NEXTAUTH_URL', undefined);
-    sandbox.set('PORT', '4321');
+    sandbox.set('BOT_PORT', '4321');
     sandbox.set('DASHBOARD_PORT', '4325');
 
     const config = getNextAuthConfig();

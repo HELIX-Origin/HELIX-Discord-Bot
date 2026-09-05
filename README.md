@@ -40,7 +40,7 @@ Configure your Discord credentials in `.env`:
 - `DISCORD_TOKEN`, `DISCORD_CLIENT_ID`, `DISCORD_CLIENT_SECRET`, `NEXTAUTH_SECRET`.
 - Optional: Set `NEXTAUTH_URL=https://yourdomain.com` for public web dashboard access.
 
-The companion dashboard runs at `http://localhost:5000/dashboard`.
+The companion dashboard runs at `http://localhost:5001/dashboard`.
 
 ---
 

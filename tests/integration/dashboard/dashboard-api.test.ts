@@ -15,7 +15,7 @@ describe('integration — dashboard full stack', () => {
   it('resolves URLs for dashboard with static NEXTAUTH_URL configuration', async () => {
     sandbox.set('NEXTAUTH_URL', 'https://bot.example.com');
     sandbox.set('DISCORD_CALLBACK_URL', undefined);
-    sandbox.set('PORT', '5000');
+    sandbox.set('BOT_PORT', '5000');
 
     expect(getCallbackUrl()).toBe('http://localhost:5000');
     expect(getNextAuthUrl()).toBe('https://bot.example.com');
@@ -47,7 +47,8 @@ describe('integration — dashboard full stack', () => {
 
   it('serves the live dashboard HTML against the temp database', async () => {
     sandbox.set('NEXTAUTH_URL', undefined);
-    sandbox.set('PORT', '5000');
+    sandbox.set('BOT_PORT', '5000');
+    sandbox.set('DASHBOARD_PORT', '5000');
     const html = renderDashboardHtml();
     expect(html).toContain('<!DOCTYPE html>');
     expect(html).toContain('HELIX Discord Bot Dashboard');

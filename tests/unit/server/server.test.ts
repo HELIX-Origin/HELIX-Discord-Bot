@@ -111,11 +111,11 @@ describe('server — getAuthorizationUrl', () => {
   });
 });
 
-describe('server — BotCallbackServer port derivation & isolation', () => {
-  it('derives dashboardPort alongside botPort by default (PORT + 1)', () => {
+describe('server — BotCallbackServer port isolation', () => {
+  it('uses explicit BOT_PORT and DASHBOARD_PORT when both are set', () => {
     const sandbox = new EnvSandbox();
-    sandbox.set('PORT', '5000');
-    sandbox.set('DASHBOARD_PORT', undefined);
+    sandbox.set('BOT_PORT', '5000');
+    sandbox.set('DASHBOARD_PORT', '5001');
     try {
       const server = new BotCallbackServer();
       const ports = server.getPorts();
@@ -126,9 +126,9 @@ describe('server — BotCallbackServer port derivation & isolation', () => {
     }
   });
 
-  it('respects DASHBOARD_PORT override when explicitly specified', () => {
+  it('respects DASHBOARD_PORT when explicitly different from BOT_PORT', () => {
     const sandbox = new EnvSandbox();
-    sandbox.set('PORT', '5000');
+    sandbox.set('BOT_PORT', '5000');
     sandbox.set('DASHBOARD_PORT', '5555');
     try {
       const server = new BotCallbackServer();
@@ -140,17 +140,12 @@ describe('server — BotCallbackServer port derivation & isolation', () => {
     }
   });
 
-  it('preserves base port from environment while placing dashboard in the same range', () => {
+  it('requires both BOT_PORT and DASHBOARD_PORT to be set', () => {
     const sandbox = new EnvSandbox();
-    sandbox.set('PORT', '6000');
+    sandbox.set('BOT_PORT', '6000');
     sandbox.set('DASHBOARD_PORT', undefined);
     try {
-      const server = new BotCallbackServer();
-      const ports = server.getPorts();
-      expect(ports.botPort).toBe(6000);
-      expect(ports.dashboardPort).toBe(6001);
-      expect(ports.dashboardPort).toBeGreaterThanOrEqual(6000);
-      expect(ports.dashboardPort).toBeLessThan(7000);
+      expect(() => new BotCallbackServer()).toThrow('DASHBOARD_PORT');
     } finally {
       sandbox.restore();
     }
