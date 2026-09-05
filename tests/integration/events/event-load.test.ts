@@ -13,6 +13,7 @@ const EVENT_FILE_EXPECTATION: Record<string, { export: string; name: string; onc
   'interaction-create.ts': { export: 'interactionCreate', name: 'interactionCreate', once: false },
   'guild-create.ts': { export: 'guildCreate', name: 'guildCreate', once: false },
   'guild-delete.ts': { export: 'guildDelete', name: 'guildDelete', once: false },
+  'guild-member-add.ts': { export: 'guildMemberAdd', name: 'guildMemberAdd', once: false },
 };
 
 async function importEvent(file: string): Promise<any> {

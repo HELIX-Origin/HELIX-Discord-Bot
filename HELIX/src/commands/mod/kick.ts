@@ -1,6 +1,7 @@
 import { GuildMember, PermissionFlagsBits } from 'discord.js';
 import { BotDatabase } from '../../db/database.js';
 import { createEmbed, formatError, getMessage } from '../../handlers/message-handler.js';
+import { sendModLog } from '../../handlers/mod-log-handler.js';
 import type { CommandDefinition } from '../../types/command.js';
 
 export const kick: CommandDefinition = {
@@ -15,6 +16,7 @@ export const kick: CommandDefinition = {
   async execute({ message, interaction, getOption, guild }) {
     const target = getOption<GuildMember>('user');
     const reason = getOption<string>('reason') || 'No reason provided';
+    const modUser = message?.author || interaction!.user;
 
     if (!target) {
       const err = formatError(getMessage('moderation.kick.not_found'));
@@ -32,14 +34,22 @@ export const kick: CommandDefinition = {
     BotDatabase.getInstance().logModeration({
       guildId: guild.id,
       userId: target.id,
-      moderatorId: message?.author.id || interaction!.user.id,
+      moderatorId: modUser.id,
       action: 'kick',
+      reason,
+    });
+
+    await sendModLog({
+      guild,
+      action: 'kick',
+      target: target.user,
+      moderator: modUser,
       reason,
     });
 
     const embed = createEmbed('moderation.kick.embed', {
       target: target.user.tag,
-      moderatorId: message?.author.id || interaction!.user.id,
+      moderatorId: modUser.id,
       reason,
     });
 

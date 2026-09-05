@@ -92,7 +92,7 @@ export class BotDatabase {
   }
 
   public static getInstance(customPath?: string): BotDatabase {
-    if (!BotDatabase.instance) {
+    if (!BotDatabase.instance || !BotDatabase.instance.db) {
       BotDatabase.instance = new BotDatabase(customPath);
     }
     return BotDatabase.instance;
@@ -134,6 +134,7 @@ export class BotDatabase {
         ticket_manager_role_id TEXT,
         mod_log_channel_id TEXT,
         welcome_channel_id TEXT,
+        enabled_slash_categories TEXT,
         created_at TEXT,
         updated_at TEXT
       );
@@ -963,6 +964,9 @@ export class BotDatabase {
         // Ignore close errors
       }
       this.db = null;
+    }
+    if (BotDatabase.instance === this) {
+      BotDatabase.instance = null;
     }
   }
 }

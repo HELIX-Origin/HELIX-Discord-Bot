@@ -1,6 +1,7 @@
 import { GuildMember, PermissionFlagsBits } from 'discord.js';
 import { BotDatabase } from '../../db/database.js';
 import { createEmbed, formatError, getMessage } from '../../handlers/message-handler.js';
+import { sendModLog } from '../../handlers/mod-log-handler.js';
 import type { CommandDefinition } from '../../types/command.js';
 
 export const ban: CommandDefinition = {
@@ -17,6 +18,7 @@ export const ban: CommandDefinition = {
     const target = getOption<GuildMember>('user');
     const reason = getOption<string>('reason') || 'No reason provided';
     const days = getOption<number>('delete_days') || 0;
+    const modUser = message?.author || interaction!.user;
 
     if (!target) {
       const err = formatError(getMessage('moderation.ban.not_found'));
@@ -34,14 +36,22 @@ export const ban: CommandDefinition = {
     BotDatabase.getInstance().logModeration({
       guildId: guild.id,
       userId: target.id,
-      moderatorId: message?.author.id || interaction!.user.id,
+      moderatorId: modUser.id,
       action: 'ban',
+      reason,
+    });
+
+    await sendModLog({
+      guild,
+      action: 'ban',
+      target: target.user,
+      moderator: modUser,
       reason,
     });
 
     const embed = createEmbed('moderation.ban.embed', {
       target: target.user.tag,
-      moderatorId: message?.author.id || interaction!.user.id,
+      moderatorId: modUser.id,
       reason,
       days,
     });

@@ -1,6 +1,7 @@
 import { PermissionFlagsBits } from 'discord.js';
 import { BotDatabase } from '../../db/database.js';
 import { createEmbed, formatError, getMessage } from '../../handlers/message-handler.js';
+import { sendModLog } from '../../handlers/mod-log-handler.js';
 import type { CommandDefinition } from '../../types/command.js';
 
 export const unban: CommandDefinition = {
@@ -15,6 +16,7 @@ export const unban: CommandDefinition = {
   async execute({ message, interaction, getOption, guild }) {
     const userId = getOption<string>('user_id');
     const reason = getOption<string>('reason') || 'No reason provided';
+    const modUser = message?.author || interaction!.user;
 
     if (!userId) {
       const err = formatError(getMessage('errors.missing_argument', { arg: 'user_id' }));
@@ -27,14 +29,22 @@ export const unban: CommandDefinition = {
       BotDatabase.getInstance().logModeration({
         guildId: guild.id,
         userId,
-        moderatorId: message?.author.id || interaction!.user.id,
+        moderatorId: modUser.id,
         action: 'unban',
+        reason,
+      });
+
+      await sendModLog({
+        guild,
+        action: 'unban',
+        target: { id: userId, tag: `User <@${userId}>` },
+        moderator: modUser,
         reason,
       });
 
       const embed = createEmbed('moderation.unban.embed', {
         userId,
-        moderatorId: message?.author.id || interaction!.user.id,
+        moderatorId: modUser.id,
         reason,
       });
 

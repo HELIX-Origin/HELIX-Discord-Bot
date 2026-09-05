@@ -9,10 +9,11 @@ import {
 import { BotDatabase } from '../../../HELIX/src/db/database.js';
 
 describe('handlers/command-handler — prefix resolution & execution', () => {
-  const testGuildId = 'test-guild-prefix-999';
+  let testGuildId: string;
   let db: BotDatabase;
 
   beforeEach(async () => {
+    testGuildId = `test-guild-prefix-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
     db = BotDatabase.getInstance();
     db.setGuildSettings({
       guildId: testGuildId,

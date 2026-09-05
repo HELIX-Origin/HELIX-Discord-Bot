@@ -177,6 +177,37 @@ export async function clearGuildSlashCommands(
   }
 }
 
+export async function purgeGlobalSlashCommands(token: string, clientId: string): Promise<void> {
+  const rest = new REST({ version: '10' }).setToken(token);
+  try {
+    await rest.put(Routes.applicationCommands(clientId), { body: [] });
+    logs.success('Purged all global slash commands (slash commands are per-guild opt-in)');
+  } catch (err: any) {
+    logs.warn(`Failed to purge global slash commands: ${err.message}`);
+  }
+}
+
+export async function reconcileAllGuildSlashCommands(
+  token: string,
+  clientId: string,
+  guildIds: string[]
+): Promise<void> {
+  const db = (await import('../db/database.js')).BotDatabase.getInstance();
+  for (const guildId of guildIds) {
+    try {
+      const settings = db.getGuildSettings(guildId);
+      const categories = settings?.enabledSlashCategories || [];
+      if (categories.length > 0) {
+        await registerGuildSlashCategories(token, clientId, guildId, categories);
+      } else {
+        await clearGuildSlashCommands(token, clientId, guildId);
+      }
+    } catch (err: any) {
+      logs.warn(`Slash reconciliation failed for guild ${guildId}: ${err.message}`);
+    }
+  }
+}
+
 export async function registerGlobalSlashCommands(token: string, clientId: string): Promise<void> {
   const rest = new REST({ version: '10' }).setToken(token);
   const payload = slashCommands.map(({ builder }) => builder.toJSON());

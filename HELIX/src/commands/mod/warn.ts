@@ -1,6 +1,7 @@
 import { GuildMember, PermissionFlagsBits } from 'discord.js';
 import { BotDatabase } from '../../db/database.js';
 import { createEmbed, formatError, getMessage } from '../../handlers/message-handler.js';
+import { sendModLog } from '../../handlers/mod-log-handler.js';
 import type { CommandDefinition } from '../../types/command.js';
 
 export const warn: CommandDefinition = {
@@ -17,6 +18,7 @@ export const warn: CommandDefinition = {
     const sub = getOption<string>('subcommand') || 'user';
     const target = getOption<GuildMember>('user');
     const reason = getOption<string>('reason') || 'No reason provided';
+    const modUser = message?.author || interaction!.user;
     const db = BotDatabase.getInstance();
 
     if (!target) {
@@ -29,13 +31,21 @@ export const warn: CommandDefinition = {
       db.addWarning({
         guildId: guild.id,
         userId: target.id,
-        moderatorId: message?.author.id || interaction!.user.id,
+        moderatorId: modUser.id,
+        reason,
+      });
+
+      await sendModLog({
+        guild,
+        action: 'warn',
+        target: target.user,
+        moderator: modUser,
         reason,
       });
 
       const embed = createEmbed('moderation.warn.warn_embed', {
         target: target.user.tag,
-        moderatorId: message?.author.id || interaction!.user.id,
+        moderatorId: modUser.id,
         reason,
       });
 

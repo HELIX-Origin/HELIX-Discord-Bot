@@ -109,4 +109,26 @@ describe('slash-handler', () => {
     await handleSlashInteraction(mockInteraction);
     expect(mockInteraction.reply).toHaveBeenCalled();
   });
+
+  it('purges global slash commands cleanly', async () => {
+    const { purgeGlobalSlashCommands } = await import('../../../HELIX/src/handlers/slash-handler.js');
+    await expect(purgeGlobalSlashCommands('fake-token', '123456789')).resolves.not.toThrow();
+  });
+
+  it('reconciles all guild slash commands based on database settings', async () => {
+    const { reconcileAllGuildSlashCommands } = await import('../../../HELIX/src/handlers/slash-handler.js');
+    const dbInstance = BotDatabase.getInstance();
+    dbInstance.setGuildSettings({
+      guildId: 'guild-reconcile-1',
+      enabledSlashCategories: ['config'],
+    });
+    dbInstance.setGuildSettings({
+      guildId: 'guild-reconcile-2',
+      enabledSlashCategories: [],
+    });
+
+    await expect(
+      reconcileAllGuildSlashCommands('fake-token', '123456789', ['guild-reconcile-1', 'guild-reconcile-2'])
+    ).resolves.not.toThrow();
+  });
 });

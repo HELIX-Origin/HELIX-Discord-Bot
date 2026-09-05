@@ -244,7 +244,6 @@ describe('database — key/value store and stats', () => {
     const first = BotDatabase.getInstance();
     const second = BotDatabase.getInstance();
     expect(first).toBe(second);
-    first.close();
   });
 });
 

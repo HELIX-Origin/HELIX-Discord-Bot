@@ -1,7 +1,7 @@
 # BUG-022 / TASK-022: Guild Settings End-to-End Bot State Registration & Stale Slash Command Registry Purge
 
 **Parent Issue:** [#75](https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues/75)  
-**Status:** In Progress  
+**Status:** Resolved  
 **Priority:** High  
 **Assigned:** Agent System  
 
@@ -44,10 +44,10 @@ flowchart TD
 
 | Sub-Issue | Title | GitHub Issue | Status |
 |-----------|-------|--------------|--------|
-| **Sub-Issue 1** | Comprehensive Settings Audit & Stale Slash Command Discovery | [#76](https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues/76) | 🔄 In Progress |
-| **Sub-Issue 2** | Guild Settings Active Bot State Registration & Event Handlers Implementation | [#77](https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues/77) | ⏳ Queued |
-| **Sub-Issue 3** | Stale Slash Command Registry Purge & Gateway Reconciliation Engine | [#78](https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues/78) | ⏳ Queued |
-| **Sub-Issue 4** | Vitest Test Suite Expansion, Verification & Documentation Sync | [#79](https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues/79) | ⏳ Queued |
+| **Sub-Issue 1** | Comprehensive Settings Audit & Stale Slash Command Discovery | [#76](https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues/76) | ✅ Resolved |
+| **Sub-Issue 2** | Guild Settings Active Bot State Registration & Event Handlers Implementation | [#77](https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues/77) | ✅ Resolved |
+| **Sub-Issue 3** | Stale Slash Command Registry Purge & Gateway Reconciliation Engine | [#78](https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues/78) | ✅ Resolved |
+| **Sub-Issue 4** | Vitest Test Suite Expansion, Verification & Documentation Sync | [#79](https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues/79) | ✅ Resolved |
 
 ---
 

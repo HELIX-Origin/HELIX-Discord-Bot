@@ -37,14 +37,17 @@ export async function handleDashboardGuilds(req: http.IncomingMessage, res: http
       try {
         const payload = JSON.parse(body || '{}');
         const guildId = payload.guildId || 'global';
+        const existing = db.getGuildSettings(guildId);
+
         db.setGuildSettings({
           guildId,
-          prefix: payload.prefix !== undefined ? payload.prefix : '>',
-          callbackUrl: payload.callbackUrl || getCallbackUrl(),
-          ticketsHubChannelId: payload.ticketsHubChannelId,
-          ticketManagerRoleId: payload.ticketManagerRoleId,
-          modLogChannelId: payload.modLogChannelId,
-          welcomeChannelId: payload.welcomeChannelId,
+          prefix: payload.prefix !== undefined ? payload.prefix : (existing?.prefix || '>'),
+          callbackUrl: payload.callbackUrl !== undefined ? payload.callbackUrl : (existing?.callbackUrl || getCallbackUrl()),
+          ticketsHubChannelId: payload.ticketsHubChannelId !== undefined ? payload.ticketsHubChannelId : existing?.ticketsHubChannelId,
+          ticketManagerRoleId: payload.ticketManagerRoleId !== undefined ? payload.ticketManagerRoleId : existing?.ticketManagerRoleId,
+          modLogChannelId: payload.modLogChannelId !== undefined ? payload.modLogChannelId : existing?.modLogChannelId,
+          welcomeChannelId: payload.welcomeChannelId !== undefined ? payload.welcomeChannelId : existing?.welcomeChannelId,
+          enabledSlashCategories: payload.enabledSlashCategories !== undefined ? payload.enabledSlashCategories : existing?.enabledSlashCategories,
         });
 
         res.writeHead(200, { 'Content-Type': 'application/json' });
