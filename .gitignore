@@ -5,6 +5,7 @@ dist/
 *.log
 logs/
 HELIX/logs/
+*.ico
 coverage/
 .DS_Store
 Thumbs.db
