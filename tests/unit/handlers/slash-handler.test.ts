@@ -8,11 +8,16 @@ import {
   clearGuildSlashCommands,
   registerGlobalSlashCommands,
   handleSlashInteraction,
+  normalizeCategory,
+  normalizeCategories,
+  syncGuildSlashCategories,
+  CANONICAL_SLASH_CATEGORIES,
 } from '../../../HELIX/src/handlers/slash-handler.js';
 import { BotDatabase } from '../../../HELIX/src/db/database.js';
 import { set } from '../../../HELIX/src/commands/config/set.js';
 import { ping } from '../../../HELIX/src/commands/util/ping.js';
 import { help } from '../../../HELIX/src/commands/info/help.js';
+import { warn } from '../../../HELIX/src/commands/mod/warn.js';
 import { REST } from 'discord.js';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -31,6 +36,7 @@ describe('slash-handler', () => {
     registerSlashCommand(set);
     registerSlashCommand(ping);
     registerSlashCommand(help);
+    registerSlashCommand(warn);
   });
 
   afterEach(() => {
@@ -40,10 +46,34 @@ describe('slash-handler', () => {
 
   it('registers slash commands and retrieves them', () => {
     const commands = getSlashCommands();
-    expect(commands.size).toBe(3);
+    expect(commands.size).toBe(4);
     expect(commands.has('set')).toBe(true);
     expect(commands.has('ping')).toBe(true);
     expect(commands.has('help')).toBe(true);
+    expect(commands.has('warn')).toBe(true);
+  });
+
+  it('normalizes category names and aliases accurately', () => {
+    expect(normalizeCategory('mod')).toBe('moderation');
+    expect(normalizeCategory('moderation')).toBe('moderation');
+    expect(normalizeCategory('util')).toBe('utility');
+    expect(normalizeCategory('utility')).toBe('utility');
+    expect(normalizeCategory('plugin')).toBe('plugins');
+    expect(normalizeCategory('plugins')).toBe('plugins');
+    expect(normalizeCategory('config')).toBe('config');
+    expect(normalizeCategory('project')).toBe('project');
+    expect(normalizeCategory('info')).toBe('info');
+  });
+
+  it('normalizes category arrays and expands "all" keyword', () => {
+    expect(normalizeCategories(['mod', 'util'])).toEqual(['moderation', 'utility']);
+    const allNormalized = normalizeCategories(['all']);
+    expect(allNormalized).toContain('moderation');
+    expect(allNormalized).toContain('utility');
+    expect(allNormalized).toContain('plugins');
+    expect(allNormalized).toContain('info');
+    expect(allNormalized).toContain('project');
+    expect(allNormalized).toContain('config');
   });
 
   it('discovers slash command categories correctly', () => {
@@ -51,6 +81,21 @@ describe('slash-handler', () => {
     expect(categories).toContain('config');
     expect(categories).toContain('utility');
     expect(categories).toContain('info');
+    expect(categories).toContain('moderation');
+  });
+
+  it('registers guild slash commands using alias "mod" to match "moderation"', async () => {
+    const res = await registerGuildSlashCategories('fake-token', '123456789', '987654321', ['mod']);
+    expect(res.categories).toEqual(['moderation']);
+    expect(res.count).toBe(1);
+    expect(res.commandNames).toContain('warn');
+  });
+
+  it('registers guild slash commands using alias "util" to match "utility"', async () => {
+    const res = await registerGuildSlashCategories('fake-token', '123456789', '987654321', ['util']);
+    expect(res.categories).toEqual(['utility']);
+    expect(res.count).toBe(1);
+    expect(res.commandNames).toContain('ping');
   });
 
   it('registers guild slash commands filtered by category', async () => {
@@ -61,7 +106,11 @@ describe('slash-handler', () => {
 
   it('registers all slash commands when category is all', async () => {
     const res = await registerGuildSlashCategories('fake-token', '123456789', '987654321', ['all']);
-    expect(res.count).toBe(3);
+    expect(res.count).toBe(4);
+  });
+
+  it('throws an error if token, clientId, or guildId is missing', async () => {
+    await expect(registerGuildSlashCategories('', '123', '456', ['all'])).rejects.toThrow();
   });
 
   it('clears guild slash commands cleanly', async () => {

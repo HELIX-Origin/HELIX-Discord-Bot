@@ -117,15 +117,62 @@ export async function loadSlashCommands(): Promise<void> {
   logs.info(`Loaded ${count} slash command(s)`);
 }
 
+export const CANONICAL_SLASH_CATEGORIES = ['moderation', 'utility', 'plugins', 'info', 'project', 'config'] as const;
+export type CanonicalSlashCategory = (typeof CANONICAL_SLASH_CATEGORIES)[number];
+
+const CATEGORY_ALIASES: Record<string, CanonicalSlashCategory> = {
+  mod: 'moderation',
+  moderation: 'moderation',
+  util: 'utility',
+  utility: 'utility',
+  utils: 'utility',
+  plugin: 'plugins',
+  plugins: 'plugins',
+  info: 'info',
+  information: 'info',
+  proj: 'project',
+  project: 'project',
+  projects: 'project',
+  cfg: 'config',
+  config: 'config',
+  configuration: 'config',
+  setting: 'config',
+  settings: 'config',
+};
+
+export function normalizeCategory(cat: string): string {
+  if (!cat) return '';
+  const lower = cat.trim().toLowerCase();
+  return CATEGORY_ALIASES[lower] || lower;
+}
+
+export function normalizeCategories(cats: string[]): string[] {
+  if (!cats || !Array.isArray(cats)) return [];
+  const result = new Set<string>();
+  for (const c of cats) {
+    if (!c) continue;
+    const lower = c.trim().toLowerCase();
+    if (lower === 'all') {
+      for (const canonical of CANONICAL_SLASH_CATEGORIES) {
+        result.add(canonical);
+      }
+    } else {
+      const normalized = normalizeCategory(lower);
+      if (normalized) result.add(normalized);
+    }
+  }
+  return Array.from(result);
+}
+
 export function getSlashCommandCategories(): string[] {
   const categories = new Set<string>();
   for (const { def } of slashCommands.values()) {
     if (def.category) {
-      categories.add(def.category.toLowerCase());
+      categories.add(normalizeCategory(def.category));
     }
   }
   if (categories.size === 0) {
-    return ['info', 'project', 'config', 'mod', 'util'];
+    return Array.from(CANONICAL_SLASH_CATEGORIES);
   }
   return Array.from(categories).sort();
 }
@@ -139,23 +186,26 @@ export async function registerGuildSlashCategories(
   clientId: string,
   guildId: string,
   categories: string[]
-): Promise<{ count: number; categories: string[] }> {
+): Promise<{ count: number; categories: string[]; commandNames: string[] }> {
+  if (!token || !clientId || !guildId) {
+    throw new Error(`Missing required parameter for slash registration (token: ${Boolean(token)}, clientId: ${Boolean(clientId)}, guildId: ${guildId})`);
+  }
+
+  const normalized = normalizeCategories(categories);
   const rest = new REST({ version: '10' }).setToken(token);
-  const isAll = categories.includes('all');
-  const catSet = new Set(categories.map(c => c.toLowerCase()));
+  const catSet = new Set(normalized);
 
   const matched = slashCommands.filter(({ def }) => {
-    if (isAll) return true;
-    const cat = (def.category || 'general').toLowerCase();
-    return catSet.has(cat);
+    const cmdCat = normalizeCategory(def.category || 'general');
+    return catSet.has(cmdCat);
   });
 
   const payload = matched.map(({ builder }) => builder.toJSON());
 
   try {
     await rest.put(Routes.applicationGuildCommands(clientId, guildId), { body: payload });
-    logs.success(`Registered ${payload.length} slash command(s) for guild ${guildId} [categories: ${categories.join(', ')}]`);
-    return { count: payload.length, categories };
+    logs.success(`Registered ${payload.length} slash command(s) for guild ${guildId} [categories: ${normalized.join(', ')}]`);
+    return { count: payload.length, categories: normalized, commandNames: matched.map(m => m.def.name) };
   } catch (err: any) {
     logs.error(`Failed to register slash commands for guild ${guildId}: ${err.message}`);
     throw err;
@@ -175,6 +225,38 @@ export async function clearGuildSlashCommands(
     logs.error(`Failed to clear slash commands for guild ${guildId}: ${err.message}`);
     throw err;
   }
+}
+
+export async function syncGuildSlashCategories(
+  guildId: string,
+  categories?: string[]
+): Promise<{ count: number; categories: string[]; commandNames: string[] }> {
+  const { getBotToken, getClientId } = await import('../env.js');
+  const { botSettings } = await import('./settings-manager.js');
+  const { getBot } = await import('../client.js');
+
+  const botClient = getBot();
+  const token = getBotToken() || (botClient?.token as string) || '';
+  const clientId = getClientId() || botClient?.user?.id || '';
+
+  if (!token || !clientId) {
+    throw new Error('Discord Bot Token or Client ID is not configured. Cannot synchronize slash commands.');
+  }
+
+  // Ensure slash command registry is loaded
+  if (slashCommands.size === 0) {
+    await loadSlashCommands();
+  }
+
+  const resolvedCats = categories !== undefined ? categories : (botSettings.getGuildSettings(guildId)?.enabledSlashCategories || []);
+  const normalized = normalizeCategories(resolvedCats);
+
+  if (normalized.length === 0) {
+    await clearGuildSlashCommands(token, clientId, guildId);
+    return { count: 0, categories: [], commandNames: [] };
+  }
+
+  return await registerGuildSlashCategories(token, clientId, guildId, normalized);
 }
 
 export async function purgeGlobalSlashCommands(token: string, clientId: string): Promise<void> {
@@ -197,8 +279,9 @@ export async function reconcileAllGuildSlashCommands(
     try {
       const settings = botSettings.getGuildSettings(guildId);
       const categories = settings?.enabledSlashCategories || [];
-      if (categories.length > 0) {
-        await registerGuildSlashCategories(token, clientId, guildId, categories);
+      const normalized = normalizeCategories(categories);
+      if (normalized.length > 0) {
+        await registerGuildSlashCategories(token, clientId, guildId, normalized);
       } else {
         await clearGuildSlashCommands(token, clientId, guildId);
       }

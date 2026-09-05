@@ -2,7 +2,14 @@ import { PermissionFlagsBits } from 'discord.js';
 import { BotDatabase } from '../../db/database.js';
 import { getBotToken, getClientId } from '../../env.js';
 import { createEmbed, formatError, getMessage } from '../../handlers/message-handler.js';
-import { registerGuildSlashCategories, clearGuildSlashCommands, getSlashCommandCategories } from '../../handlers/slash-handler.js';
+import {
+  syncGuildSlashCategories,
+  clearGuildSlashCommands,
+  getSlashCommandCategories,
+  normalizeCategory,
+  normalizeCategories,
+  CANONICAL_SLASH_CATEGORIES,
+} from '../../handlers/slash-handler.js';
 import { botSettings } from '../../handlers/settings-manager.js';
 import type { CommandDefinition } from '../../types/command.js';
 
@@ -67,16 +74,17 @@ export const set: CommandDefinition = {
         },
         {
           name: 'category',
-          description: 'Category: info, project, config, mod, util, all',
+          description: 'Category: moderation, utility, plugins, info, project, config, all',
           type: 'string',
           required: false,
           choices: [
             { name: 'all', value: 'all' },
+            { name: 'moderation', value: 'moderation' },
+            { name: 'utility', value: 'utility' },
+            { name: 'plugins', value: 'plugins' },
             { name: 'info', value: 'info' },
             { name: 'project', value: 'project' },
             { name: 'config', value: 'config' },
-            { name: 'mod', value: 'mod' },
-            { name: 'util', value: 'util' },
           ],
         },
       ],
@@ -120,12 +128,9 @@ export const set: CommandDefinition = {
       }
       if (sub === 'slash') {
         const action = interaction.options.getString('action', true).toLowerCase();
-        const category = interaction.options.getString('category')?.toLowerCase();
+        const rawCategory = interaction.options.getString('category')?.toLowerCase();
         const current = botSettings.getGuildSettings(guild.id);
         let categories = new Set<string>(current?.enabledSlashCategories || []);
-
-        const token = getBotToken();
-        const clientId = getClientId() || interaction.client?.user?.id || '';
 
         if (action === 'view') {
           const list = categories.size > 0 ? Array.from(categories).map(c => `\`${c}\``).join(', ') : '`None (Prefix Only)`';
@@ -138,9 +143,9 @@ export const set: CommandDefinition = {
 
         if (action === 'clear') {
           botSettings.setGuildSettings({ guildId: guild.id, enabledSlashCategories: [] });
-          if (token && clientId) {
-            await clearGuildSlashCommands(token, clientId, guild.id).catch(() => {});
-          }
+          try {
+            await syncGuildSlashCategories(guild.id, []);
+          } catch (err: any) {}
           return interaction.reply({
             embeds: [createEmbed('config.set.embed_slash_updated', {
               description: '🧹 Disabled and cleared all slash commands for this guild.',
@@ -149,50 +154,73 @@ export const set: CommandDefinition = {
         }
 
         if (action === 'enable') {
-          if (!category) {
+          if (!rawCategory) {
             return interaction.reply({ embeds: [formatError('missing_argument', { arg: 'category' })], ephemeral: true });
           }
-          if (category === 'all') {
-            const allCats = getSlashCommandCategories();
-            categories = new Set(allCats);
+          if (rawCategory === 'all') {
+            categories = new Set(CANONICAL_SLASH_CATEGORIES);
           } else {
-            categories.add(category);
+            const normalized = normalizeCategory(rawCategory);
+            categories.add(normalized);
           }
           const catArr = Array.from(categories);
           botSettings.setGuildSettings({ guildId: guild.id, enabledSlashCategories: catArr });
           let registeredCount = 0;
-          if (token && clientId) {
-            const res = await registerGuildSlashCategories(token, clientId, guild.id, catArr).catch(() => null);
-            if (res) registeredCount = res.count;
+          let syncError: string | null = null;
+          try {
+            const res = await syncGuildSlashCategories(guild.id, catArr);
+            registeredCount = res.count;
+          } catch (err: any) {
+            syncError = err.message;
           }
+
+          if (syncError) {
+            return interaction.reply({
+              embeds: [createEmbed('config.set.embed_slash_updated', {
+                description: `⚠️ Enabled categories in settings (${catArr.map(c => `\`${c}\``).join(', ')}), but Discord registration returned: \`${syncError}\`\nEnsure the bot is invited with the \`applications.commands\` OAuth2 scope.`,
+              })],
+            });
+          }
+
           return interaction.reply({
             embeds: [createEmbed('config.set.embed_slash_updated', {
-              description: `✅ Enabled slash command categories: ${catArr.map(c => `\`${c}\``).join(', ')}\n${registeredCount > 0 ? `Registered **${registeredCount}** slash commands.` : ''}`,
+              description: `✅ Enabled slash command categories: ${catArr.map(c => `\`${c}\``).join(', ')}\n${registeredCount > 0 ? `Registered **${registeredCount}** slash command(s) with Discord.` : 'No commands in selected categories.'}`,
             })],
           });
         }
 
         if (action === 'disable') {
-          if (!category) {
+          if (!rawCategory) {
             return interaction.reply({ embeds: [formatError('missing_argument', { arg: 'category' })], ephemeral: true });
           }
-          if (category === 'all') {
+          if (rawCategory === 'all') {
             categories.clear();
           } else {
-            categories.delete(category);
+            const normalized = normalizeCategory(rawCategory);
+            categories.delete(normalized);
           }
           const catArr = Array.from(categories);
           botSettings.setGuildSettings({ guildId: guild.id, enabledSlashCategories: catArr });
-          if (token && clientId) {
-            if (catArr.length > 0) {
-              await registerGuildSlashCategories(token, clientId, guild.id, catArr).catch(() => {});
-            } else {
-              await clearGuildSlashCommands(token, clientId, guild.id).catch(() => {});
-            }
+          let syncError: string | null = null;
+          let registeredCount = 0;
+          try {
+            const res = await syncGuildSlashCategories(guild.id, catArr);
+            registeredCount = res.count;
+          } catch (err: any) {
+            syncError = err.message;
           }
+
+          if (syncError) {
+            return interaction.reply({
+              embeds: [createEmbed('config.set.embed_slash_updated', {
+                description: `⚠️ Disabled category in settings, but Discord synchronization returned: \`${syncError}\``,
+              })],
+            });
+          }
+
           return interaction.reply({
             embeds: [createEmbed('config.set.embed_slash_updated', {
-              description: `ℹ️ Disabled category \`${category}\`. Active categories: ${catArr.length > 0 ? catArr.map(c => `\`${c}\``).join(', ') : '`None (Prefix Only)`'}`,
+              description: `ℹ️ Disabled category \`${rawCategory}\`. Active categories: ${catArr.length > 0 ? catArr.map(c => `\`${c}\``).join(', ') : '`None (Prefix Only)`'}${catArr.length > 0 ? `\nSynchronized **${registeredCount}** slash commands.` : '\nCleared guild slash commands.'}`,
             })],
           });
         }
@@ -259,12 +287,9 @@ export const set: CommandDefinition = {
 
     if (sub === 'slash') {
       const action = args[1]?.toLowerCase();
-      const category = args[2]?.toLowerCase();
+      const rawCategory = args[2]?.toLowerCase();
       const current = botSettings.getGuildSettings(guild.id);
       let categories = new Set<string>(current?.enabledSlashCategories || []);
-
-      const token = getBotToken();
-      const clientId = getClientId() || message?.client?.user?.id || '';
 
       if (action === 'view') {
         const list = categories.size > 0 ? Array.from(categories).map(c => `\`${c}\``).join(', ') : '`None (Prefix Only)`';
@@ -277,9 +302,9 @@ export const set: CommandDefinition = {
 
       if (action === 'clear') {
         botSettings.setGuildSettings({ guildId: guild.id, enabledSlashCategories: [] });
-        if (token && clientId) {
-          await clearGuildSlashCommands(token, clientId, guild.id).catch(() => {});
-        }
+        try {
+          await syncGuildSlashCategories(guild.id, []);
+        } catch (err: any) {}
         return message!.reply({
           embeds: [createEmbed('config.set.embed_slash_updated', {
             description: '🧹 Disabled and cleared all slash commands for this guild.',
@@ -288,50 +313,73 @@ export const set: CommandDefinition = {
       }
 
       if (action === 'enable') {
-        if (!category) {
+        if (!rawCategory) {
           return message!.reply({ embeds: [formatError('missing_argument', { arg: 'category' })] });
         }
-        if (category === 'all') {
-          const allCats = getSlashCommandCategories();
-          categories = new Set(allCats);
+        if (rawCategory === 'all') {
+          categories = new Set(CANONICAL_SLASH_CATEGORIES);
         } else {
-          categories.add(category);
+          const normalized = normalizeCategory(rawCategory);
+          categories.add(normalized);
         }
         const catArr = Array.from(categories);
         botSettings.setGuildSettings({ guildId: guild.id, enabledSlashCategories: catArr });
         let registeredCount = 0;
-        if (token && clientId) {
-          const res = await registerGuildSlashCategories(token, clientId, guild.id, catArr).catch(() => null);
-          if (res) registeredCount = res.count;
+        let syncError: string | null = null;
+        try {
+          const res = await syncGuildSlashCategories(guild.id, catArr);
+          registeredCount = res.count;
+        } catch (err: any) {
+          syncError = err.message;
         }
+
+        if (syncError) {
+          return message!.reply({
+            embeds: [createEmbed('config.set.embed_slash_updated', {
+              description: `⚠️ Enabled categories in settings (${catArr.map(c => `\`${c}\``).join(', ')}), but Discord registration returned: \`${syncError}\`\nEnsure the bot is invited with the \`applications.commands\` OAuth2 scope.`,
+            })],
+          });
+        }
+
         return message!.reply({
           embeds: [createEmbed('config.set.embed_slash_updated', {
-            description: `✅ Enabled slash command categories: ${catArr.map(c => `\`${c}\``).join(', ')}\n${registeredCount > 0 ? `Registered **${registeredCount}** slash commands.` : ''}`,
+            description: `✅ Enabled slash command categories: ${catArr.map(c => `\`${c}\``).join(', ')}\n${registeredCount > 0 ? `Registered **${registeredCount}** slash command(s) with Discord.` : 'No commands in selected categories.'}`,
           })],
         });
       }
 
       if (action === 'disable') {
-        if (!category) {
+        if (!rawCategory) {
           return message!.reply({ embeds: [formatError('missing_argument', { arg: 'category' })] });
         }
-        if (category === 'all') {
+        if (rawCategory === 'all') {
           categories.clear();
         } else {
-          categories.delete(category);
+          const normalized = normalizeCategory(rawCategory);
+          categories.delete(normalized);
         }
         const catArr = Array.from(categories);
         botSettings.setGuildSettings({ guildId: guild.id, enabledSlashCategories: catArr });
-        if (token && clientId) {
-          if (catArr.length > 0) {
-            await registerGuildSlashCategories(token, clientId, guild.id, catArr).catch(() => {});
-          } else {
-            await clearGuildSlashCommands(token, clientId, guild.id).catch(() => {});
-          }
+        let syncError: string | null = null;
+        let registeredCount = 0;
+        try {
+          const res = await syncGuildSlashCategories(guild.id, catArr);
+          registeredCount = res.count;
+        } catch (err: any) {
+          syncError = err.message;
         }
+
+        if (syncError) {
+          return message!.reply({
+            embeds: [createEmbed('config.set.embed_slash_updated', {
+              description: `⚠️ Disabled category in settings, but Discord synchronization returned: \`${syncError}\``,
+            })],
+          });
+        }
+
         return message!.reply({
           embeds: [createEmbed('config.set.embed_slash_updated', {
-            description: `ℹ️ Disabled category \`${category}\`. Active categories: ${catArr.length > 0 ? catArr.map(c => `\`${c}\``).join(', ') : '`None (Prefix Only)`'}`,
+            description: `ℹ️ Disabled category \`${rawCategory}\`. Active categories: ${catArr.length > 0 ? catArr.map(c => `\`${c}\``).join(', ') : '`None (Prefix Only)`'}${catArr.length > 0 ? `\nSynchronized **${registeredCount}** slash commands.` : '\nCleared guild slash commands.'}`,
           })],
         });
       }

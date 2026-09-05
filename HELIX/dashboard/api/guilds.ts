@@ -34,11 +34,16 @@ export async function handleDashboardGuilds(req: http.IncomingMessage, res: http
   if (req.method === 'POST') {
     let body = '';
     req.on('data', chunk => body += chunk);
-    req.on('end', () => {
+    req.on('end', async () => {
       try {
         const payload = JSON.parse(body || '{}');
         const guildId = payload.guildId || 'global';
         const existing = botSettings.getGuildSettings(guildId);
+
+        const { normalizeCategories, syncGuildSlashCategories } = await import('../../src/handlers/slash-handler.js');
+        const normalizedSlash = payload.enabledSlashCategories !== undefined
+          ? normalizeCategories(payload.enabledSlashCategories)
+          : existing?.enabledSlashCategories;
 
         botSettings.setGuildSettings({
           guildId,
@@ -48,8 +53,12 @@ export async function handleDashboardGuilds(req: http.IncomingMessage, res: http
           ticketManagerRoleId: payload.ticketManagerRoleId !== undefined ? payload.ticketManagerRoleId : existing?.ticketManagerRoleId,
           modLogChannelId: payload.modLogChannelId !== undefined ? payload.modLogChannelId : existing?.modLogChannelId,
           welcomeChannelId: payload.welcomeChannelId !== undefined ? payload.welcomeChannelId : existing?.welcomeChannelId,
-          enabledSlashCategories: payload.enabledSlashCategories !== undefined ? payload.enabledSlashCategories : existing?.enabledSlashCategories,
+          enabledSlashCategories: normalizedSlash,
         });
+
+        if (payload.enabledSlashCategories !== undefined && guildId !== 'global') {
+          syncGuildSlashCategories(guildId, normalizedSlash ?? undefined).catch(() => {});
+        }
 
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ success: true, guildId, message: 'Settings saved' }));

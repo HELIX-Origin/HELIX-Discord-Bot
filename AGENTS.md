@@ -147,6 +147,7 @@ flowchart LR
 - [BUG-022](.agents/bugs/BUG-022-guild-settings-registration-and-slash-purge.md) — Guild settings end-to-end bot state registration & stale slash command registry purge — **Resolved** (4 Sub-Tasks)
 - [BUG-023](.agents/bugs/BUG-023-help-embed-overhaul-and-command-missing-args-help.md) — Help Command Embed Overhaul & Automated Missing Arguments Help Response — **Resolved** (4 Sub-Tasks)
 - [BUG-024](.agents/bugs/BUG-024-guild-settings-bot-session-and-db-sync.md) — Universal In-Memory Bot Session State & Unified Database Synchronization — **Resolved** (4 Sub-Tasks)
+- [BUG-025](.agents/bugs/BUG-025-instant-guild-slash-category-sync.md) — Instant Guild Slash Command Category Registration, Normalization & REST Synchronization — **Resolved** (4 Sub-Tasks)
 
 ---
 
