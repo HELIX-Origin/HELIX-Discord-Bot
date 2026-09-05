@@ -112,9 +112,15 @@ export function buildHelpPayload(
       embed.addFields({
         name: `${emoji} ${label} (${cmds.length})`,
         value: `${cmdPills}\n*${getCategoryDescription(cat)}*`,
-        inline: false,
+        inline: true,
       });
     }
+
+    embed.addFields({
+      name: '💡 Quick Navigation',
+      value: `• Run \`${prefix}help <command>\` for detailed parameter specifications & options\n• Select a category from the **dropdown menu** below to explore features\n• Use the navigation buttons to flip through categories`,
+      inline: false,
+    });
 
     embed.setFooter({
       text: `Prefix: ${prefix} • ${allEntries.length} Commands • Select a category below to view details`,
@@ -131,7 +137,7 @@ export function buildHelpPayload(
     embed = new EmbedBuilder()
       .setColor(color as any)
       .setTitle(`${emoji} ${label}`)
-      .setDescription(`${description}\n\n> 💡 *Use \`${prefix}help <command>\` for detailed parameter specifications, options, and examples.*`)
+      .setDescription(`*${description}*`)
       .setTimestamp()
       .setFooter({
         text: `Category ${catIndex}/${categoryOrder.length} • ${cmds.length} command(s) • Prefix: ${prefix}`,
@@ -161,15 +167,21 @@ export function buildHelpPayload(
         let subStr = '';
         if (c.subcommands && c.subcommands.length > 0) {
           const subNames = c.subcommands.map(s => typeof s === 'string' ? s : s.name);
-          subStr = `\n**Subcommands:** ${subNames.map(s => `\`${s}\``).join(', ')}`;
+          subStr = `\n*Subcommands:* ${subNames.map(s => `\`${s}\``).join(', ')}`;
         }
 
         embed.addFields({
           name: `\`${prefix}${c.name}\`${permsStr}`,
           value: `${c.description}\n**Usage:** \`${usage}\`${aliasStr}${subStr}`,
-          inline: false,
+          inline: true,
         });
       }
+
+      embed.addFields({
+        name: '📖 Detailed Command Help',
+        value: `Type \`${prefix}help <command>\` (e.g. \`${prefix}help ${cmds[0]?.name || 'ping'}\`) for parameter specs, options, and full syntax.`,
+        inline: false,
+      });
     }
   }
 
