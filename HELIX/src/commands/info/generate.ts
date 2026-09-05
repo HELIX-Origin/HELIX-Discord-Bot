@@ -1,4 +1,5 @@
 import type { CommandDefinition, ExecuteContext } from "../../types/command.js";
+import { getPrefixForGuild } from "../../handlers/command-handler.js";
 import { createEmbed, formatError } from "../../handlers/message-handler.js";
 import { getPlugin, getPluginByExtension, getAllPlugins } from "../../plugins/registry.js";
 
@@ -6,6 +7,8 @@ export const generate: CommandDefinition = {
   name: "generate",
   description: "Generate boilerplate code, models, and routes",
   category: "info",
+  usage: "<language> <type> <name>",
+  examples: ["generate typescript model User", "generate rust route health", "generate python test auth"],
   options: [
     { name: "language", description: "Target language (e.g. typescript, rust)", type: "string", required: true },
     { name: "type", description: "Snippet type (model, route, test, algorithm)", type: "string", required: true },
@@ -22,10 +25,11 @@ export const generate: CommandDefinition = {
     const language = getOption<string>("language") || args[0];
     const type = getOption<string>("type") || args[1] || "model";
     const name = getOption<string>("name") || args[2] || "Item";
+    const prefix = getPrefixForGuild(message?.guildId || interaction?.guildId || '');
 
     if (!language || !type || !name) {
       return reply({
-        embeds: [formatError("Usage: `>generate <language> <type> <name>` or `/generate language:<lang> type:<type> name:<name>`\nValid types: `model`, `route`, `test`, `algorithm`")],
+        embeds: [formatError(`Usage: \`${prefix}generate <language> <type> <name>\` or \`/generate language:<lang> type:<type> name:<name>\`\nValid types: \`model\`, \`route\`, \`test\`, \`algorithm\``)],
         ephemeral: true,
       });
     }

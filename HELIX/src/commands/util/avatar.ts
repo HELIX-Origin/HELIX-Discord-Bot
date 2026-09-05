@@ -1,4 +1,4 @@
-﻿import { GuildMember, User } from 'discord.js';
+import { GuildMember, User } from 'discord.js';
 import { createEmbed, formatError, getMessage } from '../../handlers/message-handler.js';
 import type { CommandDefinition } from '../../types/command.js';
 
@@ -6,6 +6,8 @@ export const avatar: CommandDefinition = {
   name: 'avatar',
   description: 'Display a user avatar',
   category: 'utility',
+  usage: '[user]',
+  examples: ['avatar', 'avatar @username'],
   options: [{ name: 'user', description: 'Target user', type: 'user', required: false }],
   async execute({ message, interaction, getOption }) {
     const raw = getOption<GuildMember | User>('user');

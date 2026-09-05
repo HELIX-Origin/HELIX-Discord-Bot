@@ -8,11 +8,13 @@ export const timeout: CommandDefinition = {
   name: 'timeout',
   description: 'Timeout a member',
   category: 'moderation',
+  usage: '>timeout <user> <minutes> [reason]',
+  examples: ['>timeout @Spammer 10 Spamming chat', '>timeout @Disruptive 60'],
   permissions: [PermissionFlagsBits.ModerateMembers],
   options: [
-    { name: 'user', description: 'Target user', type: 'user', required: true },
+    { name: 'user', description: 'Target user to timeout', type: 'user', required: true },
     { name: 'minutes', description: 'Duration in minutes (1-40320)', type: 'integer', required: true, minValue: 1, maxValue: 40320 },
-    { name: 'reason', description: 'Reason', type: 'string', required: false },
+    { name: 'reason', description: 'Reason for the timeout', type: 'string', required: false },
   ],
   async execute({ message, interaction, getOption, guild }) {
     const target = getOption<GuildMember>('user');

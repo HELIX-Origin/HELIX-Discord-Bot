@@ -1,11 +1,18 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterAll } from 'vitest';
 import { PermissionFlagsBits } from 'discord.js';
 import { set } from '../../../HELIX/src/commands/config/set.js';
 import { BotDatabase } from '../../../HELIX/src/db/database.js';
+import { withTempDbEnvironment } from '../../helpers/db.js';
+
+const tempEnv = withTempDbEnvironment();
 
 describe('commands/config/set — execute and permissions', () => {
   let db: BotDatabase;
   const testGuildId = 'test-guild-set-123';
+
+  afterAll(() => {
+    tempEnv.cleanup();
+  });
 
   beforeEach(() => {
     db = BotDatabase.getInstance();

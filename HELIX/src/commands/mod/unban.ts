@@ -8,10 +8,12 @@ export const unban: CommandDefinition = {
   name: 'unban',
   description: 'Unban a user by ID',
   category: 'moderation',
+  usage: '>unban <user_id> [reason]',
+  examples: ['>unban 123456789012345678 Appeal granted'],
   permissions: [PermissionFlagsBits.BanMembers],
   options: [
-    { name: 'user_id', description: 'User ID to unban', type: 'string', required: true },
-    { name: 'reason', description: 'Reason', type: 'string', required: false },
+    { name: 'user_id', description: 'Discord User ID to unban', type: 'string', required: true },
+    { name: 'reason', description: 'Reason for the unban', type: 'string', required: false },
   ],
   async execute({ message, interaction, getOption, guild }) {
     const userId = getOption<string>('user_id');

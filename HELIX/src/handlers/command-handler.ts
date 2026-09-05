@@ -1,7 +1,7 @@
 import { Collection, Message, PermissionFlagsBits } from 'discord.js';
 import { CommandDefinition, ExecuteContext } from '../types/command.js';
 import { BotDatabase } from '../db/database.js';
-import { registerHelp, createHelp } from './help-registrar.js';
+import { registerHelp, createHelp, buildCommandHelpEmbed, getCommandHelp } from './help-registrar.js';
 import { logs } from './logs-handler.js';
 import { getMessage, formatError } from './message-handler.js';
 import { DEFAULT_PREFIX } from '../config.js';
@@ -55,12 +55,12 @@ export async function loadPrefixCommands(): Promise<void> {
   for (const filePath of filePaths) {
     try {
       let mod: any;
+      const rel = path.relative(__dirname, filePath).replaceAll('\\', '/');
+      const spec = rel.startsWith('.') ? rel : `./${rel}`;
       try {
-        mod = await import(pathToFileURL(filePath).href);
-      } catch {
-        const rel = path.relative(__dirname, filePath).replaceAll('\\', '/');
-        const spec = rel.startsWith('.') ? rel : `./${rel}`;
         mod = await import(spec);
+      } catch {
+        mod = await import(pathToFileURL(filePath).href);
       }
       const seenInFile = new Set<string>();
       for (const exp of Object.values(mod as any)) {
@@ -74,11 +74,21 @@ export async function loadPrefixCommands(): Promise<void> {
           for (const alias of cmd.aliases) commands.set(alias, cmd);
         }
 
+        let generatedUsage = cmd.usage || '';
+        if (generatedUsage.startsWith('>')) {
+          generatedUsage = generatedUsage.slice(1).trim();
+        }
+        if (!generatedUsage && cmd.options?.length) {
+          generatedUsage = cmd.options.map(o => o.required ? `<${o.name}>` : `[${o.name}]`).join(' ');
+        }
+
         registerHelp(createHelp(cmd.name, cmd.description, cmd.category, {
-          usage: `>${cmd.name}`,
+          usage: generatedUsage,
           permissions: (cmd.permissions || []).map(formatPermissionName),
           aliases: cmd.aliases,
           subcommands: cmd.subcommands?.map(s => s.name),
+          options: cmd.options,
+          examples: cmd.examples,
         }));
 
         count++;
@@ -110,7 +120,11 @@ function parseArgs(message: Message, args: string[], cmd: CommandDefinition): (n
 
     const idx = optionDefs.indexOf(opt);
     const raw = args[idx];
-    if (!raw) return null;
+    if (raw === undefined || raw === null || raw === '') return null;
+
+    if (idx === optionDefs.length - 1 && opt.type === 'string' && args.length > optionDefs.length) {
+      return args.slice(idx).join(' ');
+    }
 
     if (opt.type === 'user') {
       const id = raw.replace(/[<@!>]/g, '');
@@ -160,6 +174,23 @@ export async function handlePrefixMessage(message: Message): Promise<void> {
 
   try {
     const getOption = parseArgs(message, args, command);
+
+    // Validate required options defined on the command
+    if (command.options && command.options.length > 0) {
+      const missingOptions = command.options.filter(o => o.required && (getOption(o.name) === null || getOption(o.name) === undefined || getOption(o.name) === ''));
+      if (missingOptions.length > 0) {
+        const missingNames = missingOptions.map(o => `\`<${o.name}>\``).join(', ');
+        const helpEntry = getCommandHelp(command.name);
+        if (helpEntry) {
+          const helpEmbed = buildCommandHelpEmbed(helpEntry, prefix, {
+            missingNotice: `Please provide ${missingNames} to execute this command.`,
+          });
+          await message.reply({ embeds: [helpEmbed] });
+          return;
+        }
+      }
+    }
+
     await command.execute({
       message,
       args,

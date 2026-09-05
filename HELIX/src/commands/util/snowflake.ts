@@ -6,6 +6,8 @@ export const snowflake: CommandDefinition = {
   name: 'snowflake',
   description: 'Deconstruct a Discord snowflake ID',
   category: 'utility',
+  usage: '<id>',
+  examples: ['snowflake 123456789012345678'],
   options: [{ name: 'id', description: 'Snowflake ID', type: 'string', required: true }],
   async execute({ message, interaction, getOption }) {
     const id = getOption<string>('id');

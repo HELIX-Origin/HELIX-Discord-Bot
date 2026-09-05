@@ -1,4 +1,5 @@
 import type { CommandDefinition, ExecuteContext } from "../../types/command.js";
+import { getPrefixForGuild } from "../../handlers/command-handler.js";
 import { createEmbed, formatError } from "../../handlers/message-handler.js";
 import { refactorCode } from "../../plugins/sdk/code-transformer.js";
 import { resolveSourceCode } from "../../plugins/sdk/source-resolver.js";
@@ -7,6 +8,8 @@ export const refactor: CommandDefinition = {
   name: "refactor",
   description: "Modernize code syntax and apply language idioms",
   category: "info",
+  usage: "<code | url> [language]",
+  examples: ['refactor var x = function() {} typescript', 'refactor https://raw.githubusercontent.com/user/repo/main/app.ts'],
   options: [
     { name: "code", description: "Code snippet or file URL to refactor", type: "string", required: false },
     { name: "language", description: "Target programming language", type: "string", required: false },
@@ -22,6 +25,7 @@ export const refactor: CommandDefinition = {
     const rawInput = getOption<string>("code") || args.join(" ");
     const langOpt = getOption<string>("language") || (args[0] && !args[0].includes("`") && !args[0].startsWith("http") && args.length > 1 ? args[0] : undefined);
     const inputToResolve = langOpt && args.length > 1 ? args.slice(1).join(" ") : rawInput;
+    const prefix = getPrefixForGuild(message?.guildId || interaction?.guildId || '');
 
     try {
       const resolved = await resolveSourceCode({
@@ -33,7 +37,7 @@ export const refactor: CommandDefinition = {
 
       if (!resolved.code) {
         return reply({
-          embeds: [formatError("Usage: `>refactor [language] <code | url>` or attach a file with `>refactor`")],
+          embeds: [formatError(`Usage: \`${prefix}refactor [language] <code | url>\` or attach a file with \`${prefix}refactor\``)],
           ephemeral: true,
         });
       }

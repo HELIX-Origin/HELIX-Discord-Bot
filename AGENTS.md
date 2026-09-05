@@ -145,6 +145,7 @@ flowchart LR
 - [BUG-020](.agents/bugs/BUG-020-permission-flags-and-command-interactions.md) — Discord PermissionFlagsBits standardization, prefix argument parsing & help interaction router — **Resolved** (4 Sub-Tasks)
 - [BUG-021](.agents/bugs/BUG-021-help-duplicate-custom-id-and-prefix-routing.md) — Help component duplicate custom ID elimination & prefix dynamic import resolution — **Resolved** (4 Sub-Tasks)
 - [BUG-022](.agents/bugs/BUG-022-guild-settings-registration-and-slash-purge.md) — Guild settings end-to-end bot state registration & stale slash command registry purge — **Resolved** (4 Sub-Tasks)
+- [BUG-023](.agents/bugs/BUG-023-help-embed-overhaul-and-command-missing-args-help.md) — Help Command Embed Overhaul & Automated Missing Arguments Help Response — **Resolved** (4 Sub-Tasks)
 
 ---
 

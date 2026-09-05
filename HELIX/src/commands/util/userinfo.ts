@@ -1,4 +1,4 @@
-﻿import { GuildMember, User } from 'discord.js';
+import { GuildMember, User } from 'discord.js';
 import { createEmbed } from '../../handlers/message-handler.js';
 import type { CommandDefinition } from '../../types/command.js';
 
@@ -6,6 +6,8 @@ export const userinfo: CommandDefinition = {
   name: 'userinfo',
   description: 'Display user information',
   category: 'utility',
+  usage: '[user]',
+  examples: ['userinfo', 'userinfo @username'],
   options: [{ name: 'user', description: 'Target user', type: 'user', required: false }],
   async execute({ message, interaction, getOption, guild }) {
     const raw = getOption<GuildMember | User>('user');

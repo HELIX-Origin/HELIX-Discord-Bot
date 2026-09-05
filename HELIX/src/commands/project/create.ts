@@ -20,7 +20,11 @@ const TEMPLATES = [
 ];
 
 export const create: CommandDefinition = {
-  name: 'create', description: 'Scaffold a new project from starter templates', category: 'project',
+  name: 'create',
+  description: 'Scaffold a new project from starter templates',
+  category: 'project',
+  usage: '<template> <name> [git_platform] [dry_run]',
+  examples: ['create discord-bot my-bot', 'create web-react frontend-app github', 'create backend-rust api-service --dry-run'],
   options: [
     { name: 'template', description: 'Template ID', type: 'string', required: true, choices: TEMPLATES.map(t => ({ name: t.label, value: t.value })) },
     { name: 'name', description: 'Project name', type: 'string', required: true },

@@ -1,4 +1,5 @@
 import type { CommandDefinition, ExecuteContext } from "../../types/command.js";
+import { getPrefixForGuild } from "../../handlers/command-handler.js";
 import { createEmbed, formatError } from "../../handlers/message-handler.js";
 import { diagnoseError } from "../../plugins/sdk/stack-trace-parser.js";
 import { resolveSourceCode } from "../../plugins/sdk/source-resolver.js";
@@ -7,6 +8,8 @@ export const debug: CommandDefinition = {
   name: "debug",
   description: "Diagnose stack traces, errors, and log files",
   category: "info",
+  usage: "<error | log | url>",
+  examples: ['debug TypeError: Cannot read properties of undefined', 'debug https://pastebin.com/raw/errorlog'],
   options: [
     { name: "error", description: "Stack trace, exception, or log to diagnose", type: "string", required: false },
   ],
@@ -20,6 +23,8 @@ export const debug: CommandDefinition = {
 
     const rawError = getOption<string>("error") || args.join(" ");
 
+    const prefix = getPrefixForGuild(message?.guildId || interaction?.guildId || '');
+
     try {
       const resolved = await resolveSourceCode({
         input: rawError,
@@ -29,7 +34,7 @@ export const debug: CommandDefinition = {
 
       if (!resolved.code) {
         return reply({
-          embeds: [formatError("Usage: `>debug <error_log_or_stack_trace>` or attach a log file with `>debug`")],
+          embeds: [formatError(`Usage: \`${prefix}debug <error_log_or_stack_trace>\` or attach a log file with \`${prefix}debug\``)],
           ephemeral: true,
         });
       }

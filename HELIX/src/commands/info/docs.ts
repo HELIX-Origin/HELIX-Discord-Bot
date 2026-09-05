@@ -1,4 +1,5 @@
 import type { CommandDefinition, ExecuteContext } from "../../types/command.js";
+import { getPrefixForGuild } from "../../handlers/command-handler.js";
 import { createEmbed, formatError, getMessage } from "../../handlers/message-handler.js";
 import { getPlugin, getPluginByExtension, getAllPlugins } from "../../plugins/registry.js";
 import type { DocReference } from "../../plugins/types.js";
@@ -7,6 +8,8 @@ export const docs: CommandDefinition = {
   name: "docs",
   description: "Search official language documentation",
   category: "info",
+  usage: "<topic> [language]",
+  examples: ["docs promises typescript", "docs tokio rust", "docs fastapi python"],
   options: [
     { name: "topic", description: "Topic to look up (e.g. types, promises)", type: "string", required: true },
     { name: "language", description: "Programming language", type: "string", required: false },
@@ -21,10 +24,11 @@ export const docs: CommandDefinition = {
 
     const topic = getOption<string>("topic") || args[1] || args[0];
     const languageOpt = getOption<string>("language") || (args[1] ? args[0] : "typescript");
+    const prefix = getPrefixForGuild(message?.guildId || interaction?.guildId || '');
 
     if (!topic) {
       return reply({
-        embeds: [formatError("Usage: `>docs [language] <topic>` or `/docs topic:<topic> language:<language>`")],
+        embeds: [formatError(`Usage: \`${prefix}docs [language] <topic>\` or \`/docs topic:<topic> language:<language>\``)],
         ephemeral: true,
       });
     }

@@ -1,4 +1,4 @@
-﻿import { version as djsVersion } from 'discord.js';
+import { version as djsVersion } from 'discord.js';
 import { BOT_VERSION } from '../../config.js';
 import { createEmbed } from '../../handlers/message-handler.js';
 import type { CommandDefinition } from '../../types/command.js';
@@ -7,6 +7,8 @@ export const info: CommandDefinition = {
   name: 'info',
   description: 'Display bot diagnostics and information',
   category: 'info',
+  usage: '',
+  examples: ['info'],
   async execute({ message, interaction }) {
     const mem = process.memoryUsage();
     const used = Math.round(mem.heapUsed / 1024 / 1024);

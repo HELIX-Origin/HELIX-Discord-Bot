@@ -1,4 +1,5 @@
 import type { CommandDefinition, ExecuteContext } from "../../types/command.js";
+import { getPrefixForGuild } from "../../handlers/command-handler.js";
 import { createEmbed, formatError } from "../../handlers/message-handler.js";
 import { scanSecurity } from "../../plugins/sdk/security-scanner.js";
 import { resolveSourceCode } from "../../plugins/sdk/source-resolver.js";
@@ -7,6 +8,8 @@ export const inspect: CommandDefinition = {
   name: "inspect",
   description: "Run security and anti-pattern analysis",
   category: "info",
+  usage: "<code | url> [language]",
+  examples: ['inspect function evalData(x) { eval(x); } typescript', 'inspect https://raw.githubusercontent.com/user/repo/main/app.ts'],
   options: [
     { name: "code", description: "Code snippet or file URL to inspect", type: "string", required: false },
     { name: "language", description: "Programming language", type: "string", required: false },
@@ -22,6 +25,7 @@ export const inspect: CommandDefinition = {
     const rawInput = getOption<string>("code") || args.join(" ");
     const langOpt = getOption<string>("language") || (args[0] && !args[0].includes("`") && !args[0].startsWith("http") && args.length > 1 ? args[0] : undefined);
     const inputToResolve = langOpt && args.length > 1 ? args.slice(1).join(" ") : rawInput;
+    const prefix = getPrefixForGuild(message?.guildId || interaction?.guildId || '');
 
     try {
       const resolved = await resolveSourceCode({
@@ -33,7 +37,7 @@ export const inspect: CommandDefinition = {
 
       if (!resolved.code) {
         return reply({
-          embeds: [formatError("Usage: `>inspect [language] <code | url>` or attach a file with `>inspect`")],
+          embeds: [formatError(`Usage: \`${prefix}inspect [language] <code | url>\` or attach a file with \`${prefix}inspect\``)],
           ephemeral: true,
         });
       }

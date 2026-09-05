@@ -1,4 +1,4 @@
-﻿import { getPrefixForGuild } from '../../handlers/command-handler.js';
+import { getPrefixForGuild } from '../../handlers/command-handler.js';
 import { createEmbed } from '../../handlers/message-handler.js';
 import type { CommandDefinition } from '../../types/command.js';
 
@@ -25,6 +25,8 @@ export const list: CommandDefinition = {
   name: 'list',
   description: 'List available project scaffolding templates',
   category: 'info',
+  usage: '',
+  examples: ['list'],
   async execute({ message, interaction, guild }) {
     const prefix = getPrefixForGuild(guild?.id || '');
     const embed = createEmbed('info.list.embed', {

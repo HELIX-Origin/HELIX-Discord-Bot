@@ -19,15 +19,13 @@ import path from 'node:path';
 import os from 'node:os';
 
 describe('slash-handler', () => {
-  let tmpDbPath: string;
   let db: BotDatabase;
 
   beforeEach(() => {
     vi.spyOn(REST.prototype, 'setToken').mockReturnThis();
     vi.spyOn(REST.prototype, 'put').mockResolvedValue([] as any);
 
-    tmpDbPath = path.join(os.tmpdir(), `test-slash-${Date.now()}-${Math.random().toString(36).slice(2)}.sqlite`);
-    db = new BotDatabase(tmpDbPath);
+    db = BotDatabase.getInstance();
 
     clearSlashCommands();
     registerSlashCommand(set);
@@ -38,9 +36,6 @@ describe('slash-handler', () => {
   afterEach(() => {
     vi.restoreAllMocks();
     clearSlashCommands();
-    try {
-      if (fs.existsSync(tmpDbPath)) fs.unlinkSync(tmpDbPath);
-    } catch {}
   });
 
   it('registers slash commands and retrieves them', () => {

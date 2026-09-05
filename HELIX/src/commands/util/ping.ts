@@ -1,10 +1,12 @@
-﻿import { createEmbed } from '../../handlers/message-handler.js';
+import { createEmbed } from '../../handlers/message-handler.js';
 import type { CommandDefinition } from '../../types/command.js';
 
 export const ping: CommandDefinition = {
   name: 'ping',
   description: 'Check Discord WebSocket latency',
   category: 'utility',
+  usage: '',
+  examples: ['ping'],
   async execute({ message, interaction }) {
     const fmt = (ms: number) => {
       const s = Math.floor(ms / 1000);

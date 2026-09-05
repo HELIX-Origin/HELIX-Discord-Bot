@@ -194,28 +194,27 @@
     "help": {
       "embed": {
         "title": "🧬 HELIX Command Center",
-        "color": "#00d2ff",
+        "color": "#5865F2",
         "description": "Welcome to **HELIX** — developer community assistant with moderation, multi-framework scaffolding, ticket management, and code intelligence language plugins.\n\nUse `{prefix}help <command>` for detailed syntax, or use the **dropdown menu** below to explore commands by category.",
-        "footer": "Prefix: {prefix} • Total Commands: {count} • {categories} Categories"
+        "footer": "Prefix: {prefix} • {count} Commands • Select a category below to view details"
       },
       "category_embed": {
         "title": "{emoji} {categoryLabel}",
         "color": "{color}",
-        "description": "*{categoryDescription}*\n\n{commandList}",
-        "footer": "Category: {categoryLabel} • Page {page}/{totalPages} • Prefix: {prefix}"
+        "description": "*{categoryDescription}*",
+        "footer": "Category {catIndex}/{totalCategories} • {count} command(s) • Prefix: {prefix}"
       },
       "detail_embed": {
-        "title": "📖 Command Details: `{prefix}{name}`",
-        "color": "#00d2ff",
+        "title": "📖 Command Help: `{prefix}{name}`",
+        "color": "#5865F2",
         "description": "{description}",
         "fields": [
-          { "name": "Category", "value": "`{category}`", "inline": true },
-          { "name": "Usage", "value": "`{usage}`", "inline": true },
+          { "name": "Category", "value": "{category}", "inline": true },
+          { "name": "Permissions", "value": "{permissions}", "inline": true },
           { "name": "Aliases", "value": "{aliases}", "inline": true },
-          { "name": "Permissions", "value": "{permissions}", "inline": false },
-          { "name": "Subcommands", "value": "{subcommands}", "inline": false }
+          { "name": "Syntax & Usage", "value": "```syntax\n{usage}\n```", "inline": false }
         ],
-        "footer": "Use {prefix}help to return to the main menu"
+        "footer": "Prefix: {prefix} • Type {prefix}help to browse all categories"
       },
       "command_not_found": "❌ Command `{name}` was not found. Use `{prefix}help` to view all available commands."
     },

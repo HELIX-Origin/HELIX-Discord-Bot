@@ -21,6 +21,8 @@ export const plugin: CommandDefinition = {
   name: 'plugin',
   description: 'Manage language plugins and database-backed repositories',
   category: 'plugins',
+  usage: '<list|install|remove|info|enable|disable|update> [args]',
+  examples: ['plugin list', 'plugin install HELIX-Origin/helix-origin', 'plugin info HELIX-Origin/helix-origin', 'plugin enable HELIX-Origin/helix-origin'],
   subcommands: [
     { name: 'list', description: 'List installed plugins for this server' },
     {

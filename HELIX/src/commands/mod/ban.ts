@@ -8,10 +8,12 @@ export const ban: CommandDefinition = {
   name: 'ban',
   description: 'Ban a member from the server',
   category: 'moderation',
+  usage: '>ban <user> [reason] [delete_days]',
+  examples: ['>ban @BadUser Spamming server invites', '>ban 123456789012345678 Rule violation 1'],
   permissions: [PermissionFlagsBits.BanMembers],
   options: [
-    { name: 'user', description: 'Target user', type: 'user', required: true },
-    { name: 'reason', description: 'Reason', type: 'string', required: false },
+    { name: 'user', description: 'Target user to ban', type: 'user', required: true },
+    { name: 'reason', description: 'Reason for the ban', type: 'string', required: false },
     { name: 'delete_days', description: 'Days of messages to delete (0-7)', type: 'integer', required: false, minValue: 0, maxValue: 7 },
   ],
   async execute({ message, interaction, getOption, guild }) {

@@ -8,6 +8,8 @@ export const purge: CommandDefinition = {
   name: 'purge',
   description: 'Bulk delete messages from the current channel',
   category: 'moderation',
+  usage: '<amount>',
+  examples: ['purge 25', 'purge 50', 'purge 100'],
   permissions: [PermissionFlagsBits.ManageMessages],
   options: [
     { name: 'amount', description: 'Number of messages to delete (1-100)', type: 'integer', required: true, minValue: 1, maxValue: 100 },

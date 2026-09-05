@@ -2,7 +2,11 @@ import { createEmbed, formatError } from '../../handlers/message-handler.js';
 import type { CommandDefinition } from '../../types/command.js';
 
 export const scaffold: CommandDefinition = {
-  name: 'scaffold', description: 'Preview scaffolding for a new project', category: 'project',
+  name: 'scaffold',
+  description: 'Preview scaffolding for a new project',
+  category: 'project',
+  usage: '<type> <name>',
+  examples: ['scaffold web-react my-app', 'scaffold discord-bot helper-bot'],
   options: [
     { name: 'type', description: 'Project type', type: 'string', required: true },
     { name: 'name', description: 'Project name', type: 'string', required: true },

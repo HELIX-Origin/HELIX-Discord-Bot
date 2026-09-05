@@ -1,4 +1,4 @@
-﻿import { createEmbed, formatError, getMessage } from '../../handlers/message-handler.js';
+import { createEmbed, formatError, getMessage } from '../../handlers/message-handler.js';
 import type { CommandDefinition } from '../../types/command.js';
 
 const emojis = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟'];
@@ -7,6 +7,8 @@ export const poll: CommandDefinition = {
   name: 'poll',
   description: 'Create a reaction poll with up to 10 options',
   category: 'utility',
+  usage: '<question> [options]',
+  examples: ['poll "Favorite language?" TypeScript, Rust, Go', 'poll "Deploy update today?"'],
   options: [
     { name: 'question', description: 'Poll question', type: 'string', required: true },
     { name: 'options', description: 'Comma-separated options (e.g. Yes, No, Maybe)', type: 'string', required: false },

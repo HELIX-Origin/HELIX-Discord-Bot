@@ -41,7 +41,12 @@ export function withTempDbEnvironment(): { dir: string; cleanup(): void } {
   return {
     dir,
     cleanup() {
-      fs.rmSync(dir, { recursive: true, force: true });
+      try {
+        BotDatabase.getInstance().close();
+      } catch {}
+      try {
+        fs.rmSync(dir, { recursive: true, force: true });
+      } catch {}
       delete process.env.DISCORD_DB_PATH;
     },
   };

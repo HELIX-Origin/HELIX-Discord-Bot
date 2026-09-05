@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { getDbPath } from '../env.js';
+import { logs } from '../handlers/logs-handler.js';
 
 export interface ScaffoldLogEntry {
   userId: string;
@@ -285,7 +286,8 @@ export class BotDatabase {
         enabledSlashCategories,
         updatedAt: row.updated_at,
       };
-    } catch {
+    } catch (err: any) {
+      logs.error(`Failed to get guild settings for ${guildId}: ${err?.message || err}`);
       return null;
     }
   }
@@ -324,8 +326,8 @@ export class BotDatabase {
         settings.welcomeChannelId !== undefined ? settings.welcomeChannelId : null,
         slashCatJson
       );
-    } catch {
-      // Silently ignore write failures
+    } catch (err: any) {
+      logs.error(`Failed to set guild settings for ${settings.guildId}: ${err?.message || err}`);
     }
   }
 

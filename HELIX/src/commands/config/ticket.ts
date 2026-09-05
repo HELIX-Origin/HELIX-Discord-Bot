@@ -5,7 +5,11 @@ import { createEmbed, formatError, getMessage } from '../../handlers/message-han
 import type { CommandDefinition } from '../../types/command.js';
 
 export const ticket: CommandDefinition = {
-  name: 'ticket', description: 'Support ticket system', category: 'config',
+  name: 'ticket',
+  description: 'Support ticket system',
+  category: 'config',
+  usage: '<create|close|setup-hub|add|remove|transcript> [args]',
+  examples: ['ticket setup-hub #support', 'ticket create "Billing inquiry"', 'ticket close "Resolved"', 'ticket add @user', 'ticket transcript'],
   subcommands: [
     { name: 'create', description: 'Create a support ticket', options: [
       { name: 'subject', description: 'Topic', type: 'string', required: true },

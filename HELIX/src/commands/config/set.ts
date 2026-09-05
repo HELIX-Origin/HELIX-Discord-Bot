@@ -9,6 +9,8 @@ export const set: CommandDefinition = {
   name: 'set',
   description: 'Configure guild and user settings',
   category: 'config',
+  usage: '<setting> <value>',
+  examples: ['set prefix >', 'set tickets-hub #support-tickets', 'set mod-log-channel #mod-logs', 'set slash enable moderation'],
   permissions: [PermissionFlagsBits.ManageGuild],
   subcommands: [
     {

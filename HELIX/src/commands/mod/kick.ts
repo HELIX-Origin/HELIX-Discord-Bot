@@ -8,10 +8,12 @@ export const kick: CommandDefinition = {
   name: 'kick',
   description: 'Kick a member from the server',
   category: 'moderation',
+  usage: '>kick <user> [reason]',
+  examples: ['>kick @DisruptiveUser Breaking rules repeatedly'],
   permissions: [PermissionFlagsBits.KickMembers],
   options: [
-    { name: 'user', description: 'Target user', type: 'user', required: true },
-    { name: 'reason', description: 'Reason', type: 'string', required: false },
+    { name: 'user', description: 'Target user to kick', type: 'user', required: true },
+    { name: 'reason', description: 'Reason for the kick', type: 'string', required: false },
   ],
   async execute({ message, interaction, getOption, guild }) {
     const target = getOption<GuildMember>('user');

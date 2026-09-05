@@ -1,10 +1,12 @@
-﻿import { createEmbed, formatError, getMessage } from '../../handlers/message-handler.js';
+import { createEmbed, formatError, getMessage } from '../../handlers/message-handler.js';
 import type { CommandDefinition } from '../../types/command.js';
 
 export const remind: CommandDefinition = {
   name: 'remind',
   description: 'Set a timed reminder',
   category: 'utility',
+  usage: '<time> <message>',
+  examples: ['remind 10m Standup meeting', 'remind 2h Deploy release', 'remind 1d Review pull requests'],
   options: [
     { name: 'time', description: 'Duration (e.g. 10m, 1h, 2d)', type: 'string', required: true },
     { name: 'message', description: 'Reminder text', type: 'string', required: true },

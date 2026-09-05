@@ -1,4 +1,5 @@
 import type { CommandDefinition, ExecuteContext } from "../../types/command.js";
+import { getPrefixForGuild } from "../../handlers/command-handler.js";
 import { createEmbed, formatError } from "../../handlers/message-handler.js";
 import { getPlugin, getPluginByExtension, getAllPlugins } from "../../plugins/registry.js";
 import { resolveSourceCode } from "../../plugins/sdk/source-resolver.js";
@@ -8,6 +9,8 @@ export const explain: CommandDefinition = {
   name: "explain",
   description: "Explain code structure and AST syntax",
   category: "info",
+  usage: "<code | url> [language]",
+  examples: ['explain console.log("hello") typescript', 'explain https://example.com/main.rs rust'],
   options: [
     { name: "code", description: "Code snippet or file URL to explain", type: "string", required: false },
     { name: "language", description: "Programming language", type: "string", required: false },
@@ -23,6 +26,7 @@ export const explain: CommandDefinition = {
     const rawInput = getOption<string>("code") || args.join(" ");
     const langOpt = getOption<string>("language") || (args[0] && !args[0].includes("`") && !args[0].startsWith("http") && args.length > 1 ? args[0] : undefined);
     const inputToResolve = langOpt && args.length > 1 ? args.slice(1).join(" ") : rawInput;
+    const prefix = getPrefixForGuild(message?.guildId || interaction?.guildId || '');
 
     try {
       const resolved = await resolveSourceCode({
@@ -34,7 +38,7 @@ export const explain: CommandDefinition = {
 
       if (!resolved.code) {
         return reply({
-          embeds: [formatError("Usage: `>explain [language] <code | url>` or attach a file with `>explain`")],
+          embeds: [formatError(`Usage: \`${prefix}explain [language] <code | url>\` or attach a file with \`${prefix}explain\``)],
           ephemeral: true,
         });
       }

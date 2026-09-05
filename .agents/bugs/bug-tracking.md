@@ -54,6 +54,7 @@ flowchart TD
 | **BUG-020** | Discord PermissionFlagsBits Standardization, Prefix Argument Parsing & Help Interaction Router Refactor | High | Resolved | 4 Sub-Tasks | [#65](https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues/65) | [BUG-020](BUG-020-permission-flags-and-command-interactions.md) |
 | **BUG-021** | Help Component Duplicate Custom ID Elimination & Prefix Dynamic Import Resolution | High | Resolved | 4 Sub-Tasks | [#70](https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues/70) | [BUG-021](BUG-021-help-duplicate-custom-id-and-prefix-routing.md) |
 | **BUG-022** | Guild Settings End-to-End Bot State Registration & Stale Slash Command Registry Purge | High | Resolved | 4 Sub-Tasks | [#75](https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues/75) | [BUG-022](BUG-022-guild-settings-registration-and-slash-purge.md) |
+| **BUG-023** | Help Command Embed Overhaul & Automated Missing Arguments Help Response | High | Resolved | 4 Sub-Tasks | [#80](https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues/80) | [BUG-023](BUG-023-help-embed-overhaul-and-command-missing-args-help.md) |
 
 ---
 

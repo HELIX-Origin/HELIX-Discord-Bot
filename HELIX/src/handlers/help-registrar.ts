@@ -1,4 +1,12 @@
+import { EmbedBuilder } from 'discord.js';
 import { logs } from './logs-handler.js';
+
+export interface CommandHelpOption {
+  name: string;
+  description: string;
+  type?: string;
+  required?: boolean;
+}
 
 export interface CommandHelp {
   name: string;
@@ -8,6 +16,8 @@ export interface CommandHelp {
   permissions: string[];
   aliases?: string[];
   subcommands?: string[];
+  options?: CommandHelpOption[];
+  examples?: string[];
 }
 
 const allHelp: CommandHelp[] = [];
@@ -16,16 +26,29 @@ export function createHelp(
   name: string,
   description: string,
   category: string,
-  options: { usage?: string; permissions?: string[]; aliases?: string[]; subcommands?: string[] } = {},
+  options: {
+    usage?: string;
+    permissions?: string[];
+    aliases?: string[];
+    subcommands?: string[];
+    options?: CommandHelpOption[];
+    examples?: string[];
+  } = {},
 ): CommandHelp {
+  let cleanUsage = options.usage || '';
+  if (cleanUsage.startsWith('>')) {
+    cleanUsage = cleanUsage.slice(1).trim();
+  }
   return {
     name,
     description,
     category,
-    usage: options.usage || `>${name}`,
+    usage: cleanUsage,
     permissions: options.permissions || [],
     aliases: options.aliases,
     subcommands: options.subcommands,
+    options: options.options,
+    examples: options.examples,
   };
 }
 
@@ -116,4 +139,100 @@ export function helpCount(): number {
 
 export function clearHelpRegistry(): void {
   allHelp.length = 0;
+}
+
+export function buildCommandHelpEmbed(
+  help: CommandHelp,
+  prefix: string,
+  opts?: { missingNotice?: string; customUsage?: string }
+): EmbedBuilder {
+  const emoji = getCategoryEmoji(help.category);
+  const color = opts?.missingNotice ? '#ff5252' : getCategoryColor(help.category);
+
+  let usageText = '';
+  if (opts?.customUsage) {
+    const raw = opts.customUsage.startsWith('>') ? opts.customUsage.slice(1).trim() : opts.customUsage;
+    usageText = raw.startsWith(prefix) ? raw : `${prefix}${raw}`;
+  } else if (!help.usage) {
+    usageText = `${prefix}${help.name}`;
+  } else if (help.usage.startsWith(help.name)) {
+    usageText = `${prefix}${help.usage}`;
+  } else if (help.usage.startsWith('>')) {
+    usageText = `${prefix}${help.usage.slice(1).trim()}`;
+  } else {
+    usageText = `${prefix}${help.name} ${help.usage}`;
+  }
+
+  const aliasText = help.aliases && help.aliases.length ? help.aliases.map(a => `\`${prefix}${a}\``).join(', ') : 'None';
+  const permsText = help.permissions && help.permissions.length ? help.permissions.map(p => `\`${p}\``).join(', ') : 'Everyone';
+
+  const embed = new EmbedBuilder()
+    .setColor(color as any)
+    .setTitle(`${emoji} Command Help: \`${prefix}${help.name}\``)
+    .setTimestamp();
+
+  if (opts?.missingNotice) {
+    embed.setDescription(`> ⚠️ **Missing Required Parameter**: ${opts.missingNotice}\n\n${help.description}`);
+  } else {
+    embed.setDescription(help.description);
+  }
+
+  // Balanced Inline Metadata Fields
+  embed.addFields(
+    { name: 'Category', value: `${emoji} ${getCategoryLabel(help.category)}`, inline: true },
+    { name: 'Permissions', value: permsText, inline: true },
+    { name: 'Aliases', value: aliasText, inline: true }
+  );
+
+  // Non-inline Syntax / Usage
+  embed.addFields({
+    name: 'Syntax & Usage',
+    value: `\`\`\`syntax\n${usageText}\n\`\`\``,
+    inline: false,
+  });
+
+  // Options / Arguments Breakdown
+  if (help.options && help.options.length > 0) {
+    const optLines = help.options.map(o => {
+      const badge = o.required ? '**`REQUIRED`**' : '*`OPTIONAL`*';
+      const typeStr = o.type ? `(\`${o.type}\`)` : '';
+      return `• \`<${o.name}>\` ${typeStr} ${badge}\n  ${o.description}`;
+    });
+    embed.addFields({
+      name: 'Arguments & Parameters',
+      value: optLines.join('\n'),
+      inline: false,
+    });
+  }
+
+  // Subcommands (if any)
+  if (help.subcommands && help.subcommands.length > 0) {
+    const subLines = help.subcommands.map(s => `• \`${prefix}${help.name} ${s}\``);
+    embed.addFields({
+      name: 'Available Subcommands',
+      value: subLines.join('\n'),
+      inline: false,
+    });
+  }
+
+  // Examples (if any)
+  if (help.examples && help.examples.length > 0) {
+    const exLines = help.examples.map(e => {
+      let raw = e.startsWith('>') ? e.slice(1).trim() : e;
+      if (raw.startsWith(prefix)) return raw;
+      if (raw.startsWith(help.name)) return `${prefix}${raw}`;
+      return `${prefix}${help.name} ${raw}`;
+    });
+    embed.addFields({
+      name: 'Examples',
+      value: `\`\`\`bash\n${exLines.join('\n')}\n\`\`\``,
+      inline: false,
+    });
+  }
+
+  embed.setFooter({
+    text: `Prefix: ${prefix} • Type ${prefix}help to browse all categories`,
+  });
+
+  return embed;
 }

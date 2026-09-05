@@ -12,6 +12,7 @@ import {
   getAllHelp,
   getHelpByCategory,
   getCommandHelp,
+  buildCommandHelpEmbed,
   categoryOrder,
   getCategoryEmoji,
   getCategoryLabel,
@@ -127,23 +128,42 @@ export function buildHelpPayload(
     const description = getCategoryDescription(cat);
     const catIndex = categoryOrder.indexOf(cat) + 1;
 
-    const commandList = cmds.length
-      ? cmds
-          .map(c => {
-            const usage = (c.usage || `>${c.name}`).replace(/^>/, prefix);
-            const aliasStr = c.aliases && c.aliases.length ? ` *(aliases: ${c.aliases.map(a => `\`${prefix}${a}\``).join(', ')})*` : '';
-            return `### \`${prefix}${c.name}\`${aliasStr}\n${c.description}\n\`\`\`syntax\n${usage}\n\`\`\``;
-          })
-          .join('\n')
-      : '*No commands registered in this category.*';
-
     embed = new EmbedBuilder()
       .setColor(color as any)
       .setTitle(`${emoji} ${label}`)
-      .setDescription(`*${description}*\n\n${commandList}`)
+      .setDescription(`*${description}*`)
+      .setTimestamp()
       .setFooter({
         text: `Category ${catIndex}/${categoryOrder.length} • ${cmds.length} command(s) • Prefix: ${prefix}`,
       });
+
+    if (cmds.length === 0) {
+      embed.addFields({
+        name: 'No Commands',
+        value: '*No commands are currently registered in this category.*',
+        inline: false,
+      });
+    } else {
+      for (const c of cmds) {
+        let usage = '';
+        if (!c.usage) {
+          usage = `${prefix}${c.name}`;
+        } else if (c.usage.startsWith(c.name)) {
+          usage = `${prefix}${c.usage}`;
+        } else if (c.usage.startsWith('>')) {
+          usage = `${prefix}${c.usage.slice(1).trim()}`;
+        } else {
+          usage = `${prefix}${c.name} ${c.usage}`;
+        }
+        const aliasStr = c.aliases && c.aliases.length ? `\n*Aliases:* ${c.aliases.map(a => `\`${prefix}${a}\``).join(', ')}` : '';
+        const permsStr = c.permissions && c.permissions.length ? ` \`[${c.permissions.join(', ')}]\`` : '';
+        embed.addFields({
+          name: `\`${prefix}${c.name}\`${permsStr}`,
+          value: `${c.description}\n\`\`\`syntax\n${usage}\n\`\`\`${aliasStr}`,
+          inline: false,
+        });
+      }
+    }
   }
 
   // ─── Component Rows ─────────────────────────────────────────────────────────
@@ -248,6 +268,8 @@ export const help: CommandDefinition = {
   name: 'help',
   description: 'Interactive command center with category browsing and detailed syntax',
   category: 'info',
+  usage: '[command]',
+  examples: ['help', 'help ban', 'help scaffold'],
   options: [
     {
       name: 'command',
@@ -269,21 +291,7 @@ export const help: CommandDefinition = {
         return interaction!.reply({ embeds: [errorEmbed], ephemeral: true });
       }
 
-      const aliasText = found.aliases && found.aliases.length ? found.aliases.map(a => `\`${prefix}${a}\``).join(', ') : 'None';
-      const permsText = found.permissions && found.permissions.length ? found.permissions.map(p => `\`${p}\``).join(', ') : 'Everyone';
-      const subcmdsText = found.subcommands && found.subcommands.length ? found.subcommands.map(s => `\`${s}\``).join(', ') : 'None';
-      const usageText = (found.usage || `>${found.name}`).replace(/^>/, prefix);
-
-      const detailEmbed = createEmbed('info.help.detail_embed', {
-        prefix,
-        name: found.name,
-        description: found.description,
-        category: `${getCategoryEmoji(found.category)} ${getCategoryLabel(found.category)}`,
-        usage: usageText,
-        aliases: aliasText,
-        permissions: permsText,
-        subcommands: subcmdsText,
-      });
+      const detailEmbed = buildCommandHelpEmbed(found, prefix);
 
       if (message) return message.reply({ embeds: [detailEmbed] });
       return interaction!.reply({ embeds: [detailEmbed] });

@@ -8,6 +8,8 @@ export const warn: CommandDefinition = {
   name: 'warn',
   description: 'Issue, view, or clear member warnings',
   category: 'moderation',
+  usage: '<subcommand> <user> [reason]',
+  examples: ['warn user @spammer Spamming general chat', 'warn list @user', 'warn clear @user'],
   permissions: [PermissionFlagsBits.ModerateMembers],
   options: [
     { name: 'subcommand', description: 'Action (user, list, clear)', type: 'string', required: true, choices: [{ name: 'user', value: 'user' }, { name: 'list', value: 'list' }, { name: 'clear', value: 'clear' }] },

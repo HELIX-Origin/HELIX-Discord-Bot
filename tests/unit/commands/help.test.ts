@@ -39,8 +39,8 @@ describe('commands/info/help — buildHelpPayload & execute', () => {
     const embed = payload.embeds[0];
     const data = embed.toJSON();
     expect(data.title).toContain('Utility Suite');
-    expect(data.description).toContain('!ping');
-    expect(data.description).toContain('Latency test');
+    expect(data.fields?.some(f => f.name.includes('!ping') || f.value.includes('!ping'))).toBe(true);
+    expect(data.fields?.some(f => f.value.includes('Latency test'))).toBe(true);
     expect(data.footer?.text).toContain('Prefix: !');
   });
 

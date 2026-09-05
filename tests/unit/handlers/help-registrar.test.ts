@@ -18,19 +18,19 @@ describe('help-registrar — structure', () => {
     expect(help.name).toBe('ping');
     expect(help.description).toBe('Checks latency');
     expect(help.category).toBe('utility');
-    expect(help.usage).toBe('>ping');
+    expect(help.usage).toBe('');
     expect(help.permissions).toEqual([]);
     expect(help.aliases).toBeUndefined();
   });
 
   it('supports explicit usage, permissions, aliases, and subcommands', () => {
     const help = createHelp('warn', 'Warn a user', 'moderation', {
-      usage: '>warn <user> [reason]',
+      usage: 'warn <user> [reason]',
       permissions: ['ModerateMembers'],
       aliases: ['w'],
       subcommands: ['list', 'clear'],
     });
-    expect(help.usage).toBe('>warn <user> [reason]');
+    expect(help.usage).toBe('warn <user> [reason]');
     expect(help.permissions).toContain('ModerateMembers');
     expect(help.aliases).toEqual(['w']);
     expect(help.subcommands).toEqual(['list', 'clear']);
@@ -73,5 +73,62 @@ describe('help-registrar — structure', () => {
     expect(getCommandHelp('>scaffold')?.name).toBe('scaffold');
     expect(getCommandHelp('init')?.name).toBe('scaffold');
     expect(getCommandHelp('nonexistent')).toBeUndefined();
+  });
+
+  it('builds a clean, professional command help embed via buildCommandHelpEmbed', async () => {
+    const { buildCommandHelpEmbed } = await import('../../../HELIX/src/handlers/help-registrar.js');
+    const helpEntry = createHelp('ban', 'Permanently ban a user from the server', 'moderation', {
+      usage: '<user> [reason] [delete_days]',
+      examples: ['ban @spammer Excessive spam', 'ban 123456789012345678 Raid bot 7'],
+      permissions: ['BanMembers'],
+      aliases: ['b'],
+      options: [
+        { name: 'user', description: 'Target user to ban', type: 'user', required: true },
+        { name: 'reason', description: 'Reason for the ban', type: 'string', required: false },
+        { name: 'delete_days', description: 'Days of messages to delete (0-7)', type: 'integer', required: false },
+      ],
+    });
+
+    const embed = buildCommandHelpEmbed(helpEntry, '>');
+    const data = embed.toJSON();
+
+    expect(data.title).toBe('🛡️ Command Help: `>ban`');
+    expect(data.description).toBe('Permanently ban a user from the server');
+    expect(data.fields).toBeDefined();
+
+    // Check inline fields
+    const catField = data.fields?.find(f => f.name === 'Category');
+    expect(catField).toBeDefined();
+    expect(catField?.inline).toBe(true);
+    expect(catField?.value).toContain('Moderation Suite');
+
+    const permField = data.fields?.find(f => f.name === 'Permissions');
+    expect(permField).toBeDefined();
+    expect(permField?.inline).toBe(true);
+    expect(permField?.value).toContain('`BanMembers`');
+
+    const aliasField = data.fields?.find(f => f.name === 'Aliases');
+    expect(aliasField).toBeDefined();
+    expect(aliasField?.inline).toBe(true);
+    expect(aliasField?.value).toContain('`>b`');
+
+    // Check non-inline fields
+    const syntaxField = data.fields?.find(f => f.name === 'Syntax & Usage');
+    expect(syntaxField).toBeDefined();
+    expect(syntaxField?.inline).toBe(false);
+    expect(syntaxField?.value).toContain('```syntax\n>ban <user> [reason] [delete_days]\n```');
+
+    const optionsField = data.fields?.find(f => f.name === 'Arguments & Parameters');
+    expect(optionsField).toBeDefined();
+    expect(optionsField?.inline).toBe(false);
+    expect(optionsField?.value).toContain('`<user>`');
+    expect(optionsField?.value).toContain('REQUIRED');
+    expect(optionsField?.value).toContain('`<reason>`');
+    expect(optionsField?.value).toContain('OPTIONAL');
+
+    const examplesField = data.fields?.find(f => f.name === 'Examples');
+    expect(examplesField).toBeDefined();
+    expect(examplesField?.inline).toBe(false);
+    expect(examplesField?.value).toContain('>ban @spammer Excessive spam');
   });
 });

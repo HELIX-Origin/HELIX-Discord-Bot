@@ -1,10 +1,12 @@
-﻿import { createEmbed, formatError, getMessage } from '../../handlers/message-handler.js';
+import { createEmbed, formatError, getMessage } from '../../handlers/message-handler.js';
 import type { CommandDefinition } from '../../types/command.js';
 
 export const serverinfo: CommandDefinition = {
   name: 'serverinfo',
   description: 'Display server information and statistics',
   category: 'utility',
+  usage: '',
+  examples: ['serverinfo'],
   async execute({ message, interaction, guild }) {
     if (!guild) {
       const err = formatError(getMessage('errors.guild_only'));

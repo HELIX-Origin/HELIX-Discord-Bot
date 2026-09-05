@@ -8,10 +8,12 @@ export const untimeout: CommandDefinition = {
   name: 'untimeout',
   description: 'Remove timeout from a member',
   category: 'moderation',
+  usage: '>untimeout <user> [reason]',
+  examples: ['>untimeout @ReformedUser Appeal accepted'],
   permissions: [PermissionFlagsBits.ModerateMembers],
   options: [
-    { name: 'user', description: 'Target user', type: 'user', required: true },
-    { name: 'reason', description: 'Reason', type: 'string', required: false },
+    { name: 'user', description: 'Target user to untimeout', type: 'user', required: true },
+    { name: 'reason', description: 'Reason for removing timeout', type: 'string', required: false },
   ],
   async execute({ message, interaction, getOption, guild }) {
     const target = getOption<GuildMember>('user');

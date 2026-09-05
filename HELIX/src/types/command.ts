@@ -27,6 +27,8 @@ export interface CommandDefinition {
   aliases?: string[];
   description: string;
   category: string;
+  usage?: string;
+  examples?: string[];
   permissions?: (typeof PermissionFlagsBits)[keyof typeof PermissionFlagsBits][];
   options?: CommandOption[];
   subcommands?: { name: string; description: string; options?: CommandOption[] }[];

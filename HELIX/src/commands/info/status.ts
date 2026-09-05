@@ -1,4 +1,4 @@
-﻿import { BotDatabase } from '../../db/database.js';
+import { BotDatabase } from '../../db/database.js';
 import { createEmbed } from '../../handlers/message-handler.js';
 import type { CommandDefinition } from '../../types/command.js';
 
@@ -6,6 +6,8 @@ export const status: CommandDefinition = {
   name: 'status',
   description: 'Report HELIX system health and database statistics',
   category: 'info',
+  usage: '',
+  examples: ['status'],
   async execute({ message, interaction }) {
     const db = BotDatabase.getInstance();
     const stats = db.getStats();

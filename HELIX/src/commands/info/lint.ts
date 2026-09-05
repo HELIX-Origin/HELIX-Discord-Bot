@@ -1,4 +1,5 @@
 import type { CommandDefinition, ExecuteContext } from "../../types/command.js";
+import { getPrefixForGuild } from "../../handlers/command-handler.js";
 import { createEmbed, formatError } from "../../handlers/message-handler.js";
 import { getPlugin, getPluginByExtension, getAllPlugins } from "../../plugins/registry.js";
 import { resolveSourceCode } from "../../plugins/sdk/source-resolver.js";
@@ -8,6 +9,8 @@ export const lint: CommandDefinition = {
   name: "lint",
   description: "Static code analysis and syntax linting",
   category: "info",
+  usage: "<code | url> [language]",
+  examples: ['lint let x = 10; typescript', 'lint https://raw.githubusercontent.com/user/repo/main/app.ts'],
   options: [
     { name: "code", description: "Code snippet or file URL to lint", type: "string", required: false },
     { name: "language", description: "Programming language", type: "string", required: false },
@@ -23,6 +26,7 @@ export const lint: CommandDefinition = {
     const rawInput = getOption<string>("code") || args.join(" ");
     const langOpt = getOption<string>("language") || (args[0] && !args[0].includes("`") && !args[0].startsWith("http") && args.length > 1 ? args[0] : undefined);
     const inputToResolve = langOpt && args.length > 1 ? args.slice(1).join(" ") : rawInput;
+    const prefix = getPrefixForGuild(message?.guildId || interaction?.guildId || '');
 
     try {
       const resolved = await resolveSourceCode({
@@ -34,7 +38,7 @@ export const lint: CommandDefinition = {
 
       if (!resolved.code) {
         return reply({
-          embeds: [formatError("Usage: `>lint [language] <code | url>` or attach a file with `>lint`")],
+          embeds: [formatError(`Usage: \`${prefix}lint [language] <code | url>\` or attach a file with \`${prefix}lint\``)],
           ephemeral: true,
         });
       }
