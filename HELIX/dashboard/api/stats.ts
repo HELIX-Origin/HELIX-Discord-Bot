@@ -1,9 +1,10 @@
-﻿import http from 'node:http';
+import http from 'node:http';
 import { BotDatabase } from '../../src/db/database.js';
 import { HelixBotClient } from '../../src/client.js';
 import { resolveBotInviteUrl } from '../../src/server.js';
 import { getCallbackUrl, getClientId, getBotToken } from '../../src/env.js';
 import { getAllPlugins, getRegistryStats } from '../../src/plugins/registry.js';
+import { getKeepAliveStatus } from '../../src/keep-alive.js';
 
 export function handleDashboardStats(req: http.IncomingMessage, res: http.ServerResponse): void {
   const db = BotDatabase.getInstance();
@@ -31,6 +32,7 @@ export function handleDashboardStats(req: http.IncomingMessage, res: http.Server
     capabilities: p.capabilities,
   }));
   const pluginStats = getRegistryStats();
+  const keepAlive = getKeepAliveStatus();
 
   const data = {
     bot: {
@@ -45,6 +47,7 @@ export function handleDashboardStats(req: http.IncomingMessage, res: http.Server
       uptimeSeconds: Math.floor(process.uptime()),
       connectedGuilds: liveGuilds,
     },
+    keepAlive,
     database: {
       ...dbStats,
       directConnection: true,

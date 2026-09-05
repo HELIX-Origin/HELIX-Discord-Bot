@@ -12,6 +12,7 @@ export * from './src/client.js';
 export * from './src/server.js';
 export * from './src/db/database.js';
 export * from './src/env.js';
+export * from './src/keep-alive.js';
 
 export interface LaunchBotOptions {
   token?: string;

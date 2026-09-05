@@ -59,6 +59,9 @@ export function renderDashboardHtml(): string {
       <span class="hidden lg:inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-cyan-950/60 text-cyan-300 border border-cyan-800">
         <i class="fa-solid fa-database mr-1.5 text-xs text-emerald-400"></i> SQLite: 0ms lag (${Math.round(dbStats.sizeBytes / 1024)} KB)
       </span>
+      <span id="keepalive-badge" class="hidden sm:inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-950/60 text-purple-300 border border-purple-800">
+        <i class="fa-solid fa-heart-pulse mr-1.5 text-xs text-purple-400"></i> <span id="keepalive-text">Keep-Alive: Standby</span>
+      </span>
       ${inviteUrl ? `<a href="${inviteUrl}" target="_blank" class="inline-flex items-center px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition shadow-lg shadow-indigo-600/30"><i class="fa-brands fa-discord mr-1.5"></i> Add to Discord</a>` : ''}
     </div>
   </header>
@@ -676,6 +679,21 @@ export function renderDashboardHtml(): string {
               pingText.textContent = 'Gateway: Connected';
             } else {
               pingText.textContent = 'Gateway: Offline';
+            }
+          }
+        }
+
+        if (data.keepAlive) {
+          const keepAliveBadge = document.getElementById('keepalive-badge');
+          const keepAliveText = document.getElementById('keepalive-text');
+          if (keepAliveBadge && keepAliveText) {
+            if (data.keepAlive.enabled) {
+              const statusStr = data.keepAlive.lastPingStatus === 'success' ? 'Active' : (data.keepAlive.lastPingStatus === 'failed' ? 'Degraded' : 'Active');
+              keepAliveBadge.className = 'hidden sm:inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-950/60 text-purple-300 border border-purple-800';
+              keepAliveText.textContent = 'Keep-Alive: ' + statusStr + ' (' + data.keepAlive.pingCount + ' pings)';
+            } else {
+              keepAliveBadge.className = 'hidden sm:inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-800 text-gray-400 border border-gray-700';
+              keepAliveText.textContent = 'Keep-Alive: Standby';
             }
           }
         }

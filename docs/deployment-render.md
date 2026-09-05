@@ -57,8 +57,19 @@ In the [Discord Developer Portal](https://discord.com/developers/applications):
 
 ---
 
+## 💓 Built-in Autonomous Keep-Alive Service
+
+Render's Free Web Services spin down after 15 minutes of HTTP inactivity. HELIX includes an **autonomous in-process Keep-Alive Service** that automatically activates when `RENDER_EXTERNAL_URL` is detected:
+
+- **Self-Ping Loop**: Automatically sends an HTTP request to `https://<your-service-name>.onrender.com/api/health` every **10 minutes**.
+- **Edge Load Balancer Ingress**: Because the request targets your public Render domain rather than `localhost`, it hits Render's external edge proxy, resetting the 15-minute inactivity timer and keeping the Discord Gateway connection continuously online.
+- **Zero Third-Party Accounts**: No external monitoring accounts (such as UptimeRobot or Better Stack) required.
+- **Dashboard Telemetry**: The companion web dashboard displays live Keep-Alive health and total ping counts in the top header.
+
+---
+
 ## Verification & Health Check
 
-Render automatically probes `GET /api/health` every few seconds to ensure zero downtime.
+Render automatically probes `GET /api/health` to ensure zero downtime.
 - **Companion Dashboard**: `https://<your-service-name>.onrender.com/dashboard`
 - **Health Check Endpoint**: `https://<your-service-name>.onrender.com/api/health`

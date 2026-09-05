@@ -4,6 +4,7 @@ import pc from 'picocolors';
 import { logs as logger } from './handlers/logs-handler.js';
 import { routeDashboardRequest } from '../dashboard/router.js';
 import { getClientId, getCallbackUrl, getInviteUrl, getPort, normalizeCallbackBaseUrl } from './env.js';
+import { startKeepAlive, stopKeepAlive } from './keep-alive.js';
 
 export interface BotServerOptions {
   callbackUrl?: string;
@@ -219,12 +220,14 @@ export class BotCallbackServer {
         const dashboardEndpoint = `${this.baseUrl.replace(/\/$/, '')}/dashboard`;
         logger.info(`OAuth2 Callback Server listening at: ${pc.cyan(callbackEndpoint)}`);
         logger.success(`Discord Bot Dashboard running at: ${pc.bold(pc.cyan(dashboardEndpoint))}`);
+        startKeepAlive();
         resolve();
       });
     });
   }
 
   public stop(): Promise<void> {
+    stopKeepAlive();
     return new Promise((resolve) => {
       if (this.server) {
         this.server.close(() => resolve());

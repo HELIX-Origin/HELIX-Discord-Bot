@@ -322,6 +322,62 @@ export function getNextAuthSecret(): string {
 }
 
 /**
+ * Autonomous Keep-Alive self-pinger configuration.
+ */
+export interface SelfPingConfig {
+  enabled: boolean;
+  targetUrl: string | null;
+  intervalMs: number;
+}
+
+/**
+ * Returns configuration for the autonomous Keep-Alive Self-Pinger.
+ * Auto-activates on platforms with public URLs (Render, Koyeb, Railway, Heroku, Fly.io)
+ * or when HELIX_SELF_PING=true is explicitly set.
+ */
+export function getSelfPingConfig(): SelfPingConfig {
+  const explicit = (process.env.HELIX_SELF_PING || '').trim().toLowerCase();
+  const intervalRaw = parseInt(process.env.HELIX_SELF_PING_INTERVAL_MS || '600000', 10);
+  const intervalMs = (!isNaN(intervalRaw) && intervalRaw >= 60000) ? intervalRaw : 600000;
+
+  const platformUrl = detectPlatformUrl();
+  let targetUrl: string | null = null;
+  if (platformUrl && !platformUrl.includes('localhost') && !platformUrl.includes('127.0.0.1')) {
+    targetUrl = `${platformUrl.replace(/\/$/, '')}/api/health`;
+  } else {
+    const callbackUrl = normalizeCallbackBaseUrl(process.env.DISCORD_CALLBACK_URL || '');
+    if (callbackUrl && !callbackUrl.includes('localhost') && !callbackUrl.includes('127.0.0.1')) {
+      targetUrl = `${callbackUrl.replace(/\/$/, '')}/api/health`;
+    }
+  }
+
+  // Explicit disable
+  if (explicit === 'false' || explicit === '0' || explicit === 'off') {
+    return { enabled: false, targetUrl, intervalMs };
+  }
+
+  // Auto-enabled if explicit true OR if running on Render / cloud platform with a valid public targetUrl
+  const isCloudPlatform = Boolean(
+    process.env.RENDER_EXTERNAL_URL ||
+    process.env.RENDER ||
+    process.env.KOYEB_PUBLIC_DOMAIN ||
+    process.env.KOYEB_APP_NAME ||
+    process.env.RAILWAY_PUBLIC_DOMAIN ||
+    process.env.RAILWAY_STATIC_URL ||
+    process.env.HEROKU_APP_NAME ||
+    process.env.FLY_APP_NAME
+  );
+
+  const enabled = explicit === 'true' || explicit === '1' || explicit === 'on' || (Boolean(targetUrl) && isCloudPlatform);
+
+  return {
+    enabled: Boolean(enabled && targetUrl),
+    targetUrl,
+    intervalMs,
+  };
+}
+
+/**
  * Absolute path to the SQLite database file.
  * Automatically detected and managed by the bot and dashboard (defaults to `<root>/data/bot.sqlite`).
  */
@@ -347,6 +403,7 @@ export interface BotEnvConfig {
   nextAuthUrl: string;
   nextAuthInternalUrl: string;
   nextAuthSecret: string;
+  selfPing: SelfPingConfig;
   dbPath: string;
 }
 
@@ -365,6 +422,7 @@ export function getBotEnv(): BotEnvConfig {
     nextAuthUrl:         getNextAuthUrl(),
     nextAuthInternalUrl: getNextAuthInternalUrl(),
     nextAuthSecret:      getNextAuthSecret(),
+    selfPing:            getSelfPingConfig(),
     dbPath:              getDbPath(),
   };
 }

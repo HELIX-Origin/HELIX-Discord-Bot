@@ -15,6 +15,7 @@ import {
   getNextAuthInternalUrl,
   getNextAuthSecret,
   getDbPath,
+  getSelfPingConfig,
   getBotEnv,
   saveBotEnvValue,
 } from '../../../HELIX/src/env.js';
@@ -246,5 +247,38 @@ describe('src/env.ts — saveBotEnvValue', () => {
     } finally {
       fs.rmSync(tmp, { recursive: true, force: true });
     }
+  });
+});
+
+describe('src/env.ts — getSelfPingConfig', () => {
+  it('returns disabled when on localhost without platform URL', () => {
+    sandbox.set('RENDER_EXTERNAL_URL', undefined);
+    sandbox.set('KOYEB_PUBLIC_DOMAIN', undefined);
+    sandbox.set('RAILWAY_PUBLIC_DOMAIN', undefined);
+    sandbox.set('DISCORD_CALLBACK_URL', undefined);
+    const config = getSelfPingConfig();
+    expect(config.enabled).toBe(false);
+    expect(config.intervalMs).toBe(600000);
+  });
+
+  it('auto-enables with targetUrl when Render is detected', () => {
+    sandbox.set('RENDER_EXTERNAL_URL', 'https://my-app.onrender.com');
+    const config = getSelfPingConfig();
+    expect(config.enabled).toBe(true);
+    expect(config.targetUrl).toBe('https://my-app.onrender.com/api/health');
+  });
+
+  it('supports custom interval via HELIX_SELF_PING_INTERVAL_MS', () => {
+    sandbox.set('RENDER_EXTERNAL_URL', 'https://my-app.onrender.com');
+    sandbox.set('HELIX_SELF_PING_INTERVAL_MS', '300000');
+    const config = getSelfPingConfig();
+    expect(config.intervalMs).toBe(300000);
+  });
+
+  it('supports explicit disable via HELIX_SELF_PING=false', () => {
+    sandbox.set('RENDER_EXTERNAL_URL', 'https://my-app.onrender.com');
+    sandbox.set('HELIX_SELF_PING', 'false');
+    const config = getSelfPingConfig();
+    expect(config.enabled).toBe(false);
   });
 });
