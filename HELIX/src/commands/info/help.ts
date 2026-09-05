@@ -4,8 +4,9 @@ import {
   ButtonStyle,
   StringSelectMenuBuilder,
   StringSelectMenuOptionBuilder,
-  ComponentType,
   EmbedBuilder,
+  ButtonInteraction,
+  StringSelectMenuInteraction,
 } from 'discord.js';
 import {
   getAllHelp,
@@ -24,6 +25,63 @@ import { getNextAuthUrl } from '../../env.js';
 import type { CommandDefinition } from '../../types/command.js';
 
 type ViewTarget = 'home' | CategoryKey;
+
+export async function handleHelpInteraction(
+  interaction: ButtonInteraction | StringSelectMenuInteraction
+): Promise<void> {
+  const prefix = getPrefixForGuild(interaction.guildId || '');
+
+  try {
+    if (interaction.isStringSelectMenu() && interaction.customId === 'help_category_select') {
+      const selected = (interaction.values[0] || 'home') as ViewTarget;
+      const payload = buildHelpPayload(selected, prefix, false);
+      await interaction.update(payload);
+      return;
+    }
+
+    if (interaction.isButton()) {
+      if (interaction.customId === 'help_btn_close') {
+        try {
+          if (interaction.message.deletable) {
+            await interaction.message.delete();
+          } else {
+            await interaction.update({
+              content: '🗑️ *Help menu closed.*',
+              embeds: [],
+              components: [],
+            });
+          }
+        } catch {
+          await interaction.update({
+            content: '🗑️ *Help menu closed.*',
+            embeds: [],
+            components: [],
+          });
+        }
+        return;
+      }
+
+      if (interaction.customId === 'help_btn_home') {
+        const payload = buildHelpPayload('home', prefix, false);
+        await interaction.update(payload);
+        return;
+      }
+
+      if (interaction.customId.startsWith('help_btn_')) {
+        const target = interaction.customId.replace('help_btn_', '') as ViewTarget;
+        const payload = buildHelpPayload(target, prefix, false);
+        await interaction.update(payload);
+        return;
+      }
+    }
+  } catch (err: any) {
+    try {
+      if (!interaction.replied && !interaction.deferred) {
+        await interaction.reply({ content: '❌ Failed to update help view.', ephemeral: true });
+      }
+    } catch {}
+  }
+}
 
 export function buildHelpPayload(
   target: ViewTarget,

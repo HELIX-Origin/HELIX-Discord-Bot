@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { buildHelpPayload, help } from '../../../HELIX/src/commands/info/help.js';
+import { buildHelpPayload, help, handleHelpInteraction } from '../../../HELIX/src/commands/info/help.js';
 import { registerHelp, createHelp, clearHelpRegistry } from '../../../HELIX/src/handlers/help-registrar.js';
 
 describe('commands/info/help — buildHelpPayload & execute', () => {
@@ -104,4 +104,44 @@ describe('commands/info/help — buildHelpPayload & execute', () => {
     expect(data.title).toContain('Error');
     expect(data.description).toContain('Command `nonexistent` was not found');
   });
+
+  it('handles select menu interaction in handleHelpInteraction', async () => {
+    let updatedPayload: any = null;
+    const mockInteraction: any = {
+      isStringSelectMenu: () => true,
+      isButton: () => false,
+      customId: 'help_category_select',
+      values: ['utility'],
+      guildId: 'guild-1',
+      update: async (p: any) => {
+        updatedPayload = p;
+      },
+    };
+
+    await handleHelpInteraction(mockInteraction);
+    expect(updatedPayload).toBeDefined();
+    expect(updatedPayload.embeds).toHaveLength(1);
+    const data = updatedPayload.embeds[0].toJSON();
+    expect(data.title).toContain('Utility Suite');
+  });
+
+  it('handles button navigation interaction in handleHelpInteraction', async () => {
+    let updatedPayload: any = null;
+    const mockInteraction: any = {
+      isStringSelectMenu: () => false,
+      isButton: () => true,
+      customId: 'help_btn_moderation',
+      guildId: 'guild-1',
+      update: async (p: any) => {
+        updatedPayload = p;
+      },
+    };
+
+    await handleHelpInteraction(mockInteraction);
+    expect(updatedPayload).toBeDefined();
+    expect(updatedPayload.embeds).toHaveLength(1);
+    const data = updatedPayload.embeds[0].toJSON();
+    expect(data.title).toContain('Moderation Suite');
+  });
 });
+
