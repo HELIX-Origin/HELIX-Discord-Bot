@@ -229,10 +229,10 @@ To allow inbound dashboard connections over your local network or public IP:
 New-NetFirewallRule -DisplayName "HELIX Bot Dashboard" -Direction Inbound -LocalPort 5000 -Protocol TCP -Action Allow
 ```
 
-#### Step 3: Run as 24/7 Background Service via Windows Task Scheduler (Native)
-Windows includes a built-in Task Scheduler for starting background Node.js services on boot without third-party utilities. 
+#### Step 3: Run as 24/7 Background Service via Windows Task Scheduler (Headless / No Console Window)
+Windows includes a built-in Task Scheduler for starting background Node.js services on boot without spawning a command prompt or console window on screen.
 
-The script below dynamically resolves `npm` from your system `PATH` (supporting standard installers, NVM for Windows, Volta, fnm, Scoop, and Chocolatey) and registers the task for your current project directory:
+The script below dynamically resolves `npm` from your system `PATH` (supporting standard installers, NVM for Windows, Volta, fnm, Scoop, and Chocolatey) and launches HELIX silently in the background:
 
 ```powershell
 # Open PowerShell in your HELIX directory and run:
@@ -240,14 +240,21 @@ $npmPath = (Get-Command npm.cmd -ErrorAction SilentlyContinue).Source
 if (-not $npmPath) { $npmPath = "npm.cmd" }
 $projectDir = (Get-Location).Path
 
-$action = New-ScheduledTaskAction -Execute $npmPath -Argument "start" -WorkingDirectory $projectDir
+# Launch invisibly with -WindowStyle Hidden and unlimited execution lifetime
+$action = New-ScheduledTaskAction `
+    -Execute "powershell.exe" `
+    -Argument "-WindowStyle Hidden -NoProfile -NonInteractive -ExecutionPolicy Bypass -Command `"Set-Location '$projectDir'; & '$npmPath' start`"" `
+    -WorkingDirectory $projectDir
+
 $trigger = New-ScheduledTaskTrigger -AtStartup
+$settings = New-ScheduledTaskSettingsSet -Hidden -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -ExecutionTimeLimit (New-TimeSpan -Days 0)
 $principal = New-ScheduledTaskPrincipal -UserId "$env:USERDOMAIN\$env:USERNAME" -LogonType Interactive -RunLevel Highest
-Register-ScheduledTask -TaskName "HELIX Discord Bot" -Action $action -Trigger $trigger -Principal $principal -Description "HELIX Discord Bot 24/7 Service"
+
+Register-ScheduledTask -TaskName "HELIX Discord Bot" -Action $action -Trigger $trigger -Principal $principal -Settings $settings -Description "HELIX Discord Bot 24/7 Service" -Force
 Start-ScheduledTask -TaskName "HELIX Discord Bot"
 ```
 
-To manage the Windows task:
+To manage the background service:
 ```powershell
 Stop-ScheduledTask -TaskName "HELIX Discord Bot"        # Stop
 Start-ScheduledTask -TaskName "HELIX Discord Bot"       # Start
