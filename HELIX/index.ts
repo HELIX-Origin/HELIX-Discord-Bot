@@ -87,8 +87,10 @@ export async function launchBotAndDashboard(options: LaunchBotOptions = {}): Pro
           logs.success(`Discord Bot connected to gateway with fallback intents as ${client.user?.tag || 'HELIX Bot'} (Slash commands active).`);
           logs.info('To enable prefix commands (e.g. >help, >ticket), enable "Message Content Intent" in Discord Developer Portal -> Bot -> Privileged Gateway Intents.');
         } else if (err?.code === 'TokenInvalid' || (err?.message && err.message.toLowerCase().includes('invalid token'))) {
-          logs.error('Invalid Discord Bot Token provided.');
-          logs.warn('Verify you copied the Bot Token from Discord Developer Portal -> Bot -> Reset Token (do not use Client Secret or Client ID).');
+          logs.error('Invalid Discord Bot Token provided (Discord API returned 401: Unauthorized).');
+          logs.warn('👉 The current DISCORD_TOKEN is expired, invalid, or was reset in the Developer Portal.');
+          logs.warn(`👉 Go to: https://discord.com/developers/applications/${clientId || ''}/bot`);
+          logs.warn('👉 Click "Reset Token", copy the new token, and paste it into DISCORD_TOKEN in .env (and your cloud hosting platform).');
         } else {
           logs.error(`Discord gateway connection failed: ${err.message}`);
           throw err;
