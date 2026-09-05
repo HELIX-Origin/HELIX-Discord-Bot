@@ -141,6 +141,7 @@ flowchart LR
 - [BUG-016](.agents/bugs/BUG-016-multi-platform-deployment-sync.md) — Multi-platform one-click deployment sync & container runtime configuration — **Resolved** (4 Sub-Tasks)
 - [BUG-017](.agents/bugs/BUG-017-keep-alive-service.md) — Built-in autonomous keep-alive self-ping service for cloud hosting platforms — **Resolved** (4 Sub-Tasks)
 - [BUG-018](.agents/bugs/BUG-018-remove-docker-support.md) — Full deprecation & removal of Docker containerization in favor of native Node.js runtimes — **Resolved** (4 Sub-Tasks)
+- [BUG-019](.agents/bugs/BUG-019-self-hosting-static-urls.md) — Full deprecation of 1-click cloud deployments & transition to static self-hosting architecture — **Resolved** (4 Sub-Tasks)
 
 ---
 

@@ -2,7 +2,7 @@ import { describe, it, expect, afterAll } from 'vitest';
 import { getNextAuthConfig } from '../../../HELIX/dashboard/auth/config.js';
 import { routeDashboardRequest } from '../../../HELIX/dashboard/router.js';
 import { renderDashboardHtml } from '../../../HELIX/dashboard/ui/html.js';
-import { getCallbackUrl, getNextAuthUrl, detectPlatformUrl } from '../../../HELIX/src/env.js';
+import { getCallbackUrl, getNextAuthUrl } from '../../../HELIX/src/env.js';
 import { BotDatabase } from '../../../HELIX/src/db/database.js';
 import { createRequest, createResponse } from '../../helpers/http.js';
 import { withTempDbEnvironment } from '../../helpers/db.js';
@@ -12,18 +12,16 @@ const env = withTempDbEnvironment();
 const sandbox = new EnvSandbox();
 
 describe('integration — dashboard full stack', () => {
-  it('auto-resolves URLs for a one-click deploy platform without config', async () => {
-    sandbox.set('NEXTAUTH_URL', undefined);
+  it('resolves URLs for dashboard with static NEXTAUTH_URL configuration', async () => {
+    sandbox.set('NEXTAUTH_URL', 'https://bot.example.com');
     sandbox.set('DISCORD_CALLBACK_URL', undefined);
-    sandbox.set('RENDER_EXTERNAL_URL', 'https://helix-on-render.onrender.com');
 
-    expect(getCallbackUrl()).toBe('https://helix-on-render.onrender.com');
-    expect(getNextAuthUrl()).toBe('https://helix-on-render.onrender.com');
-    expect(detectPlatformUrl()).toBe('https://helix-on-render.onrender.com');
+    expect(getCallbackUrl()).toBe('https://bot.example.com');
+    expect(getNextAuthUrl()).toBe('https://bot.example.com');
 
     const config = getNextAuthConfig();
-    expect(config.url).toBe('https://helix-on-render.onrender.com');
-    expect(config.url + '/api/auth/callback/discord').toBe('https://helix-on-render.onrender.com/api/auth/callback/discord');
+    expect(config.url).toBe('https://bot.example.com');
+    expect(config.url + '/api/auth/callback/discord').toBe('https://bot.example.com/api/auth/callback/discord');
   });
 
   it('tracks a user session through the bot database and into the stats route', async () => {

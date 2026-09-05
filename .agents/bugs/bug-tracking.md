@@ -50,6 +50,7 @@ flowchart TD
 | **BUG-016** | Multi-Platform One-Click Deployment Sync & Container Runtime Configuration | High | Resolved | 4 Sub-Tasks | [#45](https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues/45) | [BUG-016](BUG-016-multi-platform-deployment-sync.md) |
 | **BUG-017** | Built-in Autonomous Keep-Alive Self-Ping Service for Cloud Hosting Platforms | High | Resolved | 4 Sub-Tasks | [#50](https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues/50) | [BUG-017](BUG-017-keep-alive-service.md) |
 | **BUG-018** | Full Deprecation & Removal of Docker Containerization in Favor of Native Node.js Runtime Across All Platforms | High | Resolved | 4 Sub-Tasks | [#55](https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues/55) | [BUG-018](BUG-018-remove-docker-support.md) |
+| **BUG-019** | Full Deprecation of 1-Click Cloud Deployments & Transition to Static Self-Hosting Architecture | High | Resolved | 4 Sub-Tasks | [#60](https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues/60) | [BUG-019](BUG-019-self-hosting-static-urls.md) |
 
 ---
 

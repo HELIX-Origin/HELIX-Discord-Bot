@@ -114,87 +114,10 @@ export function getClientSecret(): string {
 }
 
 /**
- * Detects the public Heroku application domain if running on Heroku.
- * Checks HEROKU_APP_DEFAULT_DOMAIN_NAME, HEROKU_APP_NAME, or DYNO metadata.
- */
-export function getHerokuAppUrl(): string | null {
-  const domain = process.env.HEROKU_APP_DEFAULT_DOMAIN_NAME;
-  if (domain && domain.trim()) {
-    return `https://${domain.trim().replace(/\/$/, '')}`;
-  }
-  const appName = process.env.HEROKU_APP_NAME;
-  if (appName && appName.trim()) {
-    const cleanName = appName.trim().replace(/\/$/, '');
-    return cleanName.includes('.') ? `https://${cleanName}` : `https://${cleanName}.herokuapp.com`;
-  }
-  return null;
-}
-
-/**
- * Detects the public application URL from platform environment variables.
- * Checks Render, Koyeb, Railway, Heroku, and custom DOMAIN in order.
- * Returns null if no platform is detected.
- */
-export function detectPlatformUrl(): string | null {
-  // Render.com
-  const render = (process.env.RENDER_EXTERNAL_URL || '').trim();
-  if (render) {
-    const url = render.includes('://') ? render : `https://${render}`;
-    return url.replace(/\/$/, '');
-  }
-
-  // Koyeb
-  const koyebDomain = (process.env.KOYEB_PUBLIC_DOMAIN || '').trim();
-  if (koyebDomain) {
-    const url = koyebDomain.includes('://') ? koyebDomain : `https://${koyebDomain}`;
-    return url.replace(/\/$/, '');
-  }
-  const koyebApp = (process.env.KOYEB_APP_NAME || '').trim();
-  if (koyebApp) {
-    return `https://${koyebApp}.koyeb.app`;
-  }
-
-  // Railway
-  const railwayDomain = (process.env.RAILWAY_PUBLIC_DOMAIN || process.env.RAILWAY_STATIC_URL || '').trim();
-  if (railwayDomain) {
-    const url = railwayDomain.includes('://') ? railwayDomain : `https://${railwayDomain}`;
-    return url.replace(/\/$/, '');
-  }
-
-  // Fly.io
-  const flyApp = (process.env.FLY_APP_NAME || '').trim();
-  if (flyApp) {
-    return `https://${flyApp}.fly.dev`;
-  }
-
-  // Heroku
-  const heroku = getHerokuAppUrl();
-  if (heroku) return heroku;
-
-  // Custom domain
-  const domain = (process.env.DOMAIN || '').trim();
-  if (domain) {
-    const url = domain.includes('://') ? domain : `https://${domain}`;
-    return url.replace(/\/$/, '');
-  }
-
-  return null;
-}
-
-/**
  * Builds standard Discord OAuth2 bot invite URL.
  */
-function formatBotInviteUrl(
-  clientId: string,
-  permissions: number = 8,
-  callbackBaseUrl?: string
-): string {
-  let url = `https://discord.com/oauth2/authorize?client_id=${clientId}&permissions=${permissions}&scope=bot%20applications.commands`;
-  if (callbackBaseUrl) {
-    const redirectUri = `${callbackBaseUrl.replace(/\/$/, '')}/api/auth/callback/discord`;
-    url += `&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code`;
-  }
-  return url;
+function formatBotInviteUrl(clientId: string, permissions: number = 8): string {
+  return `https://discord.com/oauth2/authorize?client_id=${clientId}&permissions=${permissions}&scope=bot%20applications.commands`;
 }
 
 /**
@@ -214,24 +137,72 @@ export function normalizeCallbackBaseUrl(raw: string): string {
   return base.replace(/\/+$/, '');
 }
 
+/** HTTP port the dashboard and OAuth2 server listens on. Defaults to 5000. */
+export function getPort(): number {
+  const raw = process.env.PORT;
+  if (raw) {
+    const n = parseInt(raw, 10);
+    if (!isNaN(n)) return n;
+  }
+  return 5000;
+}
+
+/**
+ * Public-facing NextAuth / Dashboard URL (e.g. `https://bot.example.com`).
+ * Explicitly configured via `NEXTAUTH_URL` for public deployments.
+ * Defaults to `http://localhost:<PORT>` when running locally.
+ */
+export function getNextAuthUrl(): string {
+  const port = getPort();
+  const explicit = (process.env.NEXTAUTH_URL || '').trim();
+  if (explicit) {
+    const clean = explicit.replace(/\/+$/, '');
+    const url = clean.includes('://') ? clean : (clean.includes('localhost') || clean.includes('127.0.0.1') ? `http://${clean}` : `https://${clean}`);
+    try {
+      const u = new URL(url);
+      if (!u.port && (u.hostname === 'localhost' || u.hostname === '127.0.0.1')) {
+        u.port = String(port);
+      }
+      return u.toString().replace(/\/+$/, '');
+    } catch {
+      return url;
+    }
+  }
+
+  const explicitCallback = normalizeCallbackBaseUrl(process.env.DISCORD_CALLBACK_URL || '');
+  if (explicitCallback) {
+    return explicitCallback;
+  }
+
+  return `http://localhost:${port}`;
+}
+
+/**
+ * Internal URL NextAuth uses for server-side self-requests.
+ * Explicitly configured via `NEXTAUTH_INTERNAL_URL` (defaults to `http://localhost:<port>`).
+ */
+export function getNextAuthInternalUrl(): string {
+  const port = getPort();
+  const raw = (process.env.NEXTAUTH_INTERNAL_URL || 'http://localhost').trim().replace(/\/+$/, '');
+  try {
+    const u = new URL(raw.includes('://') ? raw : `http://${raw}`);
+    if (!u.port) u.port = String(port);
+    return u.toString().replace(/\/+$/, '');
+  } catch {
+    return `http://localhost:${port}`;
+  }
+}
+
 /**
  * Base OAuth2 callback URL (no trailing slash).
- * The server appends `/api/auth/callback/discord` internally.
- * Automatically resolves from platform env vars (Heroku, Render, Railway, DOMAIN)
- * if not explicitly configured. Falls back to `http://localhost:<PORT>`.
- *
- * @example 'http://localhost:5000' | 'https://myapp.herokuapp.com'
+ * Returns `DISCORD_CALLBACK_URL` if set, otherwise defaults to `getNextAuthUrl()`.
  */
 export function getCallbackUrl(): string {
   const explicit = normalizeCallbackBaseUrl(process.env.DISCORD_CALLBACK_URL || '');
-  if (explicit && !explicit.includes('localhost') && !explicit.includes('127.0.0.1')) {
+  if (explicit) {
     return explicit;
   }
-  const platformUrl = detectPlatformUrl();
-  if (platformUrl) {
-    return platformUrl;
-  }
-  return (explicit || `http://localhost:${getPort()}`);
+  return getNextAuthUrl();
 }
 
 /**
@@ -257,62 +228,6 @@ export function getInviteUrl(): string {
   return invite;
 }
 
-/** HTTP port the dashboard and OAuth2 server listens on. Defaults to 5000. */
-export function getPort(): number {
-  const raw = process.env.PORT;
-  if (raw) {
-    const n = parseInt(raw, 10);
-    if (!isNaN(n)) return n;
-  }
-  return 5000;
-}
-
-/**
- * Public-facing NextAuth URL (e.g. your Heroku app URL).
- * Automatically resolves from platform env vars (Heroku, Render, Railway, DOMAIN).
- * Falls back to `http://localhost:<PORT>` when running locally.
- */
-export function getNextAuthUrl(): string {
-  const port = getPort();
-  const explicit = (process.env.NEXTAUTH_URL || '').trim();
-  if (explicit && !explicit.includes('localhost') && !explicit.includes('127.0.0.1')) {
-    return explicit.replace(/\/$/, '');
-  }
-  const platformUrl = detectPlatformUrl();
-  if (platformUrl) {
-    return platformUrl;
-  }
-  const callbackUrl = getCallbackUrl();
-  const callbackIsLocal =
-    callbackUrl.includes('localhost') || callbackUrl.includes('127.0.0.1');
-  const raw = (explicit || (callbackIsLocal ? `http://localhost:${port}` : callbackUrl)).replace(/\/$/, '');
-  try {
-    const u = new URL(raw.includes('://') ? raw : `http://${raw}`);
-    if (!u.port && (u.hostname === 'localhost' || u.hostname === '127.0.0.1')) {
-      u.port = String(port);
-    }
-    return u.toString().replace(/\/$/, '');
-  } catch {
-    return `http://localhost:${port}`;
-  }
-}
-
-/**
- * Internal URL NextAuth uses for server-side self-requests.
- * Defaults to `http://localhost:<port>`.
- */
-export function getNextAuthInternalUrl(): string {
-  const port = getPort();
-  const raw = (process.env.NEXTAUTH_INTERNAL_URL || 'http://localhost').replace(/\/$/, '');
-  try {
-    const u = new URL(raw.includes('://') ? raw : `http://${raw}`);
-    if (!u.port) u.port = String(port);
-    return u.toString().replace(/\/$/, '');
-  } catch {
-    return `http://localhost:${port}`;
-  }
-}
-
 /**
  * HMAC secret for signing NextAuth session tokens.
  * Must be a 32+ character random string in production.
@@ -332,23 +247,17 @@ export interface SelfPingConfig {
 
 /**
  * Returns configuration for the autonomous Keep-Alive Self-Pinger.
- * Auto-activates on platforms with public URLs (Render, Koyeb, Railway, Heroku, Fly.io)
- * or when HELIX_SELF_PING=true is explicitly set.
+ * Activates when `HELIX_SELF_PING=true` is set, or when `NEXTAUTH_URL` is set to a public URL.
  */
 export function getSelfPingConfig(): SelfPingConfig {
   const explicit = (process.env.HELIX_SELF_PING || '').trim().toLowerCase();
   const intervalRaw = parseInt(process.env.HELIX_SELF_PING_INTERVAL_MS || '600000', 10);
   const intervalMs = (!isNaN(intervalRaw) && intervalRaw >= 60000) ? intervalRaw : 600000;
 
-  const platformUrl = detectPlatformUrl();
+  const publicUrl = getNextAuthUrl();
   let targetUrl: string | null = null;
-  if (platformUrl && !platformUrl.includes('localhost') && !platformUrl.includes('127.0.0.1')) {
-    targetUrl = `${platformUrl.replace(/\/$/, '')}/api/health`;
-  } else {
-    const callbackUrl = normalizeCallbackBaseUrl(process.env.DISCORD_CALLBACK_URL || '');
-    if (callbackUrl && !callbackUrl.includes('localhost') && !callbackUrl.includes('127.0.0.1')) {
-      targetUrl = `${callbackUrl.replace(/\/$/, '')}/api/health`;
-    }
+  if (publicUrl && !publicUrl.includes('localhost') && !publicUrl.includes('127.0.0.1')) {
+    targetUrl = `${publicUrl.replace(/\/+$/, '')}/api/health`;
   }
 
   // Explicit disable
@@ -356,19 +265,7 @@ export function getSelfPingConfig(): SelfPingConfig {
     return { enabled: false, targetUrl, intervalMs };
   }
 
-  // Auto-enabled if explicit true OR if running on Render / cloud platform with a valid public targetUrl
-  const isCloudPlatform = Boolean(
-    process.env.RENDER_EXTERNAL_URL ||
-    process.env.RENDER ||
-    process.env.KOYEB_PUBLIC_DOMAIN ||
-    process.env.KOYEB_APP_NAME ||
-    process.env.RAILWAY_PUBLIC_DOMAIN ||
-    process.env.RAILWAY_STATIC_URL ||
-    process.env.HEROKU_APP_NAME ||
-    process.env.FLY_APP_NAME
-  );
-
-  const enabled = explicit === 'true' || explicit === '1' || explicit === 'on' || (Boolean(targetUrl) && isCloudPlatform);
+  const enabled = explicit === 'true' || explicit === '1' || explicit === 'on' || Boolean(targetUrl);
 
   return {
     enabled: Boolean(enabled && targetUrl),

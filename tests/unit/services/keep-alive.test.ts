@@ -103,8 +103,8 @@ describe('KeepAliveService — autonomous self-ping engine', () => {
     expect(getKeepAliveStatus().enabled).toBe(false);
   });
 
-  it('auto-activates when Render platform environment is detected', () => {
-    sandbox.set('RENDER_EXTERNAL_URL', 'https://my-render-bot.onrender.com');
+  it('auto-activates when public NEXTAUTH_URL is configured', () => {
+    sandbox.set('NEXTAUTH_URL', 'https://my-render-bot.onrender.com');
     startKeepAlive();
 
     const status = getKeepAliveStatus();
@@ -113,8 +113,8 @@ describe('KeepAliveService — autonomous self-ping engine', () => {
     expect(status.intervalMs).toBe(600_000);
   });
 
-  it('respects HELIX_SELF_PING=false to disable on cloud platforms', () => {
-    sandbox.set('RENDER_EXTERNAL_URL', 'https://my-render-bot.onrender.com');
+  it('respects HELIX_SELF_PING=false to disable self-ping', () => {
+    sandbox.set('NEXTAUTH_URL', 'https://my-render-bot.onrender.com');
     sandbox.set('HELIX_SELF_PING', 'false');
     startKeepAlive();
 

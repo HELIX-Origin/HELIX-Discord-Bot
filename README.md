@@ -15,52 +15,44 @@
   <a href="LICENSE.md"><img src="https://img.shields.io/badge/License-BSD_3--Clause-blue.svg?style=plastic" alt="License: BSD 3-Clause"></a>
 </p>
 
-<p align="center">
-  <a href="https://render.com/deploy?repo=https://github.com/HELIX-Origin/HELIX-Discord-Bot">
-    <img src="https://render.com/images/deploy-to-render-button.svg" alt="Deploy to Render" height="34">
-  </a>
-  &nbsp;
-  <a href="https://app.koyeb.com/deploy?type=git&repository=github.com/HELIX-Origin/HELIX-Discord-Bot&branch=main&builder=buildpack&env[DISCORD_TOKEN]=&env[DISCORD_CLIENT_ID]=&env[DISCORD_CLIENT_SECRET]=&env[NEXTAUTH_SECRET]=&env[NODE_ENV]=production&ports=5000;http;/&instance_type=free">
-    <img src="https://www.koyeb.com/static/images/deploy/button.svg" alt="Deploy to Koyeb" height="34">
-  </a>
-  &nbsp;
-  <a href="https://heroku.com/deploy?template=https://github.com/HELIX-Origin/HELIX-Discord-Bot">
-    <img src="https://www.herokucdn.com/deploy/button.svg" alt="Deploy to Heroku" height="34">
-  </a>
-  &nbsp;
-  <a href="https://railway.com/template/github.com/HELIX-Origin/HELIX-Discord-Bot">
-    <img src="https://railway.com/button.svg" alt="Deploy on Railway" height="34">
-  </a>
-</p>
-
-**HELIX** is a Discord bot for developer communities -- moderation, thread-based ticketing, project scaffolding, and a GitHub-hosted language plugin system for code intelligence with no paid API dependencies.
+**HELIX** is a standalone Discord bot and web dashboard for developer communities — moderation, thread-based ticketing, multi-framework project scaffolding, and a GitHub-hosted language plugin system for code intelligence with zero paid external AI API dependencies.
 
 ---
 
-## Quick Start (Local)
+## Quick Start
 
 ```bash
-npm install
+# Clone repository and install dependencies
+git clone https://github.com/HELIX-Origin/HELIX-Discord-Bot.git
+cd HELIX-Discord-Bot
+npm ci
+npm --prefix HELIX ci
+
+# Configure environment
 cp .env.example .env
+
+# Build and start
+npm run build
 npm start
 ```
 
-Fill in `DISCORD_TOKEN`, `DISCORD_CLIENT_ID`, `DISCORD_CLIENT_SECRET`, and `NEXTAUTH_SECRET` in `.env`. Everything else is optional or auto-resolved. The web dashboard runs at `http://localhost:5000/dashboard`.
+Configure your Discord credentials in `.env`:
+- `DISCORD_TOKEN`, `DISCORD_CLIENT_ID`, `DISCORD_CLIENT_SECRET`, `NEXTAUTH_SECRET`.
+- Optional: Set `NEXTAUTH_URL=https://yourdomain.com` for public web dashboard access.
+
+The companion dashboard runs at `http://localhost:5000/dashboard`.
 
 ---
 
 ## Documentation
 
+- [Self-Hosting & Deployment Guide](docs/self-hosting.md) -- complete setup on VPS, Linux, PM2, systemd, and Nginx/SSL
 - [Bot Reference](docs/discord-bot.md) -- commands, database, configuration
 - [Web Dashboard](docs/web-dashboard.md) -- admin panel and OAuth2 flow
 - [Language Plugins](docs/plugin-system.md) -- code intelligence plugin architecture
 - [Plugin Authoring](docs/plugin-authoring.md) -- build and distribute custom language plugins
 - [Plugin Repo Structure](docs/plugin-repository-structure.md) -- file layout, JSON schemas & TypeScript contracts
 - [Scaffolding Templates](docs/scaffolding-templates.md) -- 17 project starters
-- [Render Deployment (Free)](docs/deployment-render.md) -- 1-click free web service
-- [Koyeb Deployment (Free)](docs/deployment-koyeb.md) -- 1-click free nano instance
-- [Heroku Deployment](docs/deployment-heroku.md) -- Eco dyno deployment guide
-- [Railway Deployment](docs/deployment-railway.md) -- 1-click cloud service
 
 ---
 

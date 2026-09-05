@@ -46,7 +46,7 @@ When utilizing HELIX, you interact directly with the following third-party platf
 
 - **Discord API**: Used by the bot subsystem for gateway events, slash commands, and OAuth2 authorization. Governed by [Discord Privacy Policy](https://discord.com/privacy).
 - **GitHub**: Used for optional community plugin installation via `>plugin install <repo>`. Governed by [GitHub Privacy Statement](https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement).
-- **Render / Koyeb / Heroku / Railway**: Used for optional 1-click cloud hosting deployment. Governed by their respective privacy policies.
+- **Self-Hosted Infrastructure / VPS**: Your chosen server host (e.g. Ubuntu, Debian, AWS, DigitalOcean, Hetzner, etc.) where you run the Node.js application. Governed by your hosting provider's privacy policy.
 
 ---
 

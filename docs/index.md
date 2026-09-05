@@ -8,10 +8,7 @@
 | [Plugin Authoring](plugin-authoring.md) | How to build, test, and publish custom language plugins & source providers |
 | [Plugin Repo Structure](plugin-repository-structure.md) | Detailed file layout, JSON schemas, capability matrix & TypeScript contracts |
 | [Scaffolding Templates](scaffolding-templates.md) | All 17 supported project templates |
-| [Render Deployment](deployment-render.md) | 1-click free web service deploy |
-| [Koyeb Deployment](deployment-koyeb.md) | 1-click free nano instance deploy |
-| [Heroku Deployment](deployment-heroku.md) | 1-click Eco dyno deploy |
-| [Railway Deployment](deployment-railway.md) | 1-click cloud container deploy |
+| [Self-Hosting & Deployment](self-hosting.md) | Production setup on VPS, Linux, PM2, systemd, and Nginx/SSL |
 
 ---
 

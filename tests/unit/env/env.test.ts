@@ -5,8 +5,6 @@ import {
   getBotToken,
   getClientId,
   getClientSecret,
-  getHerokuAppUrl,
-  detectPlatformUrl,
   getCallbackUrl,
   normalizeCallbackBaseUrl,
   getInviteUrl,
@@ -59,51 +57,25 @@ describe('src/env.ts — bot environment accessors', () => {
     expect(getPort()).toBe(5000);
   });
 
-  it('detects Heroku app URLs from environment metadata', () => {
-    sandbox.set('HEROKU_APP_DEFAULT_DOMAIN_NAME', 'helix-app.herokuapp.com/');
-    expect(getHerokuAppUrl()).toBe('https://helix-app.herokuapp.com');
+  it('resolves NextAuth URLs with static NEXTAUTH_URL and defaults to localhost', () => {
+    sandbox.set('NEXTAUTH_URL', undefined);
+    sandbox.set('PORT', '5000');
+    expect(getNextAuthUrl()).toBe('http://localhost:5000');
 
-    sandbox.set('HEROKU_APP_DEFAULT_DOMAIN_NAME', undefined);
-    sandbox.set('HEROKU_APP_NAME', 'my-bot');
-    expect(getHerokuAppUrl()).toBe('https://my-bot.herokuapp.com');
+    sandbox.set('NEXTAUTH_URL', 'https://bot.example.com/');
+    expect(getNextAuthUrl()).toBe('https://bot.example.com');
 
-    sandbox.set('HEROKU_APP_NAME', 'custom.example.com');
-    expect(getHerokuAppUrl()).toBe('https://custom.example.com');
-
-    sandbox.set('HEROKU_APP_NAME', undefined);
-    expect(getHerokuAppUrl()).toBeNull();
+    sandbox.set('NEXTAUTH_URL', 'bot.example.com');
+    expect(getNextAuthUrl()).toBe('https://bot.example.com');
   });
 
-  it('detects platform URLs in precedence order', () => {
-    sandbox.set('RENDER_EXTERNAL_URL', 'https://render.example.com/');
-    expect(detectPlatformUrl()).toBe('https://render.example.com');
+  it('resolves NextAuth internal URL with fallback to localhost port', () => {
+    sandbox.set('NEXTAUTH_INTERNAL_URL', undefined);
+    sandbox.set('PORT', '5000');
+    expect(getNextAuthInternalUrl()).toBe('http://localhost:5000');
 
-    sandbox.set('RENDER_EXTERNAL_URL', undefined);
-    sandbox.set('KOYEB_PUBLIC_DOMAIN', 'koyeb.example.com/');
-    expect(detectPlatformUrl()).toBe('https://koyeb.example.com');
-
-    sandbox.set('KOYEB_PUBLIC_DOMAIN', undefined);
-    sandbox.set('KOYEB_APP_NAME', 'srvc');
-    expect(detectPlatformUrl()).toBe('https://srvc.koyeb.app');
-
-    sandbox.set('KOYEB_APP_NAME', undefined);
-    sandbox.set('RAILWAY_PUBLIC_DOMAIN', 'helix.up.railway.app');
-    expect(detectPlatformUrl()).toBe('https://helix.up.railway.app');
-
-    sandbox.set('RAILWAY_PUBLIC_DOMAIN', undefined);
-    sandbox.set('RAILWAY_STATIC_URL', 'https://railway.example.com/');
-    expect(detectPlatformUrl()).toBe('https://railway.example.com');
-
-    sandbox.set('RAILWAY_STATIC_URL', undefined);
-    sandbox.set('FLY_APP_NAME', 'my-fly-app');
-    expect(detectPlatformUrl()).toBe('https://my-fly-app.fly.dev');
-
-    sandbox.set('FLY_APP_NAME', undefined);
-    sandbox.set('DOMAIN', 'gitlab-pages.example.com/');
-    expect(detectPlatformUrl()).toBe('https://gitlab-pages.example.com');
-
-    sandbox.set('DOMAIN', undefined);
-    expect(detectPlatformUrl()).toBeNull();
+    sandbox.set('NEXTAUTH_INTERNAL_URL', 'http://127.0.0.1');
+    expect(getNextAuthInternalUrl()).toBe('http://127.0.0.1:5000');
   });
 
   it('falls back to the local callback URL when no platform is detected', () => {
@@ -251,32 +223,30 @@ describe('src/env.ts — saveBotEnvValue', () => {
 });
 
 describe('src/env.ts — getSelfPingConfig', () => {
-  it('returns disabled when on localhost without platform URL', () => {
-    sandbox.set('RENDER_EXTERNAL_URL', undefined);
-    sandbox.set('KOYEB_PUBLIC_DOMAIN', undefined);
-    sandbox.set('RAILWAY_PUBLIC_DOMAIN', undefined);
+  it('returns disabled when on localhost without public NEXTAUTH_URL', () => {
+    sandbox.set('NEXTAUTH_URL', undefined);
     sandbox.set('DISCORD_CALLBACK_URL', undefined);
     const config = getSelfPingConfig();
     expect(config.enabled).toBe(false);
     expect(config.intervalMs).toBe(600000);
   });
 
-  it('auto-enables with targetUrl when Render is detected', () => {
-    sandbox.set('RENDER_EXTERNAL_URL', 'https://my-app.onrender.com');
+  it('auto-enables with targetUrl when a public NEXTAUTH_URL is configured', () => {
+    sandbox.set('NEXTAUTH_URL', 'https://bot.example.com');
     const config = getSelfPingConfig();
     expect(config.enabled).toBe(true);
-    expect(config.targetUrl).toBe('https://my-app.onrender.com/api/health');
+    expect(config.targetUrl).toBe('https://bot.example.com/api/health');
   });
 
   it('supports custom interval via HELIX_SELF_PING_INTERVAL_MS', () => {
-    sandbox.set('RENDER_EXTERNAL_URL', 'https://my-app.onrender.com');
+    sandbox.set('NEXTAUTH_URL', 'https://bot.example.com');
     sandbox.set('HELIX_SELF_PING_INTERVAL_MS', '300000');
     const config = getSelfPingConfig();
     expect(config.intervalMs).toBe(300000);
   });
 
   it('supports explicit disable via HELIX_SELF_PING=false', () => {
-    sandbox.set('RENDER_EXTERNAL_URL', 'https://my-app.onrender.com');
+    sandbox.set('NEXTAUTH_URL', 'https://bot.example.com');
     sandbox.set('HELIX_SELF_PING', 'false');
     const config = getSelfPingConfig();
     expect(config.enabled).toBe(false);
