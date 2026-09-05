@@ -5,12 +5,16 @@ import { logs } from './logs-handler.js';
 const slashCommands = new Collection<string, { def: CommandDefinition; builder: SlashCommandBuilder }>();
 
 function buildSlashData(cmd: CommandDefinition): SlashCommandBuilder {
-  let builder = new SlashCommandBuilder().setName(cmd.name).setDescription(cmd.description);
+  const cleanName = cmd.name.toLowerCase().slice(0, 32);
+  const cleanDesc = (cmd.description || 'No description provided').slice(0, 100);
+  let builder = new SlashCommandBuilder().setName(cleanName).setDescription(cleanDesc);
 
   if (cmd.subcommands?.length) {
     for (const sub of cmd.subcommands) {
       builder.addSubcommand(subBuilder => {
-        subBuilder.setName(sub.name).setDescription(sub.description);
+        const subName = sub.name.toLowerCase().slice(0, 32);
+        const subDesc = (sub.description || 'No description provided').slice(0, 100);
+        subBuilder.setName(subName).setDescription(subDesc);
         if (sub.options) {
           for (const opt of sub.options) addOption(subBuilder, opt);
         }
@@ -27,20 +31,14 @@ function buildSlashData(cmd: CommandDefinition): SlashCommandBuilder {
 }
 
 function addOption(builder: any, opt: CommandOption): void {
-  const map: Record<string, number> = {
-    string: ApplicationCommandOptionType.String,
-    integer: ApplicationCommandOptionType.Integer,
-    boolean: ApplicationCommandOptionType.Boolean,
-    user: ApplicationCommandOptionType.User,
-    channel: ApplicationCommandOptionType.Channel,
-    role: ApplicationCommandOptionType.Role,
-  };
-
   const method = `add${opt.type.charAt(0).toUpperCase() + opt.type.slice(1)}Option`;
   if (typeof builder[method] !== 'function') return;
 
+  const optName = opt.name.toLowerCase().slice(0, 32);
+  const optDesc = (opt.description || 'No description provided').slice(0, 100);
+
   builder[method]((b: any) => {
-    b.setName(opt.name).setDescription(opt.description).setRequired(opt.required || false);
+    b.setName(optName).setDescription(optDesc).setRequired(opt.required || false);
     if (opt.choices?.length) b.addChoices(...opt.choices);
     if (opt.minValue !== undefined) b.setMinValue(opt.minValue);
     if (opt.maxValue !== undefined) b.setMaxValue(opt.maxValue);
@@ -78,6 +76,16 @@ function scanSlashCommandFiles(dir: string): string[] {
   return files;
 }
 
+export function registerSlashCommand(cmd: CommandDefinition): void {
+  if (!cmd?.name || typeof cmd?.execute !== 'function') return;
+  const builder = buildSlashData(cmd);
+  slashCommands.set(cmd.name, { def: cmd, builder });
+}
+
+export function clearSlashCommands(): void {
+  slashCommands.clear();
+}
+
 export async function loadSlashCommands(): Promise<void> {
   const commandsDir = path.resolve(__dirname, '..', 'commands');
   const filePaths = scanSlashCommandFiles(commandsDir);
@@ -85,7 +93,12 @@ export async function loadSlashCommands(): Promise<void> {
 
   for (const filePath of filePaths) {
     try {
-      const mod = await import(pathToFileURL(filePath).href);
+      let mod: any;
+      try {
+        mod = await import(pathToFileURL(filePath).href);
+      } catch {
+        mod = await import(filePath);
+      }
       const seenInFile = new Set<string>();
       for (const exp of Object.values(mod as any)) {
         const cmd = exp as CommandDefinition;
@@ -93,8 +106,7 @@ export async function loadSlashCommands(): Promise<void> {
         if (seenInFile.has(cmd.name)) continue;
         seenInFile.add(cmd.name);
 
-        const builder = buildSlashData(cmd);
-        slashCommands.set(cmd.name, { def: cmd, builder });
+        registerSlashCommand(cmd);
         count++;
       }
     } catch (err: any) {
@@ -103,6 +115,66 @@ export async function loadSlashCommands(): Promise<void> {
   }
 
   logs.info(`Loaded ${count} slash command(s)`);
+}
+
+export function getSlashCommandCategories(): string[] {
+  const categories = new Set<string>();
+  for (const { def } of slashCommands.values()) {
+    if (def.category) {
+      categories.add(def.category.toLowerCase());
+    }
+  }
+  if (categories.size === 0) {
+    return ['info', 'project', 'config', 'mod', 'util'];
+  }
+  return Array.from(categories).sort();
+}
+
+export function getSlashCommands(): Collection<string, { def: CommandDefinition; builder: SlashCommandBuilder }> {
+  return slashCommands;
+}
+
+export async function registerGuildSlashCategories(
+  token: string,
+  clientId: string,
+  guildId: string,
+  categories: string[]
+): Promise<{ count: number; categories: string[] }> {
+  const rest = new REST({ version: '10' }).setToken(token);
+  const isAll = categories.includes('all');
+  const catSet = new Set(categories.map(c => c.toLowerCase()));
+
+  const matched = slashCommands.filter(({ def }) => {
+    if (isAll) return true;
+    const cat = (def.category || 'general').toLowerCase();
+    return catSet.has(cat);
+  });
+
+  const payload = matched.map(({ builder }) => builder.toJSON());
+
+  try {
+    await rest.put(Routes.applicationGuildCommands(clientId, guildId), { body: payload });
+    logs.success(`Registered ${payload.length} slash command(s) for guild ${guildId} [categories: ${categories.join(', ')}]`);
+    return { count: payload.length, categories };
+  } catch (err: any) {
+    logs.error(`Failed to register slash commands for guild ${guildId}: ${err.message}`);
+    throw err;
+  }
+}
+
+export async function clearGuildSlashCommands(
+  token: string,
+  clientId: string,
+  guildId: string
+): Promise<void> {
+  const rest = new REST({ version: '10' }).setToken(token);
+  try {
+    await rest.put(Routes.applicationGuildCommands(clientId, guildId), { body: [] });
+    logs.success(`Cleared all slash command(s) for guild ${guildId}`);
+  } catch (err: any) {
+    logs.error(`Failed to clear slash commands for guild ${guildId}: ${err.message}`);
+    throw err;
+  }
 }
 
 export async function registerGlobalSlashCommands(token: string, clientId: string): Promise<void> {

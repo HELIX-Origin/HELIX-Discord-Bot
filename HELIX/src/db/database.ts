@@ -26,6 +26,7 @@ export interface GuildSettings {
   ticketManagerRoleId?: string | null;
   modLogChannelId?: string | null;
   welcomeChannelId?: string | null;
+  enabledSlashCategories?: string[] | null;
   updatedAt?: string;
 }
 
@@ -220,6 +221,7 @@ export class BotDatabase {
       'ticket_manager_role_id TEXT',
       'mod_log_channel_id TEXT',
       'welcome_channel_id TEXT',
+      'enabled_slash_categories TEXT',
     ];
     for (const col of columnsToAdd) {
       try {
@@ -261,6 +263,16 @@ export class BotDatabase {
       const stmt = this.db.prepare('SELECT * FROM guild_settings WHERE guild_id = ?');
       const row: any = stmt.get(guildId);
       if (!row) return null;
+
+      let enabledSlashCategories: string[] | null = null;
+      if (row.enabled_slash_categories) {
+        try {
+          enabledSlashCategories = JSON.parse(row.enabled_slash_categories);
+        } catch {
+          enabledSlashCategories = row.enabled_slash_categories.split(',').map((s: string) => s.trim()).filter(Boolean);
+        }
+      }
+
       return {
         guildId: row.guild_id,
         prefix: row.prefix,
@@ -269,8 +281,8 @@ export class BotDatabase {
         ticketManagerRoleId: row.ticket_manager_role_id,
         modLogChannelId: row.mod_log_channel_id,
         welcomeChannelId: row.welcome_channel_id,
+        enabledSlashCategories,
         updatedAt: row.updated_at,
-        ...row,
       };
     } catch {
       return null;
@@ -280,13 +292,17 @@ export class BotDatabase {
   public setGuildSettings(settings: GuildSettings): void {
     if (!this.db) return;
     try {
+      const slashCatJson = settings.enabledSlashCategories !== undefined
+        ? (settings.enabledSlashCategories ? JSON.stringify(settings.enabledSlashCategories) : null)
+        : null;
+
       const stmt = this.db.prepare(`
         INSERT INTO guild_settings (
           guild_id, prefix, callback_url,
           tickets_hub_channel_id, ticket_manager_role_id, mod_log_channel_id, welcome_channel_id,
-          updated_at
+          enabled_slash_categories, updated_at
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'))
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
         ON CONFLICT(guild_id) DO UPDATE SET
           prefix = COALESCE(excluded.prefix, guild_settings.prefix),
           callback_url = COALESCE(excluded.callback_url, guild_settings.callback_url),
@@ -294,6 +310,7 @@ export class BotDatabase {
           ticket_manager_role_id = COALESCE(excluded.ticket_manager_role_id, guild_settings.ticket_manager_role_id),
           mod_log_channel_id = COALESCE(excluded.mod_log_channel_id, guild_settings.mod_log_channel_id),
           welcome_channel_id = COALESCE(excluded.welcome_channel_id, guild_settings.welcome_channel_id),
+          enabled_slash_categories = CASE WHEN excluded.enabled_slash_categories IS NOT NULL THEN excluded.enabled_slash_categories ELSE guild_settings.enabled_slash_categories END,
           updated_at = datetime('now')
       `);
       stmt.run(
@@ -303,7 +320,8 @@ export class BotDatabase {
         settings.ticketsHubChannelId !== undefined ? settings.ticketsHubChannelId : null,
         settings.ticketManagerRoleId !== undefined ? settings.ticketManagerRoleId : null,
         settings.modLogChannelId !== undefined ? settings.modLogChannelId : null,
-        settings.welcomeChannelId !== undefined ? settings.welcomeChannelId : null
+        settings.welcomeChannelId !== undefined ? settings.welcomeChannelId : null,
+        slashCatJson
       );
     } catch {
       // Silently ignore write failures

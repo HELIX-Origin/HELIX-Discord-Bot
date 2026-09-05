@@ -5,11 +5,11 @@ import { resolveSourceCode } from "../../plugins/sdk/source-resolver.js";
 
 export const inspect: CommandDefinition = {
   name: "inspect",
-  description: "Static security & anti-pattern auditor for pasted code, attachments, or remote repos (zero AI)",
+  description: "Run security and anti-pattern analysis",
   category: "info",
   options: [
-    { name: "code", description: "Code snippet, file URL (GitHub/GitLab/Bitbucket/Gist), or raw text", type: "string", required: false },
-    { name: "language", description: "Programming language (e.g. typescript, python, rust)", type: "string", required: false },
+    { name: "code", description: "Code snippet or file URL to inspect", type: "string", required: false },
+    { name: "language", description: "Programming language", type: "string", required: false },
   ],
   async execute(ctx: ExecuteContext) {
     const { message, interaction, getOption, args } = ctx;

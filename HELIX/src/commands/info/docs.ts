@@ -5,11 +5,11 @@ import type { DocReference } from "../../plugins/types.js";
 
 export const docs: CommandDefinition = {
   name: "docs",
-  description: "Look up official language documentation (zero AI)",
+  description: "Search official language documentation",
   category: "info",
   options: [
-    { name: "topic", description: "Topic to look up (e.g. types, generics, promises, ownership)", type: "string", required: true },
-    { name: "language", description: "Programming language (e.g. typescript, python, rust)", type: "string", required: false },
+    { name: "topic", description: "Topic to look up (e.g. types, promises)", type: "string", required: true },
+    { name: "language", description: "Programming language", type: "string", required: false },
   ],
   async execute(ctx: ExecuteContext) {
     const { message, interaction, getOption, args } = ctx;

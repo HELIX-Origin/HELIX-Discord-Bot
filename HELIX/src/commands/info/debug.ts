@@ -5,10 +5,10 @@ import { resolveSourceCode } from "../../plugins/sdk/source-resolver.js";
 
 export const debug: CommandDefinition = {
   name: "debug",
-  description: "Diagnose stack traces, compiler errors, log files, or remote logs (100% local, zero AI)",
+  description: "Diagnose stack traces, errors, and log files",
   category: "info",
   options: [
-    { name: "error", description: "Stack trace, exception, compiler error message, or log URL/file", type: "string", required: false },
+    { name: "error", description: "Stack trace, exception, or log to diagnose", type: "string", required: false },
   ],
   async execute(ctx: ExecuteContext) {
     const { message, interaction, getOption, args } = ctx;

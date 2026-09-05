@@ -137,6 +137,7 @@ flowchart LR
 - [BUG-012](.agents/bugs/BUG-012-duplicate-app-json.md) — Root and .github/app.json deduplication — **Resolved**
 - [BUG-013](.agents/bugs/BUG-013-gateway-intent-fallback-and-clean-invite.md) — Gateway DisallowedIntents fallback & clean invite URL — **Resolved**
 - [BUG-014](.agents/bugs/BUG-014-build-artifact-nesting-and-export-default.md) — Build artifact nesting in src/dist & duplicate export defaults — **Resolved** (4 Sub-Tasks)
+- [BUG-015](.agents/bugs/BUG-015-slash-command-limits-and-per-guild-enablement.md) — Slash command limits & optional per-guild category enablement — **Resolved** (4 Sub-Tasks)
 
 ---
 

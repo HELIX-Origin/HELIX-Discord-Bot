@@ -5,11 +5,11 @@ import { resolveSourceCode } from "../../plugins/sdk/source-resolver.js";
 
 export const refactor: CommandDefinition = {
   name: "refactor",
-  description: "Modernize code syntax and apply idioms for pasted code, attachments, or remote repos (100% local, zero AI)",
+  description: "Modernize code syntax and apply language idioms",
   category: "info",
   options: [
-    { name: "code", description: "Code snippet, file URL (GitHub/GitLab/Bitbucket/Gist), or raw text", type: "string", required: false },
-    { name: "language", description: "Programming language (default: typescript)", type: "string", required: false },
+    { name: "code", description: "Code snippet or file URL to refactor", type: "string", required: false },
+    { name: "language", description: "Target programming language", type: "string", required: false },
   ],
   async execute(ctx: ExecuteContext) {
     const { message, interaction, getOption, args } = ctx;

@@ -89,10 +89,7 @@ export async function launchBotAndDashboard(options: LaunchBotOptions = {}): Pro
         }
       }
 
-      const appId = client.user?.id || getClientId() || '';
-      if (appId) {
-        await registerGlobalSlashCommands(token, appId);
-      }
+      logs.info('Slash commands are optional per-guild (enable via ">set slash enable <category>").');
     } catch (err: any) {
       logs.error(`Gateway error: ${err.message}`);
     }

@@ -4,12 +4,12 @@ import { getPlugin, getPluginByExtension, getAllPlugins } from "../../plugins/re
 
 export const generate: CommandDefinition = {
   name: "generate",
-  description: "Generate typed boilerplate, models, routes, or algorithms via language plugins (100% local, zero AI)",
+  description: "Generate boilerplate code, models, and routes",
   category: "info",
   options: [
-    { name: "language", description: "Target language (e.g. typescript, python, rust, go, java)", type: "string", required: true },
+    { name: "language", description: "Target language (e.g. typescript, rust)", type: "string", required: true },
     { name: "type", description: "Snippet type (model, route, test, algorithm)", type: "string", required: true },
-    { name: "name", description: "Entity or module name (e.g. User, Order, Auth)", type: "string", required: true },
+    { name: "name", description: "Entity or module name", type: "string", required: true },
   ],
   async execute(ctx: ExecuteContext) {
     const { message, interaction, getOption, args } = ctx;

@@ -6,11 +6,11 @@ import type { LintResult } from "../../plugins/types.js";
 
 export const lint: CommandDefinition = {
   name: "lint",
-  description: "Static code analysis and linting for pasted code, attachments, or remote repos (100% local, zero AI)",
+  description: "Static code analysis and syntax linting",
   category: "info",
   options: [
-    { name: "code", description: "Code snippet, file URL (GitHub/GitLab/Bitbucket/Gist), or raw text", type: "string", required: false },
-    { name: "language", description: "Programming language (e.g. typescript, python, rust)", type: "string", required: false },
+    { name: "code", description: "Code snippet or file URL to lint", type: "string", required: false },
+    { name: "language", description: "Programming language", type: "string", required: false },
   ],
   async execute(ctx: ExecuteContext) {
     const { message, interaction, getOption, args } = ctx;

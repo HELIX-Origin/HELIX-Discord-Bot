@@ -335,8 +335,14 @@
           { "name": "Tickets Hub", "value": "{ticketsHub}", "inline": true },
           { "name": "Manager Role", "value": "{managerRole}", "inline": true },
           { "name": "Mod Log Channel", "value": "{modLog}", "inline": true },
-          { "name": "Welcome Channel", "value": "{welcome}", "inline": true }
+          { "name": "Welcome Channel", "value": "{welcome}", "inline": true },
+          { "name": "Slash Categories", "value": "{slashCategories}", "inline": true }
         ]
+      },
+      "embed_slash_updated": {
+        "title": "⚡ Slash Commands Updated",
+        "color": "#00d2ff",
+        "description": "{description}"
       }
     },
     "ticket": {
