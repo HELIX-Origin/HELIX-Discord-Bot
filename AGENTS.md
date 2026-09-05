@@ -143,6 +143,7 @@ flowchart LR
 - [BUG-018](.agents/bugs/BUG-018-remove-docker-support.md) — Full deprecation & removal of Docker containerization in favor of native Node.js runtimes — **Resolved** (4 Sub-Tasks)
 - [BUG-019](.agents/bugs/BUG-019-self-hosting-static-urls.md) — Full deprecation of 1-click cloud deployments & transition to static self-hosting architecture — **Resolved** (4 Sub-Tasks)
 - [BUG-020](.agents/bugs/BUG-020-permission-flags-and-command-interactions.md) — Discord PermissionFlagsBits standardization, prefix argument parsing & help interaction router — **Resolved** (4 Sub-Tasks)
+- [BUG-021](.agents/bugs/BUG-021-help-duplicate-custom-id-and-prefix-routing.md) — Help component duplicate custom ID elimination & prefix dynamic import resolution — **Resolved** (4 Sub-Tasks)
 
 ---
 

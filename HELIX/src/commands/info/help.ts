@@ -21,6 +21,7 @@ import {
 } from '../../handlers/help-registrar.js';
 import { getPrefixForGuild } from '../../handlers/command-handler.js';
 import { createEmbed, formatError } from '../../handlers/message-handler.js';
+import { logs } from '../../handlers/logs-handler.js';
 import { getNextAuthUrl } from '../../env.js';
 import type { CommandDefinition } from '../../types/command.js';
 
@@ -75,6 +76,7 @@ export async function handleHelpInteraction(
       }
     }
   } catch (err: any) {
+    logs.error(`Help interaction failed: ${err?.message || err}`);
     try {
       if (!interaction.replied && !interaction.deferred) {
         await interaction.reply({ content: '❌ Failed to update help view.', ephemeral: true });
@@ -177,22 +179,18 @@ export function buildHelpPayload(
 
   const selectRow = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(selectMenu);
 
-  // 2. Navigation Buttons
+  // 2. Navigation Buttons (with unique customIds across all targets)
   const currentIndex = target === 'home' ? -1 : categoryOrder.indexOf(target as CategoryKey);
 
   const prevCat =
     target === 'home'
       ? categoryOrder[categoryOrder.length - 1]
-      : currentIndex === 0
-      ? 'home'
-      : categoryOrder[currentIndex - 1];
+      : categoryOrder[(currentIndex - 1 + categoryOrder.length) % categoryOrder.length];
 
   const nextCat =
     target === 'home'
       ? categoryOrder[0]
-      : currentIndex === categoryOrder.length - 1
-      ? 'home'
-      : categoryOrder[currentIndex + 1];
+      : categoryOrder[(currentIndex + 1) % categoryOrder.length];
 
   const btnHome = new ButtonBuilder()
     .setCustomId('help_btn_home')
@@ -292,79 +290,14 @@ export const help: CommandDefinition = {
     }
 
     // ─── Interactive Multi-Category Menu ─────────────────────────────────────
-    let currentView: ViewTarget = 'home';
-    const initialPayload = buildHelpPayload(currentView, prefix, false);
+    const initialPayload = buildHelpPayload('home', prefix, false);
 
-    const authorId = message ? message.author.id : interaction!.user.id;
-    const replyMessage = message
-      ? await message.reply(initialPayload)
-      : await (async () => {
-          const res = await interaction!.reply({ ...initialPayload, fetchReply: true });
-          return res;
-        })();
-
-    // Component Collector (2-minute interactive session)
-    const collector = replyMessage.createMessageComponentCollector({
-      filter: (i: any) => {
-        if (i.user.id !== authorId) {
-          i.reply({
-            content: '❌ This interactive help menu belongs to another user. Use `>help` to open your own.',
-            ephemeral: true,
-          }).catch(() => {});
-          return false;
-        }
-        return true;
-      },
-      time: 120_000,
-    });
-
-    collector.on('collect', async (i: any) => {
-      try {
-        if (i.isStringSelectMenu() && i.customId === 'help_category_select') {
-          currentView = i.values[0] as ViewTarget;
-          const updated = buildHelpPayload(currentView, prefix, false);
-          await i.update(updated);
-          return;
-        }
-
-        if (i.isButton()) {
-          if (i.customId === 'help_btn_close') {
-            collector.stop('closed');
-            try {
-              if (message) {
-                await replyMessage.delete();
-              } else {
-                await i.update({
-                  content: '🗑️ *Help menu closed.*',
-                  embeds: [],
-                  components: [],
-                });
-              }
-            } catch {}
-            return;
-          }
-
-          if (i.customId === 'help_btn_home') {
-            currentView = 'home';
-          } else if (i.customId.startsWith('help_btn_')) {
-            currentView = i.customId.replace('help_btn_', '') as ViewTarget;
-          }
-
-          const updated = buildHelpPayload(currentView, prefix, false);
-          await i.update(updated);
-        }
-      } catch (err) {
-        // Ignored if expired or interaction acknowledged
-      }
-    });
-
-    collector.on('end', async (_collected: any, reason: string) => {
-      if (reason === 'closed') return;
-      try {
-        const disabledPayload = buildHelpPayload(currentView, prefix, true);
-        await replyMessage.edit(disabledPayload);
-      } catch {}
-    });
+    if (message) {
+      return message.reply(initialPayload);
+    }
+    if (interaction) {
+      return interaction.reply(initialPayload);
+    }
   },
 };
 

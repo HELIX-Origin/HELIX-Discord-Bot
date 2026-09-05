@@ -54,7 +54,14 @@ export async function loadPrefixCommands(): Promise<void> {
 
   for (const filePath of filePaths) {
     try {
-      const mod = await import(pathToFileURL(filePath).href);
+      let mod: any;
+      try {
+        mod = await import(pathToFileURL(filePath).href);
+      } catch {
+        const rel = path.relative(__dirname, filePath).replaceAll('\\', '/');
+        const spec = rel.startsWith('.') ? rel : `./${rel}`;
+        mod = await import(spec);
+      }
       const seenInFile = new Set<string>();
       for (const exp of Object.values(mod as any)) {
         const cmd = exp as CommandDefinition;

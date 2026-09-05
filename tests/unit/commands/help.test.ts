@@ -143,5 +143,42 @@ describe('commands/info/help — buildHelpPayload & execute', () => {
     const data = updatedPayload.embeds[0].toJSON();
     expect(data.title).toContain('Moderation Suite');
   });
+
+  it('guarantees unique component custom IDs for all categories and home target', () => {
+    const targets = ['home', 'moderation', 'utility', 'plugins', 'info', 'project', 'config'] as const;
+    for (const target of targets) {
+      const payload = buildHelpPayload(target, '>');
+      const buttonRow = payload.components[1].toJSON() as any;
+      const customIds = buttonRow.components
+        .map((b: any) => b.custom_id)
+        .filter(Boolean);
+      const uniqueIds = new Set(customIds);
+      expect(uniqueIds.size).toBe(customIds.length);
+    }
+  });
+
+  it('renders home overview when execute is called with no query', async () => {
+    let repliedPayload: any = null;
+    const mockMessage: any = {
+      author: { id: 'user-456' },
+      reply: async (p: any) => {
+        repliedPayload = p;
+        return p;
+      },
+    };
+
+    await help.execute({
+      message: mockMessage,
+      guild: { id: 'guild-1' } as any,
+      args: [],
+      getOption: () => null,
+    } as any);
+
+    expect(repliedPayload).toBeDefined();
+    expect(repliedPayload.embeds).toHaveLength(1);
+    expect(repliedPayload.components).toHaveLength(2);
+    const data = repliedPayload.embeds[0].toJSON();
+    expect(data.title).toContain('Command Center');
+  });
 });
 

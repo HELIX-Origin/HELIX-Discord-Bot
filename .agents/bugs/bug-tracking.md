@@ -52,6 +52,7 @@ flowchart TD
 | **BUG-018** | Full Deprecation & Removal of Docker Containerization in Favor of Native Node.js Runtime Across All Platforms | High | Resolved | 4 Sub-Tasks | [#55](https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues/55) | [BUG-018](BUG-018-remove-docker-support.md) |
 | **BUG-019** | Full Deprecation of 1-Click Cloud Deployments & Transition to Static Self-Hosting Architecture | High | Resolved | 4 Sub-Tasks | [#60](https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues/60) | [BUG-019](BUG-019-self-hosting-static-urls.md) |
 | **BUG-020** | Discord PermissionFlagsBits Standardization, Prefix Argument Parsing & Help Interaction Router Refactor | High | Resolved | 4 Sub-Tasks | [#65](https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues/65) | [BUG-020](BUG-020-permission-flags-and-command-interactions.md) |
+| **BUG-021** | Help Component Duplicate Custom ID Elimination & Prefix Dynamic Import Resolution | High | Resolved | 4 Sub-Tasks | [#70](https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues/70) | [BUG-021](BUG-021-help-duplicate-custom-id-and-prefix-routing.md) |
 
 ---
 
