@@ -2,7 +2,7 @@ import type http from 'node:http';
 import type https from 'node:https';
 import type { AppDeps } from '../app.js';
 import { createLogger, type Logger } from '../util/logger.js';
-import { allBotCommands, dispatchInteraction } from './commands/index.js';
+import { getEnabledCommands, dispatchInteraction, handleGifAutocomplete } from './commands/index.js';
 import { DiscordGatewayClient } from './gateway.js';
 import { DiscordRestClient, type DiscordApplicationInfo, type DiscordChannelSnapshot } from './rest.js';
 import { InteractionResponseType, type DiscordInteraction } from './types.js';
@@ -58,11 +58,12 @@ export class DiscordBot {
       // 1. Register application slash commands with Discord REST API if clientId is available
       if (this.options.clientId) {
         try {
+          const enabledCommands = getEnabledCommands(this.deps);
           this.logger.info('Registering global slash commands with Discord...', {
-            commandsCount: allBotCommands.length,
+            commandsCount: enabledCommands.length,
             clientId: this.options.clientId,
           });
-          await this.rest.registerGlobalCommands(this.options.clientId, allBotCommands);
+          await this.rest.registerGlobalCommands(this.options.clientId, enabledCommands);
           this.logger.info('Global slash commands registered successfully');
         } catch (err) {
           this.logger.error('Failed to register global slash commands', {
@@ -124,7 +125,23 @@ export class DiscordBot {
   }
 
   private async handleInteraction(interaction: DiscordInteraction): Promise<void> {
-    // Only handle application command interactions
+    // Handle autocomplete interactions (type 4)
+    if (interaction.type === 4) {
+      if (interaction.data?.name === 'gif') {
+        try {
+          const response = await handleGifAutocomplete(interaction, this.deps);
+          await this.rest.sendInteractionResponse(interaction.id, interaction.token, response);
+        } catch (err) {
+          this.logger.error('Error handling autocomplete interaction', {
+            err: (err as Error).message,
+            command: interaction.data?.name,
+          });
+        }
+      }
+      return;
+    }
+
+    // Only handle application command interactions (type 2)
     if (interaction.type !== 2) return;
 
     this.logger.debug('Received slash command interaction', {

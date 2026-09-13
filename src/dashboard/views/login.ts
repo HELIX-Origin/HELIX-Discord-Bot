@@ -1,4 +1,5 @@
 import { getThemeInfo } from './dashboard.js';
+import { renderFooter } from './footer.js';
 
 export function renderLoginHtml(
   isRegister: boolean,
@@ -6,6 +7,7 @@ export function renderLoginHtml(
   appName = 'HELIX Discord Bot',
   appIconUrl?: string | null,
   themeConfig?: string,
+  dashboardEnabled = true,
 ): string {
   const title = isRegister ? 'Create Account' : 'Log In';
   const theme = getThemeInfo(themeConfig);
@@ -162,9 +164,7 @@ export function renderLoginHtml(
         : ''
     }
 
-    <div class="footer">
-      <a href="/">Home</a> &middot; <a href="/dashboard">Dashboard</a> &middot; <a href="/privacy">Privacy</a> &middot; <a href="/tos">Terms</a>
-    </div>
+    ${renderFooter(appName, { dashboardEnabled })}
   </div>
 </body>
 </html>`;

@@ -67,6 +67,7 @@ export interface ApplicationCommandOption {
   name: string;
   description: string;
   required?: boolean;
+  autocomplete?: boolean;
   choices?: ApplicationCommandOptionChoice[];
   options?: ApplicationCommandOption[];
 }
@@ -97,6 +98,7 @@ export interface InteractionResponseData {
   content?: string;
   embeds?: DiscordEmbed[];
   flags?: number; // 64 = EPHEMERAL
+  choices?: ApplicationCommandOptionChoice[];
 }
 
 export interface InteractionResponse {
@@ -108,6 +110,7 @@ export interface InteractionOption {
   name: string;
   type: ApplicationCommandOptionType;
   value?: string | number | boolean;
+  focused?: boolean;
   options?: InteractionOption[];
 }
 

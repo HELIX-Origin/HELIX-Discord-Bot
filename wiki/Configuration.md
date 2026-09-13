@@ -47,7 +47,7 @@ HELIX Discord Bot is configured entirely via environment variables defined in a 
 
 | Variable | Required | Default | Description |
 | :--- | :--- | :--- | :--- |
-| `SQLITE_DATA` | No | `./data` | Directory that stores the `helix-rss.db` SQLite file (native `node:sqlite`, WAL mode). |
+| `SQLITE_DATA` | No | `./data` | Directory that stores the `database.sqlite` SQLite file (native `node:sqlite`, WAL mode). |
 
 > SQLite is the only supported database engine; there is no PostgreSQL/MySQL support.
 

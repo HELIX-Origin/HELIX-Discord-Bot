@@ -17,7 +17,7 @@ HELIX Discord Bot is an open-source, self-hosted application.
 
 ## 2. Information Handled by the Service
 
-When operating an instance of HELIX Discord Bot, the software stores and processes the following data locally within an embedded SQLite database (`helix-rss.db`):
+When operating an instance of HELIX Discord Bot, the software stores and processes the following data locally within an embedded SQLite database (`database.sqlite`):
 
 ### A. Discord Account & OAuth Data
 - **Discord User ID & Username**: Used to authenticate administrators and members for dashboard access.
@@ -52,7 +52,7 @@ To perform its intended functions, HELIX Discord Bot initiates outgoing network 
 Because HELIX Discord Bot is self-hosted:
 - **Feed Deletion**: Deleting a feed from the dashboard or via `/feed remove` immediately purges its configuration and associated delivery logs from the local database.
 - **Account Deletion**: Instance administrators can delete users via the Settings tab or directly query SQLite.
-- **Complete Erasure**: Deleting the local `data/helix-rss.db` file permanently removes all stored data.
+- **Complete Erasure**: Deleting the local `data/database.sqlite` file permanently removes all stored data.
 
 ---
 

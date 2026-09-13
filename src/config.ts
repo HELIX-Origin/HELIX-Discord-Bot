@@ -2,11 +2,38 @@ import { resolve } from 'node:path';
 
 import type { LogLevel } from './util/logger.js';
 
+export interface FeatureFlags {
+  feedsEnabled: boolean;
+  streamAlertsEnabled: boolean;
+  threadsEnabled: boolean;
+  gifsEnabled: boolean;
+  administrationEnabled: boolean;
+  lavaEnabled: boolean;
+  dashboardEnabled: boolean;
+  adminPanelEnabled: boolean;
+}
+
+export interface LavalinkConfig {
+  host: string;
+  port: number;
+  secure: boolean;
+  password: string;
+  cipherUrl: string;
+  cipherPassword: string;
+}
+
+export interface YouTubeOAuthConfig {
+  clientId: string | null;
+  clientSecret: string | null;
+  refreshToken: string | null;
+}
+
 export interface AppConfig {
   host: string;
   port: number;
   internalUrl: string;
   publicBaseUrl: string | null;
+  dbUri: string;
   dbPath: string;
   pollIntervalMs: number;
   requestTimeoutMs: number;
@@ -35,6 +62,12 @@ export interface AppConfig {
   youtubeApiKey: string | null;
   twitchClientId: string | null;
   twitchClientSecret: string | null;
+  features: FeatureFlags;
+  lavalink: LavalinkConfig;
+  youtubeOAuth: YouTubeOAuthConfig;
+  spotifyClientId: string | null;
+  spotifyClientSecret: string | null;
+  klipyApiKey: string | null;
 }
 
 export function defaultConfig(): AppConfig {
@@ -55,6 +88,14 @@ export function defaultConfig(): AppConfig {
   const defaultHost = '127.0.0.1';
   const host = (envHost === 'localhost' ? '0.0.0.0' : envHost) ?? process.env['HOST']?.trim() ?? defaultHost;
   const dataDir = process.env['SQLITE_DATA'] ?? resolve(process.cwd(), 'data');
+
+  // DB_URI: unified connection string for database (SQLite, PostgreSQL, MySQL).
+  // Examples:
+  //   sqlite://./data/database.sqlite (or sqlite:./data/database.sqlite)
+  //   postgresql://user:pass@host:5432/db
+  //   mysql://user:pass@host:3306/db
+  // Falls back to SQLite file in SQLITE_DATA directory.
+  const dbUri = process.env['DB_URI']?.trim() || `sqlite:${resolve(dataDir, 'database.sqlite')}`;
 
   // Port is derived exclusively from INTERNAL_URL (default 3131). No PORT-style
   // environment variables are used; proxies/tunnels mask ports on PUBLIC_URL.
@@ -161,12 +202,46 @@ export function defaultConfig(): AppConfig {
   const twitchClientId = process.env['TWITCH_CLIENT_ID']?.trim() || null;
   const twitchClientSecret = process.env['TWITCH_CLIENT_SECRET']?.trim() || null;
 
+  // Global feature master-switches. Every feature defaults to enabled when the
+  // env key is unset. Disabled features are not registered as slash commands,
+  // not rendered in the dashboard, and their wiring is not started.
+  const features: FeatureFlags = {
+    feedsEnabled: parseEnvFlag(process.env['FEEDS_ENABLED'], true),
+    streamAlertsEnabled: parseEnvFlag(process.env['STREAM_ALERTS_ENABLED'], true),
+    threadsEnabled: parseEnvFlag(process.env['THREADS_ENABLED'], true),
+    gifsEnabled: parseEnvFlag(process.env['GIFS_ENABLED'], true),
+    administrationEnabled: parseEnvFlag(process.env['ADMINISTRATION_ENABLED'], true),
+    lavaEnabled: parseEnvFlag(process.env['LAVA_ENABLED'], true),
+    dashboardEnabled: parseEnvFlag(process.env['DASHBOARD_ENABLED'], true),
+    adminPanelEnabled: parseEnvFlag(process.env['ADMIN_PANEL_ENABLED'], true),
+  };
+
+  // Lavalink node (self-hosted sidecar or external server). The bot always acts
+  // as a client; only the endpoint values change between self-hosted/external.
+  const lavalink: LavalinkConfig = {
+    host: process.env['LAVA_HOST']?.trim() || '127.0.0.1',
+    port: parseOptionalInt(process.env['LAVA_PORT'], 2333),
+    secure: parseEnvFlag(process.env['LAVA_SECURE'], false),
+    password: process.env['LAVA_PASSWORD']?.trim() || 'youshallnotpass',
+    cipherUrl: process.env['LAVA_CIPHER_URL']?.trim() || '',
+    cipherPassword: process.env['LAVA_CIPHER_PASSWORD']?.trim() || '',
+  };
+
+  // YouTube OAuth (device-code flow) — client ID/secret are mandatory for the
+  // refresh token; the token stays empty until auto-fetched via the Admin panel.
+  const youtubeOAuth: YouTubeOAuthConfig = {
+    clientId: process.env['YOUTUBE_CLIENT_ID']?.trim() || null,
+    clientSecret: process.env['YOUTUBE_CLIENT_SECRET']?.trim() || null,
+    refreshToken: process.env['YOUTUBE_REFRESH_TOKEN']?.trim() || null,
+  };
+
   return {
     host,
     port,
     internalUrl,
     publicBaseUrl,
-    dbPath: resolve(dataDir, 'helix-rss.db'),
+    dbUri,
+    dbPath: resolve(dataDir, 'database.sqlite'),
     pollIntervalMs: 3_600_000,
     requestTimeoutMs: parsePositiveInt(process.env['REQUEST_TIMEOUT_MS'], 15_000),
     sslKey,
@@ -194,6 +269,12 @@ export function defaultConfig(): AppConfig {
     youtubeApiKey,
     twitchClientId,
     twitchClientSecret,
+    features,
+    lavalink,
+    youtubeOAuth,
+    spotifyClientId: process.env['SPOTIFY_CLIENT_ID']?.trim() || null,
+    spotifyClientSecret: process.env['SPOTIFY_CLIENT_SECRET']?.trim() || null,
+    klipyApiKey: process.env['KLIPY_API_KEY']?.trim() || null,
   };
 }
 
@@ -219,4 +300,19 @@ function parsePositiveInt(raw: string | undefined, fallback: number): number {
     throw new Error(`Invalid integer value: ${raw}`);
   }
   return value;
+}
+
+function parseOptionalInt(raw: string | undefined, fallback: number): number {
+  if (raw === undefined || raw === '') return fallback;
+  const value = Number(raw);
+  if (!Number.isInteger(value) || value <= 0) {
+    throw new Error(`Invalid integer value: ${raw}`);
+  }
+  return value;
+}
+
+function parseEnvFlag(raw: string | undefined, defaultEnabled: boolean): boolean {
+  if (raw === undefined) return defaultEnabled;
+  const v = raw.trim().toLowerCase();
+  return v === 'true' || v === '1' || v === 'yes' || v === 'on';
 }

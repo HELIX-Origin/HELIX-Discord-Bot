@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="banner.png" width="100%" alt="HELIX Discord Bot Banner" />
+  <!-- <img src="banner.png" width="100%" alt="HELIX Discord Bot Banner" /> -->
 
   # 📡 HELIX Discord Bot
   **A modern, self-hosted RSS, Web Scraper, Reddit, & Free Games syndication hub for Discord.**

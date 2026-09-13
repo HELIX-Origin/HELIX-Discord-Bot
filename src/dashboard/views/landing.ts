@@ -1,5 +1,6 @@
 import { appDisplayName, type AppDeps } from '../../app.js';
 import { getThemeInfo, getColorSchemeInfo } from './dashboard.js';
+import { renderFooter } from './footer.js';
 
 export function renderLandingHtml(deps: AppDeps, userId: number | null = null): string {
   const appName = appDisplayName(deps);
@@ -11,6 +12,7 @@ export function renderLandingHtml(deps: AppDeps, userId: number | null = null): 
     : null;
   const repoUrl = deps.config.repoUrl || 'https://github.com/HELIX-Origin/HELIX-RSS';
   const dbStats = deps.db.stats();
+  const dashboardEnabled = deps.config.features.dashboardEnabled;
 
   return `<!DOCTYPE html>
 <html lang="en" class="${theme.id} scheme-${colorScheme.id}">
@@ -244,7 +246,7 @@ export function renderLandingHtml(deps: AppDeps, userId: number | null = null): 
       <div class="brand-title">${appName}</div>
     </a>
 
-    <div class="nav-actions">
+<div class="nav-actions">
       ${
         botInviteUrl
           ? `<a href="${botInviteUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-discord btn-sm">
@@ -254,9 +256,13 @@ export function renderLandingHtml(deps: AppDeps, userId: number | null = null): 
       }
       ${
         userId !== null
-          ? `<a href="/dashboard" class="btn btn-primary btn-sm"><i class="fa-solid fa-gauge"></i> <span class="btn-text">Open Dashboard</span></a>`
-          : `<a href="/api/auth/discord" class="btn btn-discord btn-sm"><i class="fa-brands fa-discord"></i> <span class="btn-text">Log In</span></a>
-             <a href="/dashboard" class="btn btn-primary btn-sm"><i class="fa-solid fa-gauge"></i> <span class="btn-text">Open Dashboard</span></a>`
+          ? dashboardEnabled
+            ? `<a href="/dashboard" class="btn btn-primary btn-sm"><i class="fa-solid fa-gauge"></i> <span class="btn-text">Open Dashboard</span></a>`
+            : ''
+          : dashboardEnabled
+            ? `<a href="/api/auth/discord" class="btn btn-discord btn-sm"><i class="fa-brands fa-discord"></i> <span class="btn-text">Log In</span></a>
+              <a href="/dashboard" class="btn btn-primary btn-sm"><i class="fa-solid fa-gauge"></i> <span class="btn-text">Open Dashboard</span></a>`
+            : `<a href="/api/auth/discord" class="btn btn-discord btn-sm"><i class="fa-brands fa-discord"></i> <span class="btn-text">Log In</span></a>`
       }
     </div>
   </header>
@@ -279,9 +285,13 @@ export function renderLandingHtml(deps: AppDeps, userId: number | null = null): 
         </a>`
             : ''
         }
-        <a href="/dashboard" class="btn btn-primary">
+        ${
+          dashboardEnabled
+            ? `<a href="/dashboard" class="btn btn-primary">
           <i class="fa-solid fa-gauge"></i> Launch Web Dashboard
-        </a>
+        </a>`
+            : ''
+        }
         <a href="${repoUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-outline">
           <i class="fa-brands fa-github"></i> View GitHub Wiki
         </a>
@@ -415,15 +425,7 @@ export function renderLandingHtml(deps: AppDeps, userId: number | null = null): 
   </div>
 
   <!-- Footer -->
-  <footer>
-    <div class="footer-links">
-      <a href="/dashboard">Web Dashboard</a>
-      <a href="/privacy">Privacy Policy</a>
-      <a href="/tos">Terms of Service</a>
-      <a href="${repoUrl}" target="_blank" rel="noopener noreferrer">GitHub Repository</a>
-    </div>
-    <div>&copy; ${new Date().getFullYear()} ${appName} &bull; Powered by TypeScript, Node.js, native HTTP &amp; SQLite</div>
-  </footer>
+${renderFooter(deps, { dashboardEnabled, extraLinks: [{ href: repoUrl, label: 'GitHub Repository' }] })}
 </body>
 </html>`;
 }

@@ -1,5 +1,5 @@
 import type { AppDeps } from '../../app.js';
-import { allBotCommands } from '../../bot/commands/index.js';
+import { getEnabledCommands } from '../../bot/commands/index.js';
 import { sendError, sendJson } from '../http/helpers.js';
 import type { Router } from '../http/router.js';
 import { requireOwner } from './shared.js';
@@ -42,7 +42,7 @@ export function registerAdminRoutes(router: Router<AppDeps>): void {
       redirectUrl: cfg.redirectUrl,
       callbackUrl: cfg.callbackUrl,
       inviteUrl,
-      commands: allBotCommands.map((c) => ({
+      commands: getEnabledCommands(deps).map((c) => ({
         name: c.name,
         description: c.description,
         optionsCount: c.options?.length ?? 0,
@@ -65,9 +65,10 @@ export function registerAdminRoutes(router: Router<AppDeps>): void {
     }
 
     try {
-      await deps.bot.rest.registerGlobalCommands(deps.config.clientId, allBotCommands);
+      const enabledCommands = getEnabledCommands(deps);
+      await deps.bot.rest.registerGlobalCommands(deps.config.clientId, enabledCommands);
       deps.repo.logActivity(userId, 'info', 'dev-tools', 'Discord global slash commands re-synced successfully');
-      sendJson(res, 200, { ok: true, commandsCount: allBotCommands.length });
+      sendJson(res, 200, { ok: true, commandsCount: enabledCommands.length });
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       deps.repo.logActivity(userId, 'error', 'dev-tools', `Failed to sync Discord commands: ${msg}`);

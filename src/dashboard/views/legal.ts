@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { getThemeInfo } from './dashboard.js';
+import { renderFooter } from './footer.js';
 
 function inlineFormat(text: string): string {
   return text
@@ -224,6 +225,7 @@ export function renderLegalHtml(
       </div>
     </div>
     <div>${contentHtml}</div>
+    ${renderFooter(appName)}
   </div>
 </body>
 </html>`;
