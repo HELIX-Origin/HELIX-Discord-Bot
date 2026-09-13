@@ -8,6 +8,7 @@ import {
   type InteractionOption,
   type InteractionResponse,
 } from '../types.js';
+import { commandHelpResponse } from '../handlers/embeds.js';
 
 export const feedCommandDef: ApplicationCommand = {
   name: 'feed',
@@ -108,10 +109,42 @@ export async function handleFeedCommand(
   const user = deps.repo.getOrCreateGuildUser(guildId);
   const subCommand = interaction.data?.options?.[0];
   if (!subCommand) {
-    return {
-      type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-      data: { flags: 64, content: '❌ Invalid subcommand.' },
-    };
+    return commandHelpResponse({
+      name: 'feed',
+      description: 'Manage RSS/Atom and scrape feeds for this Discord server',
+      subcommands: [
+        {
+          name: 'add',
+          description: 'Add a new feed',
+          options: [
+            { name: 'name', description: 'Display name for the feed', required: true, type: 'string' },
+            { name: 'url', description: 'RSS/Atom feed URL or webpage URL to scrape', required: true, type: 'string' },
+            { name: 'channel', description: 'Discord text channel for delivery', required: false, type: 'channel' },
+            { name: 'feed_type', description: 'Type of feed (default: rss)', required: false, type: 'string' },
+          ],
+        },
+        { name: 'list', description: 'List all feeds', options: [] },
+        {
+          name: 'remove',
+          description: 'Remove a feed',
+          options: [{ name: 'id', description: 'Feed ID or name to delete', required: true, type: 'string' }],
+        },
+        {
+          name: 'toggle',
+          description: 'Enable or pause a feed',
+          options: [
+            { name: 'id', description: 'Feed ID or name', required: true, type: 'string' },
+            { name: 'enabled', description: 'Enable (True) or Pause (False)', required: true, type: 'boolean' },
+          ],
+        },
+      ],
+      examples: [
+        '/feed add name:"TechCrunch" url:"https://techcrunch.com/feed/" channel:#news',
+        '/feed list',
+        '/feed remove id:123',
+        '/feed toggle id:123 enabled:True',
+      ],
+    });
   }
 
   switch (subCommand.name) {
@@ -147,10 +180,23 @@ async function handleAdd(
   const feedType = rawType === 'scrape' ? 'scrape' : rawType === 'reddit' ? 'reddit' : 'rss';
 
   if (!name || !url) {
-    return {
-      type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-      data: { flags: 64, content: '❌ Name and URL are required to add a feed.' },
-    };
+    return commandHelpResponse({
+      name: 'feed',
+      description: 'Manage RSS/Atom and scrape feeds for this Discord server',
+      subcommands: [
+        {
+          name: 'add',
+          description: 'Add a new feed',
+          options: [
+            { name: 'name', description: 'Display name for the feed', required: true, type: 'string' },
+            { name: 'url', description: 'RSS/Atom feed URL or webpage URL to scrape', required: true, type: 'string' },
+            { name: 'channel', description: 'Discord text channel for delivery', required: false, type: 'channel' },
+            { name: 'feed_type', description: 'Type of feed (default: rss)', required: false, type: 'string' },
+          ],
+        },
+      ],
+      examples: ['/feed add name:"TechCrunch" url:"https://techcrunch.com/feed/" channel:#news'],
+    });
   }
 
   try {
@@ -243,6 +289,21 @@ function handleList(userId: number, deps: AppDeps): InteractionResponse {
 
 function handleRemove(options: InteractionOption[], userId: number, deps: AppDeps): InteractionResponse {
   const identifier = String(options.find((o) => o.name === 'id')?.value ?? '').trim();
+  if (!identifier) {
+    return commandHelpResponse({
+      name: 'feed',
+      description: 'Manage RSS/Atom and scrape feeds for this Discord server',
+      subcommands: [
+        {
+          name: 'remove',
+          description: 'Remove a feed',
+          options: [{ name: 'id', description: 'Feed ID or name to delete', required: true, type: 'string' }],
+        },
+      ],
+      examples: ['/feed remove id:123'],
+    });
+  }
+
   const feeds = deps.repo.listFeeds(userId);
   const feed = feeds.find((f) => String(f.id) === identifier || f.name.toLowerCase() === identifier.toLowerCase());
 
@@ -273,6 +334,24 @@ function handleRemove(options: InteractionOption[], userId: number, deps: AppDep
 function handleToggle(options: InteractionOption[], userId: number, deps: AppDeps): InteractionResponse {
   const identifier = String(options.find((o) => o.name === 'id')?.value ?? '').trim();
   const enabled = Boolean(options.find((o) => o.name === 'enabled')?.value);
+
+  if (!identifier || options.find((o) => o.name === 'enabled')?.value === undefined) {
+    return commandHelpResponse({
+      name: 'feed',
+      description: 'Manage RSS/Atom and scrape feeds for this Discord server',
+      subcommands: [
+        {
+          name: 'toggle',
+          description: 'Enable or pause a feed',
+          options: [
+            { name: 'id', description: 'Feed ID or name', required: true, type: 'string' },
+            { name: 'enabled', description: 'Enable (True) or Pause (False)', required: true, type: 'boolean' },
+          ],
+        },
+      ],
+      examples: ['/feed toggle id:123 enabled:True'],
+    });
+  }
 
   const feeds = deps.repo.listFeeds(userId);
   const feed = feeds.find((f) => String(f.id) === identifier || f.name.toLowerCase() === identifier.toLowerCase());

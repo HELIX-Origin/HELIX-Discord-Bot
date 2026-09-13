@@ -9,6 +9,7 @@ import {
   type InteractionResponse,
 } from '../types.js';
 import { KlipyClient } from '../klipy.js';
+import { commandHelpResponse } from '../handlers/embeds.js';
 
 const klipyClient = new KlipyClient('', { warn: () => {}, error: () => {} });
 
@@ -44,13 +45,23 @@ export async function handleGifCommand(
   const options = interaction.data?.options as InteractionOption[] | undefined;
   const category = options?.find((o) => o.name === 'category')?.value as string | undefined;
 
+  if (!deps.config.klipyApiKey) {
+    return commandHelpResponse({
+      name: 'gif',
+      description: 'Get a random GIF or filter by popular category',
+      subcommands: [],
+      usage: '[category]',
+      examples: ['/gif', '/gif anime', '/gif slap'],
+    });
+  }
+
   const gifUrl = await getGifUrl(category, deps);
   if (!gifUrl) {
     return {
       type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
       data: {
         flags: 64,
-        content: '❌ GIF feature is not configured. Please set `KLIPY_API_KEY` in your environment.',
+        content: '❌ Failed to fetch GIF. Please try again.',
       },
     };
   }

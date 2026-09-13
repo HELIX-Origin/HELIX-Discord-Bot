@@ -30,6 +30,14 @@ export class SettingsRepository {
     this.setSetting(`user:${userId}:${key}`, value);
   }
 
+  getGuildSetting(guildId: string, key: string): string | null {
+    return this.getSetting(`guild:${guildId}:${key}`);
+  }
+
+  setGuildSetting(guildId: string, key: string, value: string): void {
+    this.setSetting(`guild:${guildId}:${key}`, value);
+  }
+
   logActivity(userId: number | null, level: string, source: string, message: string): void {
     const entry: ActivityEntry = { ts: nowIso(), userId, level, source, message };
     this.db.raw

@@ -318,6 +318,14 @@ export class Repository {
     this.settings.setUserSetting(userId, key, value);
   }
 
+  getGuildSetting(guildId: string, key: string): string | null {
+    return this.settings.getGuildSetting(guildId, key);
+  }
+
+  setGuildSetting(guildId: string, key: string, value: string): void {
+    this.settings.setGuildSetting(guildId, key, value);
+  }
+
   logActivity(userId: number | null, level: string, source: string, message: string): void {
     this.settings.logActivity(userId, level, source, message);
   }

@@ -70,6 +70,7 @@ export interface ApplicationCommandOption {
   autocomplete?: boolean;
   choices?: ApplicationCommandOptionChoice[];
   options?: ApplicationCommandOption[];
+  channel_types?: number[];
 }
 
 export interface ApplicationCommand {

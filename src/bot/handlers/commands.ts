@@ -11,6 +11,7 @@ import { feedCommandDef, handleFeedCommand } from '../commands/feed.js';
 import { handleHelpCommand, helpCommandDef } from '../commands/help.js';
 import { handleStatsCommand, statsCommandDef } from '../commands/stats.js';
 import { gifCommandDef, handleGifCommand, handleGifAutocomplete } from '../commands/gif.js';
+import { setCommandDef, handleSetCommand } from '../commands/set.js';
 
 export interface CommandHandler {
   readonly commands: ApplicationCommand[];
@@ -25,6 +26,7 @@ export function createCommandHandler(deps: AppDeps): CommandHandler {
   const commands: ApplicationCommand[] = [aboutCommandDef, statsCommandDef];
   if (f.feedsEnabled) commands.push(feedCommandDef);
   if (f.gifsEnabled && deps.config.klipyApiKey) commands.push(gifCommandDef);
+  if (f.administrationEnabled) commands.push(setCommandDef);
 
   commands.push(helpCommandDef);
 
@@ -81,6 +83,8 @@ export async function dispatchInteraction(
       return handleHelpCommand(interaction, handler.commands, deps);
     case 'gif':
       return handleGifCommand(interaction, deps, rest);
+    case 'set':
+      return handleSetCommand(interaction, deps, rest);
     default:
       return {
         type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,

@@ -1,4 +1,5 @@
 import type { DiscordEmbed, DiscordEmbedField } from '../types.js';
+import { InteractionResponseType, type InteractionResponse } from '../types.js';
 
 export interface EmbedColors {
   readonly PRIMARY: number;
@@ -135,6 +136,65 @@ export function helpEmbed(
     description: 'All available slash commands grouped by category.',
     fields,
   });
+}
+
+export function commandHelpEmbed(command: {
+  name: string;
+  description: string;
+  usage?: string;
+  subcommands?: Array<{
+    name: string;
+    description: string;
+    options?: Array<{ name: string; description: string; required?: boolean; type?: string }>;
+  }>;
+  examples?: string[];
+}): DiscordEmbed {
+  const fields: DiscordEmbedField[] = [];
+
+  if (command.usage) {
+    fields.push({ name: 'Usage', value: `\`/${command.name} ${command.usage}\``, inline: false });
+  }
+
+  if (command.subcommands && command.subcommands.length > 0) {
+    const subList = command.subcommands
+      .map((sc) => {
+        const opts =
+          sc.options
+            ?.map((o) => `\`${o.name}${o.required ? '' : '?'}\` (${o.type ?? 'string'}) — ${o.description}`)
+            .join('\n') || 'No options';
+        return `**/${command.name} ${sc.name}** — ${sc.description}\n${opts}`;
+      })
+      .join('\n\n');
+    fields.push({ name: 'Subcommands', value: subList, inline: false });
+  }
+
+  if (command.examples && command.examples.length > 0) {
+    fields.push({ name: 'Examples', value: command.examples.map((e) => `\`${e}\``).join('\n'), inline: false });
+  }
+
+  return createEmbed({
+    color: EMBED_COLORS.INFO,
+    title: `📖 Help: /${command.name}`,
+    description: command.description,
+    fields,
+  });
+}
+
+export function commandHelpResponse(command: {
+  name: string;
+  description: string;
+  usage?: string;
+  subcommands?: Array<{
+    name: string;
+    description: string;
+    options?: Array<{ name: string; description: string; required?: boolean; type?: string }>;
+  }>;
+  examples?: string[];
+}): InteractionResponse {
+  return {
+    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+    data: { embeds: [commandHelpEmbed(command)] },
+  };
 }
 
 export function buildCommandOptions<T extends Record<string, unknown>>(options: T): T {
