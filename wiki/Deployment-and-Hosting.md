@@ -119,13 +119,6 @@ server {
 ```
 *Make sure `PUBLIC_URL=https://rss.yourdomain.com` is configured in `.env` so OAuth callbacks are generated against the public hostname.*
 
-### Caddy Configuration
-```caddy
-rss.yourdomain.com {
-    reverse_proxy localhost:3131
-}
-```
-
 ---
 
 ## 🚫 Cloud PaaS Platforms (Retired)

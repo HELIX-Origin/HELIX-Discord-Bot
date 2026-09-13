@@ -1029,7 +1029,7 @@ export function renderDashboardHtml(deps: AppDeps, userId: number | null): strin
     // Tab Switching
     function switchTab(tabId) {
       activeTabName = tabId;
-      document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('#dashboard-view .tab-pane').forEach(el => el.classList.remove('active'));
       document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
 
       const target = document.getElementById('tab-' + tabId);

@@ -47,7 +47,3 @@ yarn.lock
 
 # Temporary files that are created during development and should not be tracked.
 IMPORTANT.md
-
-# Caddy
-/Caddyfile
-Caddyfile
