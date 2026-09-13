@@ -1,9 +1,11 @@
 import type { AppDeps } from '../../app.js';
 import { FEED_PRESETS } from '../../feed/presets.js';
 import type { FeedType } from '../../state/types.js';
-import { readBodyJson, sendError, sendJson } from '../http/helpers.js';
+import { readBodyJson, sendError, sendJson, sendText } from '../http/helpers.js';
 import type { Router } from '../http/router.js';
 import { authedUserId, canUserManageGuild, isValidHttpUrl, requireDashboardUser } from './shared.js';
+import { FeedListener } from '../../feed/listener.js';
+import type { IncomingMessage } from 'node:http';
 
 export function registerFeedsRoutes(router: Router<AppDeps>): void {
   router.add('GET', '/api/feeds', async (req, res, _ctx, d) => {
@@ -197,5 +199,105 @@ export function registerFeedsRoutes(router: Router<AppDeps>): void {
     if (userId === null) return;
     d.repo.deleteFeed(userId, Number(ctx.params['id']));
     sendJson(res, 200, { ok: true });
+  });
+
+  // ---- Webhook endpoints for real-time feed updates ----
+  // YouTube PubSubHubbub
+  router.add('GET', '/api/feeds/webhooks/youtube', async (req, res, _ctx, _d) => {
+    const url = new URL(req.url ?? '/', `http://${req.headers.host}`);
+    const mode = url.searchParams.get('hub.mode');
+    const challenge = url.searchParams.get('hub.challenge');
+    if (mode === 'subscribe' && challenge) {
+      sendText(res, 200, challenge);
+      return;
+    }
+    if (mode === 'unsubscribe' && challenge) {
+      sendText(res, 200, challenge);
+      return;
+    }
+    sendError(res, 400, 'Invalid hub.mode');
+  });
+
+  router.add('POST', '/api/feeds/webhooks/youtube', async (req: IncomingMessage, res, _ctx, d) => {
+    let _body = '';
+    req.on('data', (chunk) => {
+      _body += chunk;
+    });
+    req.on('end', async () => {
+      try {
+        const listener = new FeedListener(d);
+        const event = await listener.handleYoutubeNotification(req as unknown as Request);
+        if (event) {
+          d.repo.logActivity(
+            0,
+            'info',
+            'feed-listener',
+            `YouTube notification received: ${JSON.stringify(event.payload)}`,
+          );
+        }
+        sendJson(res, 200, { ok: true });
+      } catch (err) {
+        d.repo.logActivity(0, 'error', 'feed-listener', `YouTube webhook error: ${(err as Error).message}`);
+        sendError(res, 500, 'Webhook processing failed');
+      }
+    });
+  });
+
+  // Twitch EventSub
+  router.add('POST', '/api/feeds/webhooks/twitch', async (req: IncomingMessage, res, _ctx, d) => {
+    let _body = '';
+    req.on('data', (chunk) => {
+      _body += chunk;
+    });
+    req.on('end', async () => {
+      try {
+        const listener = new FeedListener(d);
+        const result = await listener.handleTwitchEventSub(req as unknown as Request);
+        if (result && 'payload' in result) {
+          d.repo.logActivity(0, 'info', 'feed-listener', `Twitch EventSub received: ${JSON.stringify(result.payload)}`);
+        }
+        sendJson(res, 200, { ok: true });
+      } catch (err) {
+        d.repo.logActivity(0, 'error', 'feed-listener', `Twitch webhook error: ${(err as Error).message}`);
+        sendError(res, 500, 'Webhook processing failed');
+      }
+    });
+  });
+
+  // WebSub / PubSubHubbub for RSS
+  router.add('GET', '/api/feeds/webhooks/websub', async (req: IncomingMessage, res, _ctx, _d) => {
+    const url = new URL(req.url ?? '/', `http://${req.headers.host}`);
+    const mode = url.searchParams.get('hub.mode');
+    const challenge = url.searchParams.get('hub.challenge');
+    if ((mode === 'subscribe' || mode === 'unsubscribe') && challenge) {
+      sendText(res, 200, challenge);
+      return;
+    }
+    sendError(res, 400, 'Invalid hub.mode');
+  });
+
+  router.add('POST', '/api/feeds/webhooks/websub', async (req: IncomingMessage, res, _ctx, d) => {
+    let _body = '';
+    req.on('data', (chunk) => {
+      _body += chunk;
+    });
+    req.on('end', async () => {
+      try {
+        const listener = new FeedListener(d);
+        const event = await listener.handleWebSubNotification(req as unknown as Request);
+        if (event) {
+          d.repo.logActivity(
+            0,
+            'info',
+            'feed-listener',
+            `WebSub notification received: ${JSON.stringify(event.payload)}`,
+          );
+        }
+        sendJson(res, 200, { ok: true });
+      } catch (err) {
+        d.repo.logActivity(0, 'error', 'feed-listener', `WebSub webhook error: ${(err as Error).message}`);
+        sendError(res, 500, 'Webhook processing failed');
+      }
+    });
   });
 }
