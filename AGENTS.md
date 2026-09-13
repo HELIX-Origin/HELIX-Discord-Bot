@@ -78,13 +78,20 @@ This section documents active and recently resolved critical issues as required 
 
 ### 10. Dashboard Guild-Centric Rework, Landing Page Audit, Manual Polling Removal & Daily Free Games Polling (In Progress)
 - **Problem**: The dashboard is per-feed with large cards and per-feed channel pickers, which does not scale. Manual polling is unreliable for several sources. The landing page still advertises retired and unsupported features. Free Games only runs weekly, missing short-lived giveaways.
-- **Status**: **Complete — tracked in [#21](https://github.com/HELIX-Origin/HELIX-RSS/issues/21).** Phases 1 (unsupported source/landing cleanup), 2 (per-guild category target data model/API), 3 (guild selection page + category UI redesign), 4 (manual polling removal), and 5 (daily free games polling) are all implemented and pushed. **Phases 6+ (URL/OAuth fixes, dashboard UX, audit bug fixes) are in progress; Phases 11+ (Feeds primary tab, Guild Admin, entertainment GIFs, Lavalink music + Queue page) are planned.**
+- **Status**: **Complete — tracked in [#21](https://github.com/HELIX-Origin/HELIX-RSS/issues/21).** Phases 1 (unsupported source/landing cleanup), 2 (per-guild category target data model/API), 3 (guild selection page + category UI redesign), 4 (manual polling removal), and 5 (daily free games polling) are all implemented and pushed. **Phases 6+ (URL/OAuth fixes, dashboard UX, audit bug fixes) are in progress; Phases 11+ (Feeds primary tab, Guild Admin, entertainment GIFs, Lavalink music + Queue page) are in progress.**
 - **Supported sources locked**: **RSS/Atom/JSON (including News presets), Reddit, Free Games**. YouTube & Twitch are supported as **live-stream + upload/online alerts** (delivered primarily via webhooks with periodic polling fallback; `feedCategory` → `streamalerts`), **not** as RSS-fetch feed types. TikTok and Bluesky are **not supported**.
   - Channel/thread assignment is **per guild, per category** (`rss`, `reddit`, `freegames`, `streamalerts`), not per individual feed.
   - Manual polling endpoints/buttons will be removed entirely.
   - Free Games will poll **daily** and post only new giveaways.
   - **Product expansion (tracked in [#21](https://github.com/HELIX-Origin/HELIX-RSS/issues/21), Phases 11+):** dashboard **Feeds primary tab** with per-feed sub-pages, **Guild Admin** page + administration commands, **entertainment GIF commands (KLIPY API)**, and **music via Lavalink** with a **Queue Management** dashboard page.
   - The project/development name is **HELIX Discord Bot** (renamed from HELIX RSS); the dashboard and bot embeds keep using the live Discord application name + icon at runtime.
+
+### 11. Feature Flags, KLIPY GIF Commands & DB_URI (Implemented)
+- **Global feature master-switches** added (`FEEDS_ENABLED`, `STREAM_ALERTS_ENABLED`, `THREADS_ENABLED`, `GIFS_ENABLED`, `ADMINISTRATION_ENABLED`, `LAVA_ENABLED`, `DASHBOARD_ENABLED`, `ADMIN_PANEL_ENABLED`) — each defaults to enabled, gating slash command registration, dashboard pages, and internal wiring.
+- **KLIPY GIF commands** (`/gif [subcommand]` with autocomplete for popular tags: anime, jojo, waifu, slap, gintama, doggo, cat, hug, kiss, pat, bonk, cuddle, tickle, pet, poke, baka, smug, cry, angry, meme, etc.) plus action-style convenience commands (`/slap`, `/hug`, `/kiss`, `/pat`, `/bonk`, `/cuddle`, `/tickle`, `/pet`, `/poke`, `/baka`, `/smug`, `/cry`, `/angry`, `/meme`).
+- **DB_URI** unified connection string for database (SQLite default; PostgreSQL/MySQL reserved for future async driver support).
+- **Shared dashboard components**: `topbar.ts` (brand, invite, login/user dropdown with Guilds/Admin/Log Out), `footer.ts` (consistent footer across landing, login, legal, dashboard).
+- Bot command registration and dispatch respect feature flags via `getEnabledCommands(deps)`.
 
 ---
 
