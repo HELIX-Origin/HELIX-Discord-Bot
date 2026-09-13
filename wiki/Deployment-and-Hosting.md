@@ -83,6 +83,34 @@ pm2 save
 pm2 startup
 ```
 
+### 3b. Alternative: Start with tmux (Session-Based)
+Prefer a lightweight no-daemon approach? Use `tmux` to keep the process alive inside a persistent terminal session — great for quick VPS setups that don't need process management.
+
+```bash
+# Install tmux if not already present
+sudo apt-get install -y tmux
+
+# Start a new detachable session named "helix-rss"
+tmux new -s helix-rss
+
+# Inside the session, start the compiled server
+npm start
+
+# Detach and keep it running in the background
+# Press Ctrl+B, then D
+```
+
+Reattach the session later to see logs or restart the process:
+```bash
+# List sessions
+tmux ls
+
+# Reattach
+tmux attach -t helix-rss
+```
+
+> **Note:** tmux keeps the process running only while the session persists. For auto-restart across reboots, use PM2 (`pm2 startup`) or a systemd unit instead.
+
 ---
 
 ## 🌐 Reverse Proxy Configuration
@@ -118,6 +146,95 @@ server {
 }
 ```
 *Make sure `PUBLIC_URL=https://rss.yourdomain.com` is configured in `.env` so OAuth callbacks are generated against the public hostname.*
+
+---
+
+### Caddy (Manual Reverse Proxy Setup)
+
+HELIX RSS does not ship built-in Caddy support, but Caddy is a great option if you need a self-managed HTTPS proxy. You can install and run Caddy as your own process and point it at the service.
+
+#### 1. Install Caddy
+```bash
+# Debian/Ubuntu
+sudo apt install -y debian-keyring debian-archive-keyring apt-transport-https curl
+curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | sudo gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
+curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | sudo tee /etc/apt/sources.list.d/caddy-stable.list
+sudo apt update
+sudo apt install caddy
+```
+```powershell
+# Windows (download from https://caddyserver.com/download)
+# Place caddy.exe in a folder, e.g. C:\caddy
+```
+
+#### 2. Create a Caddyfile
+```caddyfile
+rss.yourdomain.com {
+    # Caddy automatically forwards X-Forwarded-* headers to the proxy target
+    reverse_proxy 127.0.0.1:3131
+}
+```
+Caddy automatically provisions and renews Let's Encrypt certificates for the hostname.
+
+#### 3. Run Caddy
+```bash
+# Linux (foreground, uses ./Caddyfile by default)
+caddy run
+
+# Windows
+C:\caddy\caddy.exe run --config C:\caddy\Caddyfile
+```
+> **Note:** Set `PUBLIC_URL=https://rss.yourdomain.com` in `.env` so dashboard links and OAuth callbacks use the public hostname, and log in with your own domain instead of `IP:port`.
+
+---
+
+## 🪟 Option 3: Windows (Local Hosting)
+
+HELIX RSS runs natively on Windows with Node.js.
+
+### 1. Install Node.js
+Download and install the **Node.js 22.x LTS** (>=22.9.0 for native `node:sqlite`) from [nodejs.org](https://nodejs.org). Make sure `node` and `npm` are available in a new terminal:
+```powershell
+node --version
+npm --version
+```
+
+### 2. Clone and Build
+```powershell
+git clone https://github.com/HELIX-Origin/HELIX-RSS.git
+cd HELIX-RSS
+npm install
+npm run build
+Copy-Item .env.example .env
+notepad .env   # Configure credentials
+```
+
+### 3. Start Manually
+```powershell
+npm start
+```
+
+### 4. Keep It Running on Boot (Task Scheduler)
+Use Windows Task Scheduler to start the service automatically at system startup, so the bot/dashboard survives reboots without needing to log in.
+
+1. Open **Task Scheduler** (search `taskschd.msc` or "Task Scheduler").
+2. Click **Create Task** in the right-hand Actions panel.
+3. On the **General** tab:
+   - Name: `HELIX RSS`
+   - Check **Run whether user is logged on or not**.
+   - Check **Run with highest privileges** (only if needed for port binding; port 3131 normally doesn't require it).
+4. On the **Triggers** tab, click **New...** and set **Begin the task:** to **At startup**. Click OK.
+5. On the **Actions** tab, click **New...** and set:
+   - **Action:** Start a program
+   - **Program/script:** `cmd.exe`
+   - **Add arguments:** `/c ""C:\Program Files\nodejs\npm.cmd" start --prefix C:\path\to\HELIX-RSS"` (replace with the actual project path)
+   - Click OK.
+6. On the **Conditions** tab, uncheck **Start the task only if the computer is on AC power** if you run this on a laptop.
+7. Click **OK**, enter your Windows password when prompted.
+
+The task will start the dashboard/bot whenever Windows boots. To stop it, use Task Manager or Task Scheduler > End task.
+
+> **Note:** Keep the terminal window approach in mind when binding the port; set `INTERNAL_URL`/`DISCORD_PORT` in `.env` if you need a different port.
 
 ---
 
