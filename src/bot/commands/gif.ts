@@ -29,47 +29,6 @@ export const gifCommandDef: ApplicationCommand = {
   ],
 };
 
-const ACTION_COMMANDS = [
-  { name: 'slap', description: 'Slap someone with a GIF' },
-  { name: 'hug', description: 'Hug someone with a GIF' },
-  { name: 'kiss', description: 'Kiss someone with a GIF' },
-  { name: 'pat', description: 'Pat someone with a GIF' },
-  { name: 'bonk', description: 'Bonk someone with a GIF' },
-  { name: 'cuddle', description: 'Cuddle with someone via GIF' },
-  { name: 'tickle', description: 'Tickle someone with a GIF' },
-  { name: 'pet', description: 'Pet someone with a GIF' },
-  { name: 'poke', description: 'Poke someone with a GIF' },
-  { name: 'baka', description: 'Call someone baka with a GIF' },
-  { name: 'smug', description: 'Send a smug GIF' },
-  { name: 'cry', description: 'Send a crying GIF' },
-  { name: 'angry', description: 'Send an angry GIF' },
-  { name: 'meme', description: 'Send a meme GIF' },
-  { name: 'blush', description: 'Send a blushing GIF' },
-  { name: 'bite', description: 'Send a biting GIF' },
-  { name: 'highfive', description: 'Send a high-five GIF' },
-  { name: 'kill', description: 'Send a kill GIF' },
-  { name: 'lick', description: 'Send a licking GIF' },
-  { name: 'nom', description: 'Send a nom GIF' },
-  { name: 'peck', description: 'Send a peck GIF' },
-  { name: 'punch', description: 'Send a punch GIF' },
-  { name: 'wave', description: 'Send a wave GIF' },
-  { name: 'wink', description: 'Send a wink GIF' },
-  { name: 'yeet', description: 'Send a yeet GIF' },
-];
-
-export const actionCommandDefs: ApplicationCommand[] = ACTION_COMMANDS.map((cmd) => ({
-  name: cmd.name,
-  description: cmd.description,
-  options: [
-    {
-      name: 'user',
-      description: 'User to target (optional)',
-      type: ApplicationCommandOptionType.USER,
-      required: false,
-    },
-  ],
-}));
-
 async function getGifUrl(category?: string, deps?: AppDeps): Promise<string | null> {
   if (!deps?.config.klipyApiKey) return null;
   const client = new KlipyClient(deps.config.klipyApiKey, console);
@@ -101,41 +60,6 @@ export async function handleGifCommand(
     type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
     data: {
       content: `Here's your GIF${categoryLabel}!`,
-      embeds: [
-        {
-          image: { url: gifUrl },
-          color: 0x06b6d4,
-          footer: { text: 'Powered by KLIPY' },
-        },
-      ],
-    },
-  };
-}
-
-export async function handleActionCommand(
-  interaction: DiscordInteraction,
-  deps: AppDeps,
-  action: string,
-): Promise<InteractionResponse> {
-  const options = interaction.data?.options as InteractionOption[] | undefined;
-  const target = options?.find((o) => o.name === 'user')?.value as string | undefined;
-
-  const gifUrl = await getGifUrl(action, deps);
-  if (!gifUrl) {
-    return {
-      type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-      data: {
-        flags: 64,
-        content: '❌ GIF feature is not configured. Please set `KLIPY_API_KEY` in your environment.',
-      },
-    };
-  }
-
-  const mention = target ? `<@${target}>` : '';
-  return {
-    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-    data: {
-      content: `${mention ? `${mention}, ` : ''}Here's a **${action}** GIF!`,
       embeds: [
         {
           image: { url: gifUrl },

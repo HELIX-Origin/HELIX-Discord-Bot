@@ -80,6 +80,12 @@ export interface ApplicationCommand {
   dm_permission?: boolean;
 }
 
+export interface DiscordEmbedField {
+  name: string;
+  value: string;
+  inline?: boolean;
+}
+
 export interface DiscordEmbed {
   title?: string;
   description?: string;
@@ -90,7 +96,7 @@ export interface DiscordEmbed {
   image?: { url: string };
   thumbnail?: { url: string };
   author?: { name: string; url?: string; icon_url?: string };
-  fields?: Array<{ name: string; value: string; inline?: boolean }>;
+  fields?: DiscordEmbedField[];
 }
 
 export interface InteractionResponseData {
@@ -120,6 +126,50 @@ export interface InteractionData {
   type: number;
   options?: InteractionOption[];
   guild_id?: string;
+}
+
+export interface DiscordGuild {
+  id: string;
+  name: string;
+  icon: string | null;
+  owner?: boolean;
+  permissions?: string;
+  features?: string[];
+  approximate_member_count?: number;
+  approximate_presence_count?: number;
+}
+
+export interface DiscordChannel {
+  id: string;
+  type: number;
+  name?: string;
+  guild_id?: string;
+  position?: number;
+  parent_id?: string;
+  topic?: string;
+  nsfw?: boolean;
+  last_message_id?: string;
+  bitrate?: number;
+  user_limit?: number;
+  rate_limit_per_user?: number;
+  permission_overwrites?: Array<{
+    id: string;
+    type: number;
+    allow: string;
+    deny: string;
+  }>;
+}
+
+export interface DiscordRole {
+  id: string;
+  name: string;
+  color: number;
+  hoist: boolean;
+  position: number;
+  permissions: string;
+  managed: boolean;
+  mentionable: boolean;
+  tags?: { bot_id?: string; integration_id?: string; premium_subscriber?: boolean };
 }
 
 export interface DiscordInteraction {

@@ -10,13 +10,7 @@ import { aboutCommandDef, handleAboutCommand } from './about.js';
 import { feedCommandDef, handleFeedCommand } from './feed.js';
 import { handleHelpCommand, helpCommandDef } from './help.js';
 import { handleStatsCommand, statsCommandDef } from './stats.js';
-import {
-  gifCommandDef,
-  handleGifCommand,
-  handleGifAutocomplete,
-  actionCommandDefs,
-  handleActionCommand,
-} from './gif.js';
+import { gifCommandDef, handleGifCommand, handleGifAutocomplete } from './gif.js';
 
 export { handleGifAutocomplete };
 
@@ -24,7 +18,7 @@ export function getEnabledCommands(deps: AppDeps): ApplicationCommand[] {
   const f = deps.config.features;
   const cmds: ApplicationCommand[] = [aboutCommandDef, statsCommandDef];
   if (f.feedsEnabled) cmds.push(feedCommandDef);
-  if (f.gifsEnabled && deps.config.klipyApiKey) cmds.push(gifCommandDef, ...actionCommandDefs);
+  if (f.gifsEnabled && deps.config.klipyApiKey) cmds.push(gifCommandDef);
   // Phase 12: Administration commands gated by ADMINISTRATION_ENABLED
   // Phase 14: Music commands gated by LAVA_ENABLED
   cmds.push(helpCommandDef);
@@ -62,9 +56,6 @@ export async function dispatchInteraction(
     case 'gif':
       return handleGifCommand(interaction, deps, rest);
     default:
-      if (actionCommandDefs.some((c) => c.name === commandName)) {
-        return handleActionCommand(interaction, deps, commandName);
-      }
       return {
         type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
         data: {
