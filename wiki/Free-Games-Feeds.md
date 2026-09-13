@@ -1,6 +1,6 @@
 # 🎮 Free Games & Giveaways Feeds
 
-HELIX RSS includes a multi-platform giveaway and promotion engine that automatically tracks and announces 100% free PC and console games across all major digital game distribution platforms.
+HELIX Discord Bot includes a multi-platform giveaway and promotion engine that automatically tracks and announces 100% free PC and console games across all major digital game distribution platforms.
 
 ---
 
@@ -20,14 +20,14 @@ The Free Games engine integrates with the official **Epic Games Store Promotions
 | `ea` | EA App / Origin | GamerPower API | Electronic Arts / EA App Logo |
 | `prime` | Prime Gaming | GamerPower API | Amazon Prime Gaming Logo |
 | `battlenet` | Battle.net | GamerPower API | Blizzard Battle.net Logo |
-| `all` | All Platforms Combined | Unified Aggregator | HELIX RSS Controller Icon |
+| `all` | All Platforms Combined | Unified Aggregator | HELIX Discord Bot Controller Icon |
 
 ---
 
 ## ⏰ Polling Schedule & Delivery Mechanism
 
 ### 1. Daily Automated Polling
-Free game giveaways are often time-limited, so HELIX RSS polls active `freegames` feeds **daily** instead of only once a week.
+Free game giveaways are often time-limited, so HELIX Discord Bot polls active `freegames` feeds **daily** instead of only once a week.
 - The background feed watcher inspects active `freegames` feeds on a daily schedule.
 - Only genuinely new giveaways are announced; duplicates are suppressed by the composite deduplication engine.
 

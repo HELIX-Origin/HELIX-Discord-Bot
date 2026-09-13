@@ -1,6 +1,6 @@
 # 🤖 Discord Bot & Commands
 
-HELIX RSS operates as a Discord application using a **native connection** — a Gateway WebSocket for live events (`src/bot/gateway.ts`) and the Discord REST API for interactions and messages (`src/bot/rest.ts`). No `discord.js` dependency is required. It delivers notifications directly to channels, eliminating the need to manage external webhooks.
+HELIX Discord Bot operates as a Discord application using a **native connection** — a Gateway WebSocket for live events (`src/bot/gateway.ts`) and the Discord REST API for interactions and messages (`src/bot/rest.ts`). No `discord.js` dependency is required. It delivers notifications directly to channels, eliminating the need to manage external webhooks.
 
 ---
 

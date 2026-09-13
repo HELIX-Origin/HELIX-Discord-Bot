@@ -1,6 +1,6 @@
 # 🤖 Reddit Feeds & Pure Image Mode
 
-HELIX RSS offers a dedicated Reddit engine optimized for subreddit syndication, visual media extraction, and formatting. It supports both **Pure Image Mode** and **Standard RSS Mode**.
+HELIX Discord Bot offers a dedicated Reddit engine optimized for subreddit syndication, visual media extraction, and formatting. It supports both **Pure Image Mode** and **Standard RSS Mode**.
 
 ---
 

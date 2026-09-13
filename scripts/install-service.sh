@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# HELIX RSS - systemd Service Installer & Setup Script
+# HELIX Discord Bot - systemd Service Installer & Setup Script
 # ==============================================================================
 set -euo pipefail
 
@@ -12,7 +12,7 @@ if [ "${EUID:-$(id -u)}" -ne 0 ]; then
 fi
 
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-SERVICE_NAME="helix-rss"
+SERVICE_NAME="helix-discord-bot"
 SERVICE_FILE="/etc/systemd/system/${SERVICE_NAME}.service"
 
 # Detect real calling user when run with sudo
@@ -45,7 +45,7 @@ chown -R "${TARGET_USER}:${TARGET_GROUP}" "${PROJECT_DIR}/data"
 # Generate customized systemd service unit
 cat <<EOF > "${SERVICE_FILE}"
 [Unit]
-Description=HELIX RSS - 24/7 Self-Hosted Discord RSS/Atom Bot & Dashboard
+Description=HELIX Discord Bot - Self-Hosted Discord Bot & Dashboard
 Documentation=https://github.com/HELIX-Origin/HELIX-RSS/wiki
 After=network.target network-online.target
 Wants=network-online.target
@@ -75,7 +75,7 @@ ReadWritePaths=${PROJECT_DIR}/data
 # Logging configuration
 StandardOutput=journal
 StandardError=journal
-SyslogIdentifier=helix-rss
+SyslogIdentifier=helix-discord-bot
 
 [Install]
 WantedBy=multi-user.target

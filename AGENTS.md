@@ -4,7 +4,7 @@ This document is the central entry point and operating manual for all AI agents,
 
 ## Project
 
-**HELIX RSS** is a self-hosted, multi-user RSS/Atom-to-Discord service built in TypeScript ESM.
+**HELIX Discord Bot** is a self-hosted, multi-user Discord bot built in TypeScript ESM — RSS/Atom/Reddit/Free-Games feed delivery, YouTube & Twitch live/upload alerts, and an integrated management dashboard.
 - **Runtime dependencies**: Minimal (uses native Node.js `http`, `node:sqlite`, and web standard APIs; in-memory `ioredis-mock` for coordination without external redis binaries).
 - **Architecture**: In-memory write-through repository layer (`AppState`), native SQLite persistence, integrated dashboard UI with Light/Dark themes, Discord OAuth authentication, and direct message embed delivery to Discord channels.
 
@@ -61,7 +61,7 @@ This section documents active and recently resolved critical issues as required 
   - Hardened all `/api/admin/*` routes to `requireOwner` (owner/team only at the API layer as well).
 
 ### 8. Dashboard Operational Fixes & Derived App Name (Resolved)
-- **Problem**: The Overview "Discord Delivery" stat stayed at `0`, `/privacy` & `/tos` rendered links/formatting as raw markdown, and the app name was hardcoded as `HELIX RSS` instead of the Discord bot application name.
+- **Problem**: The Overview "Discord Delivery" stat stayed at `0`, `/privacy` & `/tos` rendered links/formatting as raw markdown, and the app name was hardcoded instead of using the Discord bot application name.
 - **Resolution**:
   - `loadOverviewTab()` now calls `loadDiscordChannels()` so the delivered-channels stat reflects the real bot channel state.
   - Rewrote `markdownToHtml` in `src/dashboard/views/legal.ts` as a line-based renderer (headings, bold/italic/code, `[text](url)` links, lists, `---` rules) for `/privacy` and `/tos`.
@@ -78,12 +78,13 @@ This section documents active and recently resolved critical issues as required 
 
 ### 10. Dashboard Guild-Centric Rework, Landing Page Audit, Manual Polling Removal & Daily Free Games Polling (In Progress)
 - **Problem**: The dashboard is per-feed with large cards and per-feed channel pickers, which does not scale. Manual polling is unreliable for several sources. The landing page still advertises retired and unsupported features. Free Games only runs weekly, missing short-lived giveaways.
-- **Status**: **Complete — tracked in [#21](https://github.com/HELIX-Origin/HELIX-RSS/issues/21).** Phases 1 (unsupported source/landing cleanup), 2 (per-guild category target data model/API), 3 (guild selection page + category UI redesign), 4 (manual polling removal), and 5 (daily free games polling) are all implemented and pushed.
-- **Key decisions locked**:
-  - Supported sources: **RSS/Atom/JSON (including News presets), Reddit, Free Games**. YouTube, TikTok, and Bluesky are **not supported** and must be removed from docs/parser stubs.
-  - Channel/thread assignment is **per guild, per category** (`rss`, `reddit`, `freegames`), not per individual feed.
+- **Status**: **Complete — tracked in [#21](https://github.com/HELIX-Origin/HELIX-RSS/issues/21).** Phases 1 (unsupported source/landing cleanup), 2 (per-guild category target data model/API), 3 (guild selection page + category UI redesign), 4 (manual polling removal), and 5 (daily free games polling) are all implemented and pushed. **Phases 6+ (URL/OAuth fixes, dashboard UX, audit bug fixes) are in progress; Phases 11+ (Feeds primary tab, Guild Admin, entertainment GIFs, Lavalink music + Queue page) are planned.**
+- **Supported sources locked**: **RSS/Atom/JSON (including News presets), Reddit, Free Games**. YouTube & Twitch are supported as **live-stream + upload/online alerts** (delivered primarily via webhooks with periodic polling fallback; `feedCategory` → `streamalerts`), **not** as RSS-fetch feed types. TikTok and Bluesky are **not supported**.
+  - Channel/thread assignment is **per guild, per category** (`rss`, `reddit`, `freegames`, `streamalerts`), not per individual feed.
   - Manual polling endpoints/buttons will be removed entirely.
   - Free Games will poll **daily** and post only new giveaways.
+  - **Product expansion (tracked in [#21](https://github.com/HELIX-Origin/HELIX-RSS/issues/21), Phases 11+):** dashboard **Feeds primary tab** with per-feed sub-pages, **Guild Admin** page + administration commands, **entertainment GIF commands (KLIPY API)**, and **music via Lavalink** with a **Queue Management** dashboard page.
+  - The project/development name is **HELIX Discord Bot** (renamed from HELIX RSS); the dashboard and bot embeds keep using the live Discord application name + icon at runtime.
 
 ---
 

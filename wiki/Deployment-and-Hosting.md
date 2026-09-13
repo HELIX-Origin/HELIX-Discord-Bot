@@ -1,6 +1,6 @@
 # 🚀 Deployment & Hosting Guide
 
-HELIX RSS is optimized for self-hosted deployments on **Docker**, **Linux VPS**, and bare metal with native SSL. Cloud PaaS platforms are intentionally not supported.
+HELIX Discord Bot is optimized for self-hosted deployments on **Docker**, **Linux VPS**, and bare metal with native SSL. Cloud PaaS platforms are intentionally not supported.
 
 ---
 
@@ -11,11 +11,11 @@ The repository ships with a production `Dockerfile` and `docker-compose.yml` (mu
 ### 1. Project Files Setup
 ```yaml
 services:
-  helix-rss:
+  helix-discord-bot:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: helix-rss
+    container_name: helix-discord-bot
     restart: unless-stopped
     ports:
       - "3131:3131"
@@ -27,7 +27,6 @@ services:
     environment:
       - NODE_ENV=production
       - INTERNAL_URL=0.0.0.0
-      - DISCORD_PORT=3131
       - SQLITE_DATA=/app/data
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3131/health"]
@@ -76,7 +75,7 @@ nano .env  # Configure credentials
 ### 3. Start with PM2
 ```bash
 # Start the compiled server
-pm2 start dist/index.js --name "helix-rss"
+pm2 start dist/index.js --name "helix-discord-bot"
 
 # Save PM2 process list and configure auto-restart on system reboot
 pm2 save
@@ -90,8 +89,8 @@ Prefer a lightweight no-daemon approach? Use `tmux` to keep the process alive in
 # Install tmux if not already present
 sudo apt-get install -y tmux
 
-# Start a new detachable session named "helix-rss"
-tmux new -s helix-rss
+# Start a new detachable session named "helix-discord-bot"
+tmux new -s helix-discord-bot
 
 # Inside the session, start the compiled server
 npm start
@@ -106,7 +105,7 @@ Reattach the session later to see logs or restart the process:
 tmux ls
 
 # Reattach
-tmux attach -t helix-rss
+tmux attach -t helix-discord-bot
 ```
 
 > **Note:** tmux keeps the process running only while the session persists. For auto-restart across reboots, use PM2 (`pm2 startup`) or a systemd unit instead.
@@ -151,7 +150,7 @@ server {
 
 ### Caddy (Manual Reverse Proxy Setup)
 
-HELIX RSS does not ship built-in Caddy support, but Caddy is a great option if you need a self-managed HTTPS proxy. You can install and run Caddy as your own process and point it at the service.
+HELIX Discord Bot does not ship built-in Caddy support, but Caddy is a great option if you need a self-managed HTTPS proxy. You can install and run Caddy as your own process and point it at the service.
 
 #### 1. Install Caddy
 ```bash
@@ -190,7 +189,7 @@ C:\caddy\caddy.exe run --config C:\caddy\Caddyfile
 
 ## 🪟 Option 3: Windows (Local Hosting)
 
-HELIX RSS runs natively on Windows with Node.js.
+HELIX Discord Bot runs natively on Windows with Node.js.
 
 ### 1. Install Node.js
 Download and install the **Node.js 22.x LTS** (>=22.9.0 for native `node:sqlite`) from [nodejs.org](https://nodejs.org). Make sure `node` and `npm` are available in a new terminal:
@@ -220,7 +219,7 @@ Use Windows Task Scheduler to start the service automatically at system startup,
 1. Open **Task Scheduler** (search `taskschd.msc` or "Task Scheduler").
 2. Click **Create Task** in the right-hand Actions panel.
 3. On the **General** tab:
-   - Name: `HELIX RSS`
+   - Name: `HELIX Discord Bot`
    - Check **Run whether user is logged on or not**.
    - Check **Run with highest privileges** (only if needed for port binding; port 3131 normally doesn't require it).
 4. On the **Triggers** tab, click **New...** and set **Begin the task:** to **At startup**. Click OK.
@@ -234,10 +233,10 @@ Use Windows Task Scheduler to start the service automatically at system startup,
 
 The task will start the dashboard/bot whenever Windows boots. To stop it, use Task Manager or Task Scheduler > End task.
 
-> **Note:** Keep the terminal window approach in mind when binding the port; set `INTERNAL_URL`/`DISCORD_PORT` in `.env` if you need a different port.
+> **Note:** Keep the terminal window approach in mind when binding the port; set `INTERNAL_URL` in `.env` if you need a different port.
 
 ---
 
 ## 🚫 Cloud PaaS Platforms (Retired)
 
-Heroku, Render, Fly.io, and Railway deployment support has been **retired**. HELIX RSS is self-hosted exclusively on Local, VPS, and Docker. This removes platform-lock-in, payment barriers, and out-of-sync credential state.
+Heroku, Render, Fly.io, and Railway deployment support has been **retired**. HELIX Discord Bot is self-hosted exclusively on Local, VPS, and Docker. This removes platform-lock-in, payment barriers, and out-of-sync credential state.

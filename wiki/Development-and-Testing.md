@@ -1,6 +1,6 @@
 # 🧪 Development & Testing Guide
 
-This guide covers local development workflows, debugging techniques, TypeScript compilation checks, and verification commands for HELIX RSS.
+This guide covers local development workflows, debugging techniques, TypeScript compilation checks, and verification commands for HELIX Discord Bot.
 
 ---
 
@@ -27,7 +27,7 @@ This guide covers local development workflows, debugging techniques, TypeScript 
 
 ## 🧪 Testing Strategies
 
-The main HELIX RSS repository does not contain an in-repo test suite. Integration and regression tests are maintained in a separate dedicated Vitest repository.
+The main HELIX Discord Bot repository does not contain an in-repo test suite. Integration and regression tests are maintained in a separate dedicated Vitest repository.
 
 When contributing core logic changes, validate them with:
 

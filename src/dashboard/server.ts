@@ -46,7 +46,7 @@ export function createHelixRssServer(deps: AppDeps): Server {
     const acceptHeader = req.headers['accept'] ?? '';
     if (acceptHeader.includes('application/json')) {
       const proto = d.config.sslKey || d.config.botSslKey ? 'https' : 'http';
-      sendJson(res, 200, { status: 'ok', service: 'helix-rss-bot', proto, uptime: process.uptime() });
+      sendJson(res, 200, { status: 'ok', service: 'helix-discord-bot', proto, uptime: process.uptime() });
       return;
     }
     if (d.config.landingPageEnabled) {
@@ -54,7 +54,7 @@ export function createHelixRssServer(deps: AppDeps): Server {
       sendHtml(res, 200, renderLandingHtml(d, userId));
       return;
     }
-    const baseUrl = getRequestBaseUrl(req, d.config.publicBaseUrl, `${d.config.host}:${d.config.port}`);
+    const baseUrl = getRequestBaseUrl(req, d.config.publicBaseUrl, d.config.internalUrl);
     const url = new URL(req.url ?? '/', baseUrl);
     const dest = url.search ? `/dashboard${url.search}` : '/dashboard';
     res.writeHead(302, { Location: dest });
@@ -156,7 +156,7 @@ export function createHelixRssServer(deps: AppDeps): Server {
       return;
     }
     const proto = deps.config.sslKey || deps.config.botSslKey ? 'https' : 'http';
-    sendJson(res, 200, { status: 'ok', service: 'helix-rss-bot', proto, uptime: process.uptime() });
+    sendJson(res, 200, { status: 'ok', service: 'helix-discord-bot', proto, uptime: process.uptime() });
   });
 
   // Discord interactions (webhook)
@@ -196,7 +196,7 @@ export function createHelixRssServer(deps: AppDeps): Server {
   initWebhookRouter(deps);
 
   const requestHandler = async (req: IncomingMessage, res: ServerResponse) => {
-    const baseUrl = getRequestBaseUrl(req, deps.config.publicBaseUrl, `${deps.config.host}:${deps.config.port}`);
+    const baseUrl = getRequestBaseUrl(req, deps.config.publicBaseUrl, deps.config.internalUrl);
     const url = new URL(req.url ?? '/', baseUrl);
     const match = router.find(req.method ?? 'GET', url.pathname);
     if (!match) {

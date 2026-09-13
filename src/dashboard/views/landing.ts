@@ -1,7 +1,7 @@
 import { appDisplayName, type AppDeps } from '../../app.js';
 import { getThemeInfo, getColorSchemeInfo } from './dashboard.js';
 
-export function renderLandingHtml(deps: AppDeps, _userId: number | null = null): string {
+export function renderLandingHtml(deps: AppDeps, userId: number | null = null): string {
   const appName = appDisplayName(deps);
   const appIconUrl = deps.bot?.getAppIconUrl() || null;
   const theme = getThemeInfo(deps.config.defaultTheme);
@@ -230,7 +230,6 @@ export function renderLandingHtml(deps: AppDeps, _userId: number | null = null):
     .footer-links { display: flex; justify-content: center; gap: 1.5rem; }
     .footer-links a { color: var(--text-muted); text-decoration: none; }
     .footer-links a:hover { color: var(--primary); }
-    .badge-gray { background: rgba(156,163,175,0.12); color: #9ca3af; border: 1px solid var(--border); padding: 0.35rem 0.75rem; border-radius: 0.5rem; font-size: 0.75rem; font-weight: 600; }
   </style>
 </head>
 <body>
@@ -246,19 +245,19 @@ export function renderLandingHtml(deps: AppDeps, _userId: number | null = null):
     </a>
 
     <div class="nav-actions">
-      <span class="badge-gray" title="Active Theme: ${theme.name}">
-        <i class="${theme.icon}" style="color: var(--primary); margin-right: 0.25rem;"></i> ${theme.name}
-      </span>
       ${
         botInviteUrl
           ? `<a href="${botInviteUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-discord btn-sm">
-        <i class="fa-brands fa-discord"></i> Invite Bot
+        <i class="fa-brands fa-discord"></i> <span class="btn-text">Invite Bot</span>
       </a>`
           : ''
       }
-      <a href="/dashboard" class="btn btn-primary btn-sm">
-        <i class="fa-solid fa-gauge"></i> Open Dashboard
-      </a>
+      ${
+        userId !== null
+          ? `<a href="/dashboard" class="btn btn-primary btn-sm"><i class="fa-solid fa-gauge"></i> <span class="btn-text">Open Dashboard</span></a>`
+          : `<a href="/api/auth/discord" class="btn btn-discord btn-sm"><i class="fa-brands fa-discord"></i> <span class="btn-text">Log In</span></a>
+             <a href="/dashboard" class="btn btn-primary btn-sm"><i class="fa-solid fa-gauge"></i> <span class="btn-text">Open Dashboard</span></a>`
+      }
     </div>
   </header>
 

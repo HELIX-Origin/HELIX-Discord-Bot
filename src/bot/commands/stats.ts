@@ -8,7 +8,7 @@ import {
 
 export const statsCommandDef: ApplicationCommand = {
   name: 'stats',
-  description: 'View HELIX RSS service statistics, bot details, and dashboard info',
+  description: 'View HELIX Discord Bot service statistics, bot details, and dashboard info',
 };
 
 export async function handleStatsCommand(interaction: DiscordInteraction, deps: AppDeps): Promise<InteractionResponse> {
@@ -28,7 +28,7 @@ export async function handleStatsCommand(interaction: DiscordInteraction, deps: 
 
   const inviteUrl = deps.config.redirectUrl || 'Not configured';
 
-  const dashboardUrl = deps.config.publicBaseUrl || `http://${deps.config.host}:${deps.config.port}`;
+  const dashboardUrl = deps.config.publicBaseUrl || deps.config.internalUrl;
 
   const appName = appDisplayName(deps);
 

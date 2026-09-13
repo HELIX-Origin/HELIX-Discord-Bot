@@ -1,6 +1,6 @@
 # 🔌 REST API Reference
 
-The HELIX RSS dashboard exposes a JSON REST API for managing feeds, presets, server settings, diagnostics, and triggering manual operations.
+The HELIX Discord Bot dashboard exposes a JSON REST API for managing feeds, presets, server settings, diagnostics, and triggering manual operations.
 
 ---
 

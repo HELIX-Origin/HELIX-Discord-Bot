@@ -2,7 +2,7 @@ export function renderOAuthCallbackHtml(
   status: 'success' | 'error',
   provider: string,
   errorDetail?: string,
-  appName = 'HELIX RSS',
+  appName = 'HELIX Discord Bot',
   appIconUrl?: string | null,
 ): string {
   const isSuccess = status === 'success';
@@ -46,6 +46,6 @@ export function renderOAuthCallbackHtml(
 export const renderOAuthErrorHtml = (
   title: string,
   message: string,
-  appName = 'HELIX RSS',
+  appName = 'HELIX Discord Bot',
   appIconUrl?: string | null,
 ): string => renderOAuthCallbackHtml('error', title, message, appName, appIconUrl);

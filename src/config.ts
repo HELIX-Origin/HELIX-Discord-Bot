@@ -21,8 +21,6 @@ export interface AppConfig {
   clientSecret: string | null;
   redirectUrl: string | null;
   callbackUrl: string | null;
-  pingUrl: string | null;
-  pingIntervalMs: number;
   discordApiBaseUrl: string;
   repoUrl: string;
   userAgent: string;
@@ -58,8 +56,10 @@ export function defaultConfig(): AppConfig {
   const host = (envHost === 'localhost' ? '0.0.0.0' : envHost) ?? process.env['HOST']?.trim() ?? defaultHost;
   const dataDir = process.env['SQLITE_DATA'] ?? resolve(process.cwd(), 'data');
 
-  const botPort = parsePort(envPort ? String(envPort) : process.env['DISCORD_PORT'], 3131);
-  const port = parsePort(envPort ? String(envPort) : process.env['DISCORD_PORT'], botPort);
+  // Port is derived exclusively from INTERNAL_URL (default 3131). No PORT-style
+  // environment variables are used; proxies/tunnels mask ports on PUBLIC_URL.
+  const botPort = envPort || 3131;
+  const port = botPort;
 
   // Public URL: optional public URL for the service (behind reverse proxy or native SSL)
   const rawPublic =
@@ -101,16 +101,16 @@ export function defaultConfig(): AppConfig {
       ? `https://discord.com/oauth2/authorize?client_id=${encodeURIComponent(clientId)}&permissions=8&integration_type=0&scope=bot+applications.commands`
       : null);
 
-  // DISCORD_CALLBACK_URL is the OAuth Callback URL auto-derived from host/port or publicBaseUrl, always using botPort
+  // DISCORD_CALLBACK_URL is the preferered OAuth Callback URL.
+  // When set, it is used verbatim (must match the Redirect URI registered in the
+  // Discord Developer Portal). Otherwise the callback is derived from PUBLIC_URL
+  // without any port injection - proxies/tunnels mask the port on the public URL.
   let callbackUrl: string;
   if (process.env['DISCORD_CALLBACK_URL']?.trim()) {
     callbackUrl = process.env['DISCORD_CALLBACK_URL']!.trim();
   } else if (publicBaseUrl) {
     try {
       const u = new URL(publicBaseUrl);
-      if (u.protocol === 'http:' && !u.port) {
-        u.port = String(botPort);
-      }
       u.pathname = '/api/auth/callback/discord';
       u.search = '';
       u.hash = '';
@@ -121,41 +121,6 @@ export function defaultConfig(): AppConfig {
   } else {
     callbackUrl = `${botProto}://${callbackHost}:${botPort}/api/auth/callback/discord`;
   }
-
-  const internalHealthUrl = `${internalUrl}/health`;
-
-  const pingDisabled =
-    process.env['PING_ENABLED']?.toLowerCase() === 'false' ||
-    process.env['KEEP_ALIVE']?.toLowerCase() === 'false' ||
-    process.env['KEEP_ALIVE_ENABLED']?.toLowerCase() === 'false';
-
-  const rawPingUrl = process.env['PING_URL']?.trim() || process.env['KEEP_ALIVE_URL']?.trim();
-  let pingUrl: string | null;
-  if (pingDisabled) {
-    pingUrl = null;
-  } else if (rawPingUrl) {
-    const trimmed = rawPingUrl.toLowerCase();
-    if (trimmed === 'none' || trimmed === 'disabled' || trimmed === 'off' || trimmed === 'false') {
-      pingUrl = null;
-    } else if (rawPingUrl.startsWith('/')) {
-      pingUrl = `${internalUrl}${rawPingUrl}`;
-    } else {
-      let resolved = rawPingUrl
-        .replace(/\$\{?INTERNAL_URL\}?/g, internalPingHost)
-        .replace(/\$\{?DISCORD_PORT\}?/g, String(botPort));
-      if (!resolved.startsWith('http://') && !resolved.startsWith('https://')) {
-        if (resolved === internalPingHost || resolved === host) {
-          resolved = `${botProto}://${internalPingHost}:${botPort}/health`;
-        } else if (resolved.includes(':') || resolved.includes('/')) {
-          resolved = `${botProto}://${resolved}`;
-        }
-      }
-      pingUrl = resolved;
-    }
-  } else {
-    pingUrl = internalHealthUrl;
-  }
-  const pingIntervalMs = parsePositiveInt(process.env['PING_INTERVAL_MS'], 600_000);
 
   const repoUrl =
     process.env['REPO_URL']?.trim() ||
@@ -215,8 +180,6 @@ export function defaultConfig(): AppConfig {
     clientSecret,
     redirectUrl,
     callbackUrl,
-    pingUrl,
-    pingIntervalMs,
     discordApiBaseUrl: process.env['DISCORD_API_BASE_URL']?.trim() || 'https://discord.com/api/v10',
     repoUrl,
     userAgent,
@@ -247,16 +210,6 @@ function parseLogLevel(raw: string | undefined): LogLevel {
   const value = raw?.toLowerCase();
   if (value === 'debug' || value === 'info' || value === 'warn' || value === 'error') return value;
   return 'info';
-}
-
-function parsePort(raw: string | undefined, fallback = 3131): number {
-  if (raw === undefined) return fallback;
-  const value = Number(raw);
-  // Port 0 is allowed so smoke tests can bind to an ephemeral port.
-  if (!Number.isInteger(value) || value < 0 || value > 65_535) {
-    throw new Error(`Invalid port: ${raw}`);
-  }
-  return value;
 }
 
 function parsePositiveInt(raw: string | undefined, fallback: number): number {

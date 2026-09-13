@@ -90,12 +90,19 @@ export function getRequestHost(req: IncomingMessage, fallbackHost = '127.0.0.1:3
   return req.headers.host || fallbackHost;
 }
 
-export function getRequestBaseUrl(req: IncomingMessage, publicBaseUrl?: string | null, fallbackHost?: string): string {
+export function getRequestBaseUrl(
+  req: IncomingMessage,
+  publicBaseUrl?: string | null,
+  fallbackBaseUrl?: string,
+): string {
   if (publicBaseUrl) {
     return publicBaseUrl.replace(/\/+$/, '');
   }
+  if (fallbackBaseUrl) {
+    return fallbackBaseUrl.replace(/\/+$/, '');
+  }
   const proto = getRequestProtocol(req);
-  const host = getRequestHost(req, fallbackHost);
+  const host = getRequestHost(req);
   return `${proto}://${host}`;
 }
 

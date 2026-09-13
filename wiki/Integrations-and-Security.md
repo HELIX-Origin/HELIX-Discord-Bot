@@ -1,6 +1,6 @@
 # 🔒 Integrations & Security
 
-This guide details the security model, authentication flows, authorization rules, and data protection practices in HELIX RSS.
+This guide details the security model, authentication flows, authorization rules, and data protection practices in HELIX Discord Bot.
 
 ---
 

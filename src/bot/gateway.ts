@@ -207,8 +207,8 @@ export class DiscordGatewayClient {
           intents: 1, // GUILDS intent
           properties: {
             os: process.platform,
-            browser: 'HELIXRSS',
-            device: 'HELIXRSS',
+            browser: 'HELIXDiscordBot',
+            device: 'HELIXDiscordBot',
           },
         },
       });

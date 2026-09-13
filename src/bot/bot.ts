@@ -104,7 +104,7 @@ export class DiscordBot {
             this.deps.config.port = address.port;
             this.deps.config.botPort = address.port;
           }
-          this.logger.info('HELIX RSS unified server listening', {
+          this.logger.info('HELIX Discord Bot unified server listening', {
             host,
             port: this.deps.config.port,
           });
@@ -306,7 +306,7 @@ export class DiscordBot {
       this.applicationInfo?.name ||
       this.applicationInfo?.bot?.global_name ||
       this.applicationInfo?.bot?.username ||
-      'HELIX RSS'
+      'HELIX Discord Bot'
     );
   }
 

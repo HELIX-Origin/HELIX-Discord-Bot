@@ -32,7 +32,7 @@ export class WebhookRouter {
   constructor(deps: AppDeps, logLevel?: LogLevel) {
     this.logger = createLogger('webhook', logLevel);
     this.deps = deps;
-    this.baseUrl = deps.config.publicBaseUrl || `http://${deps.config.host}:${deps.config.port}`;
+    this.baseUrl = deps.config.publicBaseUrl || deps.config.internalUrl;
   }
 
   async handleVerification(req: IncomingMessage, res: ServerResponse): Promise<boolean> {

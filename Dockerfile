@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 # ------------------------------------------------------------------------------
-# HELIX RSS - Production Dockerfile
+# HELIX Discord Bot - Production Dockerfile
 # Multi-stage build with minimal attack surface and persistent SQLite volume.
 # ------------------------------------------------------------------------------
 
@@ -22,7 +22,6 @@ WORKDIR /app
 
 ENV NODE_ENV=production \
     INTERNAL_URL=0.0.0.0 \
-    DISCORD_PORT=3131 \
     SQLITE_DATA=/app/data
 
 # Create application user and data directory

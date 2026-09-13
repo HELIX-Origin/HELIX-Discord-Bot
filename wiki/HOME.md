@@ -1,6 +1,6 @@
-# 📖 HELIX RSS Documentation Wiki
+# 📖 HELIX Discord Bot Documentation Wiki
 
-Welcome to the comprehensive technical and operational wiki for **HELIX RSS** — the modern, high-performance RSS & web scraping feed delivery bot and web management dashboard for Discord communities.
+Welcome to the comprehensive technical and operational wiki for **HELIX Discord Bot** — the modern, high-performance RSS & web scraping feed delivery bot and web management dashboard for Discord communities.
 
 ---
 
@@ -33,7 +33,7 @@ flowchart TD
         Social["Reddit"]
     end
 
-    subgraph CoreEngine["HELIX RSS Core"]
+    subgraph CoreEngine["HELIX Discord Bot Core"]
         Watcher["Background Feed Watcher (Polling Scheduler)"]
         Parser["Parser & Fallback Scrapers"]
         Dedup["Composite Multi-Factor Deduplication"]

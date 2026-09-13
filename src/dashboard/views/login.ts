@@ -3,7 +3,7 @@ import { getThemeInfo } from './dashboard.js';
 export function renderLoginHtml(
   isRegister: boolean,
   botInviteUrl?: string | null,
-  appName = 'HELIX RSS',
+  appName = 'HELIX Discord Bot',
   appIconUrl?: string | null,
   themeConfig?: string,
 ): string {

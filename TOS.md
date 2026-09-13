@@ -1,26 +1,26 @@
-# Terms of Service for HELIX RSS
+# Terms of Service for HELIX Discord Bot
 
 **Last Updated**: September 11, 2026
 
-Please read these Terms of Service ("Terms") carefully before deploying or using **HELIX RSS** ("the Service", "the Software").
+Please read these Terms of Service ("Terms") carefully before deploying or using **HELIX Discord Bot** ("the Service", "the Software").
 
 ---
 
 ## 1. Acceptance of Terms
 
-By installing, self-hosting, accessing, or using HELIX RSS, you agree to be bound by these Terms and the terms of the project's open-source license ([LICENSE.md](LICENSE.md)). If you do not agree to these Terms, do not install or use the Software.
+By installing, self-hosting, accessing, or using HELIX Discord Bot, you agree to be bound by these Terms and the terms of the project's open-source license ([LICENSE.md](LICENSE.md)). If you do not agree to these Terms, do not install or use the Software.
 
 ---
 
 ## 2. Open Source License & Ownership
 
-HELIX RSS is licensed under the open-source license detailed in the repository's `LICENSE.md`. You are permitted to inspect, modify, fork, and distribute the software in compliance with the license terms. The project authors retain copyright and intellectual property rights in the original codebase.
+HELIX Discord Bot is licensed under the open-source license detailed in the repository's `LICENSE.md`. You are permitted to inspect, modify, fork, and distribute the software in compliance with the license terms. The project authors retain copyright and intellectual property rights in the original codebase.
 
 ---
 
 ## 3. Acceptable Use Policy
 
-When deploying or operating HELIX RSS, you agree to:
+When deploying or operating HELIX Discord Bot, you agree to:
 
 1. **Compliance with Discord Terms**:
    - Adhere strictly to the [Discord Developer Terms of Service](https://discord.com/developers/docs/policies-and-agreements/developer-terms-of-service) and [Discord Community Guidelines](https://discord.com/guidelines).
@@ -48,7 +48,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ## 6. Limitation of Liability
 
-To the maximum extent permitted by applicable law, neither the developers nor the contributors of HELIX RSS shall be liable for any direct, indirect, incidental, special, consequential, or punitive damages, including loss of data, profits, service interruptions, or Discord account actions resulting from your use or misuse of the Software.
+To the maximum extent permitted by applicable law, neither the developers nor the contributors of HELIX Discord Bot shall be liable for any direct, indirect, incidental, special, consequential, or punitive damages, including loss of data, profits, service interruptions, or Discord account actions resulting from your use or misuse of the Software.
 
 ---
 

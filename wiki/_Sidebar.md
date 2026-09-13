@@ -1,4 +1,4 @@
-### HELIX RSS Wiki
+### HELIX Discord Bot Wiki
 
 - [🏠 Home](HOME.md)
 - [📡 Feeds & Scrapers Engine](Feeds-and-Scrapers.md)

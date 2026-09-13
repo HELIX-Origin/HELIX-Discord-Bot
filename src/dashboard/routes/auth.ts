@@ -108,7 +108,7 @@ export function registerAuthRoutes(router: Router<AppDeps>, deps: AppDeps): void
 
   // ---- Discord OAuth Callback Handler ----
   router.add('GET', '/api/auth/callback/discord', async (req, res, _ctx, d) => {
-    const baseUrl = getRequestBaseUrl(req, d.config.publicBaseUrl, `${d.config.host}:${d.config.port}`);
+    const baseUrl = getRequestBaseUrl(req, d.config.publicBaseUrl, d.config.internalUrl);
     const url = new URL(req.url ?? '/', baseUrl);
     const code = url.searchParams.get('code');
     const state = url.searchParams.get('state');
@@ -279,7 +279,7 @@ export function registerAuthRoutes(router: Router<AppDeps>, deps: AppDeps): void
   });
 }
 
-export function renderAuthErrorPage(message: string, appName = 'HELIX RSS'): string {
+export function renderAuthErrorPage(message: string, appName = 'HELIX Discord Bot'): string {
   return `<!DOCTYPE html>
 <html lang="en">
 <head>

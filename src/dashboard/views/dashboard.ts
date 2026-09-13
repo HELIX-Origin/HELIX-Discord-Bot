@@ -44,6 +44,8 @@ export function renderDashboardHtml(deps: AppDeps, userId: number | null): strin
   const appIconUrl = deps.bot?.getAppIconUrl() || null;
   const theme = getThemeInfo(deps.config.defaultTheme);
   const colorScheme = getColorSchemeInfo(deps.config.dashboardColorScheme);
+  const publicBaseUrl = deps.config.publicBaseUrl || null;
+  const internalUrl = deps.config.internalUrl;
 
   // Permission check for logged in Discord users without server manage permissions
   if (userId !== null && !canUserAccessDashboard(userId, deps)) {
@@ -900,21 +902,24 @@ export function renderDashboardHtml(deps: AppDeps, userId: number | null): strin
           <div class="card">
             <div>
               <div class="card-title"><i class="fa-solid fa-sliders" style="color: var(--primary);"></i> System Settings</div>
-              <div class="card-desc">Configure public endpoints, OAuth redirection, and service defaults.</div>
+              <div class="card-desc">Public endpoint and OAuth redirect resolution. Configured entirely via environment variables in <code style="color: var(--primary);">.env</code>.</div>
             </div>
             <div class="form-grid">
               <div class="form-group">
-                <label class="form-label">Public Base URL</label>
-                <input type="text" id="cfg-base-url" placeholder="http://159.223.140.212:3131">
+                <label class="form-label">Public URL</label>
+                <input type="text" value="${publicBaseUrl || 'Not set (falls back to INTERNAL_URL)'}" disabled style="opacity: 0.85; cursor: not-allowed;" title="Configured via the PUBLIC_URL environment variable">
+                <span style="font-size: 0.6875rem; color: var(--text-dim); margin-top: 0.25rem;">Configured via <code style="color: var(--primary);">PUBLIC_URL</code> in <code style="color: var(--primary);">.env</code>. If unset, the internal URL is used so local-only instances still work.</span>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Internal URL</label>
+                <input type="text" value="${internalUrl}" disabled style="opacity: 0.85; cursor: not-allowed;" title="Configured via the INTERNAL_URL environment variable">
+                <span style="font-size: 0.6875rem; color: var(--text-dim); margin-top: 0.25rem;">Configured via <code style="color: var(--primary);">INTERNAL_URL</code> in <code style="color: var(--primary);">.env</code>. The bot binds here and Discord OAuth callbacks resolve to <code style="color: var(--text-muted);">PUBLIC_URL</code> when set, otherwise this internal address.</span>
               </div>
               <div class="form-group">
                 <label class="form-label">Active Dashboard Theme &amp; Color Scheme</label>
                 <input type="text" value="${theme.name} (${theme.id}) &bull; ${colorScheme.name} (${colorScheme.id})" disabled style="opacity: 0.85; cursor: not-allowed;" title="Configured via DASHBOARD_THEME and DASHBOARD_COLOR_SCHEME environment variables">
                 <span style="font-size: 0.6875rem; color: var(--text-dim); margin-top: 0.25rem;">Configured via <code style="color: var(--primary);">DASHBOARD_THEME</code> and <code style="color: var(--primary);">DASHBOARD_COLOR_SCHEME</code> in <code style="color: var(--primary);">.env</code>. Themes: <code style="color: var(--text-muted);">glassmorphism</code>, <code style="color: var(--text-muted);">dark</code>, <code style="color: var(--text-muted);">light</code>, <code style="color: var(--text-muted);">cyberpunk</code>, <code style="color: var(--text-muted);">dracula</code>, <code style="color: var(--text-muted);">nord</code>, <code style="color: var(--text-muted);">emerald</code>. Color Schemes: <code style="color: var(--text-muted);">cyan</code>, <code style="color: var(--text-muted);">purple</code>, <code style="color: var(--text-muted);">blue</code>, <code style="color: var(--text-muted);">emerald</code>, <code style="color: var(--text-muted);">rose</code>, <code style="color: var(--text-muted);">amber</code>, <code style="color: var(--text-muted);">indigo</code>, <code style="color: var(--text-muted);">crimson</code>, <code style="color: var(--text-muted);">teal</code>, <code style="color: var(--text-muted);">sunset</code>.</span>
               </div>
-            </div>
-            <div style="display: flex; justify-content: flex-end;">
-              <button onclick="saveSystemSettings()" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> Save Settings</button>
             </div>
           </div>
 
@@ -1040,7 +1045,6 @@ export function renderDashboardHtml(deps: AppDeps, userId: number | null): strin
       if (tabId === 'overview') loadOverviewTab();
       else if (tabId === 'categories') loadCategoriesTab();
       else if (tabId === 'news') loadNewsTab();
-      else if (tabId === 'settings') loadSettingsTab();
       else if (tabId === 'devtools') loadDevToolsTab();
     }
 
@@ -1649,32 +1653,6 @@ export function renderDashboardHtml(deps: AppDeps, userId: number | null): strin
     }
 
     // TAB 5: SETTINGS (ADMIN)
-    async function loadSettingsTab() {
-      const baseUrlInput = document.getElementById('cfg-base-url');
-      loadUsersList();
-      try {
-        const res = await fetch('/api/settings', { signal: AbortSignal.timeout(5000) });
-        if (!res.ok) return;
-        const data = await res.json();
-        if (baseUrlInput) baseUrlInput.value = data.publicBaseUrl || '';
-      } catch {}
-    }
-
-    async function saveSystemSettings() {
-      const baseUrlInput = document.getElementById('cfg-base-url');
-      const publicBaseUrl = baseUrlInput ? baseUrlInput.value.trim() : '';
-      try {
-        const res = await fetch('/api/settings', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ publicBaseUrl })
-        });
-        if (!checkAuth(res)) return;
-        if (res.ok) alert('Settings saved successfully.');
-        else alert('Failed to save settings.');
-      } catch {}
-    }
-
     async function loadUsersList() {
       const container = document.getElementById('users-list-container');
       if (!container) return;

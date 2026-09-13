@@ -8,7 +8,6 @@ import { Scheduler } from './scheduler/scheduler.js';
 import { createRedisCoordinator } from './state/redis.js';
 import { createLogger } from './util/logger.js';
 import { clearPorts } from './util/ports.js';
-import { KeepAlivePing } from './util/keep-alive.js';
 import { DiscordBot } from './bot/bot.js';
 import { WebhookRouter } from './webhook/router.js';
 
@@ -64,29 +63,24 @@ export async function main(): Promise<void> {
   await bot.start();
   void threads.keepAliveAll();
 
-  // 6. Start network keep-alive ping if configured
-  let keepAlive: KeepAlivePing | null = null;
-  if (config.pingUrl) {
-    keepAlive = new KeepAlivePing({
-      targetUrl: config.pingUrl,
-      intervalMs: config.pingIntervalMs,
-      logger,
-    });
-    keepAlive.start();
-  }
-
-  logger.info('HELIX RSS started with unified server', {
+  logger.info('HELIX Discord Bot started with unified server', {
     host: config.host,
     port: config.botPort,
-    pingUrl: config.pingUrl,
     dbPath: config.dbPath,
     botTokenConfigured: Boolean(config.botToken),
+  });
+  logger.info('Discord OAuth callback URL resolved', {
+    callbackUrl: config.callbackUrl,
+    source: process.env['DISCORD_CALLBACK_URL']?.trim()
+      ? 'DISCORD_CALLBACK_URL'
+      : config.publicBaseUrl
+        ? 'PUBLIC_URL'
+        : 'INTERNAL_URL',
   });
 
   const shutdown = (signal: string) => {
     logger.info(`Received ${signal}; shutting down`);
     scheduler.stop();
-    keepAlive?.stop();
     bot.stop();
     void (async () => {
       await redis?.close();
@@ -113,7 +107,7 @@ const isDirectRun =
 
 if (isDirectRun) {
   main().catch((err) => {
-    console.error('Failed to start HELIX RSS:', err);
+    console.error('Failed to start HELIX Discord Bot:', err);
     process.exit(1);
   });
 }

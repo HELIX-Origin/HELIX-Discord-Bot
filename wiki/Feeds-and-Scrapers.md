@@ -1,6 +1,6 @@
 # 📡 Feeds & Web Scrapers Engine
 
-HELIX RSS features a high-throughput, fault-tolerant feed processing engine capable of ingesting traditional syndication formats, Reddit, and free games giveaways.
+HELIX Discord Bot features a high-throughput, fault-tolerant feed processing engine capable of ingesting traditional syndication formats, Reddit, and free games giveaways.
 
 ---
 
@@ -40,7 +40,7 @@ graph LR
 
 ## 🔍 Composite Deduplication Engine
 
-To eliminate duplicated notifications across server restarts, feed updates, or modified publishing dates, HELIX RSS uses a 3-tier composite deduplication strategy:
+To eliminate duplicated notifications across server restarts, feed updates, or modified publishing dates, HELIX Discord Bot uses a 3-tier composite deduplication strategy:
 
 1. **Primary Key Check (`GUID / ID`)**: Checks unique item identifiers provided by the feed creator.
 2. **Canonical Link Normalization**: Strips tracking parameters (`utm_source`, `utm_medium`, `fbclid`, etc.) to produce a normalized URL identifier.

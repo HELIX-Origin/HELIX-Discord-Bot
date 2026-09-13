@@ -10,7 +10,7 @@ import { STANDARD_EMBED_COLOR, appBranding, brandAuthor } from '../embeds.js';
 
 export const aboutCommandDef: ApplicationCommand = {
   name: 'about',
-  description: 'About HELIX RSS and its capabilities',
+  description: 'About HELIX Discord Bot and its capabilities',
 };
 
 export async function handleAboutCommand(
@@ -23,7 +23,7 @@ export async function handleAboutCommand(
   const seconds = uptimeSec % 60;
   const uptimeStr = `${hours}h ${minutes}m ${seconds}s`;
 
-  const dashboardUrl = deps.config.publicBaseUrl || `http://${deps.config.host}:${deps.config.port}`;
+  const dashboardUrl = deps.config.publicBaseUrl || deps.config.internalUrl;
   const inviteUrl = deps.config.redirectUrl;
 
   const fields: Array<{ name: string; value: string; inline?: boolean }> = [

@@ -98,7 +98,7 @@ function markdownToHtml(md: string): string {
 export function renderLegalHtml(
   title: string,
   markdownFilename: string,
-  appName = 'HELIX RSS',
+  appName = 'HELIX Discord Bot',
   appIconUrl?: string | null,
   themeConfig?: string,
 ): string {

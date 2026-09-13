@@ -12,7 +12,7 @@ export function registerSettingsRoutes(router: Router<AppDeps>): void {
     const pollIntervalMs = savedPollInterval ? Number(savedPollInterval) : d.config.pollIntervalMs;
     sendJson(res, 200, {
       oauthProviders: d.oauth.listProviders(),
-      publicBaseUrl: d.repo.getSetting('public_base_url') ?? d.config.publicBaseUrl,
+      publicBaseUrl: d.config.publicBaseUrl,
       pollIntervalMs: Number.isInteger(pollIntervalMs) && pollIntervalMs > 0 ? pollIntervalMs : 3_600_000,
     });
   });
@@ -20,10 +20,7 @@ export function registerSettingsRoutes(router: Router<AppDeps>): void {
   router.add('POST', '/api/settings', async (req, res, _ctx, d) => {
     const userId = await requireAdminOrOwner(req, res, d);
     if (userId === null) return;
-    const body = (await readBodyJson(req)) as { publicBaseUrl?: string; pollIntervalMs?: number };
-    if (body.publicBaseUrl !== undefined) {
-      d.repo.setSetting('public_base_url', body.publicBaseUrl);
-    }
+    const body = (await readBodyJson(req)) as { pollIntervalMs?: number };
     if (body.pollIntervalMs !== undefined) {
       const allowed = [60_000, 600_000, 1_800_000, 3_600_000];
       if (!allowed.includes(body.pollIntervalMs)) {

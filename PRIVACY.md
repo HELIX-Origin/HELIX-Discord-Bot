@@ -1,14 +1,14 @@
-# Privacy Policy for HELIX RSS
+# Privacy Policy for HELIX Discord Bot
 
 **Last Updated**: September 11, 2026
 
-Welcome to **HELIX RSS**. This Privacy Policy explains how our self-hosted RSS/Atom-to-Discord service handles information when you use the software, dashboard, and associated Discord bot.
+Welcome to **HELIX Discord Bot**. This Privacy Policy explains how our self-hosted RSS/Atom-to-Discord service handles information when you use the software, dashboard, and associated Discord bot.
 
 ---
 
 ## 1. Core Principle: Self-Hosted & Zero Telemetry
 
-HELIX RSS is an open-source, self-hosted application.
+HELIX Discord Bot is an open-source, self-hosted application.
 - **No Third-Party Tracking**: We do not collect, transmit, sell, or analyze your personal information.
 - **No Analytics / Telemetry**: The application contains zero tracking cookies, remote analytics beacons, or centralized diagnostic pingbacks.
 - **Local Data Custody**: All database records (feeds, articles, users, logs) reside exclusively on the server or filesystem managed by the instance administrator.
@@ -17,7 +17,7 @@ HELIX RSS is an open-source, self-hosted application.
 
 ## 2. Information Handled by the Service
 
-When operating an instance of HELIX RSS, the software stores and processes the following data locally within an embedded SQLite database (`helix-rss.db`):
+When operating an instance of HELIX Discord Bot, the software stores and processes the following data locally within an embedded SQLite database (`helix-rss.db`):
 
 ### A. Discord Account & OAuth Data
 - **Discord User ID & Username**: Used to authenticate administrators and members for dashboard access.
@@ -36,7 +36,7 @@ When operating an instance of HELIX RSS, the software stores and processes the f
 
 ## 3. External Network Interactions
 
-To perform its intended functions, HELIX RSS initiates outgoing network requests to:
+To perform its intended functions, HELIX Discord Bot initiates outgoing network requests to:
 1. **Discord API (`discord.com`)**:
    - Deliver rich embeds to designated server channels via the configured Discord Bot token.
    - Register slash commands (`/feed`, `/stats`, `/about`, `/help`).
@@ -49,7 +49,7 @@ To perform its intended functions, HELIX RSS initiates outgoing network requests
 
 ## 4. Data Retention & Erasure
 
-Because HELIX RSS is self-hosted:
+Because HELIX Discord Bot is self-hosted:
 - **Feed Deletion**: Deleting a feed from the dashboard or via `/feed remove` immediately purges its configuration and associated delivery logs from the local database.
 - **Account Deletion**: Instance administrators can delete users via the Settings tab or directly query SQLite.
 - **Complete Erasure**: Deleting the local `data/helix-rss.db` file permanently removes all stored data.

@@ -1,7 +1,7 @@
 <div align="center">
-  <img src="banner.png" width="100%" alt="HELIX RSS Banner" />
+  <img src="banner.png" width="100%" alt="HELIX Discord Bot Banner" />
 
-  # 📡 HELIX RSS
+  # 📡 HELIX Discord Bot
   **A modern, self-hosted RSS, Web Scraper, Reddit, & Free Games syndication hub for Discord.**
 
   [![Version](https://img.shields.io/github/package-json/v/HELIX-Origin/HELIX-RSS?style=plastic&logo=github)](https://github.com/HELIX-Origin/HELIX-RSS/releases)
@@ -18,9 +18,9 @@
 
 ## 📖 Overview
 
-**HELIX RSS** is a lightweight, multi-user feed syndication engine and Discord bot built natively in TypeScript ESM. It automatically monitors RSS/Atom feeds, custom CSS webpage scrapers, curated subreddit streams, and weekly 100% OFF free game promotions—delivering clean, rich Discord embeds straight to your server channels without any webhook management overhead.
+**HELIX Discord Bot** is a lightweight, multi-user feed syndication engine and Discord bot built natively in TypeScript ESM. It automatically monitors RSS/Atom feeds, custom CSS webpage scrapers, curated subreddit streams, and weekly 100% OFF free game promotions—delivering clean, rich Discord embeds straight to your server channels without any webhook management overhead.
 
-Featuring a built-in web dashboard, Discord OAuth2 authentication, zero frontend npm dependencies, SQLite persistent storage, and optional Redis clustering, HELIX RSS provides everything you need to keep your Discord community informed in real time.
+Featuring a built-in web dashboard, Discord OAuth2 authentication, zero frontend npm dependencies, SQLite persistent storage, and optional Redis clustering, HELIX Discord Bot provides everything you need to keep your Discord community informed in real time.
 
 ---
 
@@ -108,7 +108,7 @@ Open **`http://localhost:3131`** in your browser and click **Log In with Discord
 
 ```yaml
 services:
-  helix-rss:
+  helix-discord-bot:
     image: node:22-alpine
     working_dir: /app
     volumes:
@@ -124,7 +124,7 @@ services:
 
 ### Linux systemd Service
 
-Install HELIX RSS as a managed 24/7 background systemd service:
+Install HELIX Discord Bot as a managed 24/7 background systemd service:
 
 ```bash
 sudo ./scripts/install-service.sh

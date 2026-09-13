@@ -1,6 +1,6 @@
 # 🩺 Troubleshooting & Frequently Asked Questions
 
-This guide provides diagnostic steps and solutions for common issues encountered when running, deploying, or configuring HELIX RSS.
+This guide provides diagnostic steps and solutions for common issues encountered when running, deploying, or configuring HELIX Discord Bot.
 
 ---
 
@@ -68,7 +68,7 @@ flowchart TD
 **Symptoms**: Log contains `Error: SQLITE_BUSY: database is locked`.
 
 **Solutions**:
-1. Ensure only **one instance** of HELIX RSS is accessing the SQLite database file at a time (e.g., avoid running multiple containers sharing the same volume without clustering).
+1. Ensure only **one instance** of HELIX Discord Bot is accessing the SQLite database file at a time (e.g., avoid running multiple containers sharing the same volume without clustering).
 2. The database runs in **WAL mode** (`PRAGMA journal_mode = WAL`), which already mitigates most read/write contention. SQLite is the only supported engine.
 
 ---
@@ -87,9 +87,9 @@ flowchart TD
 ## ❓ Frequently Asked Questions (FAQ)
 
 <details>
-<summary><strong>Q: Does HELIX RSS require webhook URLs for each channel?</strong></summary>
+<summary><strong>Q: Does HELIX Discord Bot require webhook URLs for each channel?</strong></summary>
 
-> **No**. HELIX RSS connects directly using the Discord Bot Token and Discord REST API. You only need to select target channels from the dropdown.
+> **No**. HELIX Discord Bot connects directly using the Discord Bot Token and Discord REST API. You only need to select target channels from the dropdown.
 </details>
 
 <details>

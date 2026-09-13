@@ -1,6 +1,6 @@
 # Agents Index
 
-This directory contains specialized agent documentation for the HELIX RSS project. Each agent file outlines domain architecture, responsibilities, workflow loops, and execution commands.
+This directory contains specialized agent documentation for the HELIX Discord Bot project. Each agent file outlines domain architecture, responsibilities, workflow loops, and execution commands.
 
 ```mermaid
 flowchart LR

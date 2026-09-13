@@ -26,5 +26,5 @@ export interface AppDeps {
  * Falls back to the service's default name only when no bot context is available.
  */
 export function appDisplayName(deps: AppDeps): string {
-  return deps.bot?.getAppName() ?? 'HELIX RSS';
+  return deps.bot?.getAppName() ?? 'HELIX Discord Bot';
 }
