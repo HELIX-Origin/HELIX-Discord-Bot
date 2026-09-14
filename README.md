@@ -28,6 +28,28 @@ Featuring a built-in web dashboard, Discord OAuth2 authentication, zero frontend
 
 ### 🎮 Free Games Giveaway Alerts
 - **Multi-Platform Support**: Official support for **Epic Games Store**, **Steam**, **GOG.com**, **IndieGala**, **Humble Bundle**, **Itch.io**, **Ubisoft Store**, **EA App / Origin**, **Prime Gaming**, and **Battle.net**.
+- **Automated Daily Drops**: Runs on an automated daily schedule with deduplication so limited-time giveaways are never missed.
+- **Rich Store Embeds**: Standardized Discord embeds with official store branding, high-contrast badges, pricing worth, expiration timers, and direct claim links.
+
+### 🎵 Music Playback via NodeLink
+- **Multi-Source Support**: Native playback from **YouTube**, **Spotify**, **SoundCloud**, **Apple Music**, **Deezer**, and more — no external Lavalink plugins required.
+- **Queue Management**: Full queue control with `/play`, `/queue`, `/skip`, `/previous`, `/shuffle`, `/loop`, `/volume`, `/seek`, `/nowplaying`, `/pause`, `/resume`, `/stop`, `/leave`.
+- **Real-time Dashboard Queue Page**: Live queue view with now-playing, up-next, track reordering, and volume/loop controls.
+- **Optional External NodeLink**: Run NodeLink internally (auto-started) or connect to an external NodeLink node via `NODELINK_EXTERNAL=true`.
+
+### 😂 Entertainment GIF Commands
+- **KLIPY-Powered GIFs**: `/gif [category]` with autocomplete for popular tags (anime, jojo, waifu, slap, gintama, doggo, cat, etc.).
+- **Action Commands**: Convenience commands `/slap`, `/hug`, `/kiss`, `/pat`, `/bonk`, `/cuddle`, `/tickle`, `/pet`, `/poke`, `/baka`, `/smug`, `/cry`, `/angry`, `/meme` — each maps to its KLIPY tag internally.
+- **Random GIF Fallback**: `/gif` without arguments returns a random GIF from the general pool.
+
+### 🛡️ Guild Administration
+- **Moderation Commands**: `/admin warn`, `/admin kick`, `/admin ban`, `/admin lock`, `/admin purge`, `/admin slowmode`, `/admin announce`.
+- **Role Management**: Assign/remove roles, create role menus.
+- **Voice Controls**: Mute, deafen, move, disconnect members.
+- **Per-Guild Permissions**: All commands respect Discord's native permission system.
+
+### 🤖 Custom Reddit Feeds
+- **Multi-Platform Support**: Official support for **Epic Games Store**, **Steam**, **GOG.com**, **IndieGala**, **Humble Bundle**, **Itch.io**, **Ubisoft Store**, **EA App / Origin**, **Prime Gaming**, and **Battle.net**.
 - **Automated Monday Drops**: Runs on an automated weekly schedule (every Monday) with an instant manual polling trigger in the dashboard.
 - **Rich Store Embeds**: Standardized Discord embeds with official store branding, high-contrast badges, pricing worth, expiration timers, and direct claim links.
 
@@ -54,7 +76,12 @@ Featuring a built-in web dashboard, Discord OAuth2 authentication, zero frontend
 ### 🤖 Discord Bot Integration
 - **Direct Channel Delivery**: Delivers directly to text channels via the Discord REST API—no webhook creation or management required.
 - **Forum Thread Delivery** *(optional, per server)*: Each feed can deliver into its own dedicated thread inside a forum channel—threads are kept open via keepalive polling and rotate into a fresh thread when they grow large. Configured from the dashboard Feeds tab or `FORUM_CHANNEL_IDS` env.
-- **Slash Commands**: Interactive commands (`/feed`, `/stats`, `/about`, `/help`) for checking feed statuses directly in Discord.
+- **Slash Commands**: Interactive commands grouped by category:
+  - **Feeds**: `/feed` (add/remove/list/pause/resume), `/stats`
+  - **Music**: `/play`, `/queue`, `/skip`, `/previous`, `/shuffle`, `/loop`, `/volume`, `/seek`, `/nowplaying`, `/pause`, `/resume`, `/stop`, `/leave`
+  - **Entertainment**: `/gif`, `/slap`, `/hug`, `/kiss`, `/pat`, `/bonk`, `/cuddle`, `/tickle`, `/pet`, `/poke`, `/baka`, `/smug`, `/cry`, `/angry`, `/meme`
+  - **Admin**: `/admin warn`, `/admin kick`, `/admin ban`, `/admin lock`, `/admin purge`, `/admin slowmode`, `/admin announce`, `/admin role`
+  - **Utility**: `/about`, `/help`
 - **Automatic Owner Detection**: Automatically grants full Owner rights to Discord Application owners and team members upon Discord login.
 
 ---
@@ -70,7 +97,7 @@ Featuring a built-in web dashboard, Discord OAuth2 authentication, zero frontend
 ```bash
 # Clone the repository
 git clone https://github.com/HELIX-Origin/HELIX-Discord-Bot.git
-cd HELIX-RSS
+cd HELIX-Discord-Bot
 
 # Copy environment template
 cp .env.example .env

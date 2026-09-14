@@ -34,6 +34,78 @@ export const helpCommandDef: ApplicationCommand = {
 
 export const defaultCommands: ApplicationCommand[] = [feedCommandDef, statsCommandDef, aboutCommandDef, helpCommandDef];
 
+interface CommandCategory {
+  name: string;
+  emoji: string;
+  commands: ApplicationCommand[];
+}
+
+function categorizeCommands(commands: ApplicationCommand[]): CommandCategory[] {
+  const categories: Record<string, CommandCategory> = {
+    feeds: { name: 'Feeds', emoji: '📰', commands: [] },
+    admin: { name: 'Admin', emoji: '🛡️', commands: [] },
+    entertainment: { name: 'Entertainment', emoji: '😂', commands: [] },
+    music: { name: 'Music', emoji: '🎵', commands: [] },
+    utility: { name: 'Utility', emoji: '🔧', commands: [] },
+  };
+
+  const feedCommands = new Set(['feed']);
+  const adminCommands = new Set(['set', 'welcome', 'ticket']);
+  const entertainmentCommands = new Set([
+    'gif',
+    'slap',
+    'hug',
+    'kiss',
+    'pat',
+    'bonk',
+    'cuddle',
+    'tickle',
+    'pet',
+    'poke',
+    'baka',
+    'smug',
+    'cry',
+    'angry',
+    'meme',
+  ]);
+  const musicCommands = new Set([
+    'play',
+    'queue',
+    'skip',
+    'next',
+    'jump',
+    'leave',
+    'volume',
+    'equalizer',
+    'nowplaying',
+    'np',
+    'pause',
+    'resume',
+    'stop',
+    'seek',
+    'shuffle',
+    'loop',
+    'previous',
+    'back',
+  ]);
+
+  for (const cmd of commands) {
+    if (feedCommands.has(cmd.name)) {
+      categories.feeds.commands.push(cmd);
+    } else if (adminCommands.has(cmd.name)) {
+      categories.admin.commands.push(cmd);
+    } else if (entertainmentCommands.has(cmd.name)) {
+      categories.entertainment.commands.push(cmd);
+    } else if (musicCommands.has(cmd.name)) {
+      categories.music.commands.push(cmd);
+    } else {
+      categories.utility.commands.push(cmd);
+    }
+  }
+
+  return Object.values(categories).filter((cat) => cat.commands.length > 0);
+}
+
 function formatOptionSummary(option: ApplicationCommandOption): string {
   const req = option.required ? 'required' : 'optional';
   return `• \`${option.name}\` *(${req})* — ${option.description}`;
@@ -85,18 +157,23 @@ function buildCommandDetailEmbed(command: ApplicationCommand, branding: AppBrand
   return embed;
 }
 
-function buildAllCommandsEmbed(commands: ApplicationCommand[], branding: AppBranding): DiscordEmbed {
-  const fields: Array<{ name: string; value: string; inline?: boolean }> = commands.map((cmd) => ({
-    name: `/${cmd.name}`,
-    value: `${cmd.description}\n\n**Usage:** \`/${cmd.name}\``,
-    inline: true,
-  }));
+function buildCategorizedHelpEmbed(categories: CommandCategory[], branding: AppBranding): DiscordEmbed {
+  const fields: Array<{ name: string; value: string; inline?: boolean }> = [];
+
+  for (const category of categories) {
+    const commandList = category.commands.map((cmd) => `• \`/${cmd.name}\` — ${cmd.description}`).join('\n');
+    fields.push({
+      name: `${category.emoji} ${category.name}`,
+      value: commandList,
+      inline: false,
+    });
+  }
 
   const embed: DiscordEmbed = {
     author: brandAuthor(branding),
     title: `📖 ${branding.appName} Slash Commands`,
     description:
-      'Here is a list of all available slash commands. Use `/help <command>` for detailed options and syntax.',
+      'Here is a list of all available slash commands grouped by category. Use `/help <command>` for detailed options and syntax.',
     color: STANDARD_EMBED_COLOR,
     fields,
     footer: { text: `${branding.appName} • Type / in chat to run any command` },
@@ -150,10 +227,12 @@ export async function handleHelpCommand(
     };
   }
 
+  const categories = categorizeCommands(commands);
+
   return {
     type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
     data: {
-      embeds: [buildAllCommandsEmbed(commands, branding)],
+      embeds: [buildCategorizedHelpEmbed(categories, branding)],
     },
   };
 }

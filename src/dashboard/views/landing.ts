@@ -318,16 +318,19 @@ export function renderLandingHtml(deps: AppDeps, userId: number | null = null): 
       </div>
     </div>
 
-    <!-- Supported Sources Ribbon -->
+<!-- Supported Sources Ribbon -->
     <div style="text-align: center;">
-      <h3 style="font-size: 1.125rem; font-weight: 700; color: var(--text-muted);">Supported Platforms &amp; Protocols</h3>
+      <h3 style="font-size: 1.125rem; font-weight: 700; color: var(--text-muted);">Supported Platforms & Protocols</h3>
       <div class="sources-grid">
-        <div class="source-pill"><i class="fa-solid fa-rss" style="color: #f59e0b;"></i> RSS 2.0 &amp; Atom</div>
-        <div class="source-pill"><i class="fa-brands fa-reddit" style="color: #ff4500;"></i> Reddit (Pure Image &amp; RSS)</div>
-        <div class="source-pill"><i class="fa-solid fa-gamepad" style="color: #10b981;"></i> Epic Games Store &amp; Steam</div>
-        <div class="source-pill"><i class="fa-solid fa-gifts" style="color: #a855f7;"></i> GOG, Prime &amp; Humble Bundle</div>
+        <div class="source-pill"><i class="fa-solid fa-rss" style="color: #f59e0b;"></i> RSS 2.0 & Atom</div>
+        <div class="source-pill"><i class="fa-brands fa-reddit" style="color: #ff4500;"></i> Reddit (Pure Image & RSS)</div>
+        <div class="source-pill"><i class="fa-solid fa-gamepad" style="color: #10b981;"></i> Epic Games Store & Steam</div>
+        <div class="source-pill"><i class="fa-solid fa-gifts" style="color: #a855f7;"></i> GOG, Prime & Humble Bundle</div>
         <div class="source-pill"><i class="fa-solid fa-newspaper" style="color: #38bdf8;"></i> 700+ News Presets</div>
+        <div class="source-pill"><i class="fa-brands fa-youtube" style="color: #ff0000;"></i> YouTube Live & Upload Alerts</div>
+        <div class="source-pill"><i class="fa-brands fa-twitch" style="color: #9146ff;"></i> Twitch Live Alerts</div>
       </div>
+    </div>
     </div>
 
     <!-- Core Features Grid -->
@@ -397,10 +400,40 @@ export function renderLandingHtml(deps: AppDeps, userId: number | null = null): 
             Styled with modern Glassmorphism, Dark, Cyberpunk, Dracula, Nord, Emerald, or Light themes configured via environment variables.
           </p>
         </div>
+
+        <div class="feature-card">
+          <div class="feature-icon" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">
+            <i class="fa-solid fa-music"></i>
+          </div>
+          <h3 class="feature-title">Music Playback via NodeLink</h3>
+          <p class="feature-desc">
+            High-quality music playback from YouTube, Spotify, SoundCloud, and more. Queue management, volume control, shuffle/loop modes, and a real-time dashboard queue page.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon" style="background: rgba(244, 63, 94, 0.15); color: #f43f5e;">
+            <i class="fa-solid fa-gift"></i>
+          </div>
+          <h3 class="feature-title">Entertainment GIF Commands</h3>
+          <p class="feature-desc">
+            Fun GIF commands powered by KLIPY API — <code>/gif</code>, <code>/slap</code>, <code>/hug</code>, <code>/kiss</code>, <code>/pat</code>, <code>/bonk</code>, and more. Category autocomplete and random GIF support.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon" style="background: rgba(99, 102, 241, 0.15); color: #6366f1;">
+            <i class="fa-solid fa-user-shield"></i>
+          </div>
+          <h3 class="feature-title">Guild Administration</h3>
+          <p class="feature-desc">
+            Moderation and management commands: warn, kick, ban, lock, purge, slowmode, announce, role management, and voice controls. Per-guild permission guards.
+          </p>
+        </div>
       </div>
     </section>
 
-    <!-- Slash Commands Showcase -->
+<!-- Slash Commands Showcase -->
     <section class="features-section">
       <div class="section-header">
         <h2 class="section-title">Intuitive Discord Slash Commands</h2>
@@ -409,12 +442,28 @@ export function renderLandingHtml(deps: AppDeps, userId: number | null = null): 
 
       <div class="code-preview">
         <div class="code-line">
-          <span class="code-cmd">/feed add url:&lt;feed_url&gt; channel:#announcements role:@NewsPings</span>
+          <span class="code-cmd">/feed add url:<feed_url> channel:#announcements role:@NewsPings</span>
           <span class="code-comment"># Subscribe channel to any RSS or Reddit feed</span>
         </div>
         <div class="code-line">
           <span class="code-cmd">/feed add url:freegames:all channel:#free-games</span>
           <span class="code-comment"># Subscribe to 100% free game promotions across all stores</span>
+        </div>
+        <div class="code-line">
+          <span class="code-cmd">/play <query></span>
+          <span class="code-comment"># Play music from YouTube, Spotify, SoundCloud</span>
+        </div>
+        <div class="code-line">
+          <span class="code-cmd">/queue</span>
+          <span class="code-comment"># View current music queue</span>
+        </div>
+        <div class="code-line">
+          <span class="code-cmd">/gif anime</span>
+          <span class="code-comment"># Get an anime GIF (also /slap, /hug, /kiss, etc.)</span>
+        </div>
+        <div class="code-line">
+          <span class="code-cmd">/admin warn @user reason:<reason></span>
+          <span class="code-comment"># Moderation commands</span>
         </div>
         <div class="code-line">
           <span class="code-cmd">/stats</span>

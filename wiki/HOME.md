@@ -31,6 +31,10 @@ flowchart TD
         News["News Feeds Catalog (700+ Presets)"]
         Games["Free Games (Epic, Steam, GOG, Humble, Prime...)"]
         Social["Reddit"]
+        YouTube["YouTube Live & Upload Alerts"]
+        Twitch["Twitch Live Alerts"]
+        Spotify["Spotify / Apple Music / Deezer"]
+        SoundCloud["SoundCloud"]
     end
 
     subgraph CoreEngine["HELIX Discord Bot Core"]
@@ -40,11 +44,15 @@ flowchart TD
         DB[(SQLite Database)]
         Bot["Native Discord Bot Engine (Gateway + REST API)"]
         Web["Native HTTP Web Dashboard & REST API"]
+        NodeLink["NodeLink Music Engine"]
+        GIF["KLIPY GIF Engine"]
+        Admin["Guild Admin Engine"]
     end
 
     subgraph Discord["Discord Platform"]
         Channels["Target Server Guild Channels"]
-        SlashCmd["User Slash Commands (/feed, /stats)"]
+        Threads["Forum Threads"]
+        SlashCmd["User Slash Commands (Feeds, Music, GIFs, Admin)"]
     end
 
     Sources -->|Poll/Scrape| Parser
@@ -53,16 +61,23 @@ flowchart TD
     Dedup <-->|Query/Store State| DB
     Dedup -->|New Articles| Bot
     Bot -->|Post Embeds| Channels
+    Bot -->|Post Threads| Threads
     SlashCmd <--> Bot
     Web <--> DB
     Web <--> Bot
+    NodeLink <--> Bot
+    GIF <--> Bot
+    Admin <--> Bot
 ```
 
 ### 🎯 Feature Overview
 1. **Multi-Source Scraping**: Full native support for RSS 0.9x/1.0/2.0, Atom 1.0, JSON Feed, Reddit subreddits, and free games giveaways.
-2. **Dedicated Free Games Aggregator**: Real-time promotions scraping across 10 major digital storefronts with store-specific badge icons and Monday weekly schedule.
+2. **Dedicated Free Games Aggregator**: Real-time promotions scraping across 10 major digital storefronts with store-specific badge icons and **daily** automated schedule with deduplication.
 3. **Dedicated Reddit Engine**: Switch seamlessly between **Pure Image Mode** (fullscreen meme & photo banners) and **Standard RSS Mode** (discussion excerpts and link cards).
 4. **News Feeds Catalog**: Instant 1-click subscription to 700+ verified feeds across 15 popular news categories.
 5. **No Webhook Hassle**: Messages are dispatched directly to guild channels using Discord REST API endpoints with granular role/user pings and embed color customization.
 6. **Forum Thread Delivery**: Optional per-server delivery of each feed into its own dedicated thread inside a forum channel — kept open via keepalive polling, auto-rotated into a fresh thread when large (configurable from the dashboard Feeds tab).
 7. **Glassmorphism Web Dashboard**: Real-time management interface with Discord OAuth2 login, feed analytics, log streaming, and preset browsing.
+8. **Music Playback via NodeLink**: High-quality music from YouTube, Spotify, SoundCloud, Apple Music, Deezer with queue management, shuffle/loop/volume/seek controls, and real-time dashboard queue page. Runs internal NodeLink server or connects to external node.
+9. **Entertainment GIF Commands**: KLIPY-powered `/gif` with category autocomplete (anime, jojo, waifu, slap, etc.), action commands (`/slap`, `/hug`, `/kiss`, `/pat`, `/bonk`, etc.), and random GIF fallback.
+10. **Guild Administration**: Moderation (`/admin warn`, `/kick`, `/ban`, `/lock`, `/purge`, `/slowmode`, `/announce`), role management, voice controls (mute/deafen/move/disconnect), all with Discord permission guards.
