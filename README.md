@@ -4,13 +4,13 @@
   # 📡 HELIX Discord Bot
   **A modern, self-hosted RSS, Web Scraper, Reddit, & Free Games syndication hub for Discord.**
 
-  [![Version](https://img.shields.io/github/package-json/v/HELIX-Origin/HELIX-RSS?style=plastic&logo=github)](https://github.com/HELIX-Origin/HELIX-RSS/releases)
-  [![License](https://img.shields.io/github/license/HELIX-Origin/HELIX-RSS?style=plastic)](LICENSE.md)
+  [![Version](https://img.shields.io/github/package-json/v/HELIX-Origin/HELIX-Discord-Bot?style=plastic&logo=github)](https://github.com/HELIX-Origin/HELIX-Discord-Bot/releases)
+  [![License](https://img.shields.io/github/license/HELIX-Origin/HELIX-Discord-Bot?style=plastic)](LICENSE.md)
   [![Node.js](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FHELIX-Origin%2FHELIX-RSS%2Fmain%2Fpackage.json&query=engines.node&label=Node.js&logo=node.js&logoColor=white&color=339933&style=plastic)](https://nodejs.org/)
-  [![TypeScript](https://img.shields.io/github/languages/top/HELIX-Origin/HELIX-RSS?style=plastic&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-  [![Issues](https://img.shields.io/github/issues/HELIX-Origin/HELIX-RSS?style=plastic)](https://github.com/HELIX-Origin/HELIX-RSS/issues)
-  [![Stars](https://img.shields.io/github/stars/HELIX-Origin/HELIX-RSS?style=plastic&logo=github)](https://github.com/HELIX-Origin/HELIX-RSS)
-  [![Last Commit](https://img.shields.io/github/last-commit/HELIX-Origin/HELIX-RSS?style=plastic)](https://github.com/HELIX-Origin/HELIX-RSS/commits/main)
+  [![TypeScript](https://img.shields.io/github/languages/top/HELIX-Origin/HELIX-Discord-Bot?style=plastic&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+  [![Issues](https://img.shields.io/github/issues/HELIX-Origin/HELIX-Discord-Bot?style=plastic)](https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues)
+  [![Stars](https://img.shields.io/github/stars/HELIX-Origin/HELIX-Discord-Bot?style=plastic&logo=github)](https://github.com/HELIX-Origin/HELIX-Discord-Bot)
+  [![Last Commit](https://img.shields.io/github/last-commit/HELIX-Origin/HELIX-Discord-Bot?style=plastic)](https://github.com/HELIX-Origin/HELIX-Discord-Bot/commits/main)
   [![Discord](https://dcbadge.limes.pink/api/server/https://discord.gg/Ww3XBZC2HV?style=plastic)](https://discord.gg/Ww3XBZC2HV)
 </div>
 
@@ -69,7 +69,7 @@ Featuring a built-in web dashboard, Discord OAuth2 authentication, zero frontend
 
 ```bash
 # Clone the repository
-git clone https://github.com/HELIX-Origin/HELIX-RSS.git
+git clone https://github.com/HELIX-Origin/HELIX-Discord-Bot.git
 cd HELIX-RSS
 
 # Copy environment template
@@ -86,8 +86,8 @@ DISCORD_CLIENT_ID=your_discord_application_client_id
 DISCORD_CLIENT_SECRET=your_discord_client_secret
 INTERNAL_URL=127.0.0.1:3131
 PUBLIC_URL=http://localhost:3131
-REPO_URL=https://github.com/HELIX-Origin/HELIX-RSS
-USER_AGENT=HELIX-Origin/HELIX-RSS
+REPO_URL=https://github.com/HELIX-Origin/HELIX-Discord-Bot
+USER_AGENT=HELIX-Origin/HELIX-Discord-Bot
 ```
 
 ### 3. Build & Run
@@ -157,7 +157,7 @@ Comprehensive guides, architecture breakdowns, configuration settings, and API s
 
 Contributions, feature suggestions, and bug reports are welcome!
 - Review [CONTRIBUTING.md](CONTRIBUTING.md) for code quality standards and git commit conventions.
-- Report issues and request features on our [GitHub Issue Tracker](https://github.com/HELIX-Origin/HELIX-RSS/issues).
+- Report issues and request features on our [GitHub Issue Tracker](https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues).
 
 ---
 

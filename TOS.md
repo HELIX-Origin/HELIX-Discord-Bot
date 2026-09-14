@@ -60,5 +60,5 @@ The project maintainers reserve the right to update these Terms at any time by u
 
 ## 8. Community & Contact
 
-- **Repository**: [https://github.com/HELIX-Origin/HELIX-RSS](https://github.com/HELIX-Origin/HELIX-RSS)
+- **Repository**: [https://github.com/HELIX-Origin/HELIX-Discord-Bot](https://github.com/HELIX-Origin/HELIX-Discord-Bot)
 - **Discord Community**: [HELIX Origin Discord](https://discord.com/invite/Ww3XBZC2HV)

@@ -10,7 +10,7 @@ export function renderLandingHtml(deps: AppDeps, userId: number | null = null): 
   const botInviteUrl = deps.config.clientId
     ? `https://discord.com/oauth2/authorize?client_id=${encodeURIComponent(deps.config.clientId)}&scope=bot%20applications.commands&permissions=586263558272`
     : null;
-  const repoUrl = deps.config.repoUrl || 'https://github.com/HELIX-Origin/HELIX-RSS';
+  const repoUrl = deps.config.repoUrl || 'https://github.com/HELIX-Origin/HELIX-Discord-Bot';
   const dbStats = deps.db.stats();
   const dashboardEnabled = deps.config.features.dashboardEnabled;
 

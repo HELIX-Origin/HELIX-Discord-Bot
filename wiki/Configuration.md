@@ -103,7 +103,7 @@ INTERNAL_URL=127.0.0.1:3131
 PUBLIC_URL=http://localhost:3131
 
 # Repository & User-Agent identification
-REPO_URL=https://github.com/HELIX-Origin/HELIX-RSS
+REPO_URL=https://github.com/HELIX-Origin/HELIX-Discord-Bot
 USER_AGENT=
 
 # Logging

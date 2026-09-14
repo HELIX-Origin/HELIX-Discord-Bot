@@ -67,5 +67,5 @@ Because HELIX Discord Bot is self-hosted:
 ## 6. Contact & Open Source Inquiries
 
 For questions regarding the open-source software, security disclosures, or feature requests, visit:
-- **Repository**: [https://github.com/HELIX-Origin/HELIX-RSS](https://github.com/HELIX-Origin/HELIX-RSS)
+- **Repository**: [https://github.com/HELIX-Origin/HELIX-Discord-Bot](https://github.com/HELIX-Origin/HELIX-Discord-Bot)
 - **Discord Community**: [HELIX Origin Discord](https://discord.com/invite/Ww3XBZC2HV)

@@ -620,7 +620,7 @@ export function renderDashboardHtml(
             <i class="fa-solid fa-user-shield" style="color: var(--primary);"></i> <span>Guild Admin</span>
           </button>
           ${
-            deps.config.features.lavaEnabled
+            deps.config.features.nodeLinkEnabled
               ? `<button onclick="switchTab('music')" id="tab-btn-music" class="tab-btn">
             <i class="fa-solid fa-music" style="color: #10b981;"></i> <span>Music</span>
           </button>`
@@ -1071,7 +1071,7 @@ export function renderDashboardHtml(
 
         <!-- TAB: MUSIC (NodeLink Queue) -->
         ${
-          deps.config.features.lavaEnabled
+          deps.config.features.nodeLinkEnabled
             ? `<section id="tab-music" class="tab-pane">
           <div>
             <div class="section-title"><i class="fa-solid fa-music" style="color: #10b981;"></i> Music &amp; Queue</div>

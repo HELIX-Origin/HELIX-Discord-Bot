@@ -30,7 +30,7 @@ export function createCommandHandler(deps: AppDeps): CommandHandler {
   if (f.feedsEnabled) commands.push(feedCommandDef);
   if (f.gifsEnabled && deps.config.klipyApiKey) commands.push(gifCommandDef);
   if (f.administrationEnabled) commands.push(setCommandDef, welcomeCommandDef, ticketCommandDef);
-  if (f.lavaEnabled) commands.push(...musicCommandDefs);
+  if (f.nodeLinkEnabled) commands.push(...musicCommandDefs);
 
   commands.push(helpCommandDef);
 
@@ -41,7 +41,7 @@ export function createCommandHandler(deps: AppDeps): CommandHandler {
   if (f.gifsEnabled && deps.config.klipyApiKey) {
     autocompleteHandlers.set('gif', handleGifAutocomplete);
   }
-  if (f.lavaEnabled) {
+  if (f.nodeLinkEnabled) {
     autocompleteHandlers.set('play', handleMusicAutocomplete);
   }
 

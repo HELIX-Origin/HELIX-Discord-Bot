@@ -10,7 +10,7 @@ export function registerMusicRoutes(router: Router<AppDeps>): void {
 
     const guildId = ctx.params['guildId'];
     if (!guildId) return sendError(res, 400, 'guildId is required');
-    if (!d.config.features.lavaEnabled) return sendError(res, 400, 'Music features are disabled.');
+    if (!d.config.features.nodeLinkEnabled) return sendError(res, 400, 'Music features are disabled.');
     if (!d.bot) return sendError(res, 400, 'Discord bot is not enabled');
     if (!canUserManageGuild(userId, guildId, d)) {
       return sendError(res, 403, 'Forbidden: You cannot manage this server.');
@@ -50,7 +50,7 @@ export function registerMusicRoutes(router: Router<AppDeps>): void {
     const action = ctx.params['action'];
     if (!guildId) return sendError(res, 400, 'guildId is required');
     if (!action) return sendError(res, 400, 'action is required');
-    if (!d.config.features.lavaEnabled) return sendError(res, 400, 'Music features are disabled.');
+    if (!d.config.features.nodeLinkEnabled) return sendError(res, 400, 'Music features are disabled.');
     if (!d.bot) return sendError(res, 400, 'Discord bot is not enabled');
     if (!canUserManageGuild(userId, guildId, d)) {
       return sendError(res, 403, 'Forbidden: You cannot manage this server.');

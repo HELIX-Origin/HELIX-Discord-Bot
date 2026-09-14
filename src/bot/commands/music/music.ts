@@ -197,7 +197,7 @@ export async function handleMusicCommand(
     };
   }
 
-  if (!deps.config.features.lavaEnabled) {
+  if (!deps.config.features.nodeLinkEnabled) {
     return {
       type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
       data: { flags: 64, content: '❌ Music features are disabled.' },
@@ -546,7 +546,7 @@ export async function handleMusicAutocomplete(
   const _focused = interaction.data?.options?.[0]?.focused as boolean | undefined;
   const value = (interaction.data?.options?.[0]?.value as string | undefined)?.toLowerCase() ?? '';
 
-  if (!deps.config.features.lavaEnabled) {
+  if (!deps.config.features.nodeLinkEnabled) {
     return { type: InteractionResponseType.APPLICATION_COMMAND_AUTOCOMPLETE_RESULT, data: { choices: [] } };
   }
 

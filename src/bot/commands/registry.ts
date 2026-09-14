@@ -16,7 +16,7 @@ export function getEnabledCommands(deps: AppDeps): ApplicationCommand[] {
   if (f.feedsEnabled) commands.push(feedCommandDef);
   if (f.gifsEnabled && deps.config.klipyApiKey) commands.push(gifCommandDef);
   if (f.administrationEnabled) commands.push(setCommandDef, welcomeCommandDef, ticketCommandDef);
-  if (f.lavaEnabled) commands.push(...musicCommandDefs);
+  if (f.nodeLinkEnabled) commands.push(...musicCommandDefs);
   return commands;
 }
 

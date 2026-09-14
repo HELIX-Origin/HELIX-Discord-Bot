@@ -8,7 +8,7 @@ export interface FeatureFlags {
   threadsEnabled: boolean;
   gifsEnabled: boolean;
   administrationEnabled: boolean;
-  lavaEnabled: boolean;
+  nodeLinkEnabled: boolean;
   dashboardEnabled: boolean;
   adminPanelEnabled: boolean;
 }
@@ -18,6 +18,7 @@ export interface NodeLinkConfig {
   port: number;
   secure: boolean;
   password: string;
+  external: boolean;
 }
 
 export interface AppConfig {
@@ -53,10 +54,13 @@ export interface AppConfig {
   threadKeepaliveGraceMs: number;
   threadMaxMessages: number;
   youtubeApiKey: string | null;
+  youtubeClientId: string | null;
+  youtubeClientSecret: string | null;
   twitchClientId: string | null;
   twitchClientSecret: string | null;
   features: FeatureFlags;
   nodeLink: NodeLinkConfig;
+  nodeLinkExternal: boolean;
   spotifyClientId: string | null;
   spotifyClientSecret: string | null;
   klipyApiKey: string | null;
@@ -199,6 +203,8 @@ export function defaultConfig(): AppConfig {
     process.env['KEEP_THREADS_OPEN']?.toLowerCase() !== 'false';
 
   const youtubeApiKey = process.env['YOUTUBE_API_KEY']?.trim() || null;
+  const youtubeClientId = process.env['YOUTUBE_CLIENT_ID']?.trim() || null;
+  const youtubeClientSecret = process.env['YOUTUBE_CLIENT_SECRET']?.trim() || null;
   const twitchClientId = process.env['TWITCH_CLIENT_ID']?.trim() || null;
   const twitchClientSecret = process.env['TWITCH_CLIENT_SECRET']?.trim() || null;
 
@@ -211,7 +217,7 @@ export function defaultConfig(): AppConfig {
     threadsEnabled: parseEnvFlag(process.env['THREADS_ENABLED'], true),
     gifsEnabled: parseEnvFlag(process.env['GIFS_ENABLED'], true),
     administrationEnabled: parseEnvFlag(process.env['ADMINISTRATION_ENABLED'], true),
-    lavaEnabled: parseEnvFlag(process.env['LAVA_ENABLED'], true),
+    nodeLinkEnabled: parseEnvFlag(process.env['NODELINK_ENABLED'], true),
     dashboardEnabled: parseEnvFlag(process.env['DASHBOARD_ENABLED'], true),
     adminPanelEnabled: parseEnvFlag(process.env['ADMIN_PANEL_ENABLED'], true),
   };
@@ -220,11 +226,13 @@ export function defaultConfig(): AppConfig {
   // as a client; only the endpoint values change.
   // Public instance: nodelink.triniumhost.indevs.in:443 (SSL) - password: free (NodeLink v3.8.0)
   // Self-hosted fallback: localhost:2333
+  const nodeLinkExternal = parseEnvFlag(process.env['NODELINK_EXTERNAL'], false);
   const nodeLink: NodeLinkConfig = {
     host: process.env['NODELINK_HOST']?.trim() || 'nodelink.triniumhost.indevs.in',
     port: parseOptionalInt(process.env['NODELINK_PORT'], 443),
     secure: parseEnvFlag(process.env['NODELINK_SECURE'], true),
     password: process.env['NODELINK_PASSWORD']?.trim() || 'free',
+    external: nodeLinkExternal,
   };
 
   return {
@@ -260,10 +268,13 @@ export function defaultConfig(): AppConfig {
     threadKeepaliveGraceMs: parsePositiveInt(process.env['THREAD_KEEPALIVE_GRACE_MS'], 24 * 3600 * 1000),
     threadMaxMessages: parsePositiveInt(process.env['THREAD_MAX_MESSAGES'], 100),
     youtubeApiKey,
+    youtubeClientId,
+    youtubeClientSecret,
     twitchClientId,
     twitchClientSecret,
     features,
     nodeLink,
+    nodeLinkExternal,
     spotifyClientId: process.env['SPOTIFY_CLIENT_ID']?.trim() || null,
     spotifyClientSecret: process.env['SPOTIFY_CLIENT_SECRET']?.trim() || null,
     klipyApiKey: process.env['KLIPY_API_KEY']?.trim() || null,

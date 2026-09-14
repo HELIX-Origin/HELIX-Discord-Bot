@@ -63,7 +63,7 @@ sudo npm install -g pm2
 
 ### 2. Clone and Build Project
 ```bash
-git clone https://github.com/HELIX-Origin/HELIX-RSS.git /opt/helix-rss
+git clone https://github.com/HELIX-Origin/HELIX-Discord-Bot.git /opt/helix-rss
 cd /opt/helix-rss
 
 npm install
@@ -200,7 +200,7 @@ npm --version
 
 ### 2. Clone and Build
 ```powershell
-git clone https://github.com/HELIX-Origin/HELIX-RSS.git
+git clone https://github.com/HELIX-Origin/HELIX-Discord-Bot.git
 cd HELIX-RSS
 npm install
 npm run build

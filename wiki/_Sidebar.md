@@ -17,6 +17,6 @@
 
 ### Resources
 
-- [GitHub Repository](https://github.com/HELIX-Origin/HELIX-RSS)
-- [Issue Tracker](https://github.com/HELIX-Origin/HELIX-RSS/issues)
+- [GitHub Repository](https://github.com/HELIX-Origin/HELIX-Discord-Bot)
+- [Issue Tracker](https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues)
 - [Community Discord](https://discord.gg/Ww3XBZC2HV)
