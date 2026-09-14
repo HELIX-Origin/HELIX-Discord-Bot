@@ -102,6 +102,13 @@ export class Database {
     } catch {
       // Index may already exist
     }
+    // Schema v7: per-feed topic for topic-based grouping
+    try {
+      this.db.exec('ALTER TABLE feeds ADD COLUMN topic TEXT;');
+    } catch {
+      // Column may already exist
+    }
+
     // Fix oauth_states user_id nullability if created under legacy schema
     try {
       const info = this.db.prepare('PRAGMA table_info(oauth_states)').all() as Array<{

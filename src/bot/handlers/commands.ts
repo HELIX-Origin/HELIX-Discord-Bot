@@ -5,13 +5,16 @@ import {
   type ApplicationCommand,
   type DiscordInteraction,
   type InteractionResponse,
-} from '../types.js';
-import { aboutCommandDef, handleAboutCommand } from '../commands/about.js';
-import { feedCommandDef, handleFeedCommand } from '../commands/feed.js';
-import { handleHelpCommand, helpCommandDef } from '../commands/help.js';
-import { handleStatsCommand, statsCommandDef } from '../commands/stats.js';
-import { gifCommandDef, handleGifCommand, handleGifAutocomplete } from '../commands/gif.js';
-import { setCommandDef, handleSetCommand } from '../commands/set.js';
+} from '../utils/types.js';
+import { aboutCommandDef, handleAboutCommand } from '../commands/utility/about.js';
+import { feedCommandDef, handleFeedCommand } from '../commands/feeds/feed.js';
+import { handleHelpCommand, helpCommandDef } from '../commands/utility/help.js';
+import { handleStatsCommand, statsCommandDef } from '../commands/utility/stats.js';
+import { gifCommandDef, handleGifCommand, handleGifAutocomplete } from '../commands/entertainment/gif.js';
+import { setCommandDef, handleSetCommand } from '../commands/admin/set.js';
+import { welcomeCommandDef, handleWelcomeCommand } from '../commands/admin/welcome.js';
+import { ticketCommandDef, handleTicketCommand } from '../commands/admin/ticket.js';
+import { musicCommandDefs, handleMusicCommand, handleMusicAutocomplete } from '../commands/music/music.js';
 
 export interface CommandHandler {
   readonly commands: ApplicationCommand[];
@@ -26,7 +29,8 @@ export function createCommandHandler(deps: AppDeps): CommandHandler {
   const commands: ApplicationCommand[] = [aboutCommandDef, statsCommandDef];
   if (f.feedsEnabled) commands.push(feedCommandDef);
   if (f.gifsEnabled && deps.config.klipyApiKey) commands.push(gifCommandDef);
-  if (f.administrationEnabled) commands.push(setCommandDef);
+  if (f.administrationEnabled) commands.push(setCommandDef, welcomeCommandDef, ticketCommandDef);
+  if (f.lavaEnabled) commands.push(...musicCommandDefs);
 
   commands.push(helpCommandDef);
 
@@ -36,6 +40,9 @@ export function createCommandHandler(deps: AppDeps): CommandHandler {
   >();
   if (f.gifsEnabled && deps.config.klipyApiKey) {
     autocompleteHandlers.set('gif', handleGifAutocomplete);
+  }
+  if (f.lavaEnabled) {
+    autocompleteHandlers.set('play', handleMusicAutocomplete);
   }
 
   return { commands, autocompleteHandlers };
@@ -85,6 +92,28 @@ export async function dispatchInteraction(
       return handleGifCommand(interaction, deps, rest);
     case 'set':
       return handleSetCommand(interaction, deps, rest);
+    case 'welcome':
+      return handleWelcomeCommand(interaction, deps, rest);
+    case 'ticket':
+      return handleTicketCommand(interaction, deps, rest);
+    case 'play':
+    case 'queue':
+    case 'skip':
+    case 'next':
+    case 'previous':
+    case 'jump':
+    case 'leave':
+    case 'volume':
+    case 'equalizer':
+    case 'nowplaying':
+    case 'np':
+    case 'pause':
+    case 'resume':
+    case 'stop':
+    case 'seek':
+    case 'shuffle':
+    case 'loop':
+      return handleMusicCommand(interaction, deps, rest);
     default:
       return {
         type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,

@@ -10,8 +10,8 @@ export function sendJson(res: ServerResponse, status: number, body: unknown): vo
   res.end(payload);
 }
 
-export function sendText(res: ServerResponse, status: number, text: string): void {
-  res.writeHead(status, { 'content-type': 'text/plain; charset=utf-8' });
+export function sendText(res: ServerResponse, status: number, text: string, headers?: Record<string, string>): void {
+  res.writeHead(status, { 'content-type': 'text/plain; charset=utf-8', ...headers });
   res.end(text);
 }
 

@@ -170,8 +170,9 @@ export class Repository {
     feedType: FeedType,
     scrape: Feed['scrape'],
     guildId?: string | null,
+    topic?: string | null,
   ): Feed {
-    return this.feeds.addFeed(userId, name, url, channelId, feedType, scrape, guildId);
+    return this.feeds.addFeed(userId, name, url, channelId, feedType, scrape, guildId, topic);
   }
 
   updateFeed(
@@ -180,6 +181,7 @@ export class Repository {
     fields: {
       name?: string;
       url?: string;
+      topic?: string | null;
       feedType?: FeedType;
       channelId?: string | null;
       guildId?: string | null;

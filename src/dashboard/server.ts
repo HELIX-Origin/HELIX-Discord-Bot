@@ -16,14 +16,15 @@ import { registerOAuthRoutes } from './routes/oauth.js';
 import { registerFeedsRoutes } from './routes/feeds.js';
 import { registerDiscordRoutes } from './routes/discord.js';
 import { registerGuildRoutes } from './routes/guilds.js';
+import { registerMusicRoutes } from './routes/music.js';
 import { registerSettingsRoutes } from './routes/settings.js';
 import { registerStatsRoutes } from './routes/stats.js';
 import { registerWebhookRoutes, initWebhookRouter } from './routes/webhooks.js';
 import { authedUserId, isAdminOrOwner } from './routes/shared.js';
 import { createLogger } from '../util/logger.js';
-import { dispatchInteraction } from '../bot/commands/index.js';
+import { dispatchInteraction, createCommandHandler } from '../bot/handlers/commands.js';
 import { DiscordRestClient } from '../bot/rest.js';
-import type { DiscordInteraction } from '../bot/types.js';
+import type { DiscordInteraction } from '../bot/utils/types.js';
 
 export function loadTlsCredentials(
   keyConfig: string | null,
@@ -195,6 +196,31 @@ export function createHelixRssServer(deps: AppDeps): Server {
     sendJson(res, 200, { status: 'ok', service: 'helix-discord-bot', proto, uptime: process.uptime() });
   });
 
+  // robots.txt for SEO
+  router.add('GET', '/robots.txt', (_req, res) => {
+    const content = [
+      'User-agent: *',
+      'Disallow: /login',
+      'Disallow: /register',
+      'Disallow: /oauth/',
+      'Disallow: /dashboard/',
+      'Disallow: /guilds',
+      'Disallow: /admin',
+      'Disallow: /api/',
+      'Disallow: /webhook/',
+      'Disallow: /health',
+      'Allow: /',
+      'Allow: /home',
+      'Allow: /landing',
+      'Allow: /privacy',
+      'Allow: /tos',
+      'Allow: /invite',
+      '',
+      'Sitemap: ' + (deps.config.publicBaseUrl ? new URL('/sitemap.xml', deps.config.publicBaseUrl).href : ''),
+    ].join('\n');
+    sendText(res, 200, content, { 'Content-Type': 'text/plain; charset=utf-8' });
+  });
+
   // Discord interactions (webhook)
   const handleInteractions = async (req: IncomingMessage, res: ServerResponse, _ctx: unknown, d: AppDeps) => {
     let body = '';
@@ -209,7 +235,8 @@ export function createHelixRssServer(deps: AppDeps): Server {
           return;
         }
         const rest = d.bot?.rest ?? new DiscordRestClient(d.config.botToken ?? '', d.config.discordApiBaseUrl);
-        const response = await dispatchInteraction(interaction, d, rest);
+        const handler = createCommandHandler(d);
+        const response = await dispatchInteraction(interaction, d, rest, handler);
         sendJson(res, 200, response);
       } catch (err) {
         sendError(res, 500, (err as Error).message);
@@ -225,6 +252,7 @@ export function createHelixRssServer(deps: AppDeps): Server {
   registerFeedsRoutes(router);
   registerDiscordRoutes(router);
   registerGuildRoutes(router);
+  registerMusicRoutes(router);
   registerSettingsRoutes(router);
   registerStatsRoutes(router);
   registerAdminRoutes(router);

@@ -1,4 +1,4 @@
-import type { ApplicationCommand, InteractionResponse, InteractionResponseData } from './types.js';
+import type { ApplicationCommand, InteractionResponse, InteractionResponseData } from './utils/types.js';
 
 export interface DiscordApplicationInfo {
   id: string;
@@ -231,6 +231,58 @@ export class DiscordRestClient {
       const text = await res.text();
       throw new Error(`Failed to archive thread ${threadId}: ${formatErrorText(res.status, text)}`);
     }
+  }
+
+  /** Adds a user to a private thread (admin-style tickets rely on this). */
+  async addThreadMember(threadId: string, userId: string): Promise<void> {
+    const res = await fetch(`${this.baseUrl}/channels/${threadId}/thread-members/${userId}`, {
+      method: 'PUT',
+      headers: this.headers(),
+      signal: AbortSignal.timeout(DISCORD_API_TIMEOUT_MS),
+    });
+
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(`Failed to add user ${userId} to thread ${threadId}: ${formatErrorText(res.status, text)}`);
+    }
+  }
+
+  /** Removes a user from a private thread. */
+  async removeThreadMember(threadId: string, userId: string): Promise<void> {
+    const res = await fetch(`${this.baseUrl}/channels/${threadId}/thread-members/${userId}`, {
+      method: 'DELETE',
+      headers: this.headers(),
+      signal: AbortSignal.timeout(DISCORD_API_TIMEOUT_MS),
+    });
+
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(`Failed to remove user ${userId} from thread ${threadId}: ${formatErrorText(res.status, text)}`);
+    }
+  }
+
+  /** Fetches recent messages from a channel (used for ticket transcripts). */
+  async getChannelMessages(
+    channelId: string,
+    limit = 50,
+  ): Promise<Array<{ id: string; author: { id: string; username: string }; content: string; timestamp: string }>> {
+    const res = await fetch(`${this.baseUrl}/channels/${channelId}/messages?limit=${limit}`, {
+      method: 'GET',
+      headers: this.headers(),
+      signal: AbortSignal.timeout(DISCORD_API_TIMEOUT_MS),
+    });
+
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(`Failed to fetch messages for channel ${channelId}: ${formatErrorText(res.status, text)}`);
+    }
+
+    return (await res.json()) as Array<{
+      id: string;
+      author: { id: string; username: string };
+      content: string;
+      timestamp: string;
+    }>;
   }
 
   async sendChannelMessage(channelId: string, payload: { content?: string; embeds?: unknown[] }): Promise<void> {

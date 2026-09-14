@@ -1,48 +1,13 @@
 import { appDisplayName, type AppDeps } from '../../app.js';
 import { isOwnerUser, isAdminOrOwner, canUserAccessDashboard } from '../routes/shared.js';
+import { getThemeInfo, getColorSchemeInfo } from './theme.js';
+
+export { getThemeInfo, getColorSchemeInfo } from './theme.js';
 
 export interface DashboardRoute {
   view: 'guilds' | 'dashboard';
   guildId?: string;
   page?: string;
-}
-
-export function getThemeInfo(theme?: string): { id: string; name: string; icon: string } {
-  const t = (theme || '').trim().toLowerCase();
-  if (t === 'glass' || t === 'glassmorphism') {
-    return { id: 'glassmorphism', name: 'Glassmorphism', icon: 'fa-solid fa-wand-magic-sparkles' };
-  }
-  if (t === 'light') {
-    return { id: 'light', name: 'Light', icon: 'fa-solid fa-sun' };
-  }
-  if (t === 'cyberpunk') {
-    return { id: 'cyberpunk', name: 'Cyberpunk', icon: 'fa-solid fa-bolt' };
-  }
-  if (t === 'dracula') {
-    return { id: 'dracula', name: 'Dracula', icon: 'fa-solid fa-skull' };
-  }
-  if (t === 'nord') {
-    return { id: 'nord', name: 'Nord', icon: 'fa-solid fa-snowflake' };
-  }
-  if (t === 'emerald') {
-    return { id: 'emerald', name: 'Emerald', icon: 'fa-solid fa-tree' };
-  }
-  return { id: 'dark', name: 'Dark', icon: 'fa-solid fa-moon' };
-}
-
-export function getColorSchemeInfo(scheme?: string): { id: string; name: string } {
-  const s = (scheme || '').trim().toLowerCase();
-  if (s === 'purple' || s === 'amethyst') return { id: 'purple', name: 'Amethyst Purple' };
-  if (s === 'blue' || s === 'ocean') return { id: 'blue', name: 'Ocean Blue' };
-  if (s === 'emerald' || s === 'jade' || s === 'green') return { id: 'emerald', name: 'Emerald Green' };
-  if (s === 'rose' || s === 'pink' || s === 'fuchsia') return { id: 'rose', name: 'Rose Pink' };
-  if (s === 'amber' || s === 'gold' || s === 'yellow') return { id: 'amber', name: 'Amber Gold' };
-  if (s === 'indigo' || s === 'violet') return { id: 'indigo', name: 'Indigo Violet' };
-  if (s === 'crimson' || s === 'ruby' || s === 'red') return { id: 'crimson', name: 'Crimson Ruby' };
-  if (s === 'teal' || s === 'aqua') return { id: 'teal', name: 'Teal Aqua' };
-  if (s === 'sunset' || s === 'coral' || s === 'orange') return { id: 'sunset', name: 'Sunset Coral' };
-  if (s === 'cyan' || s === 'electric') return { id: 'cyan', name: 'Electric Cyan' };
-  return { id: 'default', name: 'Theme Default' };
 }
 
 export function renderDashboardHtml(
@@ -475,11 +440,13 @@ export function renderDashboardHtml(
     .category-card.rss { border-top: 4px solid var(--primary); }
     .category-card.reddit { border-top: 4px solid #ff4500; }
     .category-card.freegames { border-top: 4px solid #10b981; }
+    .category-card.streamalerts { border-top: 4px solid #9146ff; }
     .category-header { display: flex; align-items: center; gap: 0.75rem; }
     .category-icon { width: 2.5rem; height: 2.5rem; border-radius: 0.75rem; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
     .category-icon.rss { background: rgba(6, 182, 212, 0.15); color: var(--primary); }
     .category-icon.reddit { background: rgba(255, 69, 0, 0.15); color: #ff4500; }
     .category-icon.freegames { background: rgba(16, 185, 129, 0.15); color: #10b981; }
+    .category-icon.streamalerts { background: rgba(145, 70, 255, 0.15); color: #9146ff; }
     .category-title { font-size: 1.125rem; font-weight: 800; }
     .target-readout { font-size: 0.75rem; color: var(--text-muted); background: var(--card-inner); border: 1px solid var(--border); border-radius: 0.75rem; padding: 0.5rem 0.75rem; }
 
@@ -544,6 +511,17 @@ export function renderDashboardHtml(
 
     .empty-state { padding: 2rem 1rem; text-align: center; color: var(--text-muted); font-size: 0.875rem; }
 
+    /* User Dropdown */
+    .user-menu { position: relative; }
+    .user-menu-trigger { display: inline-flex; align-items: center; gap: 0.5rem; }
+    .user-menu.open .user-menu-trigger i.fa-chevron-down { transform: rotate(180deg); }
+    .user-menu-list { position: absolute; right: 0; top: calc(100% + 0.5rem); min-width: 200px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 0.875rem; padding: 0.375rem; box-shadow: 0 16px 40px rgba(0,0,0,0.35); display: flex; flex-direction: column; gap: 0.125rem; opacity: 0; visibility: hidden; transform: translateY(-4px); transition: opacity 0.15s, transform 0.15s, visibility 0.15s; z-index: 60; }
+    .user-menu.open .user-menu-list { opacity: 1; visibility: visible; transform: translateY(0); }
+    .user-menu-item { display: flex; align-items: center; gap: 0.625rem; width: 100%; padding: 0.5rem 0.75rem; border-radius: 0.625rem; font-size: 0.8125rem; font-weight: 600; color: var(--text); background: transparent; border: none; cursor: pointer; text-align: left; text-decoration: none; }
+    .user-menu-item i { width: 1.125rem; text-align: center; color: var(--text-muted); }
+    .user-menu-item:hover { background: rgba(255,255,255,0.06); }
+    .user-menu-logout, .user-menu-logout i { color: #f87171; }
+
     /* Utility */
     .section-title { font-size: 1.25rem; font-weight: 800; margin-bottom: 0.25rem; }
     .section-desc { font-size: 0.875rem; color: var(--text-muted); margin-bottom: 0.75rem; }
@@ -584,10 +562,20 @@ export function renderDashboardHtml(
       }
       ${
         userId !== null
-          ? `<span class="badge badge-gray" style="padding: 0.4rem 0.75rem; font-size: 0.75rem;">
-        <i class="fa-solid fa-user" style="color: var(--primary); margin-right: 0.25rem;"></i> <span id="user-display-name">Discord User</span>
-      </span>
-      <button onclick="logout()" class="btn btn-ghost btn-sm" title="Log Out"><i class="fa-solid fa-arrow-right-from-bracket"></i></button>`
+          ? `<div class="user-menu" id="user-menu">
+        <button type="button" class="btn btn-ghost btn-sm user-menu-trigger" id="user-menu-trigger" aria-haspopup="true" aria-expanded="false">
+          <i class="fa-solid fa-user" style="color: var(--primary);"></i> <span id="user-display-name">Discord User</span> <i class="fa-solid fa-chevron-down" style="font-size: 0.6875rem; color: var(--text-muted);"></i>
+        </button>
+        <div class="user-menu-list" id="user-menu-list" role="menu">
+          <a href="/guilds" role="menuitem" class="user-menu-item"><i class="fa-solid fa-server"></i> <span>Guilds</span></a>
+          ${
+            isOwner && deps.config.features.adminPanelEnabled
+              ? `<a href="/admin" role="menuitem" class="user-menu-item"><i class="fa-solid fa-screwdriver-wrench"></i> <span>Admin Panel</span></a>`
+              : ''
+          }
+          <button type="button" role="menuitem" class="user-menu-item user-menu-logout" onclick="logout()"><i class="fa-solid fa-arrow-right-from-bracket"></i> <span>Log Out</span></button>
+        </div>
+      </div>`
           : `<a href="/api/auth/discord" class="btn btn-discord btn-sm"><i class="fa-brands fa-discord"></i> Log In with Discord</a>`
       }
     </div>
@@ -616,7 +604,10 @@ export function renderDashboardHtml(
       <!-- Sidebar -->
       <nav class="sidebar">
         <div class="tab-list">
-          <button onclick="switchTab('overview')" id="tab-btn-overview" class="tab-btn active">
+          <button onclick="switchTab('feeds')" id="tab-btn-feeds" class="tab-btn active">
+            <i class="fa-solid fa-rss"></i> <span>Feeds</span>
+          </button>
+          <button onclick="switchTab('overview')" id="tab-btn-overview" class="tab-btn">
             <i class="fa-solid fa-chart-line"></i> <span>Overview</span>
           </button>
           <button onclick="switchTab('categories')" id="tab-btn-categories" class="tab-btn">
@@ -625,17 +616,20 @@ export function renderDashboardHtml(
           <button onclick="switchTab('news')" id="tab-btn-news" class="tab-btn">
             <i class="fa-solid fa-newspaper" style="color: var(--amber);"></i> <span>News</span>
           </button>
+          <button onclick="switchTab('guildadmin')" id="tab-btn-guildadmin" class="tab-btn">
+            <i class="fa-solid fa-user-shield" style="color: var(--primary);"></i> <span>Guild Admin</span>
+          </button>
           ${
-            isHost
-              ? `<button onclick="switchTab('settings')" id="tab-btn-settings" class="tab-btn">
-            <i class="fa-solid fa-sliders"></i> <span>Settings</span>
+            deps.config.features.lavaEnabled
+              ? `<button onclick="switchTab('music')" id="tab-btn-music" class="tab-btn">
+            <i class="fa-solid fa-music" style="color: #10b981;"></i> <span>Music</span>
           </button>`
               : ''
           }
           ${
-            isOwner
-              ? `<button onclick="switchTab('devtools')" id="tab-btn-devtools" class="tab-btn">
-            <i class="fa-solid fa-screwdriver-wrench" style="color: var(--primary);"></i> <span>Dev Tools</span>
+            isHost
+              ? `<button onclick="switchTab('settings')" id="tab-btn-settings" class="tab-btn">
+            <i class="fa-solid fa-sliders"></i> <span>Settings</span>
           </button>`
               : ''
           }
@@ -652,7 +646,26 @@ export function renderDashboardHtml(
 
       <!-- Main View -->
       <main>
-        <!-- TAB 1: OVERVIEW -->
+        <!-- TAB 1: FEEDS -->
+        <section id="tab-feeds" class="tab-pane active">
+          <div id="feeds-topic-view">
+            <div>
+              <div class="section-title"><i class="fa-solid fa-rss" style="color: var(--primary);"></i> Feeds</div>
+              <div class="section-desc">All feeds for this server, organized by topic. Pause, resume, or remove feeds, and jump to delivery settings in the Categories tab.</div>
+            </div>
+            <div id="feeds-topic-groups" style="display: flex; flex-direction: column; gap: 1.25rem;">
+              <div class="empty-state">Loading feeds...</div>
+            </div>
+          </div>
+          <div id="feed-detail-view" style="display: none;">
+            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem;">
+              <button onclick="closeFeedDetail()" class="btn btn-ghost btn-sm"><i class="fa-solid fa-arrow-left"></i> Back to Feeds</button>
+            </div>
+            <div id="feed-detail-content"></div>
+          </div>
+        </section>
+
+        <!-- TAB 2: OVERVIEW -->
         <section id="tab-overview" class="tab-pane active">
           <div>
             <div class="section-title"><i class="fa-solid fa-chart-pie" style="color: var(--primary);"></i> Server Overview</div>
@@ -683,6 +696,11 @@ export function renderDashboardHtml(
               <div class="stat-label">Free Games Feeds</div>
               <div class="stat-value" style="color: #10b981;" id="stat-freegames-feeds">0</div>
               <div class="stat-sub">Daily game drops</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Stream Alert Feeds</div>
+              <div class="stat-value" style="color: #9146ff;" id="stat-streamalerts-feeds">0</div>
+              <div class="stat-sub">YouTube & Twitch live</div>
             </div>
             <div class="stat-card">
               <div class="stat-label">Database Engine</div>
@@ -746,7 +764,28 @@ export function renderDashboardHtml(
                     <label class="form-label">Feed URL</label>
                     <input type="text" id="add-rss-url" placeholder="https://example.com/rss.xml" style="font-family: monospace;">
                   </div>
+                    <div class="form-group">
+                      <label class="form-label">Topic</label>
+                      <input type="text" id="add-rss-topic" list="feed-topic-options" placeholder="E.g., News, Technology, Entertainment, Other">
+                    </div>
                 </div>
+                <datalist id="feed-topic-options">
+                  <option value="News">
+                  <option value="Technology">
+                  <option value="Entertainment">
+                  <option value="Gaming">
+                  <option value="Programming">
+                  <option value="Science &amp; Space">
+                  <option value="Artificial Intelligence">
+                  <option value="Cybersecurity">
+                  <option value="Cryptocurrency">
+                  <option value="Business &amp; Finance">
+                  <option value="Sports">
+                  <option value="Reddit">
+                  <option value="Free Games">
+                  <option value="Stream Alerts">
+                  <option value="Other">
+                </datalist>
                 <div class="form-group" style="margin-top: 0.5rem;">
                   <label class="form-label" style="display: flex; align-items: center; gap: 0.5rem;">
                     <input type="checkbox" id="add-rss-scrape" onchange="toggleScrapeFields('rss')">
@@ -889,6 +928,58 @@ export function renderDashboardHtml(
                 </div>
               </div>
             </div>
+
+            <!-- Stream Alerts Card -->
+            <div class="category-card streamalerts">
+              <div class="category-header">
+                <div class="category-icon streamalerts"><i class="fa-solid fa-satellite-dish"></i></div>
+                <div>
+                  <div class="category-title" style="color: #9146ff;">Stream Alerts</div>
+                  <div class="card-desc">YouTube uploads & Twitch live alerts</div>
+                </div>
+              </div>
+              <div class="target-readout" id="streamalerts-target-readout">Loading target...</div>
+              <div class="form-group">
+                <label class="form-label">Target Channel</label>
+                <select id="streamalerts-target-channel"></select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Target Forum Thread Channel (optional)</label>
+                <select id="streamalerts-target-thread"></select>
+              </div>
+              <div style="display: flex; justify-content: flex-end;">
+                <button onclick="saveCategoryTarget('streamalerts')" class="btn btn-primary btn-sm" style="background: #9146ff; border-color: #9146ff;"><i class="fa-solid fa-floppy-disk"></i> Save Target</button>
+              </div>
+
+              <div style="border-top: 1px solid var(--border); padding-top: 1rem; margin-top: 0.25rem;">
+                <div class="card-title" style="font-size: 0.9375rem;"><i class="fa-solid fa-video" style="color: #9146ff;"></i> Add Stream Alert Feed</div>
+                <div class="form-grid" style="margin-top: 0.75rem;">
+                  <div class="form-group">
+                    <label class="form-label">Platform</label>
+                    <select id="add-streamalerts-platform" onchange="handleStreamAlertsPlatformChange(this.value)">
+                      <option value="youtube">YouTube</option>
+                      <option value="twitch">Twitch</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Channel Handle</label>
+                    <input type="text" id="add-streamalerts-handle" placeholder="e.g. @channel or twitch.tv/name">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Display Name (optional)</label>
+                    <input type="text" id="add-streamalerts-name" placeholder="YouTube · @channel">
+                  </div>
+                </div>
+                <button onclick="submitAddStreamAlertFeed()" class="btn btn-primary btn-sm btn-block" style="margin-top: 0.75rem; background: #9146ff; border-color: #9146ff;"><i class="fa-solid fa-video"></i> Add Stream Alert</button>
+              </div>
+
+              <div style="border-top: 1px solid var(--border); padding-top: 1rem;">
+                <div class="card-title" style="font-size: 0.9375rem;"><i class="fa-solid fa-tower-broadcast" style="color: #9146ff;"></i> Stream Alert Feeds</div>
+                <div id="streamalerts-feeds-list" class="feed-list" style="margin-top: 0.75rem;">
+                  <div class="empty-state">Loading feeds...</div>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -904,6 +995,95 @@ export function renderDashboardHtml(
             </div>
           </div>
         </section>
+
+        <!-- TAB: GUILD ADMIN -->
+        <section id="tab-guildadmin" class="tab-pane">
+          <div>
+            <div class="section-title"><i class="fa-solid fa-user-shield" style="color: var(--primary);"></i> Guild Admin</div>
+            <div class="section-desc">Roles, feature toggles, command prefix, and thread delivery for this server. Mirrors the <code style="color: var(--primary);">/set</code> command.</div>
+          </div>
+
+          <div class="card">
+            <div>
+              <div class="card-title"><i class="fa-solid fa-user-tag" style="color: var(--primary);"></i> Roles</div>
+              <div class="card-desc">DJ role gates music commands. Admin role can manage feeds and bot settings.</div>
+            </div>
+            <div class="form-grid" style="margin-top: 0.75rem;">
+              <div class="form-group">
+                <label class="form-label">DJ Role</label>
+                <select id="admin-dj-role"><option value="">-- No DJ role --</option></select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Admin Role</label>
+                <select id="admin-admin-role"><option value="">-- No Admin role --</option></select>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div>
+              <div class="card-title"><i class="fa-solid fa-toggle-on" style="color: var(--primary);"></i> Features</div>
+              <div class="card-desc">Enable or disable features for this server.</div>
+            </div>
+            <div id="admin-features-list" style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.75rem;">
+              <div class="empty-state">Loading features...</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div>
+              <div class="card-title"><i class="fa-solid fa-hashtag" style="color: var(--primary);"></i> Command Prefix</div>
+              <div class="card-desc">Optional text prefix for commands. Leave empty for slash-commands only.</div>
+            </div>
+            <div class="form-group" style="margin-top: 0.75rem; max-width: 240px;">
+              <input type="text" id="admin-prefix" maxlength="16" placeholder="e.g. !  ?  .">
+            </div>
+          </div>
+
+          <div class="card">
+            <div>
+              <div class="card-title"><i class="fa-solid fa-tower-broadcast" style="color: var(--primary);"></i> Thread Delivery</div>
+              <div class="card-desc">Deliver each feed into its own thread inside a forum channel (one thread per feed).</div>
+            </div>
+            <div class="form-grid" style="margin-top: 0.75rem;">
+              <div class="form-group">
+                <label class="form-label">Thread Delivery</label>
+                <label style="display: flex; align-items: center; gap: 0.5rem;">
+                  <input type="checkbox" id="admin-threads-enabled">
+                  <span>Enabled</span>
+                </label>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Forum Channels</label>
+                <select id="admin-forum-channels" multiple size="4" style="width: 100%;">
+                  <option value="">-- No forum channels available --</option>
+                </select>
+                <span style="font-size: 0.6875rem; color: var(--text-dim); margin-top: 0.25rem; display: block;">Hold Ctrl/Cmd to select multiple.</span>
+              </div>
+            </div>
+          </div>
+
+          <div style="display: flex; justify-content: flex-end; gap: 0.5rem;">
+            <span id="admin-save-status" style="font-size: 0.8125rem; color: #10b981; display: none;"></span>
+            <button onclick="saveGuildAdmin()" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> Save Settings</button>
+          </div>
+        </section>
+
+        <!-- TAB: MUSIC (NodeLink Queue) -->
+        ${
+          deps.config.features.lavaEnabled
+            ? `<section id="tab-music" class="tab-pane">
+          <div>
+            <div class="section-title"><i class="fa-solid fa-music" style="color: #10b981;"></i> Music &amp; Queue</div>
+            <div class="section-desc">Live playback and queue management for this server via NodeLink.</div>
+          </div>
+
+          <div id="music-queue-view" style="display: flex; flex-direction: column; gap: 1.25rem;">
+            <div class="empty-state">Loading player state...</div>
+          </div>
+        </section>`
+            : ''
+        }
 
         <!-- TAB 4: SETTINGS (ADMIN ONLY) -->
         ${
@@ -948,75 +1128,6 @@ export function renderDashboardHtml(
         </section>`
             : ''
         }
-
-        <!-- TAB 5: DEVELOPER TOOLS (BOT OWNER / TEAM ONLY) -->
-        ${
-          isOwner
-            ? `<section id="tab-devtools" class="tab-pane">
-          <div class="card">
-            <div class="card-header">
-              <div>
-                <div class="card-title"><i class="fa-solid fa-screwdriver-wrench" style="color: var(--primary);"></i> Developer Tools</div>
-                <div class="card-desc">Discord bot owner/team diagnostics, service logs, and manual maintenance triggers.</div>
-              </div>
-              <button onclick="loadDevToolsTab()" class="btn btn-ghost btn-sm"><i class="fa-solid fa-rotate-right"></i> Refresh</button>
-            </div>
-          </div>
-
-          <div class="stats-grid">
-            <div class="stat-card"><div class="stat-label">Total Feeds</div><div class="stat-value" id="dt-feed-count">-</div><div class="stat-sub">All syndicated feeds</div></div>
-            <div class="stat-card"><div class="stat-label">Entries Delivered</div><div class="stat-value" id="dt-sent-count">-</div><div class="stat-sub">Messages sent to Discord</div></div>
-            <div class="stat-card"><div class="stat-label">Registered Users</div><div class="stat-value" id="dt-user-count">-</div><div class="stat-sub">Dashboard accounts</div></div>
-            <div class="stat-card"><div class="stat-label">Database Size</div><div class="stat-value" id="dt-db-size">-</div><div class="stat-sub">SQLite persistence</div></div>
-            <div class="stat-card"><div class="stat-label">Process Uptime</div><div class="stat-value" id="dt-uptime">-</div><div class="stat-sub">Since service start</div></div>
-            <div class="stat-card"><div class="stat-label">Memory RSS</div><div class="stat-value" id="dt-memory">-</div><div class="stat-sub">Heap: <span id="dt-heap">-</span></div></div>
-            <div class="stat-card"><div class="stat-label">Node.js</div><div class="stat-value" id="dt-node">-</div><div class="stat-sub">Runtime version</div></div>
-            <div class="stat-card"><div class="stat-label">Platform</div><div class="stat-value" id="dt-platform">-</div><div class="stat-sub">Operating environment</div></div>
-          </div>
-
-          <div class="card">
-            <div class="card-header">
-              <div>
-                <div class="card-title"><i class="fa-solid fa-bolt" style="color: var(--primary);"></i> Developer Actions</div>
-                <div class="card-desc">Manual maintenance triggers. Every action is recorded in the Service Logs below.</div>
-              </div>
-            </div>
-            <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
-              <button onclick="syncDiscordCommands()" class="btn btn-ghost btn-sm"><i class="fa-solid fa-arrow-right-arrow-left"></i> Sync Discord Slash Commands</button>
-              <button onclick="optimizeDatabase()" class="btn btn-ghost btn-sm"><i class="fa-solid fa-database"></i> Optimize SQLite DB</button>
-            </div>
-          </div>
-
-          <div class="card">
-            <div class="card-header">
-              <div>
-                <div class="card-title"><i class="fa-solid fa-list-ul" style="color: var(--primary);"></i> Service Logs</div>
-                <div class="card-desc">Full activity log with level filtering.</div>
-              </div>
-              <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
-                <select id="devtools-log-level" onchange="renderActivityLogs()" style="width: auto; padding: 0.375rem 0.75rem; font-size: 0.75rem;">
-                  <option value="">All levels</option>
-                  <option value="info">info</option>
-                  <option value="warn">warn</option>
-                  <option value="error">error</option>
-                  <option value="debug">debug</option>
-                </select>
-                <select id="devtools-log-limit" onchange="renderActivityLogs()" style="width: auto; padding: 0.375rem 0.75rem; font-size: 0.75rem;">
-                  <option value="50">50</option>
-                  <option value="100" selected>100</option>
-                  <option value="200">200</option>
-                  <option value="500">500</option>
-                </select>
-                <button onclick="renderActivityLogs()" class="btn btn-ghost btn-sm"><i class="fa-solid fa-rotate-right"></i> Refresh Logs</button>
-              </div>
-            </div>
-            <div id="devtools-logs" style="display: flex; flex-direction: column; gap: 0.5rem; max-height: 480px; overflow-y: auto;">
-              <div class="empty-state">Loading service logs...</div>
-            </div>
-          </div>
-        </section>`
-            : ''
-        }
       </main>
     </div>
   </div>
@@ -1039,17 +1150,18 @@ export function renderDashboardHtml(
     let cachedGuilds = [];
     let cachedCategories = null;
     let cachedPresets = [];
-    let activeTabName = 'overview';
+    let activeTabName = 'feeds';
+    let currentFeedDetailId = null;
 
     // Path-based routing helpers
     // Regex pattern as string to avoid template string parsing issues
-    const DASHBOARD_ROUTE_REGEX = '^/dashboard/([^/]+)(?:/([^/]+))?$';
+    const DASHBOARD_ROUTE_REGEX = '^/dashboard/([^/]+)(?:/([^/]+))?(?:/([^/]+))?$';
     function getPathRoute() {
-      const path = window.location.pathname;
+      var path = window.location.pathname;
       if (path === '/guilds' || path === '/guilds/') return { view: 'guilds' };
-      const match = path.match(new RegExp(DASHBOARD_ROUTE_REGEX));
+      var match = path.match(new RegExp(DASHBOARD_ROUTE_REGEX));
       if (match) {
-        return { view: 'dashboard', guildId: match[1], page: match[2] || 'overview' };
+        return { view: 'dashboard', guildId: match[1], page: match[2] || 'feeds', feedId: match[3] || null };
       }
       if (path === '/admin' || path === '/admin/') return { view: 'admin' };
       return { view: 'guilds' };
@@ -1073,7 +1185,10 @@ export function renderDashboardHtml(
         document.getElementById('guild-selection-view')?.classList.remove('active');
         document.getElementById('dashboard-view')?.classList.add('active');
         loadGuildDashboard();
-        if (route.page && ['overview', 'categories', 'news', 'settings'].includes(route.page)) {
+        if (route.page === 'feed' && route.feedId) {
+          switchTab('feeds');
+          openFeedDetail(Number(route.feedId));
+        } else if (route.page && ['feeds', 'overview', 'categories', 'news', 'guildadmin', 'music', 'settings'].includes(route.page)) {
           switchTab(route.page);
         }
       } else if (route.view === 'admin') {
@@ -1085,6 +1200,11 @@ export function renderDashboardHtml(
     // Tab Switching
     function switchTab(tabId) {
       activeTabName = tabId;
+      currentFeedDetailId = null;
+      var detail = document.getElementById('feed-detail-view');
+      var topicView = document.getElementById('feeds-topic-view');
+      if (detail) detail.style.display = 'none';
+      if (topicView) topicView.style.display = 'block';
       document.querySelectorAll('#dashboard-view .tab-pane').forEach(el => el.classList.remove('active'));
       document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
 
@@ -1097,9 +1217,12 @@ export function renderDashboardHtml(
       const path = currentGuildId ? '/dashboard/' + currentGuildId + '/' + tabId : '/guilds';
       window.history.pushState({}, '', '/dashboard/' + currentGuildId + '/' + tabId);
 
-      if (tabId === 'overview') loadOverviewTab();
+      if (tabId === 'feeds') loadFeedsTab();
+      else if (tabId === 'overview') loadOverviewTab();
       else if (tabId === 'categories') loadCategoriesTab();
       else if (tabId === 'news') loadNewsTab();
+      else if (tabId === 'guildadmin') loadGuildAdminTab();
+      else if (tabId === 'music') loadMusicTab();
       else if (tabId === 'settings') loadSettingsTab();
     }
 
@@ -1246,7 +1369,7 @@ export function renderDashboardHtml(
       const targets = cachedCategories.categories || [];
       const getTarget = (cat) => targets.find(t => t.category === cat) || { channelId: null, threadChannelId: null };
 
-      ['rss', 'reddit', 'freegames'].forEach(cat => {
+      ['rss', 'reddit', 'freegames', 'streamalerts'].forEach(cat => {
         const target = getTarget(cat);
         populateCategoryTargetSelect(cat + '-target-channel', textChannels, target.channelId, '-- Select Channel --');
         populateCategoryTargetSelect(cat + '-target-thread', forumChannels, target.threadChannelId, '-- No Forum Thread --');
@@ -1303,6 +1426,7 @@ export function renderDashboardHtml(
       if (t === 'reddit') return 'reddit';
       if (t === 'rss' || t === 'scrape') return 'rss';
       if (t && t.startsWith('free_games')) return 'freegames';
+      if (t === 'youtube' || t === 'twitch') return 'streamalerts';
       return null;
     }
 
@@ -1321,15 +1445,17 @@ export function renderDashboardHtml(
       const isReddit = f.feedType === 'reddit';
       const isFreeGames = f.feedType === 'free_games' || (f.feedType && f.feedType.startsWith('free_games'));
       const isScrape = f.feedType === 'scrape';
+      const isStreamAlert = f.feedType === 'youtube' || f.feedType === 'twitch';
       let typeBadge = '<span class="badge badge-gray"><i class="fa-solid fa-rss"></i> RSS</span>';
       if (isReddit) typeBadge = '<span class="badge" style="background: rgba(255,69,0,0.15); color: #ff4500; border: 1px solid rgba(255,69,0,0.3);"><i class="fa-brands fa-reddit"></i> Reddit</span>';
       else if (isFreeGames) typeBadge = '<span class="badge" style="background: rgba(16,185,129,0.15); color: #10b981; border: 1px solid rgba(16,185,129,0.3);"><i class="fa-solid fa-gift"></i> Free Games</span>';
       else if (isScrape) typeBadge = '<span class="badge badge-amber"><i class="fa-solid fa-code"></i> Scraper</span>';
+      else if (isStreamAlert) typeBadge = '<span class="badge" style="background: rgba(145,70,255,0.15); color: #9146ff; border: 1px solid rgba(145,70,255,0.3);"><i class="fa-solid fa-video"></i> Stream</span>';
       const statusBadge = f.enabled
         ? '<span class="badge badge-green">Active</span>'
         : '<span class="badge badge-gray">Paused</span>';
       const lastPolled = f.lastCheckedAt ? new Date(f.lastCheckedAt).toLocaleString() : 'Never polled';
-      return '<div class="feed-pill">' +
+      return '<div class="feed-pill" style="cursor: pointer;" onclick="openFeedDetail(' + f.id + ')">' +
         '<div class="feed-details">' +
           '<div class="feed-name-row">' +
             '<span class="feed-name">' + esc(f.name) + '</span>' +
@@ -1339,7 +1465,7 @@ export function renderDashboardHtml(
           '<div class="feed-url">' + esc(f.url) + '</div>' +
           '<div class="feed-meta">Checked: ' + lastPolled + '</div>' +
         '</div>' +
-        '<div style="display: flex; gap: 0.375rem; flex-shrink: 0;">' +
+        '<div style="display: flex; gap: 0.375rem; flex-shrink: 0;" onclick="event.stopPropagation()">' +
           '<button onclick="toggleFeed(' + f.id + ', ' + (f.enabled ? 'false' : 'true') + ')" class="btn btn-ghost btn-sm" title="' + (f.enabled ? 'Pause' : 'Resume') + '">' +
             '<i class="fa-solid ' + (f.enabled ? 'fa-pause' : 'fa-play') + '"></i>' +
           '</button>' +
@@ -1367,10 +1493,107 @@ export function renderDashboardHtml(
         return;
       }
       populateCategoryTargets();
-      await Promise.all(['rss', 'reddit', 'freegames'].map(renderCategoryFeeds));
+      await Promise.all(['rss', 'reddit', 'freegames', 'streamalerts'].map(renderCategoryFeeds));
     }
 
-    // TAB 1: OVERVIEW
+    // TAB 1: FEEDS
+    const FEED_TOPIC_ORDER = ['News', 'Technology', 'Entertainment', 'Gaming', 'Programming', 'Science & Space', 'Artificial Intelligence', 'Cybersecurity', 'Cryptocurrency', 'Business & Finance', 'Sports', 'Reddit', 'Free Games', 'Stream Alerts'];
+
+    function feedTopicOf(f) {
+      if (f.topic && String(f.topic).trim()) {
+        const stored = String(f.topic).trim();
+        if (stored === 'World News' || stored === 'US News') return 'News';
+        return stored;
+      }
+      const t = f.feedType || 'rss';
+      if (t === 'reddit') return 'Reddit';
+      if (t.indexOf('free_games') === 0) return 'Free Games';
+      if (t === 'youtube' || t === 'twitch') return 'Stream Alerts';
+      return 'Other';
+    }
+
+    function topicIcon(topic) {
+      const map = {
+        'News': 'fa-newspaper',
+        'Technology': 'fa-microchip',
+        'Entertainment': 'fa-film',
+        'Gaming': 'fa-gamepad',
+        'Programming': 'fa-code',
+        'Science & Space': 'fa-flask',
+        'Artificial Intelligence': 'fa-robot',
+        'Cybersecurity': 'fa-shield-halved',
+        'Cryptocurrency': 'fa-coins',
+        'Business & Finance': 'fa-chart-line',
+        'Sports': 'fa-futbol',
+        'Reddit': 'fa-brands fa-reddit',
+        'Free Games': 'fa-gift',
+        'Stream Alerts': 'fa-tower-broadcast'
+      };
+      return map[topic] || 'fa-rss';
+    }
+
+    function topicColor(topic) {
+      const map = {
+        'News': '#3b82f6',
+        'Technology': '#6366f1',
+        'Entertainment': '#ec4899',
+        'Gaming': '#8b5cf6',
+        'Programming': '#f59e0b',
+        'Science & Space': '#06b6d4',
+        'Artificial Intelligence': '#0ea5e9',
+        'Cybersecurity': '#ef4444',
+        'Cryptocurrency': '#fbbf24',
+        'Business & Finance': '#10b981',
+        'Sports': '#22c55e',
+        'Reddit': '#ff4500',
+        'Free Games': '#16a34a',
+        'Stream Alerts': '#9146ff'
+      };
+      return map[topic] || 'var(--text-dim)';
+    }
+
+    async function loadFeedsTab() {
+      if (!currentGuildId) return;
+      const container = document.getElementById('feeds-topic-groups');
+      if (!container) return;
+      container.innerHTML = '<div class="empty-state">Loading feeds...</div>';
+      const feeds = await loadGuildFeeds();
+      const groups = {};
+      feeds.forEach(feed => {
+        const topic = feedTopicOf(feed);
+        (groups[topic] = groups[topic] || []).push(feed);
+      });
+      const topics = Object.keys(groups);
+      if (!topics.length) {
+        container.innerHTML = '<div class="empty-state">No feeds for this server yet. Add feeds from the Categories tab, or enable ready-made feeds from the News tab.</div>';
+        return;
+      }
+      topics.sort((a, b) => {
+        if (a === b) return 0;
+        if (a === 'Other') return 1;
+        if (b === 'Other') return -1;
+        const ia = FEED_TOPIC_ORDER.indexOf(a);
+        const ib = FEED_TOPIC_ORDER.indexOf(b);
+        if (ia !== -1 && ib !== -1) return ia - ib;
+        if (ia !== -1) return -1;
+        if (ib !== -1) return 1;
+        return a.localeCompare(b);
+      });
+      container.innerHTML = topics.map(t => {
+        const list = groups[t];
+        return '<div class="card">' +
+          '<div class="card-header">' +
+            '<div>' +
+              '<div class="card-title"><i class="fa-solid ' + topicIcon(t) + '" style="color: ' + topicColor(t) + ';"></i> ' + esc(t) + '</div>' +
+              '<div class="card-desc">' + (list.length === 1 ? '1 feed' : list.length + ' feeds') + ' in this topic</div>' +
+            '</div>' +
+          '</div>' +
+          '<div class="feed-list" style="margin-top: 0.75rem;">' + list.map(renderFeedPill).join('') + '</div>' +
+        '</div>';
+      }).join('');
+    }
+
+    // TAB 2: OVERVIEW
     async function loadOverviewTab() {
       const activityEl = document.getElementById('activity-list');
       const totalEl = document.getElementById('stat-total-feeds');
@@ -1378,6 +1601,7 @@ export function renderDashboardHtml(
       const rssEl = document.getElementById('stat-rss-feeds');
       const redditEl = document.getElementById('stat-reddit-feeds');
       const freegamesEl = document.getElementById('stat-freegames-feeds');
+      const streamalertsEl = document.getElementById('stat-streamalerts-feeds');
 
       try {
         const [feeds, statsRes] = await Promise.all([
@@ -1389,11 +1613,13 @@ export function renderDashboardHtml(
         const rss = feeds.filter(f => categoryForFeed(f) === 'rss').length;
         const reddit = feeds.filter(f => categoryForFeed(f) === 'reddit').length;
         const freegames = feeds.filter(f => categoryForFeed(f) === 'freegames').length;
+        const streamalerts = feeds.filter(f => categoryForFeed(f) === 'streamalerts').length;
         if (totalEl) totalEl.textContent = String(total);
         if (activeEl) activeEl.textContent = String(active);
         if (rssEl) rssEl.textContent = String(rss);
         if (redditEl) redditEl.textContent = String(reddit);
         if (freegamesEl) freegamesEl.textContent = String(freegames);
+        if (streamalertsEl) streamalertsEl.textContent = String(streamalerts);
 
         if (activityEl && statsRes.ok) {
           const data = await statsRes.json();
@@ -1437,14 +1663,188 @@ export function renderDashboardHtml(
       try {
         const res = await fetch('/api/feeds/' + id, { method: 'DELETE' });
         if (!checkAuth(res)) return;
+        closeFeedDetail();
         refreshCurrentTab();
       } catch {}
     }
 
+    function feedTypeBadge(f) {
+      if (f.feedType === 'reddit') return '<span class="badge" style="background: rgba(255,69,0,0.15); color: #ff4500; border: 1px solid rgba(255,69,0,0.3);"><i class="fa-brands fa-reddit"></i> Reddit</span>';
+      if (f.feedType === 'free_games' || (f.feedType && f.feedType.startsWith('free_games'))) return '<span class="badge" style="background: rgba(16,185,129,0.15); color: #10b981; border: 1px solid rgba(16,185,129,0.3);"><i class="fa-solid fa-gift"></i> Free Games</span>';
+      if (f.feedType === 'scrape') return '<span class="badge badge-amber"><i class="fa-solid fa-code"></i> Scraper</span>';
+      if (f.feedType === 'youtube' || f.feedType === 'twitch') return '<span class="badge" style="background: rgba(145,70,255,0.15); color: #9146ff; border: 1px solid rgba(145,70,255,0.3);"><i class="fa-solid fa-video"></i> Stream</span>';
+      return '<span class="badge badge-gray"><i class="fa-solid fa-rss"></i> RSS</span>';
+    }
+
+    function channelOptionsForSelect(selectedId, includeNone) {
+      // Use cachedCategories' channel lists when loaded; otherwise empty.
+      var text = (cachedCategories && cachedCategories.textChannels) || [];
+      var forum = (cachedCategories && cachedCategories.forumChannels) || [];
+      var opts = '';
+      if (includeNone) opts += '<option value="">(none)</option>';
+      text.forEach(function(ch) {
+        opts += '<option value="' + esc(ch.id) + '"' + (ch.id === selectedId ? ' selected' : '') + '>#' + esc(ch.name) + '</option>';
+      });
+      forum.forEach(function(ch) {
+        opts += '<option value="' + esc(ch.id) + '"' + (ch.id === selectedId ? ' selected' : '') + '>&#128172; ' + esc(ch.name) + ' (Forum)</option>';
+      });
+      return opts;
+    }
+
+    function topicDatalistOptions(selectedTopic) {
+      var opts = '';
+      FEED_TOPIC_ORDER.forEach(function(t) {
+        opts += '<option value="' + esc(t) + '"' + (t === selectedTopic ? ' selected' : '') + '>' + esc(t) + '</option>';
+      });
+      return opts;
+    }
+
+    function renderFeedDetail(f) {
+      var topic = feedTopicOf(f);
+      var enabled = !!f.enabled;
+      var typeDisplay = feedTypeBadge(f);
+      var urlDisplay = f.feedType === 'free_games' || (f.feedType && f.feedType.startsWith('free_games'))
+        ? 'Platform feed (auto-managed)'
+        : esc(f.url);
+      return '<div class="card">' +
+        '<div class="card-header">' +
+          '<div>' +
+            '<div class="card-title"><i class="fa-solid ' + topicIcon(topic) + '" style="color: ' + topicColor(topic) + ';"></i> ' + esc(f.name) + '</div>' +
+            '<div class="card-desc">' + typeDisplay + ' &middot; ' + (enabled ? '<span class="badge badge-green">Active</span>' : '<span class="badge badge-gray">Paused</span>') + '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="form-grid" style="margin-top: 1rem;">' +
+          '<div class="form-group">' +
+            '<label class="form-label" for="edit-feed-name">Feed name</label>' +
+            '<input type="text" id="edit-feed-name" class="form-input" value="' + esc(f.name) + '">' +
+          '</div>' +
+          '<div class="form-group">' +
+            '<label class="form-label" for="edit-feed-topic">Topic</label>' +
+            '<input type="text" id="edit-feed-topic" list="edit-feed-topic-options" class="form-input" value="' + esc(topic === 'Other' ? '' : topic) + '">' +
+            '<datalist id="edit-feed-topic-options">' + topicDatalistOptions(topic) + '</datalist>' +
+          '</div>' +
+          '<div class="form-group">' +
+            '<label class="form-label" for="edit-feed-url">Feed URL</label>' +
+            '<input type="text" id="edit-feed-url" class="form-input" value="' + urlDisplay + '"' + (f.feedType === 'free_games' || (f.feedType && f.feedType.startsWith('free_games')) ? ' disabled' : '') + '>' +
+          '</div>' +
+          '<div class="form-group">' +
+            '<label class="form-label" for="edit-feed-channel">Deliver to channel</label>' +
+            '<select id="edit-feed-channel" class="form-input">' + channelOptionsForSelect(f.channelId, true) + '</select>' +
+          '</div>' +
+          '<div class="form-group">' +
+            '<label class="form-label" for="edit-feed-enable">Status</label>' +
+            '<label style="display: flex; align-items: center; gap: 0.5rem; padding-top: 0.25rem;">' +
+              '<input type="checkbox" id="edit-feed-enable"' + (enabled ? ' checked' : '') + '> ' +
+              (enabled ? 'Feed is active' : 'Feed is paused') +
+            '</label>' +
+          '</div>' +
+        '</div>' +
+        '<div class="feed-meta" style="margin-top: 0.75rem;">' +
+          'Created: ' + (f.createdAt ? new Date(f.createdAt).toLocaleString() : 'Unknown') +
+          (f.lastCheckedAt ? ' &middot; Last checked: ' + new Date(f.lastCheckedAt).toLocaleString() : ' &middot; Never polled') +
+          (f.threadChannelId ? ' &middot; Thread: <code>' + esc(f.threadChannelId) + '</code>' : '') +
+        '</div>' +
+        '<div style="display: flex; gap: 0.5rem; margin-top: 1.25rem;">' +
+          '<button onclick="saveFeedDetail(' + f.id + ')" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button>' +
+          '<button onclick="deleteFeed(' + f.id + ')" class="btn btn-danger"><i class="fa-solid fa-trash"></i> Delete Feed</button>' +
+        '</div>' +
+        '<div id="feed-detail-status" style="margin-top: 0.75rem; color: #10b981; display: none;">Saved successfully.</div>' +
+      '</div>';
+    }
+
+    function openFeedDetail(feedId) {
+      currentFeedDetailId = feedId;
+      var container = document.getElementById('feeds-topic-view');
+      var detail = document.getElementById('feed-detail-view');
+      if (!container || !detail || !currentGuildId) return;
+      loadGuildFeeds().then(function(list) {
+        var feed = list.find(function(x) { return x.id === feedId; });
+        if (!feed) { closeFeedDetail(); return; }
+        var content = document.getElementById('feed-detail-content');
+        if (content) content.innerHTML = renderFeedDetail(feed);
+        container.style.display = 'none';
+        detail.style.display = 'block';
+        window.history.pushState({}, '', '/dashboard/' + currentGuildId + '/feed/' + feedId);
+        populateFeedChannelSelect(feedId, feed.channelId);
+      });
+    }
+
+    async function populateFeedChannelSelect(feedId, currentChannelId) {
+      var selectEl = document.getElementById('edit-feed-channel');
+      if (!selectEl) return;
+      var channels = null;
+      if (cachedCategories && (cachedCategories.textChannels || cachedCategories.forumChannels)) {
+        channels = cachedCategories;
+      } else {
+        try {
+          var res = await fetch('/api/guilds/' + currentGuildId + '/categories', { signal: AbortSignal.timeout(6000) });
+          if (!res.ok) return;
+          var data = await res.json();
+          if (data && (data.textChannels || data.forumChannels)) channels = data;
+        } catch (e) {}
+      }
+      if (!channels || !channels.textChannels) return;
+      cachedCategories = channels;
+      selectEl.innerHTML = channelOptionsForSelect(currentChannelId || '', true);
+    }
+
+    function closeFeedDetail() {
+      currentFeedDetailId = null;
+      var container = document.getElementById('feeds-topic-view');
+      var detail = document.getElementById('feed-detail-view');
+      if (container) container.style.display = 'block';
+      if (detail) detail.style.display = 'none';
+      if (currentGuildId) {
+        window.history.pushState({}, '', '/dashboard/' + currentGuildId + '/feeds');
+        loadFeedsTab();
+      }
+    }
+
+    async function saveFeedDetail(feedId) {
+      var nameEl = document.getElementById('edit-feed-name');
+      var topicEl = document.getElementById('edit-feed-topic');
+      var urlEl = document.getElementById('edit-feed-url');
+      var channelEl = document.getElementById('edit-feed-channel');
+      var enableEl = document.getElementById('edit-feed-enable');
+      if (!nameEl || !channelEl || !enableEl) return;
+      var payload = {
+        name: nameEl.value.trim() || null,
+        topic: topicEl ? topicEl.value.trim() || null : null,
+        channelId: channelEl.value || null,
+        enabled: enableEl.checked
+      };
+      if (urlEl && !urlEl.disabled && urlEl.value.trim()) {
+        payload.url = urlEl.value.trim();
+      }
+      try {
+        var res = await fetch('/api/feeds/' + feedId, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+          signal: AbortSignal.timeout(10000)
+        });
+        if (!checkAuth(res)) return;
+        if (!res.ok) {
+          var err = await res.json().catch(function() { return {}; });
+          alert(err.error || 'Failed to save feed.');
+          return;
+        }
+        var statusEl = document.getElementById('feed-detail-status');
+        if (statusEl) { statusEl.style.display = 'block'; setTimeout(function() { statusEl.style.display = 'none'; }, 4000); }
+        refreshCurrentTab();
+      } catch (e) {
+        alert('Failed to save feed.');
+      }
+    }
+
     function refreshCurrentTab() {
-      if (activeTabName === 'overview') loadOverviewTab();
+      if (currentFeedDetailId) { openFeedDetail(currentFeedDetailId); return; }
+      if (activeTabName === 'feeds') loadFeedsTab();
+      else if (activeTabName === 'overview') loadOverviewTab();
       else if (activeTabName === 'categories') loadCategoriesTab();
       else if (activeTabName === 'news') loadNewsTab();
+      else if (activeTabName === 'guildadmin') loadGuildAdminTab();
+      else if (activeTabName === 'music') loadMusicTab();
     }
 
     // RSS
@@ -1458,9 +1858,11 @@ export function renderDashboardHtml(
       if (!currentGuildId) return;
       const nameInput = document.getElementById('add-rss-name');
       const urlInput = document.getElementById('add-rss-url');
+      const topicInput = document.getElementById('add-rss-topic');
       const scrapeChk = document.getElementById('add-rss-scrape');
       const name = nameInput ? nameInput.value.trim() : '';
       const url = urlInput ? urlInput.value.trim() : '';
+      const topic = topicInput ? topicInput.value.trim() || null : null;
       if (!name || !url) return alert('Please enter both feed name and URL.');
 
       let feedType = 'rss';
@@ -1486,16 +1888,18 @@ export function renderDashboardHtml(
         const res = await fetch('/api/feeds', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, url, feedType, scrape, guildId: currentGuildId })
+          body: JSON.stringify({ name, url, topic, feedType, scrape, guildId: currentGuildId })
         });
         if (!checkAuth(res)) return;
         const data = await res.json();
         if (res.ok) {
           if (nameInput) nameInput.value = '';
           if (urlInput) urlInput.value = '';
+          if (topicInput) topicInput.value = '';
           if (scrapeChk) scrapeChk.checked = false;
           toggleScrapeFields('rss');
           renderCategoryFeeds('rss');
+          if (activeTabName === 'feeds') loadFeedsTab();
         } else {
           alert(data.error || 'Failed to add feed');
         }
@@ -1610,6 +2014,56 @@ export function renderDashboardHtml(
       }
     }
 
+    // Stream Alerts
+    function cleanStreamHandle(raw) {
+      let s = (raw || '').trim();
+      s = s.replace(/^https?:[/][/]/gi, '');
+      s = s.replace(/^(www[.])?(youtube[.]com|youtu[.]be|twitch[.]tv)[/]/gi, '');
+      s = s.replace(/^@/, '');
+      s = s.split('?')[0].split('#')[0].split('/')[0].trim();
+      return s;
+    }
+
+    function handleStreamAlertsPlatformChange(val) {
+      const nameInput = document.getElementById('add-streamalerts-name');
+      if (!nameInput) return;
+      nameInput.placeholder = val === 'youtube' ? 'YouTube · @channel' : 'Twitch · channel';
+    }
+
+    async function submitAddStreamAlertFeed() {
+      if (!currentGuildId) return;
+      const platformSel = document.getElementById('add-streamalerts-platform');
+      const handleInput = document.getElementById('add-streamalerts-handle');
+      const nameInput = document.getElementById('add-streamalerts-name');
+      const platform = platformSel ? platformSel.value : 'youtube';
+      const handle = cleanStreamHandle(handleInput ? handleInput.value : '');
+      if (!handle) return alert('Please enter a channel handle or username.');
+      const url = platform === 'youtube'
+        ? 'https://www.youtube.com/@' + handle
+        : 'https://www.twitch.tv/' + handle;
+      let name = nameInput ? nameInput.value.trim() : '';
+      if (!name) name = platform === 'youtube' ? 'YouTube · @' + handle : 'Twitch · ' + handle;
+
+      try {
+        const res = await fetch('/api/feeds', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, url, feedType: platform, guildId: currentGuildId })
+        });
+        if (!checkAuth(res)) return;
+        const data = await res.json();
+        if (res.ok) {
+          if (handleInput) handleInput.value = '';
+          if (nameInput) nameInput.value = '';
+          renderCategoryFeeds('streamalerts');
+        } else {
+          alert(data.error || 'Failed to add stream alert feed');
+        }
+      } catch (err) {
+        alert('Network error adding stream alert feed: ' + (err && err.message ? err.message : String(err)));
+      }
+    }
+
     // TAB 4: NEWS FEEDS
     async function loadNewsTab() {
       const container = document.getElementById('presets-list-container');
@@ -1690,7 +2144,7 @@ export function renderDashboardHtml(
         const res = await fetch('/api/feeds', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name: preset.name, url: preset.url, feedType: 'rss', guildId: currentGuildId })
+          body: JSON.stringify({ name: preset.name, url: preset.url, topic: preset.category, feedType: 'rss', guildId: currentGuildId })
         });
         if (!checkAuth(res)) return;
         const data = await res.json();
@@ -1736,106 +2190,322 @@ export function renderDashboardHtml(
         if (container) container.innerHTML = '<div class="empty-state">Failed to load users list.</div>';
       }
     }
+    const GUILD_ADMIN_FEATURES = [
+      { key: 'feeds', label: 'Feeds', desc: 'RSS, Reddit, and Free Games polling' },
+      { key: 'streamalerts', label: 'Stream Alerts', desc: 'YouTube & Twitch live/upload alerts' },
+      { key: 'threads', label: 'Threads', desc: 'Per-feed forum thread delivery' },
+      { key: 'music', label: 'Music', desc: 'Lavalink voice playback' },
+      { key: 'gifs', label: 'GIF Commands', desc: '/gif and action-style GIF commands' },
+    ];
 
-    // TAB 6: DEVELOPER TOOLS
-    async function loadDevToolsTab() {
-      renderActivityLogs();
-      try {
-        const res = await fetch('/api/admin/stats', { signal: AbortSignal.timeout(5000) });
-        if (!checkAuth(res)) return;
-        const stats = await res.json();
-        const set = (id, v) => {
-          const el = document.getElementById(id);
-          if (el) el.textContent = v;
-        };
-        set('dt-feed-count', stats.feedCount ?? '-');
-        set('dt-sent-count', stats.sentCount ?? '-');
-        set('dt-user-count', stats.userCount ?? '-');
-        set('dt-db-size', Math.round((stats.dbSizeBytes || 0) / 1024) + ' KB');
-        if (typeof stats.processUptimeSeconds === 'number') {
-          const s = stats.processUptimeSeconds;
-          const d = Math.floor(s / 86400);
-          const h = Math.floor((s % 86400) / 3600);
-          const m = Math.floor((s % 3600) / 60);
-          set('dt-uptime', (d ? d + 'd ' : '') + h + 'h ' + m + 'm');
-        }
-        set('dt-memory', Math.round(stats.memoryRssBytes / 1048576) + ' MB');
-        set('dt-heap', Math.round(stats.memoryHeapUsedBytes / 1048576) + ' MB');
-        set('dt-node', stats.nodeVersion || '-');
-        set('dt-platform', stats.platform || '-');
-      } catch {}
+    function populateRoleSelect(selectId, roles, currentRoleId, placeholder) {
+      const sel = document.getElementById(selectId);
+      if (!sel) return;
+      let html = '<option value="">' + esc(placeholder) + '</option>';
+      (roles || []).forEach(r => {
+        const selected = r.id === currentRoleId ? 'selected' : '';
+        const colorDot = r.color && r.color !== 0 ? ' <span style="color:#' + Number(r.color).toString(16).padStart(6, '0') + ';">&#9679;</span>' : '';
+        html += '<option value="' + esc(r.id) + '" ' + selected + '>' + esc(r.name) + colorDot + '</option>';
+      });
+      sel.innerHTML = html;
     }
 
-    async function renderActivityLogs() {
-      const container = document.getElementById('devtools-logs');
-      if (!container) return;
-      const levelEl = document.getElementById('devtools-log-level');
-      const limitEl = document.getElementById('devtools-log-limit');
-      const level = levelEl ? levelEl.value : '';
-      const limit = limitEl ? limitEl.value : '100';
+    async function loadGuildAdminTab() {
+      if (!currentGuildId) return;
       try {
-        container.innerHTML = '<div class="empty-state">Loading service logs...</div>';
-        const res = await fetch(
-          '/api/admin/activity?limit=' + encodeURIComponent(limit) + (level ? '&level=' + encodeURIComponent(level) : ''),
-          { signal: AbortSignal.timeout(5000) }
-        );
+        const res = await fetch('/api/guilds/' + encodeURIComponent(currentGuildId) + '/settings', { signal: AbortSignal.timeout(6000) });
         if (!checkAuth(res)) return;
-        const logs = await res.json();
-        if (!Array.isArray(logs) || !logs.length) {
-          container.innerHTML = '<div class="empty-state">No log entries found.</div>';
+        if (!res.ok) {
+          const featuresEl = document.getElementById('admin-features-list');
+          if (featuresEl) featuresEl.innerHTML = '<div class="empty-state">Could not load guild settings.</div>';
           return;
         }
-        container.innerHTML = logs.map(a => {
-          const lvl = (a.level || 'info').toLowerCase();
-          const badge = lvl === 'error' ? 'badge-red' : lvl === 'warn' ? 'badge-amber' : lvl === 'info' ? 'badge-green' : 'badge-gray';
-          const time = a.ts ? new Date(a.ts).toLocaleString() : '-';
-          const actor = a.userId != null ? 'User #' + a.userId : 'System';
-          return '<div class="feed-pill" style="align-items: flex-start;">' +
-            '<div class="feed-details">' +
-              '<div class="feed-name-row">' +
-                '<span class="badge ' + badge + '">' + esc(lvl) + '</span>' +
-                '<span class="badge badge-gray">' + esc(a.source || 'system') + '</span>' +
-                '<span class="feed-name" style="font-weight: 600; font-size: 0.8125rem;">' + esc(a.message || '') + '</span>' +
-              '</div>' +
-              '<div class="feed-meta">' + esc(time) + ' &middot; Actor: ' + esc(actor) + '</div>' +
-            '</div>' +
-          '</div>';
-        }).join('');
+        const data = await res.json();
+
+        populateRoleSelect('admin-dj-role', data.guildRoles || [], data.roles && data.roles.djRoleId, '-- No DJ role --');
+        populateRoleSelect('admin-admin-role', data.guildRoles || [], data.roles && data.roles.adminRoleId, '-- No Admin role --');
+
+        const featuresEl = document.getElementById('admin-features-list');
+        if (featuresEl) {
+          featuresEl.innerHTML = GUILD_ADMIN_FEATURES.map(f => {
+            const enabled = !!(data.features && data.features[f.key]);
+            return '<div class="feed-pill" style="cursor: default;">' +
+              '<label style="flex: 1; cursor: pointer; display: flex; align-items: center; gap: 0.75rem;">' +
+                '<input type="checkbox" data-feature="' + f.key + '"' + (enabled ? ' checked' : '') + '>' +
+                '<div class="feed-details">' +
+                  '<div class="feed-name" style="font-weight: 600;">' + esc(f.label) + '</div>' +
+                  '<div class="feed-meta">' + esc(f.desc) + '</div>' +
+                '</div>' +
+              '</label>' +
+            '</div>';
+          }).join('');
+        }
+
+        const prefixEl = document.getElementById('admin-prefix');
+        if (prefixEl) prefixEl.value = data.prefix || '';
+
+        const threadsEl = document.getElementById('admin-threads-enabled');
+        if (threadsEl) threadsEl.checked = !!data.threadsEnabled;
+
+        const forumSel = document.getElementById('admin-forum-channels');
+        if (forumSel) {
+          const forumChannels = data.forumChannels || [];
+          const selectedIds = data.forumChannelIds || [];
+          if (!forumChannels.length) {
+            forumSel.innerHTML = '<option value="">-- No forum channels available --</option>';
+            forumSel.disabled = true;
+          } else {
+            forumSel.disabled = false;
+            forumSel.innerHTML = forumChannels.map(ch => {
+              const selected = selectedIds.indexOf(ch.id) !== -1 ? 'selected' : '';
+              return '<option value="' + esc(ch.id) + '" ' + selected + '>#' + esc(ch.name) + '</option>';
+            }).join('');
+          }
+        }
       } catch {
-        if (container) container.innerHTML = '<div class="empty-state">Failed to load service logs.</div>';
+        const featuresEl = document.getElementById('admin-features-list');
+        if (featuresEl) featuresEl.innerHTML = '<div class="empty-state">Failed to load guild settings.</div>';
       }
     }
 
-    async function postDevToolAction(url, okMsg, failMsg) {
+    async function saveGuildAdmin() {
+      if (!currentGuildId) return;
+      const statusEl = document.getElementById('admin-save-status');
+      if (statusEl) statusEl.style.display = 'none';
+
+      const djRoleId = document.getElementById('admin-dj-role') ? document.getElementById('admin-dj-role').value || null : null;
+      const adminRoleId = document.getElementById('admin-admin-role') ? document.getElementById('admin-admin-role').value || null : null;
+
+      const features = {};
+      document.querySelectorAll('#admin-features-list input[data-feature]').forEach(chk => {
+        features[chk.getAttribute('data-feature')] = chk.checked;
+      });
+
+      const prefix = document.getElementById('admin-prefix') ? document.getElementById('admin-prefix').value.trim() : '';
+      const threadsEnabled = document.getElementById('admin-threads-enabled') ? document.getElementById('admin-threads-enabled').checked : false;
+
+      const forumSel = document.getElementById('admin-forum-channels');
+      const forumChannelIds = forumSel ? Array.from(forumSel.selectedOptions).map(o => o.value).filter(v => v.length > 0) : [];
+
+      const body = { djRoleId, adminRoleId, prefix, features, threadsEnabled, forumChannelIds };
       try {
-        const res = await fetch(url, { method: 'POST', signal: AbortSignal.timeout(15000) });
+        const res = await fetch('/api/guilds/' + encodeURIComponent(currentGuildId) + '/settings', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+          signal: AbortSignal.timeout(10000)
+        });
         if (!checkAuth(res)) return;
         if (res.ok) {
-          alert(okMsg);
-          renderActivityLogs();
+          if (statusEl) {
+            statusEl.style.display = 'inline';
+            statusEl.textContent = 'Settings saved successfully.';
+            setTimeout(() => { statusEl.style.display = 'none'; }, 4000);
+          }
+          refreshCurrentTab();
         } else {
-          let msg = failMsg;
+          let msg = 'Failed to save settings.';
           try {
             const j = await res.json();
-            if (j && j.error) msg += ': ' + j.error;
+            if (j && j.error) msg = j.error;
           } catch {}
           alert(msg);
         }
       } catch {
-        alert(failMsg);
+        alert('Failed to save settings.');
       }
     }
 
-    function syncDiscordCommands() {
-      postDevToolAction('/api/admin/bot/sync-commands', 'Discord slash commands synced successfully.', 'Failed to sync Discord slash commands.');
+    // Music & Queue
+    function fmtDur(ms) {
+      if (ms === null || ms === undefined || ms < 0 || !isFinite(ms)) return '--:--';
+      const total = Math.floor(ms / 1000);
+      const h = Math.floor(total / 3600);
+      const m = Math.floor((total % 3600) / 60);
+      const s = total % 60;
+      return h > 0
+        ? h + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0')
+        : m + ':' + String(s).padStart(2, '0');
     }
 
-    function optimizeDatabase() {
-      postDevToolAction('/api/admin/db/optimize', 'SQLite database optimized.', 'Failed to optimize the database.');
+    async function musicAction(action, extra) {
+      if (!currentGuildId) return false;
+      try {
+        const res = await fetch('/api/guilds/' + encodeURIComponent(currentGuildId) + '/music/' + action, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(extra || {}),
+          signal: AbortSignal.timeout(10000)
+        });
+        if (!checkAuth(res)) return false;
+        if (!res.ok) {
+          let msg = 'Failed to run action.';
+          try {
+            const j = await res.json();
+            if (j && j.error) msg = j.error;
+          } catch {}
+          alert(msg);
+        } else {
+          loadMusicTab();
+        }
+        return res.ok;
+      } catch {
+        alert('Failed to reach NodeLink.');
+        return false;
+      }
+    }
+
+    function musicControlBtn(action, icon, title, color) {
+      return '<button onclick="musicAction(\\'' + action + '\\')" class="btn btn-ghost btn-sm" title="' + title + '" style="color: ' + (color || 'var(--text-muted)') + ';"><i class="fa-solid ' + icon + '"></i></button>';
+    }
+
+    async function loadMusicTab() {
+      if (!currentGuildId) return;
+      const container = document.getElementById('music-queue-view');
+      if (!container) return;
+      container.innerHTML = '<div class="empty-state">Loading player state...</div>';
+
+      try {
+        const res = await fetch('/api/guilds/' + encodeURIComponent(currentGuildId) + '/music', {
+          signal: AbortSignal.timeout(6000)
+        });
+        if (!checkAuth(res)) return;
+        const data = await res.json();
+
+        container.innerHTML = renderMusicQueue(data);
+      } catch {
+        container.innerHTML = '<div class="empty-state">Could not reach NodeLink. Ensure LAVA_ENABLED and NodeLink credentials are configured.</div>';
+      }
+    }
+
+    function renderMusicQueue(data) {
+      if (data && data.active === false) {
+        return '<div class="empty-state"><i class="fa-solid fa-circle-info"></i> Nothing is playing in this server yet. Use <code style="color: #10b981;">/play</code> in a voice channel to start music.</div>';
+      }
+      if (!data || !data.active || !data.current) {
+        return '<div class="empty-state"><i class="fa-solid fa-music"></i> No active player session for this server.</div>';
+      }
+
+      const cur = data.current;
+      const track = cur.track || {};
+      const total = track.length || 0;
+      const pos = Math.min(data.position || 0, total || 0);
+      const pct = total > 0 ? Math.min(Math.round((pos / total) * 100), 100) : 0;
+
+      const transport = [
+        musicControlBtn('pause', 'fa-pause', 'Pause', '#f59e0b'),
+        musicControlBtn('resume', 'fa-play', 'Resume', '#10b981'),
+        musicControlBtn('skip', 'fa-forward-step', 'Skip', '#06b6d4'),
+        musicControlBtn('stop', 'fa-stop', 'Stop & clear queue', '#ef4444')
+      ].join('');
+
+      const nowPlaying =
+        '<div class="card">' +
+        '<div class="card-header">' +
+          '<div><div class="card-title"><i class="fa-solid fa-compact-disc" style="color: #10b981;"></i> Now Playing</div>' +
+          '<div class="card-desc">' + (data.paused ? '<span style="color: #f59e0b;">Paused</span>' : '<span style="color: #10b981;">Playing</span>') + ' &middot; channel ' + (data.channelId ? '<code style="color: var(--text-muted);">' + esc(data.channelId) + '</code>' : 'N/A') + '</div></div>' +
+          '<div style="display: flex; align-items: center; gap: 0.25rem;">' + transport + '</div>' +
+        '</div>' +
+        '<div style="display: flex; gap: 1rem; margin-top: 1rem; align-items: flex-start;">' +
+          (track.artworkUrl ? '<img src="' + esc(track.artworkUrl) + '" alt="" style="width: 96px; height: 96px; border-radius: 10px; object-fit: cover; flex-shrink: 0;">' : '<div style="width: 96px; height: 96px; border-radius: 10px; background: linear-gradient(135deg, rgba(16,185,129,0.2), rgba(6,182,212,0.2)); display: flex; align-items: center; justify-content: center; flex-shrink: 0;"><i class="fa-solid fa-music" style="font-size: 2rem; color: var(--text-dim);"></i></div>') +
+          '<div style="flex: 1; min-width: 0;">' +
+            '<div style="font-weight: 700; font-size: 1.0625rem; word-break: break-word;">' + esc(track.title || 'Unknown track') + '</div>' +
+            '<div style="color: var(--text-muted); font-size: 0.875rem; margin-top: 0.25rem;">' + esc(track.author || 'Unknown artist') + '</div>' +
+            '<div style="margin-top: 0.75rem;">' +
+              '<div style="display: flex; justify-content: space-between; font-size: 0.6875rem; color: var(--text-dim); margin-bottom: 0.25rem;"><span>' + fmtDur(pos) + '</span><span>' + fmtDur(total) + '</span></div>' +
+              '<div style="height: 6px; border-radius: 3px; background: var(--border); overflow: hidden;"><div style="height: 100%; width: ' + pct + '%; background: linear-gradient(90deg, #10b981, #06b6d4);"></div></div>' +
+            '</div>' +
+            '<div style="display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 0.75rem; align-items: center;">' +
+              '<span class="badge" style="background: rgba(16,185,129,0.15); color: #10b981; border: 1px solid rgba(16,185,129,0.3);"><i class="fa-solid fa-user"></i> ' + esc(cur.requester || 'unknown') + '</span>' +
+              '<span class="badge" style="background: rgba(6,182,212,0.15); color: #06b6d4; border: 1px solid rgba(6,182,212,0.3);">Volume ' + (data.volume || 100) + '%</span>' +
+              '<span class="badge" style="background: rgba(139,92,246,0.15); color: #a78bfa; border: 1px solid rgba(139,92,246,0.3);"><i class="fa-solid fa-repeat"></i> ' + esc(data.loop || 'none') + '</span>' +
+              '<span class="badge" style="background: rgba(245,158,11,0.15); color: #f59e0b; border: 1px solid rgba(245,158,11,0.3);"><i class="fa-solid fa-shuffle"></i> ' + (data.shuffled ? 'Shuffled' : 'In order') + '</span>' +
+              (track.uri ? '<a href="' + esc(track.uri) + '" target="_blank" rel="noopener noreferrer" style="font-size: 0.8125rem; color: var(--primary);"><i class="fa-solid fa-arrow-up-right-from-square"></i> Open source</a>' : '') +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div style="display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1rem;">' +
+          '<div class="form-group" style="flex: 1; min-width: 120px;">' +
+            '<label class="form-label">Volume</label>' +
+            '<input type="range" min="0" max="200" value="' + (data.volume || 100) + '" oninput="this.nextElementSibling.textContent = this.value + \\'%\\'" onchange="musicAction(\\'volume\\', { level: Number(this.value) })">' +
+            '<span style="font-size: 0.6875rem; color: var(--text-dim);">' + (data.volume || 100) + '%</span>' +
+          '</div>' +
+          '<div class="form-group" style="flex: 1; min-width: 140px;">' +
+            '<label class="form-label">Loop Mode</label>' +
+            '<select onchange="musicAction(\\'loop\\', { mode: this.value })">' +
+              '<option value="none"' + (data.loop === 'none' ? ' selected' : '') + '>Off</option>' +
+              '<option value="track"' + (data.loop === 'track' ? ' selected' : '') + '>Track</option>' +
+              '<option value="queue"' + (data.loop === 'queue' ? ' selected' : '') + '>Queue</option>' +
+            '</select>' +
+          '</div>' +
+          '<div class="form-group" style="flex: 1; min-width: 140px;">' +
+            '<label class="form-label">Shuffle</label>' +
+            '<div style="display: flex; gap: 0.5rem;">' +
+              '<button onclick="musicAction(\\'shuffle\\')" class="btn btn-ghost btn-sm" style="color: #f59e0b;"><i class="fa-solid fa-shuffle"></i> On</button>' +
+              '<button onclick="musicAction(\\'unshuffle\\')" class="btn btn-ghost btn-sm" style="color: var(--text-muted);"><i class="fa-solid fa-shuffle"></i> Off</button>' +
+            '</div>' +
+          '</div>' +
+          '<div class="form-group" style="flex: 1; min-width: 120px;">' +
+            '<label class="form-label">Seek (minutes)</label>' +
+            '<div style="display: flex; gap: 0.5rem;">' +
+              '<input type="number" id="music-seek-min" min="0" step="0.1" value="0" style="max-width: 110px;">' +
+              '<button onclick="musicAction(\\'seek\\', { position: Math.round(Number(document.getElementById(\\'music-seek-min\\').value) * 60000) })" class="btn btn-ghost btn-sm" style="color: #06b6d4;"><i class="fa-solid fa-forward"></i> Seek</button>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+
+      const queueEls = (data.queue || []).map(function (item, i) {
+        const t = item.track || {};
+        return '<div class="feed-pill">' +
+          '<div class="feed-details">' +
+            '<div class="feed-name-row"><span class="feed-name">' + (i + 1) + '. ' + esc(t.title || 'Unknown track') + '</span>' +
+            '<span class="badge" style="background: rgba(6,182,212,0.15); color: #06b6d4; border: 1px solid rgba(6,182,212,0.3);">' + fmtDur(t.length) + '</span></div>' +
+            '<div class="feed-url">' + esc(t.author || '') + (t.uri ? ' &middot; <a href="' + esc(t.uri) + '" target="_blank" rel="noopener noreferrer" style="color: var(--primary);">source</a>' : '') + '</div>' +
+            '<div class="feed-meta">Requested by ' + esc(item.requester || 'unknown') + '</div>' +
+          '</div>' +
+          '<div>' +
+            '<button onclick="musicAction(\\'remove\\', { position: ' + (i + 1) + ' })" class="btn btn-ghost btn-sm" title="Remove" style="color: #ef4444;"><i class="fa-solid fa-xmark"></i></button>' +
+            '<button onclick="musicAction(\\'skip\\' )" class="btn btn-ghost btn-sm" title="Play now" style="color: #10b981;"><i class="fa-solid fa-play"></i></button>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+
+      const queueSection =
+        '<div class="card">' +
+        '<div class="card-header">' +
+          '<div><div class="card-title"><i class="fa-solid fa-list-ol" style="color: var(--primary);"></i> Up Next</div>' +
+          '<div class="card-desc">' + (data.queue || []).length + ' track(s) in queue</div></div>' +
+          '<button onclick="musicAction(\\'clear\\')" class="btn btn-ghost btn-sm" style="color: #ef4444;"><i class="fa-solid fa-broom"></i> Clear Queue</button>' +
+        '</div>' +
+        '<div id="music-queue-list" style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.75rem;">' +
+          (queueEls.length ? queueEls : '<div class="empty-state">Queue is empty.</div>') +
+        '</div>' +
+      '</div>';
+
+      return nowPlaying + queueSection;
     }
 
     // Initialize on page load
     loadUserProfile();
+
+    // User dropdown toggle
+    (function () {
+      var trigger = document.getElementById('user-menu-trigger');
+      var box = document.getElementById('user-menu');
+      if (trigger && box) {
+        trigger.addEventListener('click', function (e) {
+          e.stopPropagation();
+          box.classList.toggle('open');
+          trigger.setAttribute('aria-expanded', box.classList.contains('open') ? 'true' : 'false');
+        });
+        document.addEventListener('click', function () {
+          box.classList.remove('open');
+          if (trigger) trigger.setAttribute('aria-expanded', 'false');
+        });
+        box.addEventListener('click', function (e) { e.stopPropagation(); });
+      }
+    })();
 
     // Handle browser back/forward
     window.addEventListener('popstate', applyRoute);

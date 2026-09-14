@@ -1,13 +1,14 @@
 /* eslint-disable no-useless-assignment -- accessToken and accessTokenSet are used in template literals */
 import type { Repository } from '../db/repository.js';
 import type { RedisCoordinator } from '../state/redis.js';
-import { feedCategory, type Feed, type FeedCategory } from '../state/types.js';
+import type { Feed } from '../state/types.js';
+import { resolveFeedTargets } from './targets.js';
 import { fetchRaw, isCloudflareChallenge } from './fetch.js';
 import { fetchFreeGames, type FreeGameItem, type FreeGamePlatformKey } from './freegames.js';
 import { parseHtml } from './html.js';
 import { parseFeed, withGuid, type FeedEntry } from './parser.js';
 import { scrapeItems, absoluteUrl } from './scraper.js';
-import { feedEmbed, freeGameEmbed, streamAlertEmbed } from '../bot/embeds.js';
+import { feedEmbed, freeGameEmbed, streamAlertEmbed } from '../bot/utils/embeds.js';
 import { createLogger, type LogLevel } from '../util/logger.js';
 import { FeedThreadManager } from './threads.js';
 
@@ -49,15 +50,6 @@ export class FeedWatcher {
 
   setThreads(threads: FeedThreadManager | null): void {
     this.threads = threads;
-  }
-
-  private resolveFeedTargets(feed: Feed): { channelId: string | null; threadChannelId: string | null } {
-    const category = feed.guildId ? (feedCategory(feed.feedType) as FeedCategory | null) : null;
-    const target = category && feed.guildId ? this.repo.getGuildCategoryTarget(feed.guildId, category) : null;
-    return {
-      channelId: target?.channelId ?? feed.channelId ?? null,
-      threadChannelId: target?.threadChannelId ?? feed.threadChannelId ?? null,
-    };
   }
 
   async pollFeed(userId: number, feedId: number): Promise<void> {
@@ -105,7 +97,7 @@ export class FeedWatcher {
       }
     }
 
-    const { channelId: targetChannelId, threadChannelId: targetThreadChannelId } = this.resolveFeedTargets(feed);
+    const { channelId: targetChannelId, threadChannelId: targetThreadChannelId } = resolveFeedTargets(this.repo, feed);
     if (!targetChannelId && !targetThreadChannelId) {
       this.logger.warn('Feed has no configured Discord channel and no category target; skipping poll', {
         feedId: feed.id,
@@ -268,7 +260,7 @@ export class FeedWatcher {
       const outcome = await this.threads.deliver(feed, payload);
       if (outcome.mode === 'thread') return outcome.delivered;
     }
-    const { channelId } = this.resolveFeedTargets(feed);
+    const { channelId } = resolveFeedTargets(this.repo, feed);
     if (!this.bot || !channelId) return false;
     await this.bot.sendChannelMessage(channelId, payload);
     return true;
@@ -360,7 +352,7 @@ export class FeedWatcher {
   private async pollStreamAlertFeed(userId: number, feed: Feed): Promise<void> {
     this.logger.debug('Polling stream alert feed (fallback)', { feedId: feed.id, feedType: feed.feedType });
 
-    const { channelId, threadChannelId } = this.resolveFeedTargets(feed);
+    const { channelId, threadChannelId } = resolveFeedTargets(this.repo, feed);
     if (!channelId && !threadChannelId) {
       this.logger.warn('Stream alert feed has no configured Discord channel or thread target; skipping poll', {
         feedId: feed.id,

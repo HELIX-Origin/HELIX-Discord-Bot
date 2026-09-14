@@ -1,7 +1,7 @@
 import type { AppDeps } from '../../app.js';
 import type { DiscordBot } from '../bot.js';
 import { type Logger } from '../../util/logger.js';
-import type { DiscordGuild, DiscordChannel, DiscordRole } from '../types.js';
+import type { DiscordGuild, DiscordChannel, DiscordRole } from '../utils/types.js';
 
 export interface EventHandlers {
   onGuildCreate?: (guild: DiscordGuild, _bot: DiscordBot, _deps: AppDeps) => Promise<void>;

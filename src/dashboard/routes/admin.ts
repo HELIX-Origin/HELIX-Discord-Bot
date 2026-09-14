@@ -1,5 +1,5 @@
 import type { AppDeps } from '../../app.js';
-import { getEnabledCommands } from '../../bot/commands/index.js';
+import { getEnabledCommands } from '../../bot/commands/registry.js';
 import { sendError, sendJson } from '../http/helpers.js';
 import type { Router } from '../http/router.js';
 import { requireOwner } from './shared.js';

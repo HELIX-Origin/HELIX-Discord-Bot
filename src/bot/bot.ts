@@ -1,11 +1,23 @@
 import type http from 'node:http';
 import type https from 'node:https';
+import {
+  Client,
+  GatewayIntentBits,
+  Events,
+  REST,
+  Routes,
+  type Interaction,
+  type Guild,
+  type GuildMember,
+  type Channel,
+  type Role,
+  type VoiceState,
+} from 'discord.js';
 import type { AppDeps } from '../app.js';
 import { createLogger, type Logger } from '../util/logger.js';
-import { getEnabledCommands, dispatchInteraction, handleGifAutocomplete } from './commands/index.js';
-import { DiscordGatewayClient } from './gateway.js';
-import { DiscordRestClient, type DiscordApplicationInfo, type DiscordChannelSnapshot } from './rest.js';
-import { InteractionResponseType, type DiscordInteraction } from './types.js';
+import { getEnabledCommands, handleGifAutocomplete } from './commands/registry.js';
+import { dispatchInteraction, createCommandHandler } from './handlers/commands.js';
+import { DiscordRestClient } from './rest.js';
 import { createHelixRssServer } from '../dashboard/server.js';
 
 export interface DiscordBotOptions {
@@ -23,12 +35,17 @@ export interface DiscordBotOptions {
 export class DiscordBot {
   private readonly logger: Logger;
   readonly rest: DiscordRestClient;
-  private readonly gateway: DiscordGatewayClient;
+  private readonly client: Client;
   private server: http.Server | https.Server | null = null;
   private isStarted = false;
   private ownerDiscordIds = new Set<string>();
   private teamAdminDiscordIds = new Set<string>();
-  private applicationInfo: DiscordApplicationInfo | null = null;
+  private applicationInfo: {
+    id: string;
+    name: string;
+    icon?: string | null;
+    bot?: { id: string; username: string; avatar?: string | null; global_name?: string | null; discriminator?: string };
+  } | null = null;
 
   constructor(
     private readonly deps: AppDeps,
@@ -36,12 +53,30 @@ export class DiscordBot {
   ) {
     this.logger = createLogger('bot', deps.config.logLevel);
     this.rest = new DiscordRestClient(options.token, deps.config.discordApiBaseUrl);
-    this.gateway = new DiscordGatewayClient({
-      token: options.token,
-      logger: this.logger,
-      onInteraction: (interaction) => this.handleInteraction(interaction),
-      onGuildDelete: (guildId) => this.handleGuildDelete(guildId),
+
+    this.client = new Client({
+      intents: [
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.GuildVoiceStates,
+        GatewayIntentBits.MessageContent,
+        GatewayIntentBits.GuildMembers,
+      ],
     });
+
+    this.client.on(Events.InteractionCreate, (interaction) => this.handleInteraction(interaction));
+    this.client.on(Events.GuildDelete, (guild) => this.handleGuildDelete(guild));
+    this.client.on(Events.GuildCreate, (guild) => this.handleGuildCreate(guild));
+    this.client.on(Events.GuildMemberAdd, (member) => this.handleGuildMemberAdd(member));
+    this.client.on(Events.ChannelCreate, (channel) => this.handleChannelCreate(channel));
+    this.client.on(Events.ChannelDelete, (channel) => this.handleChannelDelete(channel));
+    this.client.on(Events.ChannelUpdate, (oldChannel, newChannel) => this.handleChannelUpdate(oldChannel, newChannel));
+    this.client.on(Events.GuildRoleCreate, (role) => this.handleRoleCreate(role));
+    this.client.on(Events.GuildRoleDelete, (role) => this.handleRoleDelete(role));
+    this.client.on(Events.GuildRoleUpdate, (oldRole, newRole) => this.handleRoleUpdate(oldRole, newRole));
+    this.client.on(Events.VoiceStateUpdate, (oldState, newState) => this.handleVoiceStateUpdate(oldState, newState));
+    this.client.on(Events.ClientReady, () => this.onReady());
+
     this.deps.bot = this;
   }
 
@@ -52,10 +87,8 @@ export class DiscordBot {
     this.logger.info('Starting Discord Bot primary service...');
 
     if (this.options.token) {
-      // 0. Auto-detect owner and team permissions from Discord Application API
       await this.detectApplicationOwners();
 
-      // 1. Register application slash commands with Discord REST API if clientId is available
       if (this.options.clientId) {
         try {
           const enabledCommands = getEnabledCommands(this.deps);
@@ -63,7 +96,8 @@ export class DiscordBot {
             commandsCount: enabledCommands.length,
             clientId: this.options.clientId,
           });
-          await this.rest.registerGlobalCommands(this.options.clientId, enabledCommands);
+          const rest = new REST({ version: '10' }).setToken(this.options.token);
+          await rest.put(Routes.applicationCommands(this.options.clientId), { body: enabledCommands });
           this.logger.info('Global slash commands registered successfully');
         } catch (err) {
           this.logger.error('Failed to register global slash commands', {
@@ -76,13 +110,13 @@ export class DiscordBot {
         );
       }
 
-      // 2. Connect to Discord Gateway
-      this.gateway.connect();
+      this.client.login(this.options.token).catch((err) => {
+        this.logger.error('Failed to login to Discord', { err: (err as Error).message });
+      });
     } else {
       this.logger.warn('DISCORD_TOKEN not set; running bot in local web-only mode without Discord Gateway connection.');
     }
 
-    // 3. Start unified HTTP/HTTPS server on bot port (e.g. 3131)
     if (this.options.port !== undefined && this.options.port >= 0) {
       const port = this.options.port;
       const host = this.options.host ?? '127.0.0.1';
@@ -124,66 +158,89 @@ export class DiscordBot {
     }
   }
 
-  private async handleInteraction(interaction: DiscordInteraction): Promise<void> {
-    // Handle autocomplete interactions (type 4)
-    if (interaction.type === 4) {
-      if (interaction.data?.name === 'gif') {
+  private async onReady(): Promise<void> {
+    this.logger.info('Discord client ready', { user: this.client.user?.tag });
+    await this.detectApplicationOwners();
+    const { handleReady } = await import('./events/ready.js');
+    await handleReady(this, this.deps);
+  }
+
+  private async handleInteraction(interaction: Interaction): Promise<void> {
+    if (!interaction.isChatInputCommand() && !interaction.isAutocomplete()) return;
+
+    const commandName = interaction.commandName;
+
+    if (interaction.isAutocomplete()) {
+      if (commandName === 'gif') {
         try {
-          const response = await handleGifAutocomplete(interaction, this.deps);
-          await this.rest.sendInteractionResponse(interaction.id, interaction.token, response);
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const response = await handleGifAutocomplete(interaction as unknown as any, this.deps);
+          await interaction.respond(response.data?.choices || []);
         } catch (err) {
           this.logger.error('Error handling autocomplete interaction', {
             err: (err as Error).message,
-            command: interaction.data?.name,
+            command: commandName,
           });
         }
       }
       return;
     }
 
-    // Only handle application command interactions (type 2)
-    if (interaction.type !== 2) return;
-
     this.logger.debug('Received slash command interaction', {
-      command: interaction.data?.name,
-      guildId: interaction.guild_id,
-      user: interaction.member?.user?.username ?? interaction.user?.username,
+      command: commandName,
+      guildId: interaction.guildId,
+      user: interaction.user?.username,
     });
 
     try {
-      const response = await dispatchInteraction(interaction, this.deps, this.rest);
-      await this.rest.sendInteractionResponse(interaction.id, interaction.token, response);
+      const handler = createCommandHandler(this.deps);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const response = await dispatchInteraction(interaction as unknown as any, this.deps, this.rest, handler);
+      if (interaction.replied || interaction.deferred) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        await interaction.followUp(response as unknown as any);
+      } else {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        await interaction.reply(response as unknown as any);
+      }
     } catch (err) {
       this.logger.error('Error dispatching slash command interaction', {
         err: (err as Error).message,
-        command: interaction.data?.name,
+        command: commandName,
       });
 
       try {
-        await this.rest.sendInteractionResponse(interaction.id, interaction.token, {
-          type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+        const errorResponse = {
+          type: 4,
           data: {
             flags: 64,
             content: `❌ An unexpected error occurred: ${(err as Error).message}`,
           },
-        });
+        };
+        if (interaction.replied || interaction.deferred) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          await interaction.followUp(errorResponse as unknown as any);
+        } else {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          await interaction.reply(errorResponse as unknown as any);
+        }
       } catch {
         /* ignore fallback failure */
       }
     }
   }
 
-  async handleGuildDelete(guildId: string): Promise<void> {
-    this.logger.info('Handling GUILD_DELETE: Bot removed from guild or guild deleted', { guildId });
+  async handleGuildDelete(guild: Guild): Promise<void> {
+    this.logger.info('Handling GUILD_DELETE: Bot removed from guild or guild deleted', { guildId: guild.id });
     try {
-      const result = this.deps.repo.deleteGuildData(guildId);
-      this.logger.info(`Cleaned up guild ${guildId} data`, {
+      const result = this.deps.repo.deleteGuildData(guild.id);
+      this.logger.info(`Cleaned up guild ${guild.id} data`, {
         feedsDeleted: result.feedsDeleted,
         guildsDeleted: result.guildsDeleted,
       });
     } catch (err) {
       this.logger.error('Failed to clean up guild data after GUILD_DELETE', {
-        guildId,
+        guildId: guild.id,
         err: (err as Error).message,
       });
     }
@@ -211,16 +268,23 @@ export class DiscordBot {
     }
 
     try {
-      const guilds = await this.rest.getBotGuilds();
+      const guilds = this.client.guilds.cache;
       const results = await Promise.all(
         guilds.map(async (guild) => {
           try {
-            const channels = await this.rest.getGuildChannels(guild.id);
+            const channels = await guild.channels.fetch();
             return {
               id: guild.id,
               name: guild.name,
               icon: guild.icon,
-              channels,
+              channels: channels
+                .filter((c) => c !== null)
+                .map((c) => ({
+                  id: c.id,
+                  name: c.name ?? 'unknown',
+                  type: c.type,
+                  position: (c as unknown as { position?: number }).position ?? 0,
+                })),
             };
           } catch {
             return {
@@ -250,7 +314,31 @@ export class DiscordBot {
     return this.rest.getGuildChannelsAll(guildId);
   }
 
-  async getChannel(threadId: string): Promise<DiscordChannelSnapshot> {
+  async getGuildMemberCount(guildId: string): Promise<number | null> {
+    const guild = this.client.guilds.cache.get(guildId);
+    if (!guild) return null;
+    try {
+      await guild.members.fetch();
+    } catch {
+      return guild.memberCount ?? null;
+    }
+    return guild.memberCount ?? null;
+  }
+
+  async getGuildRoles(guildId: string): Promise<Array<{ id: string; name: string; color: number; position: number }>> {
+    try {
+      const guild = this.client.guilds.cache.get(guildId);
+      if (!guild) return [];
+      const roles = await guild.roles.fetch();
+      return roles
+        .map((r) => ({ id: r.id, name: r.name, color: r.color, position: r.position }))
+        .sort((a, b) => b.position - a.position);
+    } catch {
+      return [];
+    }
+  }
+
+  async getChannel(threadId: string): Promise<{ id: string; name: string; type: number }> {
     return this.rest.getChannel(threadId);
   }
 
@@ -286,7 +374,6 @@ export class DiscordBot {
         }
         for (const m of app.team.members || []) {
           if (m.membership_state === 2) {
-            // ACCEPTED: The entire app team is the admin team by default
             owners.add(m.user.id);
             admins.add(m.user.id);
           }
@@ -314,7 +401,12 @@ export class DiscordBot {
     }
   }
 
-  getApplicationInfo(): DiscordApplicationInfo | null {
+  getApplicationInfo(): {
+    id: string;
+    name: string;
+    icon?: string | null;
+    bot?: { id: string; username: string; avatar?: string | null; global_name?: string | null; discriminator?: string };
+  } | null {
     return this.applicationInfo;
   }
 
@@ -349,10 +441,55 @@ export class DiscordBot {
     return this.ownerDiscordIds.has(discordUserId) || this.teamAdminDiscordIds.has(discordUserId);
   }
 
+  async handleGuildCreate(guild: Guild): Promise<void> {
+    const { handleGuildCreate } = await import('./events/guild-create.js');
+    await handleGuildCreate(guild, this, this.deps);
+  }
+
+  async handleGuildMemberAdd(member: NonNullable<GuildMember>): Promise<void> {
+    const { handleGuildMemberAdd } = await import('./events/member.js');
+    await handleGuildMemberAdd(member, this, this.deps);
+  }
+
+  async handleChannelCreate(channel: Channel): Promise<void> {
+    const { handleChannelCreate } = await import('./events/channel.js');
+    await handleChannelCreate(channel, this, this.deps);
+  }
+
+  async handleChannelDelete(channel: Channel): Promise<void> {
+    const { handleChannelDelete } = await import('./events/channel.js');
+    await handleChannelDelete(channel.id, this, this.deps);
+  }
+
+  async handleChannelUpdate(oldChannel: Channel, newChannel: Channel): Promise<void> {
+    const { handleChannelUpdate } = await import('./events/channel.js');
+    await handleChannelUpdate(oldChannel, newChannel, this, this.deps);
+  }
+
+  async handleRoleCreate(role: Role): Promise<void> {
+    const { handleRoleCreate } = await import('./events/role.js');
+    await handleRoleCreate(role, this, this.deps);
+  }
+
+  async handleRoleDelete(role: Role): Promise<void> {
+    const { handleRoleDelete } = await import('./events/role.js');
+    await handleRoleDelete(role.id, this, this.deps);
+  }
+
+  async handleRoleUpdate(oldRole: Role, newRole: Role): Promise<void> {
+    const { handleRoleUpdate } = await import('./events/role.js');
+    await handleRoleUpdate(oldRole, newRole, this, this.deps);
+  }
+
+  async handleVoiceStateUpdate(oldState: VoiceState, newState: VoiceState): Promise<void> {
+    const { handleVoiceStateUpdate } = await import('./events/voice-state.js');
+    await handleVoiceStateUpdate(oldState, newState, this, this.deps);
+  }
+
   stop(): void {
     if (!this.isStarted) return;
     this.isStarted = false;
-    this.gateway.stop();
+    this.client.destroy();
     if (this.server) {
       this.server.close();
       this.server = null;

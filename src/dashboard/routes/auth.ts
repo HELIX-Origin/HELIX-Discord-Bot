@@ -1,6 +1,6 @@
 import { randomBytes } from 'node:crypto';
 import { appDisplayName, type AppDeps } from '../../app.js';
-import { AuthService } from '../../auth/service.js';
+import { AuthService } from '../auth/service.js';
 import {
   clearSessionCookie,
   getRequestBaseUrl,
@@ -10,7 +10,7 @@ import {
   setSessionCookie,
 } from '../http/helpers.js';
 import type { Router } from '../http/router.js';
-import { DiscordProvider, hasManageChannelsPermission } from '../../oauth/discord.js';
+import { DiscordProvider, hasManageChannelsPermission } from '../oauth/discord.js';
 import { createLogger } from '../../util/logger.js';
 import { authedUserId, getDiscordCallbackUri, getSessionToken, SESSION_MAX_AGE_SECONDS } from './shared.js';
 

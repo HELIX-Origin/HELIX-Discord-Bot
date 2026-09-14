@@ -58,6 +58,7 @@ export function registerFeedsRoutes(router: Router<AppDeps>): void {
     const body = (await readBodyJson(req)) as {
       name?: string;
       url?: string;
+      topic?: string;
       channelId?: string | null;
       guildId?: string | null;
       feedType?: FeedType;
@@ -133,7 +134,7 @@ export function registerFeedsRoutes(router: Router<AppDeps>): void {
               description: body.scrape.description?.trim() || undefined,
             }
           : null;
-      const feed = d.repo.addFeed(userId, name, url, channelId, feedType, scrape, guildId);
+      const feed = d.repo.addFeed(userId, name, url, channelId, feedType, scrape, guildId, body.topic?.trim() || null);
       const typeLabel =
         feedType === 'reddit'
           ? 'Reddit image '
@@ -156,6 +157,7 @@ export function registerFeedsRoutes(router: Router<AppDeps>): void {
     const body = (await readBodyJson(req)) as {
       name?: string;
       url?: string;
+      topic?: string;
       feedType?: FeedType;
       channelId?: string | null;
       enabled?: boolean;
@@ -184,6 +186,7 @@ export function registerFeedsRoutes(router: Router<AppDeps>): void {
     const feed = d.repo.updateFeed(userId, id, {
       name: body.name?.trim(),
       url: body.url?.trim(),
+      topic: body.topic !== undefined ? body.topic.trim() || null : undefined,
       feedType: body.feedType,
       channelId: body.channelId !== undefined ? body.channelId?.trim() || null : undefined,
       guildId,

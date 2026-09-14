@@ -31,20 +31,29 @@ export class FeedRepository {
     feedType: FeedType,
     scrape: Feed['scrape'],
     guildId?: string | null,
+    topic?: string | null,
   ): Feed {
     if (feedType === 'scrape' && !scrape) {
       throw new Error('Scrape feeds require a scrape configuration');
     }
 
+    const cleanTopic =
+      topic && topic.trim()
+        ? topic.trim() === 'World News' || topic.trim() === 'US News'
+          ? 'News'
+          : topic.trim()
+        : null;
+
     const result = this.db.raw
       .prepare(
-        `INSERT INTO feeds (user_id, name, url, channel_id, guild_id, feed_type, scrape_item, scrape_title, scrape_link, scrape_description, created_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        `INSERT INTO feeds (user_id, name, url, topic, channel_id, guild_id, feed_type, scrape_item, scrape_title, scrape_link, scrape_description, created_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       )
       .run(
         userId,
         name,
         url,
+        cleanTopic,
         channelId,
         guildId ?? null,
         feedType,
@@ -59,6 +68,7 @@ export class FeedRepository {
       userId,
       name,
       url,
+      topic: cleanTopic,
       channelId,
       guildId: guildId ?? null,
       enabled: 1,
@@ -80,6 +90,7 @@ export class FeedRepository {
     fields: {
       name?: string;
       url?: string;
+      topic?: string | null;
       feedType?: FeedType;
       channelId?: string | null;
       guildId?: string | null;
@@ -94,6 +105,14 @@ export class FeedRepository {
       ...current,
       name: fields.name ?? current.name,
       url: fields.url ?? current.url,
+      topic:
+        fields.topic !== undefined
+          ? fields.topic && fields.topic.trim()
+            ? fields.topic.trim() === 'World News' || fields.topic.trim() === 'US News'
+              ? 'News'
+              : fields.topic.trim()
+            : null
+          : current.topic,
       feedType: fields.feedType ?? current.feedType,
       channelId: fields.channelId !== undefined ? fields.channelId : current.channelId,
       guildId: fields.guildId !== undefined ? fields.guildId : current.guildId,
@@ -103,11 +122,12 @@ export class FeedRepository {
     };
     this.db.raw
       .prepare(
-        'UPDATE feeds SET name = ?, url = ?, feed_type = ?, channel_id = ?, guild_id = ?, enabled = ?, thread_channel_id = ?, thread_entry_count = ? WHERE id = ? AND user_id = ?',
+        'UPDATE feeds SET name = ?, url = ?, topic = ?, feed_type = ?, channel_id = ?, guild_id = ?, enabled = ?, thread_channel_id = ?, thread_entry_count = ? WHERE id = ? AND user_id = ?',
       )
       .run(
         updated.name,
         updated.url,
+        updated.topic,
         updated.feedType,
         updated.channelId ?? null,
         updated.guildId ?? null,

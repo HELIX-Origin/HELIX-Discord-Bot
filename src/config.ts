@@ -27,6 +27,7 @@ export interface AppConfig {
   publicBaseUrl: string | null;
   dbUri: string;
   dbPath: string;
+  redisUri: string | null;
   pollIntervalMs: number;
   requestTimeoutMs: number;
   sslKey: string | null;
@@ -88,6 +89,13 @@ export function defaultConfig(): AppConfig {
   //   mysql://user:pass@host:3306/db
   // Falls back to SQLite file in SQLITE_DATA directory.
   const dbUri = process.env['DB_URI']?.trim() || `sqlite:${resolve(dataDir, 'database.sqlite')}`;
+
+  // REDIS_URI: optional remote Redis connection string for multi-instance
+  // coordination (deduplication + locking) across multiple bot processes.
+  // Example: rediss://:password@host:port (TLS) or redis://user:pass@host:6379/0.
+  // When unset, an in-memory ioredis-mock coordination layer is used instead and
+  // no external redis-server binary is required.
+  const redisUri = process.env['REDIS_URI']?.trim() || process.env['REDIS_URL']?.trim() || null;
 
   // Port is derived exclusively from INTERNAL_URL (default 3131). No PORT-style
   // environment variables are used; proxies/tunnels mask ports on PUBLIC_URL.
@@ -226,6 +234,7 @@ export function defaultConfig(): AppConfig {
     publicBaseUrl,
     dbUri,
     dbPath: resolve(dataDir, 'database.sqlite'),
+    redisUri,
     pollIntervalMs: 3_600_000,
     requestTimeoutMs: parsePositiveInt(process.env['REQUEST_TIMEOUT_MS'], 15_000),
     sslKey,

@@ -63,11 +63,35 @@ export type FeedType =
   | 'youtube'
   | 'twitch';
 
+export const FEED_TYPES: readonly FeedType[] = [
+  'rss',
+  'scrape',
+  'reddit',
+  'free_games',
+  'free_games_epic',
+  'free_games_steam',
+  'free_games_gog',
+  'free_games_indiegala',
+  'free_games_humble',
+  'free_games_itchio',
+  'free_games_ubisoft',
+  'free_games_ea',
+  'free_games_prime',
+  'free_games_battlenet',
+  'youtube',
+  'twitch',
+];
+
+export function isFeedType(value: unknown): value is FeedType {
+  return typeof value === 'string' && (FEED_TYPES as readonly string[]).includes(value);
+}
+
 export interface Feed {
   id: number;
   userId: number;
   name: string;
   url: string;
+  topic: string | null;
   channelId: string | null;
   guildId?: string | null;
   enabled: number;
@@ -157,7 +181,9 @@ export const rowToFeed = (r: Row | undefined): Feed | null => {
     r.scrape_description === null || r.scrape_description === undefined ? null : String(r.scrape_description);
   const channelId = r.channel_id !== null && r.channel_id !== undefined ? String(r.channel_id) : null;
   const guildId = r.guild_id !== null && r.guild_id !== undefined ? String(r.guild_id) : null;
-  const feedType = r.feed_type === 'scrape' ? 'scrape' : r.feed_type === 'reddit' ? 'reddit' : 'rss';
+  const rawFeedType = r.feed_type === null || r.feed_type === undefined ? 'rss' : String(r.feed_type);
+  const feedType: FeedType = isFeedType(rawFeedType) ? rawFeedType : 'rss';
+  const topic = r.topic !== null && r.topic !== undefined && String(r.topic).trim() ? String(r.topic).trim() : null;
   const threadChannelId =
     r.thread_channel_id !== null && r.thread_channel_id !== undefined ? String(r.thread_channel_id) : null;
   const threadEntryCount = Number(r.thread_entry_count ?? 0);
@@ -166,6 +192,7 @@ export const rowToFeed = (r: Row | undefined): Feed | null => {
     userId: Number(r.user_id),
     name: String(r.name),
     url: String(r.url),
+    topic,
     channelId,
     guildId,
     enabled: Number(r.enabled),
@@ -230,4 +257,16 @@ export function feedCategory(feedType: FeedType): FeedCategory | null {
   if (feedType.startsWith('free_games')) return 'freegames';
   if (feedType === 'youtube' || feedType === 'twitch') return 'streamalerts';
   return null;
+}
+
+export function feedTopic(feed: Feed): string {
+  if (feed.topic && feed.topic.trim()) {
+    const stored = feed.topic.trim();
+    if (stored === 'World News' || stored === 'US News') return 'News';
+    return stored;
+  }
+  if (feed.feedType === 'reddit') return 'Reddit';
+  if (feed.feedType.startsWith('free_games')) return 'Free Games';
+  if (feed.feedType === 'youtube' || feed.feedType === 'twitch') return 'Stream Alerts';
+  return 'Other';
 }

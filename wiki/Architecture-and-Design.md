@@ -15,7 +15,7 @@ flowchart TB
 
     subgraph AppLayer["Application Core (Node.js / TypeScript)"]
         HttpServer["Native HTTP Server & REST API (`src/dashboard/routes/*`)"]
-        SessionMgr["Discord OAuth2 & Session Manager (`src/oauth/*`)"]
+        SessionMgr["Discord OAuth2 & Session Manager (`src/dashboard/oauth/*` + `src/dashboard/auth/*`)"]
         BotClient["Native Discord Bot Client (`src/bot/*`)"]
         FeedWatcher["Background Feed Watcher (`src/feed/watcher.ts`)"]
         ParserEngine["Multi-Format Parser & Scrapers (`src/feed/*`)"]
