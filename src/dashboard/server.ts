@@ -5,9 +5,11 @@ import { appDisplayName, type AppDeps } from '../app.js';
 import { getRequestBaseUrl, sendError, sendHtml, sendJson, sendText } from './http/helpers.js';
 import { Router } from './http/router.js';
 import { renderDashboardHtml } from './views/dashboard.js';
+import { renderGuildsHtml } from './views/guilds.js';
 import { renderLandingHtml } from './views/landing.js';
 import { renderLoginHtml } from './views/login.js';
 import { renderLegalHtml } from './views/legal.js';
+import { renderAdminHtml } from './views/admin.js';
 import { registerAdminRoutes } from './routes/admin.js';
 import { registerAuthRoutes } from './routes/auth.js';
 import { registerOAuthRoutes } from './routes/oauth.js';
@@ -114,8 +116,43 @@ export function createHelixRssServer(deps: AppDeps): Server {
   router.add('GET', '/bot/invite', handleInvite);
   router.add('GET', '/api/bot/invite', handleInvite);
 
-  // Navigation shortcuts
-  router.add('GET', '/dev-tools', async (req, res, _ctx, d) => {
+  // Guild selection page
+  router.add('GET', '/guilds', async (req, res, _ctx, d) => {
+    const userId = await authedUserId(req, d);
+    if (userId === null) {
+      res.writeHead(302, { Location: '/login' });
+      res.end();
+      return;
+    }
+    sendHtml(res, 200, renderGuildsHtml(d, userId));
+  });
+
+  // Per-guild dashboard with sub-pages
+  router.add('GET', '/dashboard/:guildId', async (req, res, ctx, d) => {
+    const userId = await authedUserId(req, d);
+    if (userId === null) {
+      res.writeHead(302, { Location: '/login' });
+      res.end();
+      return;
+    }
+    const guildId = ctx.params['guildId'];
+    sendHtml(res, 200, renderDashboardHtml(d, userId, { view: 'dashboard', guildId, page: 'overview' }));
+  });
+
+  router.add('GET', '/dashboard/:guildId/:page', async (req, res, ctx, d) => {
+    const userId = await authedUserId(req, d);
+    if (userId === null) {
+      res.writeHead(302, { Location: '/login' });
+      res.end();
+      return;
+    }
+    const guildId = ctx.params['guildId'];
+    const page = ctx.params['page'];
+    sendHtml(res, 200, renderDashboardHtml(d, userId, { view: 'dashboard', guildId, page }));
+  });
+
+  // Admin page (owner/team only)
+  router.add('GET', '/admin', async (req, res, _ctx, d) => {
     const userId = await authedUserId(req, d);
     if (userId === null) {
       res.writeHead(302, { Location: '/login' });
@@ -126,25 +163,24 @@ export function createHelixRssServer(deps: AppDeps): Server {
       sendError(res, 403, 'Forbidden: Administrator or Owner access required');
       return;
     }
-    res.writeHead(302, { Location: '/?tab=dev-tools' });
+    sendHtml(res, 200, renderAdminHtml(d, userId));
+  });
+
+  // Legacy redirects
+  router.add('GET', '/dashboard', async (_req, res) => {
+    res.writeHead(302, { Location: '/guilds' });
+    res.end();
+  });
+  router.add('GET', '/dev-tools', async (_req, res) => {
+    res.writeHead(302, { Location: '/admin' });
     res.end();
   });
   router.add('GET', '/dev', async (_req, res) => {
-    res.writeHead(302, { Location: '/dev-tools' });
+    res.writeHead(302, { Location: '/admin' });
     res.end();
   });
-  router.add('GET', '/settings', async (req, res, _ctx, d) => {
-    const userId = await authedUserId(req, d);
-    if (userId === null) {
-      res.writeHead(302, { Location: '/login' });
-      res.end();
-      return;
-    }
-    if (!isAdminOrOwner(userId, d)) {
-      sendError(res, 403, 'Forbidden: Administrator or Owner access required');
-      return;
-    }
-    res.writeHead(302, { Location: '/?tab=settings' });
+  router.add('GET', '/settings', async (_req, res) => {
+    res.writeHead(302, { Location: '/guilds' });
     res.end();
   });
 

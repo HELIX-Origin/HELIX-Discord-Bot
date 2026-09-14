@@ -13,19 +13,11 @@ export interface FeatureFlags {
   adminPanelEnabled: boolean;
 }
 
-export interface LavalinkConfig {
+export interface NodeLinkConfig {
   host: string;
   port: number;
   secure: boolean;
   password: string;
-  cipherUrl: string;
-  cipherPassword: string;
-}
-
-export interface YouTubeOAuthConfig {
-  clientId: string | null;
-  clientSecret: string | null;
-  refreshToken: string | null;
 }
 
 export interface AppConfig {
@@ -63,11 +55,11 @@ export interface AppConfig {
   twitchClientId: string | null;
   twitchClientSecret: string | null;
   features: FeatureFlags;
-  lavalink: LavalinkConfig;
-  youtubeOAuth: YouTubeOAuthConfig;
+  nodeLink: NodeLinkConfig;
   spotifyClientId: string | null;
   spotifyClientSecret: string | null;
   klipyApiKey: string | null;
+  appleMediaToken: string | null;
 }
 
 export function defaultConfig(): AppConfig {
@@ -216,23 +208,15 @@ export function defaultConfig(): AppConfig {
     adminPanelEnabled: parseEnvFlag(process.env['ADMIN_PANEL_ENABLED'], true),
   };
 
-  // Lavalink node (self-hosted sidecar or external server). The bot always acts
-  // as a client; only the endpoint values change between self-hosted/external.
-  const lavalink: LavalinkConfig = {
-    host: process.env['LAVA_HOST']?.trim() || '127.0.0.1',
-    port: parseOptionalInt(process.env['LAVA_PORT'], 2333),
-    secure: parseEnvFlag(process.env['LAVA_SECURE'], false),
-    password: process.env['LAVA_PASSWORD']?.trim() || 'youshallnotpass',
-    cipherUrl: process.env['LAVA_CIPHER_URL']?.trim() || '',
-    cipherPassword: process.env['LAVA_CIPHER_PASSWORD']?.trim() || '',
-  };
-
-  // YouTube OAuth (device-code flow) — client ID/secret are mandatory for the
-  // refresh token; the token stays empty until auto-fetched via the Admin panel.
-  const youtubeOAuth: YouTubeOAuthConfig = {
-    clientId: process.env['YOUTUBE_CLIENT_ID']?.trim() || null,
-    clientSecret: process.env['YOUTUBE_CLIENT_SECRET']?.trim() || null,
-    refreshToken: process.env['YOUTUBE_REFRESH_TOKEN']?.trim() || null,
+  // NodeLink node (public instance or self-hosted). The bot always acts
+  // as a client; only the endpoint values change.
+  // Public instance: nodelink.triniumhost.indevs.in:443 (SSL) - password: free (NodeLink v3.8.0)
+  // Self-hosted fallback: localhost:2333
+  const nodeLink: NodeLinkConfig = {
+    host: process.env['NODELINK_HOST']?.trim() || 'nodelink.triniumhost.indevs.in',
+    port: parseOptionalInt(process.env['NODELINK_PORT'], 443),
+    secure: parseEnvFlag(process.env['NODELINK_SECURE'], true),
+    password: process.env['NODELINK_PASSWORD']?.trim() || 'free',
   };
 
   return {
@@ -270,11 +254,11 @@ export function defaultConfig(): AppConfig {
     twitchClientId,
     twitchClientSecret,
     features,
-    lavalink,
-    youtubeOAuth,
+    nodeLink,
     spotifyClientId: process.env['SPOTIFY_CLIENT_ID']?.trim() || null,
     spotifyClientSecret: process.env['SPOTIFY_CLIENT_SECRET']?.trim() || null,
     klipyApiKey: process.env['KLIPY_API_KEY']?.trim() || null,
+    appleMediaToken: process.env['APPLE_MEDIA_TOKEN']?.trim() || null,
   };
 }
 

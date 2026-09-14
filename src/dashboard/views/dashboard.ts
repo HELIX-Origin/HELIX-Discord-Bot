@@ -1,6 +1,12 @@
 import { appDisplayName, type AppDeps } from '../../app.js';
 import { isOwnerUser, isAdminOrOwner, canUserAccessDashboard } from '../routes/shared.js';
 
+export interface DashboardRoute {
+  view: 'guilds' | 'dashboard';
+  guildId?: string;
+  page?: string;
+}
+
 export function getThemeInfo(theme?: string): { id: string; name: string; icon: string } {
   const t = (theme || '').trim().toLowerCase();
   if (t === 'glass' || t === 'glassmorphism') {
@@ -39,13 +45,20 @@ export function getColorSchemeInfo(scheme?: string): { id: string; name: string 
   return { id: 'default', name: 'Theme Default' };
 }
 
-export function renderDashboardHtml(deps: AppDeps, userId: number | null): string {
+export function renderDashboardHtml(
+  deps: AppDeps,
+  userId: number | null,
+  _route: DashboardRoute = { view: 'guilds' },
+): string {
   const appName = appDisplayName(deps);
   const appIconUrl = deps.bot?.getAppIconUrl() || null;
   const theme = getThemeInfo(deps.config.defaultTheme);
   const colorScheme = getColorSchemeInfo(deps.config.dashboardColorScheme);
   const publicBaseUrl = deps.config.publicBaseUrl || null;
   const internalUrl = deps.config.internalUrl;
+  const botInviteUrl = deps.config.clientId
+    ? `https://discord.com/oauth2/authorize?client_id=${encodeURIComponent(deps.config.clientId)}&scope=bot%20applications.commands&permissions=586263558272`
+    : null;
 
   // Permission check for logged in Discord users without server manage permissions
   if (userId !== null && !canUserAccessDashboard(userId, deps)) {
@@ -159,9 +172,6 @@ export function renderDashboardHtml(deps: AppDeps, userId: number | null): strin
   const isAdmin = !isOwner && isAdminOrOwner(userId, deps);
   const isHost = isOwner || isAdmin;
   const dbStats = deps.db.stats();
-  const botInviteUrl = deps.config.clientId
-    ? `https://discord.com/oauth2/authorize?client_id=${encodeURIComponent(deps.config.clientId)}&scope=bot%20applications.commands&permissions=586263558272`
-    : null;
 
   return `<!DOCTYPE html>
 <html lang="en" class="${theme.id} scheme-${colorScheme.id}">
