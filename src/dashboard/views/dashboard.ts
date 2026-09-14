@@ -1041,6 +1041,47 @@ export function renderDashboardHtml(
     let cachedPresets = [];
     let activeTabName = 'overview';
 
+    // Path-based routing helpers
+    // Regex pattern as string to avoid template string parsing issues
+    const DASHBOARD_ROUTE_REGEX = '^/dashboard/([^/]+)(?:/([^/]+))?$';
+    function getPathRoute() {
+      const path = window.location.pathname;
+      if (path === '/guilds' || path === '/guilds/') return { view: 'guilds' };
+      const match = path.match(new RegExp(DASHBOARD_ROUTE_REGEX));
+      if (match) {
+        return { view: 'dashboard', guildId: match[1], page: match[2] || 'overview' };
+      }
+      if (path === '/admin' || path === '/admin/') return { view: 'admin' };
+      return { view: 'guilds' };
+    }
+
+    function navigateTo(path) {
+      window.history.pushState({}, '', path);
+      applyRoute();
+    }
+
+    function applyRoute() {
+      const route = getPathRoute();
+      if (route.view === 'guilds') {
+        currentGuildId = null;
+        currentGuild = null;
+        document.getElementById('guild-selection-view')?.classList.add('active');
+        document.getElementById('dashboard-view')?.classList.remove('active');
+        loadGuildSelection();
+      } else if (route.view === 'dashboard') {
+        currentGuildId = route.guildId;
+        document.getElementById('guild-selection-view')?.classList.remove('active');
+        document.getElementById('dashboard-view')?.classList.add('active');
+        loadGuildDashboard();
+        if (route.page && ['overview', 'categories', 'news', 'settings'].includes(route.page)) {
+          switchTab(route.page);
+        }
+      } else if (route.view === 'admin') {
+        // Admin page handled by separate /admin route
+        window.location.href = '/admin';
+      }
+    }
+
     // Tab Switching
     function switchTab(tabId) {
       activeTabName = tabId;
@@ -1052,21 +1093,23 @@ export function renderDashboardHtml(
       if (target) target.classList.add('active');
       if (btn) btn.classList.add('active');
 
+      // Update URL without reload
+      const path = currentGuildId ? '/dashboard/' + currentGuildId + '/' + tabId : '/guilds';
+      window.history.pushState({}, '', '/dashboard/' + currentGuildId + '/' + tabId);
+
       if (tabId === 'overview') loadOverviewTab();
       else if (tabId === 'categories') loadCategoriesTab();
       else if (tabId === 'news') loadNewsTab();
-      else if (tabId === 'devtools') loadDevToolsTab();
+      else if (tabId === 'settings') loadSettingsTab();
     }
 
     function clearGuild(event) {
       if (event) event.preventDefault();
-      window.location.href = '/dashboard';
+      navigateTo('/guilds');
     }
 
     function selectGuild(guildId) {
-      const params = new URLSearchParams(window.location.search);
-      params.set('guild', guildId);
-      window.location.search = params.toString();
+      navigateTo('/dashboard/' + guildId);
     }
 
     // Auth & Logout
@@ -1794,19 +1837,11 @@ export function renderDashboardHtml(
     // Initialize on page load
     loadUserProfile();
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const guildParam = urlParams.get('guild');
-    const initialTab = urlParams.get('tab');
+    // Handle browser back/forward
+    window.addEventListener('popstate', applyRoute);
 
-    if (guildParam) {
-      currentGuildId = guildParam;
-      loadGuildDashboard();
-      if (initialTab && ['overview', 'categories', 'news', 'settings', 'devtools'].includes(initialTab)) {
-        switchTab(initialTab);
-      }
-    } else {
-      loadGuildSelection();
-    }
+    // Initial route resolution
+    applyRoute();
   </script>
 </body>
 </html>`;
