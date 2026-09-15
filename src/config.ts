@@ -222,16 +222,19 @@ export function defaultConfig(): AppConfig {
     adminPanelEnabled: parseEnvFlag(process.env['ADMIN_PANEL_ENABLED'], true),
   };
 
-  // NodeLink node (public instance or self-hosted). The bot always acts
+  // NodeLink node (self-hosted or external). The bot always acts
   // as a client; only the endpoint values change.
-  // Public instance: nodelink.triniumhost.indevs.in:443 (SSL) - password: free (NodeLink v3.8.0)
-  // Self-hosted fallback: localhost:2333
+  // Default: self-hosted on localhost:2333 (SSL false, password: youshallnotpass).
+  // For external node: set NODELINK_EXTERNAL=true and configure NODELINK_HOST/PORT/SECURE/PASSWORD.
   const nodeLinkExternal = parseEnvFlag(process.env['NODELINK_EXTERNAL'], false);
+  const defaultNodeLinkHost = nodeLinkExternal ? 'nodelink.triniumhost.indevs.in' : '127.0.0.1';
+  const defaultNodeLinkPort = nodeLinkExternal ? 443 : 2333;
+  const defaultNodeLinkSecure = nodeLinkExternal ? true : false;
   const nodeLink: NodeLinkConfig = {
-    host: process.env['NODELINK_HOST']?.trim() || 'nodelink.triniumhost.indevs.in',
-    port: parseOptionalInt(process.env['NODELINK_PORT'], 443),
-    secure: parseEnvFlag(process.env['NODELINK_SECURE'], true),
-    password: process.env['NODELINK_PASSWORD']?.trim() || 'free',
+    host: process.env['NODELINK_HOST']?.trim() || defaultNodeLinkHost,
+    port: parseOptionalInt(process.env['NODELINK_PORT'], defaultNodeLinkPort),
+    secure: parseEnvFlag(process.env['NODELINK_SECURE'], defaultNodeLinkSecure),
+    password: process.env['NODELINK_PASSWORD']?.trim() || 'youshallnotpass',
     external: nodeLinkExternal,
   };
 
