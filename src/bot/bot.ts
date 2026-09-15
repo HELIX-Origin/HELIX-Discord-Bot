@@ -13,6 +13,7 @@ import {
   type Role,
   type VoiceState,
 } from 'discord.js';
+import type { DiscordInteraction } from '../bot/utils/types.js';
 import type { AppDeps } from '../app.js';
 import { createLogger, type Logger } from '../util/logger.js';
 import { getEnabledCommands } from './commands/registry.js';
@@ -182,7 +183,12 @@ export class DiscordBot {
 
     try {
       const handler = createCommandHandler(this.deps);
-      const response = await dispatchInteraction(interaction as unknown as any, this.deps, this.rest, handler);
+      const response = await dispatchInteraction(
+        interaction as unknown as DiscordInteraction,
+        this.deps,
+        this.rest,
+        handler,
+      );
       if (interaction.replied || interaction.deferred) {
         await interaction.followUp((response as unknown as { data?: unknown }).data ?? {});
       } else {
