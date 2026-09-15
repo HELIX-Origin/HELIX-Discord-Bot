@@ -1,7 +1,7 @@
 import type { AppDeps } from '../../app.js';
 import { type ApplicationCommand } from '../utils/types.js';
 import { feedCommandDef } from './feeds/feed.js';
-import { gifCommandDef, handleGifAutocomplete } from './entertainment/gif.js';
+import { gifCommandDef } from './entertainment/gif.js';
 import { setCommandDef } from './admin/set.js';
 import { welcomeCommandDef } from './admin/welcome.js';
 import { ticketCommandDef } from './admin/ticket.js';
@@ -19,5 +19,3 @@ export function getEnabledCommands(deps: AppDeps): ApplicationCommand[] {
   if (f.nodeLinkEnabled) commands.push(...musicCommandDefs);
   return commands;
 }
-
-export { handleGifAutocomplete };

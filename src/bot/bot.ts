@@ -15,7 +15,7 @@ import {
 } from 'discord.js';
 import type { AppDeps } from '../app.js';
 import { createLogger, type Logger } from '../util/logger.js';
-import { getEnabledCommands, handleGifAutocomplete } from './commands/registry.js';
+import { getEnabledCommands } from './commands/registry.js';
 import { dispatchInteraction, createCommandHandler } from './handlers/commands.js';
 import { DiscordRestClient } from './rest.js';
 import { createHelixRssServer } from '../dashboard/server.js';
@@ -171,18 +171,6 @@ export class DiscordBot {
     const commandName = interaction.commandName;
 
     if (interaction.isAutocomplete()) {
-      if (commandName === 'gif') {
-        try {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const response = await handleGifAutocomplete(interaction as unknown as any, this.deps);
-          await interaction.respond(response.data?.choices || []);
-        } catch (err) {
-          this.logger.error('Error handling autocomplete interaction', {
-            err: (err as Error).message,
-            command: commandName,
-          });
-        }
-      }
       return;
     }
 

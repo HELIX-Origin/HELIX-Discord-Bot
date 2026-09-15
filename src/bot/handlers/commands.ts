@@ -10,11 +10,11 @@ import { aboutCommandDef, handleAboutCommand } from '../commands/utility/about.j
 import { feedCommandDef, handleFeedCommand } from '../commands/feeds/feed.js';
 import { handleHelpCommand, helpCommandDef } from '../commands/utility/help.js';
 import { handleStatsCommand, statsCommandDef } from '../commands/utility/stats.js';
-import { gifCommandDef, handleGifCommand, handleGifAutocomplete } from '../commands/entertainment/gif.js';
+import { gifCommandDef, handleGifCommand } from '../commands/entertainment/gif.js';
 import { setCommandDef, handleSetCommand } from '../commands/admin/set.js';
 import { welcomeCommandDef, handleWelcomeCommand } from '../commands/admin/welcome.js';
 import { ticketCommandDef, handleTicketCommand } from '../commands/admin/ticket.js';
-import { musicCommandDefs, handleMusicCommand, handleMusicAutocomplete } from '../commands/music/music.js';
+import { musicCommandDefs, handleMusicCommand } from '../commands/music/music.js';
 
 export interface CommandHandler {
   readonly commands: ApplicationCommand[];
@@ -38,12 +38,6 @@ export function createCommandHandler(deps: AppDeps): CommandHandler {
     string,
     (interaction: DiscordInteraction, deps: AppDeps) => Promise<InteractionResponse>
   >();
-  if (f.gifsEnabled && deps.config.klipyApiKey) {
-    autocompleteHandlers.set('gif', handleGifAutocomplete);
-  }
-  if (f.nodeLinkEnabled) {
-    autocompleteHandlers.set('play', handleMusicAutocomplete);
-  }
 
   return { commands, autocompleteHandlers };
 }

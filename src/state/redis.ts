@@ -116,6 +116,7 @@ export async function createRedisCoordinator(
         enableOfflineQueue: false,
         maxRetriesPerRequest: 1,
         connectTimeout: 10_000,
+        tls: { rejectUnauthorized: false },
       });
       client.on('error', (err: Error) => {
         logger.warn('Remote Redis connection error', {

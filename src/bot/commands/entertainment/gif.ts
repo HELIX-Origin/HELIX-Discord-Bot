@@ -11,21 +11,17 @@ import {
 import { KlipyClient } from '../../utils/klipy.js';
 import { commandHelpResponse } from '../../utils/embeds.js';
 
-const klipyClient = new KlipyClient('', { warn: () => {}, error: () => {} });
-
 export const gifCommandDef: ApplicationCommand = {
   name: 'gif',
-  description: 'Get a random GIF or filter by popular category',
+  description:
+    'Get a random GIF or filter by category (anime, jojo, waifu, slap, gintama, doggo, cat, hug, kiss, pat, bonk, cuddle, tickle, pet, poke, baka, smug, cry, angry, meme)',
   options: [
     {
       name: 'category',
-      description: 'GIF category (optional - omitting returns a random GIF)',
+      description:
+        'GIF category (optional - omitting returns a random GIF). Popular: anime, jojo, waifu, slap, gintama, doggo, cat, hug, kiss, pat, bonk, cuddle, tickle, pet, poke, baka, smug, cry, angry, meme',
       type: ApplicationCommandOptionType.STRING,
       required: false,
-      autocomplete: true,
-      choices: klipyClient
-        .getPopularTags()
-        .map((tag) => ({ name: tag.charAt(0).toUpperCase() + tag.slice(1), value: tag })),
     },
   ],
 };
@@ -48,7 +44,7 @@ export async function handleGifCommand(
   if (!deps.config.klipyApiKey) {
     return commandHelpResponse({
       name: 'gif',
-      description: 'Get a random GIF or filter by popular category',
+      description: 'Get a random GIF or filter by category',
       subcommands: [],
       usage: '[category]',
       examples: ['/gif', '/gif anime', '/gif slap'],
@@ -79,25 +75,5 @@ export async function handleGifCommand(
         },
       ],
     },
-  };
-}
-
-export async function handleGifAutocomplete(
-  interaction: DiscordInteraction,
-  deps: AppDeps,
-): Promise<InteractionResponse> {
-  if (!deps.config.klipyApiKey) {
-    return {
-      type: InteractionResponseType.APPLICATION_COMMAND_AUTOCOMPLETE_RESULT,
-      data: { choices: [] },
-    };
-  }
-  const value = (interaction.data?.options?.[0]?.value as string | undefined)?.toLowerCase() ?? '';
-  const client = new KlipyClient(deps.config.klipyApiKey, console);
-  const tags = client.getPopularTags().filter((t) => t.startsWith(value));
-  const choices = tags.slice(0, 25).map((t) => ({ name: t.charAt(0).toUpperCase() + t.slice(1), value: t }));
-  return {
-    type: InteractionResponseType.APPLICATION_COMMAND_AUTOCOMPLETE_RESULT,
-    data: { choices },
   };
 }

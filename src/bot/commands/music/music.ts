@@ -20,10 +20,9 @@ const MUSIC_COMMANDS = [
     options: [
       {
         name: 'query',
-        description: 'Track name, URL, or search query',
+        description: 'Track name, URL, or search query (e.g. "lofi hip hop", "anime openings", "gaming music")',
         type: ApplicationCommandOptionType.STRING,
         required: true,
-        autocomplete: true,
       },
     ],
   },
@@ -537,27 +536,4 @@ export async function handleMusicCommand(
       data: { flags: 64, content: `❌ Error: ${(err as Error).message}` },
     };
   }
-}
-
-export async function handleMusicAutocomplete(
-  interaction: DiscordInteraction,
-  deps: AppDeps,
-): Promise<InteractionResponse> {
-  const _focused = interaction.data?.options?.[0]?.focused as boolean | undefined;
-  const value = (interaction.data?.options?.[0]?.value as string | undefined)?.toLowerCase() ?? '';
-
-  if (!deps.config.features.nodeLinkEnabled) {
-    return { type: InteractionResponseType.APPLICATION_COMMAND_AUTOCOMPLETE_RESULT, data: { choices: [] } };
-  }
-
-  // Provide search suggestions
-  const suggestions = ['lofi hip hop', 'chill music', 'gaming music', 'anime openings', 'video game soundtracks']
-    .filter((s) => s.toLowerCase().startsWith(value))
-    .slice(0, 25)
-    .map((s) => ({ name: s, value: s }));
-
-  return {
-    type: InteractionResponseType.APPLICATION_COMMAND_AUTOCOMPLETE_RESULT,
-    data: { choices: suggestions },
-  };
 }
