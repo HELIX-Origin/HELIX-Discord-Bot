@@ -8,7 +8,7 @@ import {
   type InteractionOption,
   type InteractionResponse,
 } from '../../utils/types.js';
-import { NodeLinkManager } from '../../music/nodelink.js';
+import { LavalinkManager } from '../../music/lavalink.js';
 import { createLogger } from '../../../util/logger.js';
 
 const _logger = createLogger('music', 'warn');
@@ -156,7 +156,7 @@ function formatQueue(queue: QueueItem[], current: QueueItem | null): string {
 async function ensurePlayer(
   interaction: DiscordInteraction,
   deps: AppDeps,
-  manager: NodeLinkManager,
+  manager: LavalinkManager,
 ): Promise<string | null> {
   const guildId = interaction.guild_id;
   if (!guildId) return null;
@@ -196,18 +196,18 @@ export async function handleMusicCommand(
     };
   }
 
-  if (!deps.config.features.nodeLinkEnabled) {
+  if (!deps.config.features.lavaEnabled) {
     return {
       type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
       data: { flags: 64, content: '❌ Music features are disabled.' },
     };
   }
 
-  const manager = deps.nodeLinkManager ?? null;
+  const manager = deps.lavaManager ?? null;
   if (!manager) {
     return {
       type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-      data: { flags: 64, content: '❌ NodeLink manager not initialized.' },
+      data: { flags: 64, content: '❌ Lavalink manager not initialized.' },
     };
   }
 

@@ -620,7 +620,7 @@ export function renderDashboardHtml(
             <i class="fa-solid fa-user-shield" style="color: var(--primary);"></i> <span>Guild Admin</span>
           </button>
           ${
-            deps.config.features.nodeLinkEnabled
+            deps.config.features.lavaEnabled
               ? `<button onclick="switchTab('music')" id="tab-btn-music" class="tab-btn">
             <i class="fa-solid fa-music" style="color: #10b981;"></i> <span>Music</span>
           </button>`
@@ -1069,13 +1069,13 @@ export function renderDashboardHtml(
           </div>
         </section>
 
-        <!-- TAB: MUSIC (NodeLink Queue) -->
+<!-- TAB: MUSIC (Lavalink Queue) -->
         ${
-          deps.config.features.nodeLinkEnabled
+          deps.config.features.lavaEnabled
             ? `<section id="tab-music" class="tab-pane">
           <div>
-            <div class="section-title"><i class="fa-solid fa-music" style="color: #10b981;"></i> Music &amp; Queue</div>
-            <div class="section-desc">Live playback and queue management for this server via NodeLink.</div>
+            <div class="section-title"><i class="fa-solid fa-music" style="color: #10b981;"></i> Music & Queue</div>
+            <div class="section-desc">Live playback and queue management for this server via Lavalink.</div>
           </div>
 
           <div id="music-queue-view" style="display: flex; flex-direction: column; gap: 1.25rem;">
@@ -2350,7 +2350,7 @@ export function renderDashboardHtml(
         }
         return res.ok;
       } catch {
-        alert('Failed to reach NodeLink.');
+        alert('Failed to reach Lavalink.');
         return false;
       }
     }
@@ -2374,7 +2374,7 @@ export function renderDashboardHtml(
 
         container.innerHTML = renderMusicQueue(data);
       } catch {
-        container.innerHTML = '<div class="empty-state">Could not reach NodeLink. Ensure LAVA_ENABLED and NodeLink credentials are configured.</div>';
+        container.innerHTML = '<div class="empty-state">Could not reach Lavalink. Ensure LAVA_ENABLED and Lavalink credentials are configured.</div>';
       }
     }
 

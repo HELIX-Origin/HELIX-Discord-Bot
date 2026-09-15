@@ -8,17 +8,16 @@ export interface FeatureFlags {
   threadsEnabled: boolean;
   gifsEnabled: boolean;
   administrationEnabled: boolean;
-  nodeLinkEnabled: boolean;
+  lavaEnabled: boolean;
   dashboardEnabled: boolean;
   adminPanelEnabled: boolean;
 }
 
-export interface NodeLinkConfig {
+export interface LavalinkConfig {
   host: string;
   port: number;
   secure: boolean;
   password: string;
-  external: boolean;
 }
 
 export interface AppConfig {
@@ -28,7 +27,6 @@ export interface AppConfig {
   publicBaseUrl: string | null;
   dbUri: string;
   dbPath: string;
-  redisUri: string | null;
   pollIntervalMs: number;
   requestTimeoutMs: number;
   sslKey: string | null;
@@ -59,8 +57,7 @@ export interface AppConfig {
   twitchClientId: string | null;
   twitchClientSecret: string | null;
   features: FeatureFlags;
-  nodeLink: NodeLinkConfig;
-  nodeLinkExternal: boolean;
+  lava: LavalinkConfig;
   spotifyClientId: string | null;
   spotifyClientSecret: string | null;
   klipyApiKey: string | null;
@@ -86,20 +83,11 @@ export function defaultConfig(): AppConfig {
   const host = (envHost === 'localhost' ? '0.0.0.0' : envHost) ?? process.env['HOST']?.trim() ?? defaultHost;
   const dataDir = process.env['SQLITE_DATA'] ?? resolve(process.cwd(), 'data');
 
-  // DB_URI: unified connection string for database (SQLite, PostgreSQL, MySQL).
+  // DB_URI: SQLite connection string only.
   // Examples:
   //   sqlite://./data/database.sqlite (or sqlite:./data/database.sqlite)
-  //   postgresql://user:pass@host:5432/db
-  //   mysql://user:pass@host:3306/db
   // Falls back to SQLite file in SQLITE_DATA directory.
   const dbUri = process.env['DB_URI']?.trim() || `sqlite:${resolve(dataDir, 'database.sqlite')}`;
-
-  // REDIS_URI: optional remote Redis connection string for multi-instance
-  // coordination (deduplication + locking) across multiple bot processes.
-  // Example: rediss://:password@host:port (TLS) or redis://user:pass@host:6379/0.
-  // When unset, an in-memory ioredis-mock coordination layer is used instead and
-  // no external redis-server binary is required.
-  const redisUri = process.env['REDIS_URI']?.trim() || process.env['REDIS_URL']?.trim() || null;
 
   // Port is derived exclusively from INTERNAL_URL (default 3131). No PORT-style
   // environment variables are used; proxies/tunnels mask ports on PUBLIC_URL.
@@ -217,20 +205,18 @@ export function defaultConfig(): AppConfig {
     threadsEnabled: parseEnvFlag(process.env['THREADS_ENABLED'], true),
     gifsEnabled: parseEnvFlag(process.env['GIFS_ENABLED'], true),
     administrationEnabled: parseEnvFlag(process.env['ADMINISTRATION_ENABLED'], true),
-    nodeLinkEnabled: parseEnvFlag(process.env['NODELINK_ENABLED'], true),
+    lavaEnabled: parseEnvFlag(process.env['LAVA_ENABLED'], true),
     dashboardEnabled: parseEnvFlag(process.env['DASHBOARD_ENABLED'], true),
     adminPanelEnabled: parseEnvFlag(process.env['ADMIN_PANEL_ENABLED'], true),
   };
 
-  // NodeLink node (external). The bot always acts as a client.
-  // Configure NODELINK_HOST/PORT/SECURE/PASSWORD for the external NodeLink server.
-  const nodeLinkExternal = true;
-  const nodeLink: NodeLinkConfig = {
-    host: process.env['NODELINK_HOST']?.trim() || '127.0.0.1',
-    port: parseOptionalInt(process.env['NODELINK_PORT'], 2333),
-    secure: parseEnvFlag(process.env['NODELINK_SECURE'], false),
-    password: process.env['NODELINK_PASSWORD']?.trim() || 'youshallnotpass',
-    external: true,
+  // Lavalink server (external). The bot always acts as a client.
+  // Configure LAVA_HOST/PORT/SECURE/PASSWORD for the external Lavalink server.
+  const lava: LavalinkConfig = {
+    host: process.env['LAVA_HOST']?.trim() || '127.0.0.1',
+    port: parseOptionalInt(process.env['LAVA_PORT'], 2333),
+    secure: parseEnvFlag(process.env['LAVA_SECURE'], false),
+    password: process.env['LAVA_PASSWORD']?.trim() || 'youshallnotpass',
   };
 
   return {
@@ -240,7 +226,6 @@ export function defaultConfig(): AppConfig {
     publicBaseUrl,
     dbUri,
     dbPath: resolve(dataDir, 'database.sqlite'),
-    redisUri,
     pollIntervalMs: 3_600_000,
     requestTimeoutMs: parsePositiveInt(process.env['REQUEST_TIMEOUT_MS'], 15_000),
     sslKey,
@@ -271,8 +256,7 @@ export function defaultConfig(): AppConfig {
     twitchClientId,
     twitchClientSecret,
     features,
-    nodeLink,
-    nodeLinkExternal,
+    lava,
     spotifyClientId: process.env['SPOTIFY_CLIENT_ID']?.trim() || null,
     spotifyClientSecret: process.env['SPOTIFY_CLIENT_SECRET']?.trim() || null,
     klipyApiKey: process.env['KLIPY_API_KEY']?.trim() || null,

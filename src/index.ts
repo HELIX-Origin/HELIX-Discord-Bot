@@ -9,7 +9,7 @@ import { createRedisCoordinator } from './state/redis.js';
 import { createLogger } from './util/logger.js';
 import { clearPorts } from './util/ports.js';
 import { DiscordBot } from './bot/bot.js';
-import { NodeLinkManager } from './bot/music/nodelink.js';
+import { LavalinkManager } from './bot/music/lavalink.js';
 import { WebhookRouter } from './dashboard/webhooks/router.js';
 import { fileURLToPath } from 'node:url';
 import { resolve } from 'node:path';
@@ -24,7 +24,7 @@ export async function main(): Promise<void> {
   const db = Database.open(config.dbPath);
   const repo = new Repository(db);
   const oauth = new OAuthService(repo, config);
-  const redis = await createRedisCoordinator(config.redisUri, config.logLevel);
+  const redis = await createRedisCoordinator(null, config.logLevel);
   const feeds = new FeedWatcher(repo, redis, config.logLevel);
 
   // 3. Start background polling scheduler
@@ -40,25 +40,25 @@ export async function main(): Promise<void> {
     config.logLevel,
   );
 
-  // NodeLink music manager (Lavalink-compatible). Instantiated whenever the
+  // Lavalink music manager. Instantiated whenever the
   // music feature is enabled so both slash commands and the dashboard queue
   // page share the same in-memory player state.
-  let nodeLinkManager: NodeLinkManager | null = null;
+  let lavaManager: LavalinkManager | null = null;
 
-  if (config.features.nodeLinkEnabled) {
-    logger.info('Connecting to NodeLink server', {
-      host: config.nodeLink.host,
-      port: config.nodeLink.port,
-      secure: config.nodeLink.secure,
+  if (config.features.lavaEnabled) {
+    logger.info('Connecting to Lavalink server', {
+      host: config.lava.host,
+      port: config.lava.port,
+      secure: config.lava.secure,
     });
 
-    nodeLinkManager = new NodeLinkManager(config.nodeLink, logger);
-    nodeLinkManager.connectWS().catch(() => {});
+    lavaManager = new LavalinkManager(config.lava, logger);
+    lavaManager.connectWS().catch(() => {});
   }
 
   // 4. Create Discord Bot as primary application process
   const bot = new DiscordBot(
-    { config, db, repo, oauth, feeds, redis, scheduler, webhookRouter, nodeLinkManager },
+    { config, db, repo, oauth, feeds, redis, scheduler, webhookRouter, lavaManager },
     {
       token: config.botToken || '',
       clientId: config.clientId,

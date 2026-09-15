@@ -1,13 +1,8 @@
 /**
  * Coordination layer for multi-instance feed delivery.
- *
- * Defaults to an in-memory implementation backed by ioredis-mock so the
- * service boots instantly with zero external infrastructure. When REDIS_URI is
- * configured, a real remote Redis server (ioredis) is used instead, enabling
- * deduplication and locking coordination across multiple bot instances.
+ * Uses in-memory ioredis-mock for zero external infrastructure.
  */
 import RedisMock from 'ioredis-mock';
-import { Redis } from 'ioredis';
 import { createLogger } from '../util/logger.js';
 
 export interface RedisCoordinator {
@@ -21,8 +16,7 @@ export interface RedisCoordinator {
 }
 
 /**
- * Minimal Redis command surface shared by both ioredis and ioredis-mock. Kept
- * deliberately small so the coordinator is agnostic to the backing client.
+ * Minimal Redis command surface shared by ioredis-mock.
  */
 export interface RedisClientLike {
   sismember(key: string, member: string): Promise<number>;
@@ -100,42 +94,10 @@ export class RedisCoordinatorImpl implements RedisCoordinator {
 }
 
 export async function createRedisCoordinator(
-  redisUri?: string | null,
+  _redisUri?: string | null,
   logLevel?: import('../util/logger.js').LogLevel,
 ): Promise<RedisCoordinator | null> {
   const logger = createLogger('redis', logLevel);
-  const uri = redisUri?.trim();
-
-  // Remote Redis mode: only used when REDIS_URI is configured explicitly.
-  // ioredis connects lazily and auto-reconnects; offline commands reject
-  // immediately (enableOfflineQueue: false) so the coordinator degrades to
-  // single-instance behavior through safe() instead of hanging.
-  if (uri) {
-    try {
-      const client = new Redis(uri, {
-        enableOfflineQueue: false,
-        maxRetriesPerRequest: 1,
-        connectTimeout: 10_000,
-        tls: { rejectUnauthorized: false },
-      });
-      client.on('error', (err: Error) => {
-        logger.warn('Remote Redis connection error', {
-          error: err instanceof Error ? err.message : String(err),
-        });
-      });
-      const coordinator = new RedisCoordinatorImpl(client as unknown as RedisClientLike);
-      logger.info('Remote Redis coordinator initialized', {
-        instanceId: coordinator.instanceId,
-        uri: sanitizeUri(uri),
-      });
-      return coordinator;
-    } catch (err) {
-      logger.warn('Failed to initialize remote Redis coordinator; continuing in standalone mode', {
-        error: err instanceof Error ? err.message : String(err),
-      });
-      return null;
-    }
-  }
 
   try {
     const coordinator = RedisCoordinatorImpl.create();
@@ -146,16 +108,6 @@ export async function createRedisCoordinator(
   } catch {
     logger.warn('Failed to initialize ioredis-mock coordinator; continuing in standalone mode');
     return null;
-  }
-}
-
-function sanitizeUri(uri: string): string {
-  try {
-    const u = new URL(uri);
-    if (u.password) u.password = '***';
-    return u.toString();
-  } catch {
-    return uri;
   }
 }
 

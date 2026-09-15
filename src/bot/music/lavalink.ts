@@ -1,5 +1,5 @@
-﻿import type { Logger } from '../../util/logger.js';
-import type { NodeLinkConfig } from '../../config.js';
+import type { Logger } from '../../util/logger.js';
+import type { LavalinkConfig } from '../../config.js';
 
 interface WebSocketOptions {
   headers?: Record<string, string>;
@@ -48,7 +48,7 @@ export interface PlayerState {
   position: number;
 }
 
-export interface NodeLinkStats {
+export interface LavalinkStats {
   players: number;
   playingPlayers: number;
   uptime: number;
@@ -70,9 +70,9 @@ export interface NodeLinkStats {
   };
 }
 
-export class NodeLinkManager {
+export class LavalinkManager {
   private readonly logger: Logger;
-  private readonly config: NodeLinkConfig;
+  private readonly config: LavalinkConfig;
   private ws: WebSocket | null = null;
   private sessionId: string | null = null;
   private readonly pendingRequests = new Map<
@@ -87,7 +87,7 @@ export class NodeLinkManager {
   private readonly eventHandlers = new Map<string, Set<(data: unknown) => void>>();
   private players = new Map<string, PlayerState>();
 
-  constructor(config: NodeLinkConfig, logger: Logger) {
+  constructor(config: LavalinkConfig, logger: Logger) {
     this.config = config;
     this.logger = logger;
   }
@@ -104,31 +104,32 @@ export class NodeLinkManager {
 
   async connectWS(): Promise<void> {
     return new Promise((resolve, reject) => {
-      this.logger.info('Connecting to NodeLink', { url: this.wsUrl });
+      this.logger.info('Connecting to Lavalink', { url: this.wsUrl });
 
       const wsHeaders: Record<string, string> = {
         Authorization: this.config.password,
         'User-Id': 'helix-discord-bot',
         'Client-Name': 'HELIX Discord Bot',
+        'Num-Shards': '1',
       };
 
       this.ws = new WebSocketClient(this.wsUrl, undefined, { headers: wsHeaders });
 
       this.ws.onopen = () => {
-        this.logger.info('NodeLink WebSocket connected');
+        this.logger.info('Lavalink WebSocket connected');
         this.reconnectAttempts = 0;
         this.startHeartbeat();
         resolve();
       };
 
       this.ws.onclose = (event) => {
-        this.logger.warn('NodeLink WebSocket closed', { code: event.code, reason: event.reason });
+        this.logger.warn('Lavalink WebSocket closed', { code: event.code, reason: event.reason });
         this.stopHeartbeat();
         this.handleDisconnect();
       };
 
       this.ws.onerror = (error) => {
-        this.logger.error('NodeLink WebSocket error', { error: String(error) });
+        this.logger.error('Lavalink WebSocket error', { error: String(error) });
         reject(new Error('WebSocket connection failed'));
       };
 
@@ -137,7 +138,7 @@ export class NodeLinkManager {
           const data = JSON.parse(event.data);
           this.handleMessage(data);
         } catch (err) {
-          this.logger.error('Failed to parse NodeLink message', { error: String(err), raw: event.data });
+          this.logger.error('Failed to parse Lavalink message', { error: String(err), raw: event.data });
         }
       };
 
@@ -169,7 +170,7 @@ export class NodeLinkManager {
     this.cleanupPendingRequests(new Error('Disconnected'));
     if (this.reconnectAttempts < this.maxReconnectAttempts) {
       this.reconnectAttempts++;
-      this.logger.info('Attempting to reconnect to NodeLink', { attempt: this.reconnectAttempts });
+      this.logger.info('Attempting to reconnect to Lavalink', { attempt: this.reconnectAttempts });
       setTimeout(() => this.connectWS().catch(() => {}), this.reconnectDelay * this.reconnectAttempts);
     } else {
       this.logger.error('Max reconnect attempts reached');
@@ -195,7 +196,7 @@ export class NodeLinkManager {
       this.sessionId = msg.sessionId as string;
       this.emit('ready', data);
     } else if (msg.op === 'error') {
-      this.logger.error('NodeLink error', { data });
+      this.logger.error('Lavalink error', { data });
     }
 
     if (msg.requestId && this.pendingRequests.has(msg.requestId as string)) {
@@ -400,7 +401,7 @@ export class NodeLinkManager {
     return this.rest(`/v4/loadtracks?identifier=${encodeURIComponent(query)}`);
   }
 
-  async getStats(): Promise<NodeLinkStats> {
+  async getStats(): Promise<LavalinkStats> {
     return this.rest('/v4/stats');
   }
 

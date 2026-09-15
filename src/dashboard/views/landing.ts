@@ -405,7 +405,7 @@ export function renderLandingHtml(deps: AppDeps, userId: number | null = null): 
           <div class="feature-icon" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">
             <i class="fa-solid fa-music"></i>
           </div>
-          <h3 class="feature-title">Music Playback via NodeLink</h3>
+          <h3 class="feature-title">Music Playback via Lavalink</h3>
           <p class="feature-desc">
             High-quality music playback from YouTube, Spotify, SoundCloud, and more. Queue management, volume control, shuffle/loop modes, and a real-time dashboard queue page.
           </p>

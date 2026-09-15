@@ -20,7 +20,6 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@types/ioredis-mock": "^8.2.8",
     "@types/node": "^26.5.0",
     "eslint": "^10.10.0",
     "prettier": "^3.9.6",
@@ -29,7 +28,6 @@
   },
   "dependencies": {
     "discord.js": "^14.18.0",
-    "ioredis": "^5.11.0",
     "ioredis-mock": "^8.13.1"
   }
 }

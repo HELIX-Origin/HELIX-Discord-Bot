@@ -83,7 +83,7 @@ export function renderAdminHtml(deps: AppDeps, userId: number | null): string {
         <div class="stat-card"><div class="stat-label">Uptime</div><div class="stat-value" id="lavalink-uptime">-</div></div>
       </div>
       ${
-        features.nodeLinkEnabled
+        features.lavaEnabled
           ? `
       <div style="margin-top: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
         <button onclick="authorizeYouTube()" class="btn btn-primary"><i class="fa-brands fa-youtube"></i> Authorize YouTube</button>

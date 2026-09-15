@@ -30,7 +30,7 @@ export function createCommandHandler(deps: AppDeps): CommandHandler {
   if (f.feedsEnabled) commands.push(feedCommandDef);
   if (f.gifsEnabled && deps.config.klipyApiKey) commands.push(gifCommandDef);
   if (f.administrationEnabled) commands.push(setCommandDef, welcomeCommandDef, ticketCommandDef);
-  if (f.nodeLinkEnabled) commands.push(...musicCommandDefs);
+  if (f.lavaEnabled) commands.push(...musicCommandDefs);
 
   commands.push(helpCommandDef);
 

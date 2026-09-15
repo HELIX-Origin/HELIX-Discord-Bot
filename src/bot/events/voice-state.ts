@@ -11,7 +11,7 @@ export async function handleVoiceStateUpdate(
   const logger = bot['logger'];
   logger.debug('Voice state updated', { oldState, newState });
 
-  const manager = deps.nodeLinkManager;
+  const manager = deps.lavaManager;
   if (!manager) return;
 
   // NodeLink expects the raw Lavalink-compatible voice state payload:
