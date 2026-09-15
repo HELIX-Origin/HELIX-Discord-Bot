@@ -11,9 +11,8 @@ import { clearPorts } from './util/ports.js';
 import { DiscordBot } from './bot/bot.js';
 import { NodeLinkManager } from './bot/music/nodelink.js';
 import { WebhookRouter } from './dashboard/webhooks/router.js';
-import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { resolve, dirname } from 'node:path';
+import { resolve } from 'node:path';
 
 export async function main(): Promise<void> {
   const config = defaultConfig();
@@ -45,52 +44,13 @@ export async function main(): Promise<void> {
   // music feature is enabled so both slash commands and the dashboard queue
   // page share the same in-memory player state.
   let nodeLinkManager: NodeLinkManager | null = null;
-  let nodeLinkProcess: ReturnType<typeof spawn> | null = null;
 
   if (config.features.nodeLinkEnabled) {
-    // Start internal NodeLink server if not using external node
-    if (!config.nodeLinkExternal) {
-      const __dirname = dirname(fileURLToPath(import.meta.url));
-      const nodeLinkJar = resolve(__dirname, '..', '..', 'nodelink', 'NodeLink.jar');
-      nodeLinkProcess = spawn('java', ['-jar', nodeLinkJar], {
-        stdio: ['ignore', 'pipe', 'pipe'],
-        env: {
-          ...process.env,
-          NODELINK_HOST: config.nodeLink.host,
-          NODELINK_PORT: String(config.nodeLink.port),
-          NODELINK_SECURE: String(config.nodeLink.secure),
-          NODELINK_PASSWORD: config.nodeLink.password,
-        },
-      });
-
-      nodeLinkProcess.stdout?.on('data', (data: Buffer) => {
-        logger.debug('NodeLink stdout', { output: data.toString().trim() });
-      });
-      nodeLinkProcess.stderr?.on('data', (data: Buffer) => {
-        logger.warn('NodeLink stderr', { output: data.toString().trim() });
-      });
-      nodeLinkProcess.on('error', (err: Error) => {
-        logger.error('NodeLink process error', { error: err.message });
-      });
-      nodeLinkProcess.on('exit', (code: number | null) => {
-        logger.warn('NodeLink process exited', { code });
-      });
-
-      logger.info('Starting internal NodeLink server', {
-        host: config.nodeLink.host,
-        port: config.nodeLink.port,
-        secure: config.nodeLink.secure,
-      });
-
-      // Wait a moment for NodeLink to start up
-      await new Promise((resolve) => setTimeout(resolve, 3000));
-    } else {
-      logger.info('NodeLink external mode enabled — connecting to external NodeLink node', {
-        host: config.nodeLink.host,
-        port: config.nodeLink.port,
-        secure: config.nodeLink.secure,
-      });
-    }
+    logger.info('Connecting to NodeLink server', {
+      host: config.nodeLink.host,
+      port: config.nodeLink.port,
+      secure: config.nodeLink.secure,
+    });
 
     nodeLinkManager = new NodeLinkManager(config.nodeLink, logger);
     nodeLinkManager.connectWS().catch(() => {});
@@ -143,16 +103,6 @@ export async function main(): Promise<void> {
     logger.info(`Received ${signal}; shutting down`);
     scheduler.stop();
     bot.stop();
-    if (nodeLinkProcess) {
-      logger.info('Stopping internal NodeLink server');
-      nodeLinkProcess.kill('SIGTERM');
-      // Force kill after 2 seconds if not terminated
-      setTimeout(() => {
-        if (!nodeLinkProcess!.killed) {
-          nodeLinkProcess!.kill('SIGKILL');
-        }
-      }, 2000);
-    }
     void (async () => {
       await redis?.close();
       db.close();
