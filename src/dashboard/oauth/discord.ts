@@ -35,7 +35,7 @@ function getDiscordUserAgent(): string {
   return (
     process.env['USER_AGENT']?.trim() ||
     process.env['DISCORD_USER_AGENT']?.trim() ||
-    (repoUrl ? `DiscordBot (${repoUrl}, 0.1.0)` : 'DiscordBot (0.1.0)')
+    (repoUrl ? `DiscordBot (${repoUrl}, 0.4.0)` : 'DiscordBot (0.4.0)')
   );
 }
 

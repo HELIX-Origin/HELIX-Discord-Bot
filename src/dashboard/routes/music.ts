@@ -17,7 +17,7 @@ export function registerMusicRoutes(router: Router<AppDeps>): void {
     }
 
     const manager = d.lavaManager ?? null;
-    if (!manager) return sendError(res, 503, 'NodeLink manager not initialized.');
+    if (!manager) return sendError(res, 503, 'Lavalink manager not initialized.');
 
     try {
       const player = await manager.getPlayer(guildId);
@@ -57,7 +57,7 @@ export function registerMusicRoutes(router: Router<AppDeps>): void {
     }
 
     const manager = d.lavaManager ?? null;
-    if (!manager) return sendError(res, 503, 'NodeLink manager not initialized.');
+    if (!manager) return sendError(res, 503, 'Lavalink manager not initialized.');
 
     try {
       const body = (await readBodyJson(req).catch(() => ({}))) as Record<string, unknown>;

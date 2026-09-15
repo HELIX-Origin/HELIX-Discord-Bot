@@ -24,7 +24,7 @@ export async function main(): Promise<void> {
   const db = Database.open(config.dbPath);
   const repo = new Repository(db);
   const oauth = new OAuthService(repo, config);
-  const redis = await createRedisCoordinator(null, config.logLevel);
+  const redis = await createRedisCoordinator(config.logLevel);
   const feeds = new FeedWatcher(repo, redis, config.logLevel);
 
   // 3. Start background polling scheduler

@@ -44,7 +44,7 @@ flowchart TD
         DB[(SQLite Database)]
         Bot["Native Discord Bot Engine (Gateway + REST API)"]
         Web["Native HTTP Web Dashboard & REST API"]
-        NodeLink["NodeLink Music Engine"]
+        Lavalink["Lavalink Music Engine"]
         GIF["KLIPY GIF Engine"]
         Admin["Guild Admin Engine"]
     end
@@ -65,7 +65,7 @@ flowchart TD
     SlashCmd <--> Bot
     Web <--> DB
     Web <--> Bot
-    NodeLink <--> Bot
+    Lavalink <--> Bot
     GIF <--> Bot
     Admin <--> Bot
 ```
@@ -78,6 +78,6 @@ flowchart TD
 5. **No Webhook Hassle**: Messages are dispatched directly to guild channels using Discord REST API endpoints with granular role/user pings and embed color customization.
 6. **Forum Thread Delivery**: Optional per-server delivery of each feed into its own dedicated thread inside a forum channel — kept open via keepalive polling, auto-rotated into a fresh thread when large (configurable from the dashboard Feeds tab).
 7. **Glassmorphism Web Dashboard**: Real-time management interface with Discord OAuth2 login, feed analytics, log streaming, and preset browsing.
-8. **Music Playback via NodeLink**: High-quality music from YouTube, Spotify, SoundCloud, Apple Music, Deezer with queue management, shuffle/loop/volume/seek controls, and real-time dashboard queue page. Runs internal NodeLink server or connects to external node.
+8. **Music Playback via Lavalink**: High-quality music from YouTube, Spotify, SoundCloud, Apple Music, Deezer with queue management, shuffle/loop/volume/seek controls, and real-time dashboard queue page. Connects to external Lavalink v4 server.
 9. **Entertainment GIF Commands**: KLIPY-powered `/gif` with category autocomplete (anime, jojo, waifu, slap, etc.), action commands (`/slap`, `/hug`, `/kiss`, `/pat`, `/bonk`, etc.), and random GIF fallback.
 10. **Guild Administration**: Moderation (`/admin warn`, `/kick`, `/ban`, `/lock`, `/purge`, `/slowmode`, `/announce`), role management, voice controls (mute/deafen/move/disconnect), all with Discord permission guards.

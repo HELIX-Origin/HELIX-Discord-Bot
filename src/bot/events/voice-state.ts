@@ -14,7 +14,7 @@ export async function handleVoiceStateUpdate(
   const manager = deps.lavaManager;
   if (!manager) return;
 
-  // NodeLink expects the raw Lavalink-compatible voice state payload:
+  // Lavalink expects the raw voice state payload:
   // { guildId, channelId (nullable), sessionId, selfDeaf, selfMute }
   manager.handleVoiceStateUpdate({
     guildId: newState.guild.id,

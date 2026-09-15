@@ -22,7 +22,7 @@ repository:
   type: git
   url: https://github.com/HELIX-Origin/Discord-RSS.git
   branch: main
-title: Discord RSS
-description: "A Discord bot for managing RSS feeds"
-version: 0.1.0
+title: HELIX Discord Bot
+description: "A self-hosted Discord bot for RSS feed syndication, music playback, GIFs, and guild administration"
+version: 0.4.0
 license: BSD-3-Clause

@@ -165,7 +165,7 @@ export function defaultConfig(): AppConfig {
   const userAgent =
     process.env['USER_AGENT']?.trim() ||
     process.env['DISCORD_USER_AGENT']?.trim() ||
-    (repoUrl ? `DiscordBot (${repoUrl}, 0.1.0)` : 'DiscordBot (0.1.0)');
+    (repoUrl ? `DiscordBot (${repoUrl}, 0.4.0)` : 'DiscordBot (0.4.0)');
 
   const rawTheme =
     process.env['DASHBOARD_THEME']?.trim().toLowerCase() ||
@@ -211,12 +211,12 @@ export function defaultConfig(): AppConfig {
   };
 
   // Lavalink server (external). The bot always acts as a client.
-  // Configure LAVA_HOST/PORT/SECURE/PASSWORD for the external Lavalink server.
+  // Configure LAVA_HOST/PORT/SECURE/PASS for the external Lavalink server.
   const lava: LavalinkConfig = {
     host: process.env['LAVA_HOST']?.trim() || '127.0.0.1',
     port: parseOptionalInt(process.env['LAVA_PORT'], 2333),
     secure: parseEnvFlag(process.env['LAVA_SECURE'], false),
-    password: process.env['LAVA_PASSWORD']?.trim() || 'youshallnotpass',
+    password: process.env['LAVA_PASS']?.trim() || 'youshallnotpass',
   };
 
   return {

@@ -31,11 +31,11 @@ Featuring a built-in web dashboard, Discord OAuth2 authentication, zero frontend
 - **Automated Daily Drops**: Runs on an automated daily schedule with deduplication so limited-time giveaways are never missed.
 - **Rich Store Embeds**: Standardized Discord embeds with official store branding, high-contrast badges, pricing worth, expiration timers, and direct claim links.
 
-### 🎵 Music Playback via NodeLink
-- **Multi-Source Support**: Native playback from **YouTube**, **Spotify**, **SoundCloud**, **Apple Music**, **Deezer**, and more — no external Lavalink plugins required.
+### 🎵 Music Playback via Lavalink
+- **Multi-Source Support**: Native playback from **YouTube**, **Spotify**, **SoundCloud**, **Apple Music**, **Deezer**, and more via external Lavalink v4 server.
 - **Queue Management**: Full queue control with `/play`, `/queue`, `/skip`, `/previous`, `/shuffle`, `/loop`, `/volume`, `/seek`, `/nowplaying`, `/pause`, `/resume`, `/stop`, `/leave`.
 - **Real-time Dashboard Queue Page**: Live queue view with now-playing, up-next, track reordering, and volume/loop controls.
-- **Optional External NodeLink**: Run NodeLink internally (auto-started) or connect to an external NodeLink node via `NODELINK_EXTERNAL=true`.
+- **External Lavalink**: Connect to your own Lavalink v4 server via `LAVA_HOST`, `LAVA_PORT`, `LAVA_PASS`, `LAVA_SECURE`.
 
 ### 😂 Entertainment GIF Commands
 - **KLIPY-Powered GIFs**: `/gif [category]` with autocomplete for popular tags (anime, jojo, waifu, slap, gintama, doggo, cat, etc.).

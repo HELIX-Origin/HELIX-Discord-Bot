@@ -17,6 +17,10 @@ data-cookies.txt
 
 # Local scratch / temporary work
 scratch/
+comment-*.json
+comment-*.md
+issue21-*.md
+issue21-*.json
 
 # Coverage
 coverage/

@@ -94,7 +94,6 @@ export class RedisCoordinatorImpl implements RedisCoordinator {
 }
 
 export async function createRedisCoordinator(
-  _redisUri?: string | null,
   logLevel?: import('../util/logger.js').LogLevel,
 ): Promise<RedisCoordinator | null> {
   const logger = createLogger('redis', logLevel);
