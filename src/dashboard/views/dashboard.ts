@@ -742,13 +742,14 @@ export function renderDashboardHtml(
               </div>
               <div class="target-readout" id="rss-target-readout">Loading target...</div>
               <div class="form-group">
-                <label class="form-label">Target Channel</label>
-                <select id="rss-target-channel"></select>
+                <label class="form-label">Text / Announcement Channel</label>
+                <select id="rss-target-channel" onchange="categoryTargetChanged('rss', 'channel')"></select>
               </div>
               <div class="form-group">
-                <label class="form-label">Target Forum Thread Channel (optional)</label>
-                <select id="rss-target-thread"></select>
+                <label class="form-label">Forum Thread Channel (alternative)</label>
+                <select id="rss-target-thread" onchange="categoryTargetChanged('rss', 'thread')"></select>
               </div>
+              <div class="target-readout" style="font-size: 0.6875rem; color: var(--text-muted);">Pick one — setting one clears the other.</div>
               <div style="display: flex; justify-content: flex-end;">
                 <button onclick="saveCategoryTarget('rss')" class="btn btn-primary btn-sm"><i class="fa-solid fa-floppy-disk"></i> Save Target</button>
               </div>
@@ -834,13 +835,14 @@ export function renderDashboardHtml(
               </div>
               <div class="target-readout" id="reddit-target-readout">Loading target...</div>
               <div class="form-group">
-                <label class="form-label">Target Channel</label>
-                <select id="reddit-target-channel"></select>
+                <label class="form-label">Text / Announcement Channel</label>
+                <select id="reddit-target-channel" onchange="categoryTargetChanged('reddit', 'channel')"></select>
               </div>
               <div class="form-group">
-                <label class="form-label">Target Forum Thread Channel (optional)</label>
-                <select id="reddit-target-thread"></select>
+                <label class="form-label">Forum Thread Channel (alternative)</label>
+                <select id="reddit-target-thread" onchange="categoryTargetChanged('reddit', 'thread')"></select>
               </div>
+              <div class="target-readout" style="font-size: 0.6875rem; color: var(--text-muted);">Pick one — setting one clears the other.</div>
               <div style="display: flex; justify-content: flex-end;">
                 <button onclick="saveCategoryTarget('reddit')" class="btn btn-primary btn-sm" style="background: #ff4500; border-color: #ff4500;"><i class="fa-solid fa-floppy-disk"></i> Save Target</button>
               </div>
@@ -885,13 +887,14 @@ export function renderDashboardHtml(
               </div>
               <div class="target-readout" id="freegames-target-readout">Loading target...</div>
               <div class="form-group">
-                <label class="form-label">Target Channel</label>
-                <select id="freegames-target-channel"></select>
+                <label class="form-label">Text / Announcement Channel</label>
+                <select id="freegames-target-channel" onchange="categoryTargetChanged('freegames', 'channel')"></select>
               </div>
               <div class="form-group">
-                <label class="form-label">Target Forum Thread Channel (optional)</label>
-                <select id="freegames-target-thread"></select>
+                <label class="form-label">Forum Thread Channel (alternative)</label>
+                <select id="freegames-target-thread" onchange="categoryTargetChanged('freegames', 'thread')"></select>
               </div>
+              <div class="target-readout" style="font-size: 0.6875rem; color: var(--text-muted);">Pick one — setting one clears the other.</div>
               <div style="display: flex; justify-content: flex-end;">
                 <button onclick="saveCategoryTarget('freegames')" class="btn btn-primary btn-sm" style="background: #10b981; border-color: #10b981;"><i class="fa-solid fa-floppy-disk"></i> Save Target</button>
               </div>
@@ -940,13 +943,14 @@ export function renderDashboardHtml(
               </div>
               <div class="target-readout" id="streamalerts-target-readout">Loading target...</div>
               <div class="form-group">
-                <label class="form-label">Target Channel</label>
-                <select id="streamalerts-target-channel"></select>
+                <label class="form-label">Text / Announcement Channel</label>
+                <select id="streamalerts-target-channel" onchange="categoryTargetChanged('streamalerts', 'channel')"></select>
               </div>
               <div class="form-group">
-                <label class="form-label">Target Forum Thread Channel (optional)</label>
-                <select id="streamalerts-target-thread"></select>
+                <label class="form-label">Forum Thread Channel (alternative)</label>
+                <select id="streamalerts-target-thread" onchange="categoryTargetChanged('streamalerts', 'thread')"></select>
               </div>
+              <div class="target-readout" style="font-size: 0.6875rem; color: var(--text-muted);">Pick one — setting one clears the other.</div>
               <div style="display: flex; justify-content: flex-end;">
                 <button onclick="saveCategoryTarget('streamalerts')" class="btn btn-primary btn-sm" style="background: #9146ff; border-color: #9146ff;"><i class="fa-solid fa-floppy-disk"></i> Save Target</button>
               </div>
@@ -1386,9 +1390,13 @@ export function renderDashboardHtml(
     function updateTargetReadout(category, target, textChannels, forumChannels) {
       const el = document.getElementById(category + '-target-readout');
       if (!el) return;
-      const channel = channelNameById(textChannels, target.channelId) || 'none';
-      const thread = channelNameById(forumChannels, target.threadChannelId) || 'none';
-      el.innerHTML = 'Channel: <strong>' + esc(channel) + '</strong> &middot; Thread: <strong>' + esc(thread) + '</strong>';
+      if (target.channelId) {
+        el.innerHTML = 'Delivers to <strong>' + esc(channelNameById(textChannels, target.channelId) || '#' + target.channelId) + '</strong>';
+      } else if (target.threadChannelId) {
+        el.innerHTML = 'Delivers as threads in <strong>' + esc(channelNameById(forumChannels, target.threadChannelId) || '#' + target.threadChannelId) + '</strong>';
+      } else {
+        el.innerHTML = '<span style="color: var(--text-muted);">Not configured</span>';
+      }
     }
 
     async function saveCategoryTarget(category) {
@@ -1397,6 +1405,10 @@ export function renderDashboardHtml(
       const threadSel = document.getElementById(category + '-target-thread');
       const channelId = channelSel ? channelSel.value || null : null;
       const threadChannelId = threadSel ? threadSel.value || null : null;
+      if (channelId && threadChannelId) {
+        alert('Pick one only: choose either a text channel or a forum thread — not both.');
+        return;
+      }
       try {
         const res = await fetch('/api/guilds/' + encodeURIComponent(currentGuildId) + '/categories/' + encodeURIComponent(category), {
           method: 'PUT',
@@ -1419,6 +1431,12 @@ export function renderDashboardHtml(
       } catch {
         alert('Network error saving target.');
       }
+    }
+
+    function categoryTargetChanged(category, source) {
+      const otherId = source === 'channel' ? category + '-target-thread' : category + '-target-channel';
+      const otherSel = document.getElementById(otherId);
+      if (otherSel) otherSel.value = '';
     }
 
     function categoryForFeed(feed) {
@@ -2136,8 +2154,8 @@ export function renderDashboardHtml(
         return;
       }
       const rssTarget = (cachedCategories.categories || []).find(t => t.category === 'rss');
-      if (!rssTarget || !rssTarget.channelId) {
-        alert('Please configure an RSS target channel for this server in the Categories tab before subscribing to news presets.');
+      if (!rssTarget || (!rssTarget.channelId && !rssTarget.threadChannelId)) {
+        alert('Please configure an RSS delivery target for this server in the Categories tab (text channel or forum thread) before subscribing to news presets.');
         return;
       }
       try {

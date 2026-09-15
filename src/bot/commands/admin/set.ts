@@ -37,14 +37,14 @@ export const setCommandDef: ApplicationCommand = {
         },
         {
           name: 'channel',
-          description: 'Target Discord text/announcement channel',
+          description: 'Target text/announcement channel',
           type: ApplicationCommandOptionType.CHANNEL,
-          required: true,
+          required: false,
           channel_types: [0, 5],
         },
         {
           name: 'thread_channel',
-          description: 'Optional forum channel for thread delivery',
+          description: 'Forum channel for thread delivery',
           type: ApplicationCommandOptionType.CHANNEL,
           required: false,
           channel_types: [15],
@@ -250,13 +250,20 @@ function handleSetChannel(
   deps: AppDeps,
 ): InteractionResponse {
   const rawCategory = String(options.find((o) => o.name === 'category')?.value ?? '').trim();
-  const channelId = String(options.find((o) => o.name === 'channel')?.value ?? '').trim();
+  const channelId = String(options.find((o) => o.name === 'channel')?.value ?? '').trim() || null;
   const threadChannelId = String(options.find((o) => o.name === 'thread_channel')?.value ?? '').trim() || null;
 
   const category = (FEED_CATEGORIES as readonly string[]).includes(rawCategory) ? (rawCategory as FeedCategory) : null;
 
-  if (!category || !channelId) {
+  if (!category || (!channelId && !threadChannelId)) {
     return setHelp();
+  }
+
+  if (channelId && threadChannelId) {
+    return errorResponse(
+      'Choose One Only',
+      'Pick **either** a text channel **or** a forum thread channel — not both. Run `/set channel` again with only one of `channel` / `thread_channel`.',
+    );
   }
 
   deps.repo.setGuildCategoryTarget(guildId, category, channelId, threadChannelId);
@@ -264,13 +271,15 @@ function handleSetChannel(
     userId,
     'info',
     'bot',
-    `Set ${category} delivery channel (${channelId}${threadChannelId ? `, threads ${threadChannelId}` : ''}) for guild ${guildId} via /set`,
+    `Set ${category} delivery target (${channelId ? `channel ${channelId}` : `threads ${threadChannelId}`}) for guild ${guildId} via /set`,
   );
 
   return embedResponse(
     successEmbed(
-      'New Delivery Channel Set',
-      `**${CATEGORY_LABELS[category]}** will now be delivered to <#${channelId}>${threadChannelId ? ` with thread delivery in <#${threadChannelId}>` : ''}.`,
+      'New Delivery Target Set',
+      threadChannelId
+        ? `**${CATEGORY_LABELS[category]}** will now be delivered as threads in <#${threadChannelId}>.`
+        : `**${CATEGORY_LABELS[category]}** will now be delivered to <#${channelId}>.`,
     ),
   );
 }
@@ -405,11 +414,13 @@ function handleSetView(userId: number, guildId: string, deps: AppDeps): Interact
 
   const channelLines = FEED_CATEGORIES.map((category) => {
     const target = targets.find((t) => t.category === category);
-    if (!target || !target.channelId) {
+    if (!target || (!target.channelId && !target.threadChannelId)) {
       return `**${CATEGORY_LABELS[category]}:** Not configured`;
     }
-    const thread = target.threadChannelId ? ` (threads: <#${target.threadChannelId}>)` : '';
-    return `**${CATEGORY_LABELS[category]}:** <#${target.channelId}>${thread}`;
+    if (target.threadChannelId) {
+      return `**${CATEGORY_LABELS[category]}:** Threads in <#${target.threadChannelId}>`;
+    }
+    return `**${CATEGORY_LABELS[category]}:** <#${target.channelId}>`;
   });
 
   const featureLines = FEATURE_NAMES.map(

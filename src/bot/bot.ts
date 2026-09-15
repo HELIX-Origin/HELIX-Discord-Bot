@@ -182,14 +182,11 @@ export class DiscordBot {
 
     try {
       const handler = createCommandHandler(this.deps);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const response = await dispatchInteraction(interaction as unknown as any, this.deps, this.rest, handler);
       if (interaction.replied || interaction.deferred) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        await interaction.followUp(response as unknown as any);
+        await interaction.followUp((response as unknown as { data?: unknown }).data ?? {});
       } else {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        await interaction.reply(response as unknown as any);
+        await interaction.reply((response as unknown as { data?: unknown }).data ?? {});
       }
     } catch (err) {
       this.logger.error('Error dispatching slash command interaction', {
@@ -206,11 +203,9 @@ export class DiscordBot {
           },
         };
         if (interaction.replied || interaction.deferred) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          await interaction.followUp(errorResponse as unknown as any);
+          await interaction.followUp(errorResponse.data);
         } else {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          await interaction.reply(errorResponse as unknown as any);
+          await interaction.reply(errorResponse.data);
         }
       } catch {
         /* ignore fallback failure */

@@ -100,6 +100,10 @@ export function registerGuildRoutes(router: Router<AppDeps>): void {
     const threadChannelId =
       body.threadChannelId === undefined ? null : body.threadChannelId ? String(body.threadChannelId).trim() : null;
 
+    if (channelId && threadChannelId) {
+      return sendError(res, 400, 'Choose one only: pick either a text channel or a forum thread channel, not both.');
+    }
+
     try {
       const allChannels = await d.bot.getGuildChannelsAll(guildId).catch(() => []);
       const validTextIds = new Set(allChannels.filter((ch) => ch.type === 0 || ch.type === 5).map((ch) => ch.id));

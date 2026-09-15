@@ -42,15 +42,6 @@ npm-shrinkwrap.json
 yarn.lock
 
 # agent-related files and directories
-.agents/
-.agents/**
-.opencode/
-.opencode/**
-.gemini/
-.gemini/**
-AGENTS.md
-CLAUDE.md
-IMPORTANT.md
-PLAN.md
-BUGS.md
+scratch/
+scratch/**
 temp.md
