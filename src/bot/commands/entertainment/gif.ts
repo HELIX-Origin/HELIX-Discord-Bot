@@ -13,13 +13,11 @@ import { commandHelpResponse } from '../../utils/embeds.js';
 
 export const gifCommandDef: ApplicationCommand = {
   name: 'gif',
-  description:
-    'Get a random GIF or filter by category (anime, jojo, waifu, slap, gintama, doggo, cat, hug, kiss, pat, bonk, cuddle, tickle, pet, poke, baka, smug, cry, angry, meme)',
+  description: 'Get a random GIF or filter by category',
   options: [
     {
       name: 'category',
-      description:
-        'GIF category (optional - omitting returns a random GIF). Popular: anime, jojo, waifu, slap, gintama, doggo, cat, hug, kiss, pat, bonk, cuddle, tickle, pet, poke, baka, smug, cry, angry, meme',
+      description: 'GIF category (optional - omitting returns a random GIF)',
       type: ApplicationCommandOptionType.STRING,
       required: false,
     },

@@ -8,7 +8,7 @@ import {
 
 export const statsCommandDef: ApplicationCommand = {
   name: 'stats',
-  description: 'View HELIX Discord Bot service statistics, bot details, and dashboard info',
+  description: 'View bot statistics, service status, and dashboard info',
 };
 
 export async function handleStatsCommand(interaction: DiscordInteraction, deps: AppDeps): Promise<InteractionResponse> {

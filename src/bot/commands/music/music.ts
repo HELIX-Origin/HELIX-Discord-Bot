@@ -20,7 +20,7 @@ const MUSIC_COMMANDS = [
     options: [
       {
         name: 'query',
-        description: 'Track name, URL, or search query (e.g. "lofi hip hop", "anime openings", "gaming music")',
+        description: 'Track name, URL, or search query',
         type: ApplicationCommandOptionType.STRING,
         required: true,
       },

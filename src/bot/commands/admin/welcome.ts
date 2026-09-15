@@ -37,7 +37,7 @@ export const welcomeCommandDef: ApplicationCommand = {
       options: [
         {
           name: 'content',
-          description: 'Welcome message (supports {user}, {server}, {membercount}, {mention})',
+          description: 'Welcome message template (supports placeholders)',
           type: ApplicationCommandOptionType.STRING,
           required: true,
         },

@@ -22,17 +22,17 @@ export const ticketCommandDef: ApplicationCommand = {
       type: ApplicationCommandOptionType.SUB_COMMAND,
       options: [
         {
+          name: 'manager_role',
+          description: 'Role that can manage tickets (auto-added)',
+          type: ApplicationCommandOptionType.ROLE,
+          required: true,
+        },
+        {
           name: 'category',
           description: 'Forum channel for tickets (optional)',
           type: ApplicationCommandOptionType.CHANNEL,
           required: false,
           channel_types: [15],
-        },
-        {
-          name: 'manager_role',
-          description: 'Role that can manage tickets (auto-added)',
-          type: ApplicationCommandOptionType.ROLE,
-          required: true,
         },
         {
           name: 'transcript_channel',

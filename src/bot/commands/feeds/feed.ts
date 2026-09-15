@@ -16,7 +16,7 @@ export const feedCommandDef: ApplicationCommand = {
   options: [
     {
       name: 'add',
-      description: 'Add a new feed and optionally configure a channel for automated delivery',
+      description: 'Add a new feed',
       type: ApplicationCommandOptionType.SUB_COMMAND,
       options: [
         {
