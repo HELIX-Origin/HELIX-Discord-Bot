@@ -12,6 +12,9 @@ Welcome to the comprehensive technical and operational wiki for **HELIX Discord 
 | [**🎮 Free Games & Giveaways**](Free-Games-Feeds.md) | Multi-store aggregation (Epic Games, Steam, GOG, Humble, etc.), Monday cron scheduler, and store branding. |
 | [**🤖 Reddit Feeds & Pure Image Mode**](Reddit-Feeds.md) | Reddit scraping, Pure Image Mode vs Standard RSS Mode, animated GIF/gifv banners, and subreddit filtering. |
 | [**🤖 Discord Bot & Commands**](Discord-Bot.md) | Slash commands (`/feed`, `/stats`, `/about`, `/help`), direct channel + forum thread delivery, embed formatting, and Discord permissions. |
+| [**🎵 Music & Lavalink**](Music.md) | Lavalink v4 playback (YouTube, Spotify, SoundCloud, Apple Music, Deezer), queue management, embedded node setup, and dashboard queue page. |
+| [**😂 Entertainment & GIF Commands**](Entertainment.md) | KLIPY-powered `/gif` with autocomplete, action commands (`/slap`, `/hug`, etc.), and random GIF fallback. |
+| [**🛡️ Guild Administration**](Administration.md) | Moderation (`/admin warn`, `/kick`, `/ban`, `/lock`, `/purge`, `/slowmode`, `/announce`), role management, voice controls, permission guards. |
 | [**🔌 REST API Reference**](API-Reference.md) | Complete documentation of all REST endpoints, request/response schemas, and query params. |
 | [**🏗️ Architecture & Design**](Architecture-and-Design.md) | System components, data flow diagrams, background polling engine, caching, and state management. |
 | [**⚙️ Configuration Guide**](Configuration.md) | Exhaustive reference of all `.env` variables, timeouts, polling, dashboard themes, and hosting settings. |
@@ -78,6 +81,6 @@ flowchart TD
 5. **No Webhook Hassle**: Messages are dispatched directly to guild channels using Discord REST API endpoints with granular role/user pings and embed color customization.
 6. **Forum Thread Delivery**: Optional per-server delivery of each feed into its own dedicated thread inside a forum channel — kept open via keepalive polling, auto-rotated into a fresh thread when large (configurable from the dashboard Feeds tab).
 7. **Glassmorphism Web Dashboard**: Real-time management interface with Discord OAuth2 login, feed analytics, log streaming, and preset browsing.
-8. **Music Playback via Lavalink**: High-quality music from YouTube, Spotify, SoundCloud, Apple Music, Deezer with queue management, shuffle/loop/volume/seek controls, and real-time dashboard queue page. Connects to external Lavalink v4 server.
+8. **Music Playback via Lavalink**: High-quality music from YouTube, Spotify, SoundCloud, Apple Music, Deezer with queue management, shuffle/loop/volume/seek controls, and real-time dashboard queue page. Ships the official Lavalink v4 engine as a pre-built npm dependency (`@helix-origin/lavalink-server`, read-only pinned release tarball) embedded as the default node, or connects to an external Lavalink v4 server. All music configuration lives in the bot's global `.env`.
 9. **Entertainment GIF Commands**: KLIPY-powered `/gif` with category autocomplete (anime, jojo, waifu, slap, etc.), action commands (`/slap`, `/hug`, `/kiss`, `/pat`, `/bonk`, etc.), and random GIF fallback.
 10. **Guild Administration**: Moderation (`/admin warn`, `/kick`, `/ban`, `/lock`, `/purge`, `/slowmode`, `/announce`), role management, voice controls (mute/deafen/move/disconnect), all with Discord permission guards.

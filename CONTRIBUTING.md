@@ -1,6 +1,6 @@
-# Contributing to Discord-RSS
+# Contributing to HELIX Discord Bot
 
-Thank you for your interest in contributing to **Discord-RSS**! We welcome contributions ranging from bug fixes, documentation enhancements, feature proposals, to adding new presets to our News Feeds and Free Games scrapers.
+Thank you for your interest in contributing to **HELIX Discord Bot**! We welcome contributions ranging from bug fixes, documentation enhancements, feature proposals, to adding new presets to our News Feeds and Free Games scrapers.
 
 ---
 
@@ -23,8 +23,8 @@ We are committed to providing a welcoming, inclusive, and harassment-free enviro
 
 1. **Fork & Clone the Repository**:
    ```bash
-   git clone https://github.com/your-username/Discord-RSS.git
-   cd Discord-RSS
+   git clone https://github.com/your-username/HELIX-Discord-Bot.git
+   cd HELIX-Discord-Bot
    ```
 
 2. **Install Dependencies**:
@@ -37,7 +37,7 @@ We are committed to providing a welcoming, inclusive, and harassment-free enviro
    ```bash
    cp .env.example .env
    ```
-   *For detailed explanation of all environment variables, check the [Configuration Guide](file:///d:/Projects/Discord-RSS/wiki/Configuration.md).*
+   *For detailed explanation of all environment variables, check the [Configuration Guide](../../wiki/Configuration).*
 
 4. **Start the Development Server**:
    ```bash
@@ -73,7 +73,7 @@ npm run build
 ## 📁 Repository Structure
 
 ```
-Discord-RSS/
+HELIX-Discord-Bot/
 ├── src/
 │   ├── bot/                # Discord.js bot client, slash commands & embed generators
 │   │   ├── commands/       # /feed, /stats, /about, /help
@@ -83,7 +83,7 @@ Discord-RSS/
 │   │   ├── routes/         # REST API routes (feeds, presets, settings, analytics)
 │   │   ├── public/         # Vanilla CSS & client-side dashboard JS
 │   │   └── server.ts       # Express server entry point
-│   ├── db/                 # SQLite / PostgreSQL persistence layer & migrations
+│   ├── db/                 # SQLite persistence layer & migrations
 │   │   ├── database.ts     # Database connection & pooling
 │   │   ├── schema.ts       # Table schemas & DDL
 │   │   └── repositories/   # Feed, Guild, Settings, and Stats repositories
@@ -141,7 +141,7 @@ Discord-RSS/
 ## 💡 Adding New Feed Presets
 
 To contribute new verified feed presets into the **News Feeds** catalog:
-1. Open [`src/dashboard/routes/presets.ts`](file:///d:/Projects/Discord-RSS/src/dashboard/routes/presets.ts).
+1. Open [`src/dashboard/routes/presets.ts`](src/dashboard/routes/presets.ts).
 2. Locate the corresponding category array (e.g., `Technology`, `Gaming`, `AI`, `Cybersecurity`).
 3. Add your verified feed entry with `name`, `url`, `description`, `icon`, and optional tags.
 4. Verify that the RSS feed URL produces valid XML and responds quickly.
@@ -151,4 +151,4 @@ To contribute new verified feed presets into the **News Feeds** catalog:
 ## ❓ Getting Help
 
 - Join our Discord Community or open an issue on GitHub if you have any questions.
-- Browse the [Discord-RSS Wiki](file:///d:/Projects/Discord-RSS/wiki/HOME.md) for deep dives on architecture, scrapers, and bot configuration.
+- Browse the [HELIX Discord Bot Wiki](../../wiki/HOME) for deep dives on architecture, scrapers, and bot configuration.

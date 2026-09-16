@@ -70,26 +70,43 @@ export interface LavalinkStats {
   };
 }
 
+export interface VoiceGateway {
+  joinChannel(guildId: string, channelId: string, deaf?: boolean, mute?: boolean): Promise<void>;
+  leaveChannel(guildId: string): Promise<void>;
+}
+
+interface NormalizedLoadResult {
+  loadType: string;
+  data: Track[];
+  playlistInfo?: unknown;
+}
+
+/**
+ * Lavalink v4 client. Speaks the native Lavalink WS protocol (fire-and-forget
+ * ops: play/stop/pause/seek/volume/filters/destroy/voiceUpdate) and REST
+ * (loadtracks/info/stats). Queue, history, loop and shuffle are owned
+ * client-side; track-end events advance the queue automatically.
+ */
 export class LavalinkManager {
   private readonly logger: Logger;
   private readonly config: LavalinkConfig;
   private ws: WebSocket | null = null;
   private sessionId: string | null = null;
-  private readonly pendingRequests = new Map<
-    string,
-    { resolve: (value: unknown) => void; reject: (reason: unknown) => void; timeout: NodeJS.Timeout }
-  >();
-  private requestId = 0;
   private reconnectAttempts = 0;
   private readonly maxReconnectAttempts = 5;
   private readonly reconnectDelay = 5000;
-  private heartbeatInterval: NodeJS.Timeout | null = null;
   private readonly eventHandlers = new Map<string, Set<(data: unknown) => void>>();
-  private players = new Map<string, PlayerState>();
+  private readonly players = new Map<string, PlayerState>();
+  private readonly voiceSessions = new Map<string, string>();
+  private voiceConnector: VoiceGateway | null = null;
 
   constructor(config: LavalinkConfig, logger: Logger) {
     this.config = config;
     this.logger = logger;
+  }
+
+  setVoiceConnector(connector: VoiceGateway): void {
+    this.voiceConnector = connector;
   }
 
   get baseUrl(): string {
@@ -115,16 +132,25 @@ export class LavalinkManager {
 
       this.ws = new WebSocketClient(this.wsUrl, undefined, { headers: wsHeaders });
 
-      this.ws.onopen = () => {
+      const onOpen = () => {
         this.logger.info('Lavalink WebSocket connected');
         this.reconnectAttempts = 0;
-        this.startHeartbeat();
+        this.ws?.removeEventListener?.('open', onOpen);
         resolve();
       };
 
+      const onReady = (data: unknown) => {
+        const msg = data as { sessionId?: string; resumed?: boolean };
+        this.sessionId = msg.sessionId ?? null;
+        this.logger.info('Lavalink session ready', { sessionId: this.sessionId, resumed: msg.resumed ?? false });
+      };
+
+      this.once('ready', onReady);
+
+      this.ws.onopen = onOpen;
+
       this.ws.onclose = (event) => {
         this.logger.warn('Lavalink WebSocket closed', { code: event.code, reason: event.reason });
-        this.stopHeartbeat();
         this.handleDisconnect();
       };
 
@@ -151,23 +177,14 @@ export class LavalinkManager {
     });
   }
 
-  private startHeartbeat(): void {
-    this.heartbeatInterval = setInterval(() => {
-      if (this.ws?.readyState === WebSocket.OPEN) {
-        this.send({ op: 'heartbeat' });
-      }
-    }, 30000);
-  }
-
-  private stopHeartbeat(): void {
-    if (this.heartbeatInterval) {
-      clearInterval(this.heartbeatInterval);
-      this.heartbeatInterval = null;
-    }
+  private once(event: string, handler: (data: unknown) => void): void {
+    const off = this.on(event, (data) => {
+      off();
+      handler(data);
+    });
   }
 
   private handleDisconnect(): void {
-    this.cleanupPendingRequests(new Error('Disconnected'));
     if (this.reconnectAttempts < this.maxReconnectAttempts) {
       this.reconnectAttempts++;
       this.logger.info('Attempting to reconnect to Lavalink', { attempt: this.reconnectAttempts });
@@ -186,28 +203,26 @@ export class LavalinkManager {
 
   private handleMessage(data: unknown): void {
     const msg = data as Record<string, unknown>;
-    if (msg.op === 'event') {
-      this.emit(msg.type as string, data);
-    } else if (msg.op === 'stats') {
-      this.emit('stats', data);
-    } else if (msg.op === 'playerUpdate') {
-      this.handlePlayerUpdate(data);
-    } else if (msg.op === 'ready') {
-      this.sessionId = msg.sessionId as string;
-      this.emit('ready', data);
-    } else if (msg.op === 'error') {
-      this.logger.error('Lavalink error', { data });
-    }
-
-    if (msg.requestId && this.pendingRequests.has(msg.requestId as string)) {
-      const pending = this.pendingRequests.get(msg.requestId as string)!;
-      clearTimeout(pending.timeout);
-      this.pendingRequests.delete(msg.requestId as string);
-      if (msg.error) {
-        pending.reject(new Error(msg.error as string));
-      } else {
-        pending.resolve(msg.data);
+    switch (msg.op) {
+      case 'ready': {
+        this.sessionId = (msg.sessionId as string) ?? null;
+        this.emit('ready', data);
+        return;
       }
+      case 'playerUpdate':
+        this.handlePlayerUpdate(data);
+        return;
+      case 'stats':
+        this.emit('stats', data);
+        return;
+      case 'event':
+        this.emit('event', data);
+        if (msg.type === 'TrackEndEvent') {
+          this.handleTrackEnd(data);
+        }
+        return;
+      default:
+        this.emit(msg.op as string, data);
     }
   }
 
@@ -217,28 +232,109 @@ export class LavalinkManager {
     const player = this.players.get(guildId);
     if (player && msg.state) {
       const state = msg.state as Record<string, unknown>;
-      player.position = (state.position as number) ?? player.position;
-      if (state.paused !== undefined) player.paused = state.paused as boolean;
+      if (typeof state.position === 'number') player.position = state.position;
+      if (typeof state.paused === 'boolean') player.paused = state.paused;
     }
     this.emit('playerUpdate', data);
   }
 
-  private makeRequest<T>(op: string, data: unknown): Promise<T> {
-    return new Promise<T>((resolve, reject) => {
-      if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
-        reject(new Error('Not connected'));
-        return;
-      }
+  private handleTrackEnd(data: unknown): void {
+    const msg = data as Record<string, unknown>;
+    const guildId = msg.guildId as string;
+    const reason = msg.reason as string;
+    const player = this.players.get(guildId);
+    if (!player) return;
 
-      const requestId = String(++this.requestId);
-      const timeout = setTimeout(() => {
-        this.pendingRequests.delete(requestId);
-        reject(new Error('Request timeout'));
-      }, 15000);
+    if (reason === 'replaced') return;
 
-      this.pendingRequests.set(requestId, { resolve: resolve as (value: unknown) => void, reject, timeout });
-      this.send({ op, requestId, ...(data as Record<string, unknown>) });
-    });
+    const finished = player.current;
+    if (finished) {
+      player.history.push(finished);
+      if (player.history.length > 50) player.history.shift();
+    }
+
+    if (reason === 'finished' && player.loop === 'track' && finished) {
+      player.paused = false;
+      player.position = 0;
+      this.send({ op: 'play', guildId, track: finished.track.identifier });
+      return;
+    }
+
+    const next = player.queue.shift() ?? null;
+    if (next) {
+      player.current = next;
+      player.paused = false;
+      player.position = 0;
+      this.send({ op: 'play', guildId, track: next.track.identifier });
+      return;
+    }
+
+    if (player.loop === 'queue' && player.history.length) {
+      player.queue.push(...player.history);
+      player.history = [];
+      const first = player.queue.shift()!;
+      player.current = first;
+      player.paused = false;
+      player.position = 0;
+      this.send({ op: 'play', guildId, track: first.track.identifier });
+      return;
+    }
+
+    player.current = null;
+    player.position = 0;
+    this.emit('queueEnd', { guildId });
+  }
+
+  private toTrack(raw: unknown): Track {
+    const value = raw as {
+      encoded?: string;
+      identifier?: string;
+      info?: {
+        identifier?: string;
+        title?: string;
+        author?: string;
+        length?: number;
+        position?: number;
+        isStream?: boolean;
+        uri?: string;
+        artworkUrl?: string | null;
+        sourceName?: string;
+      };
+      title?: string;
+      author?: string;
+      length?: number;
+      position?: number;
+      isStream?: boolean;
+      uri?: string;
+      artworkUrl?: string | null;
+      sourceName?: string;
+    };
+
+    if (value.info) {
+      return {
+        identifier: value.encoded ?? value.info.identifier ?? '',
+        title: value.info.title ?? 'Unknown',
+        author: value.info.author ?? 'Unknown',
+        length: value.info.length ?? 0,
+        position: value.info.position ?? 0,
+        isStream: value.info.isStream ?? false,
+        uri: value.info.uri ?? '',
+        artworkUrl: value.info.artworkUrl ?? null,
+        sourceName: value.info.sourceName ?? 'lavalink',
+      };
+    }
+
+    return {
+      identifier: value.encoded ?? value.identifier ?? '',
+      title: value.title ?? 'Unknown',
+      author: value.author ?? 'Unknown',
+      length: value.length ?? 0,
+      position: value.position ?? 0,
+      isStream: value.isStream ?? false,
+      uri: value.uri ?? '',
+      artworkUrl: value.artworkUrl ?? null,
+      sourceName: value.sourceName ?? 'lavalink',
+    } as Track;
   }
 
   on(event: string, handler: (data: unknown) => void): () => void {
@@ -263,14 +359,6 @@ export class LavalinkManager {
     });
   }
 
-  private cleanupPendingRequests(error: Error): void {
-    for (const [, { reject, timeout }] of this.pendingRequests) {
-      clearTimeout(timeout);
-      reject(error);
-    }
-    this.pendingRequests.clear();
-  }
-
   private async rest<T>(path: string, options: RequestInit = {}): Promise<T> {
     const url = `${this.baseUrl}${path}`;
     const res = await fetch(url, {
@@ -292,8 +380,8 @@ export class LavalinkManager {
   }
 
   async createPlayer(guildId: string): Promise<void> {
-    await this.makeRequest('createPlayer', { guildId });
-    const player: PlayerState = {
+    if (this.players.has(guildId)) return;
+    this.players.set(guildId, {
       guildId,
       channelId: null,
       queue: [],
@@ -304,30 +392,47 @@ export class LavalinkManager {
       loop: 'none',
       shuffled: false,
       position: 0,
-    };
-    this.players.set(guildId, player);
+    });
   }
 
   async destroyPlayer(guildId: string): Promise<void> {
-    await this.makeRequest('destroyPlayer', { guildId });
+    this.send({ op: 'destroy', guildId });
     this.players.delete(guildId);
+    this.voiceSessions.delete(guildId);
+    if (this.voiceConnector) {
+      try {
+        await this.voiceConnector.leaveChannel(guildId);
+      } catch (err) {
+        this.logger.warn('Failed to leave voice channel', { guildId, error: String(err) });
+      }
+    }
   }
 
   async connectVoice(guildId: string, channelId: string, deaf = true, mute = false): Promise<void> {
-    const player = this.players.get(guildId);
-    if (!player) await this.createPlayer(guildId);
-    await this.makeRequest('connect', { guildId, channelId, deaf, mute });
-    this.players.get(guildId)!.channelId = channelId;
+    let player = this.players.get(guildId);
+    if (!player) {
+      await this.createPlayer(guildId);
+      player = this.players.get(guildId)!;
+    }
+    player.channelId = channelId;
+    if (this.voiceConnector) {
+      await this.voiceConnector.joinChannel(guildId, channelId, deaf, mute);
+    }
   }
 
   async disconnectVoice(guildId: string): Promise<void> {
-    await this.makeRequest('disconnect', { guildId });
     const player = this.players.get(guildId);
     if (player) player.channelId = null;
+    if (this.voiceConnector) {
+      try {
+        await this.voiceConnector.leaveChannel(guildId);
+      } catch (err) {
+        this.logger.warn('Failed to leave voice channel', { guildId, error: String(err) });
+      }
+    }
   }
 
   async play(guildId: string, track: Track): Promise<void> {
-    await this.makeRequest('play', { guildId, encodedTrack: track.identifier });
     const player = this.players.get(guildId);
     if (player) {
       if (player.current) {
@@ -336,7 +441,9 @@ export class LavalinkManager {
       }
       player.current = { track, requester: '', requestedAt: Date.now() };
       player.paused = false;
+      player.position = 0;
     }
+    this.send({ op: 'play', guildId, track: track.identifier });
   }
 
   async previous(guildId: string): Promise<QueueItem | null> {
@@ -346,59 +453,65 @@ export class LavalinkManager {
     const prev = player.history.pop()!;
     if (player.current) {
       player.history.push(player.current);
+      if (player.history.length > 50) player.history.shift();
     }
     player.current = prev;
     player.paused = false;
     player.position = 0;
-    await this.makeRequest('play', { guildId, encodedTrack: prev.track.identifier });
+    this.send({ op: 'play', guildId, track: prev.track.identifier });
     return prev;
   }
 
   async stop(guildId: string): Promise<void> {
-    await this.makeRequest('stop', { guildId });
-    const player = this.players.get(guildId);
-    if (player) {
-      if (player.current) {
-        player.history.push(player.current);
-        if (player.history.length > 50) player.history.shift();
-      }
-      player.current = null;
-      player.queue = [];
-    }
+    this.send({ op: 'stop', guildId });
   }
 
   async pause(guildId: string, pause: boolean): Promise<void> {
-    await this.makeRequest('pause', { guildId, pause });
+    this.send({ op: 'pause', guildId, pause });
     const player = this.players.get(guildId);
     if (player) player.paused = pause;
   }
 
   async seek(guildId: string, position: number): Promise<void> {
-    await this.makeRequest('seek', { guildId, position });
+    this.send({ op: 'seek', guildId, position });
     const player = this.players.get(guildId);
     if (player) player.position = position;
   }
 
   async setVolume(guildId: string, volume: number): Promise<void> {
-    await this.makeRequest('volume', { guildId, volume });
+    this.send({ op: 'volume', guildId, volume });
     const player = this.players.get(guildId);
     if (player) player.volume = volume;
   }
 
   async setLoop(guildId: string, mode: 'none' | 'track' | 'queue'): Promise<void> {
-    await this.makeRequest('loop', { guildId, mode });
     const player = this.players.get(guildId);
     if (player) player.loop = mode;
   }
 
   async setShuffle(guildId: string, shuffle: boolean): Promise<void> {
-    await this.makeRequest('shuffle', { guildId, shuffle });
     const player = this.players.get(guildId);
     if (player) player.shuffled = shuffle;
   }
 
-  async loadTracks(query: string): Promise<{ loadType: string; data: Track[]; playlistInfo?: unknown }> {
-    return this.rest(`/v4/loadtracks?identifier=${encodeURIComponent(query)}`);
+  async loadTracks(query: string): Promise<NormalizedLoadResult> {
+    const raw = (await this.rest(`/v4/loadtracks?identifier=${encodeURIComponent(query)}`)) as {
+      loadType: string;
+      data?: { tracks?: unknown[]; info?: unknown } | unknown[];
+    };
+
+    const loadType = raw.loadType ?? 'empty';
+    let data: Track[] = [];
+    if (loadType === 'playlist' && raw.data && !Array.isArray(raw.data)) {
+      data = ((raw.data as { tracks?: unknown[] }).tracks ?? []).map((t) => this.toTrack(t));
+      return { loadType, data, playlistInfo: (raw.data as { info?: unknown }).info };
+    }
+
+    if (Array.isArray(raw.data)) {
+      data = raw.data.map((t) => this.toTrack(t));
+    }
+
+    return { loadType, data };
   }
 
   async getStats(): Promise<LavalinkStats> {
@@ -410,14 +523,35 @@ export class LavalinkManager {
   }
 
   async setFilter(guildId: string, filters: unknown): Promise<void> {
-    await this.makeRequest('filters', { guildId, filters });
+    this.send({ op: 'filters', guildId, filters });
   }
 
   handleVoiceStateUpdate(data: unknown): void {
+    const msg = data as { guildId: string; sessionId?: string | null; channelId?: string | null };
+    if (msg.sessionId) {
+      this.voiceSessions.set(msg.guildId, msg.sessionId);
+    } else {
+      this.voiceSessions.delete(msg.guildId);
+    }
+    const player = this.players.get(msg.guildId);
+    if (player) player.channelId = msg.channelId ?? null;
     this.emit('voiceStateUpdate', data);
   }
 
   handleVoiceServerUpdate(data: unknown): void {
+    const msg = data as { token: string; guild_id: string; endpoint?: string };
+    const sessionId = this.voiceSessions.get(msg.guild_id);
+    if (!sessionId) {
+      this.logger.warn('Voice server update received without a voice session', { guildId: msg.guild_id });
+      return;
+    }
+    const endpoint = (msg.endpoint ?? '').replace(/^wss?:\/\//, '');
+    this.send({
+      op: 'voiceUpdate',
+      guildId: msg.guild_id,
+      sessionId,
+      event: { token: msg.token, guild_id: msg.guild_id, endpoint },
+    });
     this.emit('voiceServerUpdate', data);
   }
 

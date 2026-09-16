@@ -86,12 +86,38 @@ This section documents active and recently resolved critical issues as required 
   - **Product expansion (tracked in [#21](https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues/21), Phases 11+):** dashboard **Feeds primary tab** with per-feed sub-pages, **Guild Admin** page + administration commands, **entertainment GIF commands (KLIPY API)**, and **music via NodeLink** with a **Queue Management** dashboard page.
   - The project/development name is **HELIX Discord Bot** (renamed from HELIX RSS); the dashboard and bot embeds keep using the live Discord application name + icon at runtime.
 
-### 11. Feature Flags, KLIPY GIF Commands & DB_URI (Implemented)
-- **Global feature master-switches** added (`FEEDS_ENABLED`, `STREAM_ALERTS_ENABLED`, `THREADS_ENABLED`, `GIFS_ENABLED`, `ADMINISTRATION_ENABLED`, `NODELINK_ENABLED`, `DASHBOARD_ENABLED`, `ADMIN_PANEL_ENABLED`) — each defaults to enabled, gating slash command registration, dashboard pages, and internal wiring.
-- **KLIPY GIF commands** (`/gif [subcommand]` with autocomplete for popular tags: anime, jojo, waifu, slap, gintama, doggo, cat, hug, kiss, pat, bonk, cuddle, tickle, pet, poke, baka, smug, cry, angry, meme, etc.) plus action-style convenience commands (`/slap`, `/hug`, `/kiss`, `/pat`, `/bonk`, `/cuddle`, `/tickle`, `/pet`, `/poke`, `/baka`, `/smug`, `/cry`, `/angry`, `/meme`).
-- **DB_URI** unified connection string for database (SQLite default; PostgreSQL/MySQL reserved for future async driver support).
-- **Shared dashboard components**: `topbar.ts` (brand, invite, login/user dropdown with Guilds/Admin/Log Out), `footer.ts` (consistent footer across landing, login, legal, dashboard).
-- Bot command registration and dispatch respect feature flags via `getEnabledCommands(deps)`.
+### 11. Embedded Lavalink v4 Integration (Resolved)
+- **Problem**: Music playback relied on external Lavalink node only; no self-contained embedded option. Previous NodeLink client was incompatible with official Lavalink v4.
+- **Resolution**:
+  - Migrated to `@helix-origin/lavalink-server` npm package (pinned GitHub Release tarball, read-only).
+  - Embedded node (`LAVA_EMBEDDED=true`, default) bootstraps Java 21 + Lavalink.jar in-process; zero external services required.
+  - Rewrote `LavalinkManager` to native Lavalink v4 WebSocket protocol (fire-and-forget ops: `play`, `stop`, `pause`, `seek`, `volume`, `filters`, `destroy`, `voiceUpdate`).
+  - Client-side queue/history/shuffle/loop with `TrackEndEvent` auto-advance.
+  - `VoiceGateway` interface bridges Discord voice state updates → Lavalink `voiceUpdate` op.
+  - All music config in single global `.env` (`LAVA_ENABLED`, `LAVA_EMBEDDED`, `LAVA_HOST/PORT/PASS/SECURE`, `LAVA_READY_TIMEOUT_MS`, `LAVA_INTERNAL_URL`, `LAVA_PUBLIC_URL`, `GENIUS_ACCESS_TOKEN`, `YOUTUBE_REFRESH_TOKEN`, `SPOTIFY_CLIENT_ID/SECRET`).
+  - External node option retained (`LAVA_EMBEDDED=false`).
+  - Documentation: `wiki/Music.md`, `wiki/Configuration.md`, `wiki/Deployment-and-Hosting.md`, `wiki/Development-and-Testing.md`, `wiki/Troubleshooting.md`, `README.md` feature flags table.
+
+### 12. Entertainment GIF Commands — KLIPY Integration (Resolved)
+- **Problem**: No entertainment/reaction GIF commands.
+- **Resolution**:
+  - Added `/gif [category]` with Discord autocomplete (25+ categories: anime, jojo, waifu, slap, gintama, doggo, cat, etc.).
+  - Added 14 action-style convenience commands (`/slap`, `/hug`, `/kiss`, `/pat`, `/bonk`, `/cuddle`, `/tickle`, `/pet`, `/poke`, `/baka`, `/smug`, `/cry`, `/angry`, `/meme`) mapping to KLIPY tags.
+  - KLIPY API integration (public, no auth) with graceful fallback.
+  - Gated by `GIFS_ENABLED` feature flag (default `true`).
+  - Documentation: `wiki/Entertainment.md`, `wiki/Discord-Bot.md`, `README.md` feature flags table.
+
+### 13. Guild Administration Commands (Resolved)
+- **Problem**: No native moderation/role/voice administration commands.
+- **Resolution**:
+  - Added 13 moderation commands: `/admin warn`, `/kick`, `/ban`, `/lock`, `/unlock`, `/purge`, `/slowmode`, `/announce`.
+  - Added role management: `/admin role add`, `/remove`, `/list`.
+  - Added voice controls: `/admin voice mute`, `/unmute`, `/deafen`, `/undeafen`, `/move`, `/disconnect`.
+  - All commands enforce Discord native permissions + role hierarchy.
+  - Mod log channel support (`/set mod-log-channel` or dashboard) with case-numbered embed logs.
+  - Gated by `ADMINISTRATION_ENABLED` + `ADMIN_PANEL_ENABLED` feature flags (default `true`).
+  - Dashboard Admin page scaffolded (quick-access panels for moderation, roles, voice, mod log viewer).
+  - Documentation: `wiki/Administration.md`, `wiki/Discord-Bot.md`, `README.md` feature flags table.
 
 ---
 

@@ -51,11 +51,12 @@ flowchart TD
 |---|------|--------|-------|
 | 1 | Add optional env field for **glassmorphism** dashboard theme + other theme options | ✅ Done | `DASHBOARD_THEME` parsed in `src/config.ts`, applied in `dashboard.ts` / `login.ts` / `legal.ts` / `landing.ts` via `getThemeInfo()` |
 | 2 | Include **various color schemes** for each theme | ✅ Done | `DASHBOARD_COLOR_SCHEME` + `getColorSchemeInfo()`; 11 accents: cyan, purple, blue, emerald, rose, amber, indigo, crimson, teal, sunset |
-| 3 | Create a **landing page** enableable/disableable via env | ✅ Done | `LANDING_PAGE_ENABLED`; routes `/`, `/home`, `/landing` in `src/dashboard/server.ts`; view in `views/landing.ts` |
+| 3 | Create a **landing page** enable/disable via env | ✅ Done | `LANDING_PAGE_ENABLED`; routes `/`, `/home`, `/landing` in `src/dashboard/server.ts`; view in `views/landing.ts` |
 | 4 | **Fix** error caused by renaming *Popular* tab → **News Feeds** | ✅ Done | `src/dashboard/views/dashboard.ts`: `loadPopularTab()` → `loadNewsTab()`; removed stale `'popular'` tab alias |
 | 5 | Log this plan to **`PLAN.md`** for proper tracking | ✅ Done | This file |
 | 6 | Create the **plan issue on the repo** with a detailed ROADMAP | 🚧 In progress | `[PLAN]` issue via `gh` (Rule 04) |
 | 7 | Sync global roadmap, AGENTS.md & `.env.example` | ✅ Done | `.agents/plans/roadmap.md`, `AGENTS.md` Current Issues, `.env.example` reference |
+| 8 | **Embedded Lavalink auto-download JAR** | ⬜ Blocked | Upstream `@helix-origin/lavalink-server` auto-download feature WIP; blocks final verification |
 
 ---
 

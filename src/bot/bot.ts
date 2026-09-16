@@ -76,6 +76,15 @@ export class DiscordBot {
     this.client.on(Events.GuildRoleDelete, (role) => this.handleRoleDelete(role));
     this.client.on(Events.GuildRoleUpdate, (oldRole, newRole) => this.handleRoleUpdate(oldRole, newRole));
     this.client.on(Events.VoiceStateUpdate, (oldState, newState) => this.handleVoiceStateUpdate(oldState, newState));
+    this.client.on(
+      Events.VoiceServerUpdate,
+      (data) =>
+        void this.handleVoiceServerUpdate({
+          token: data.token,
+          guild_id: data.guildId,
+          endpoint: data.endpoint ?? undefined,
+        }),
+    );
     this.client.on(Events.ClientReady, () => this.onReady());
 
     this.deps.bot = this;
@@ -473,6 +482,39 @@ export class DiscordBot {
   async handleVoiceStateUpdate(oldState: VoiceState, newState: VoiceState): Promise<void> {
     const { handleVoiceStateUpdate } = await import('./events/voice-state.js');
     await handleVoiceStateUpdate(oldState, newState, this, this.deps);
+  }
+
+  async handleVoiceServerUpdate(data: { token: string; guild_id: string; endpoint?: string }): Promise<void> {
+    this.deps.lavaManager?.handleVoiceServerUpdate(data);
+  }
+
+  async getUserVoiceChannelId(guildId: string, userId: string): Promise<string | null> {
+    const guild = this.client.guilds.cache.get(guildId);
+    if (!guild) return null;
+    const state = guild.voiceStates.cache.get(userId);
+    return state?.channelId ?? null;
+  }
+
+  async joinVoiceChannel(guildId: string, channelId: string, deaf = true, mute = false): Promise<void> {
+    const guild = this.client.guilds.cache.get(guildId);
+    if (!guild) throw new Error('Guild not found');
+    const channel = guild.channels.cache.get(channelId) ?? (await guild.channels.fetch(channelId).catch(() => null));
+    if (!channel) throw new Error('Voice channel not found');
+    const me = guild.members.me ?? (await guild.members.fetch(this.client.user!.id).catch(() => null));
+    if (!me) throw new Error('Bot member not found');
+    await me.voice.setChannel(channel.id);
+    await me.voice.setDeaf(deaf);
+    if (mute) await me.voice.setMute(true);
+  }
+
+  async leaveVoiceChannel(guildId: string): Promise<void> {
+    const guild = this.client.guilds.cache.get(guildId);
+    if (!guild) return;
+    const me = guild.members.me ?? (await guild.members.fetch(this.client.user!.id).catch(() => null));
+    if (!me) return;
+    if (me.voice.channelId) {
+      await me.voice.setChannel(null);
+    }
   }
 
   stop(): void {

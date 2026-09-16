@@ -25,6 +25,17 @@ This guide covers local development workflows, debugging techniques, TypeScript 
 
 ---
 
+## 🎵 Lavalink Verification (Embedded Node)
+
+When developing with the embedded Lavalink node (`LAVA_EMBEDDED=true`):
+
+1. Ensure **Java 21+** is installed and on PATH.
+2. Run `npm run dev` — the embedded Lavalink server (`@helix-origin/lavalink-server`) will download `Lavalink.jar` automatically on first startup (if missing) and start the Java node.
+3. Verify Lavalink is ready by checking logs for `Lavalink v4 ready on port 2333` or hitting `GET http://localhost:2333/v4/info` (Authorization: `youshallnotpass`).
+4. If `LAVA_READY_TIMEOUT_MS` is exceeded, increase it in `.env` or check Java installation.
+
+---
+
 ## 🧪 Testing Strategies
 
 The main HELIX Discord Bot repository does not contain an in-repo test suite. Integration and regression tests are maintained in a separate dedicated Vitest repository.

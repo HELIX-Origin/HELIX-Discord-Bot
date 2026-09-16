@@ -1,6 +1,6 @@
 authors:
   - name: HELIX Origin
-  - name: Discord RSS Contributors
+  - name: HELIX Discord Bot Contributors
 cff-version: 1.2.0
 keywords:
   - Discord
@@ -14,13 +14,13 @@ keywords:
 references:
   - authors:
       - name: HELIX Origin
-      - name: Discord RSS Contributors
-    title: Discord RSS
+      - name: HELIX Discord Bot Contributors
+    title: HELIX Discord Bot
     type: software
-    url: https://github.com/HELIX-Origin/Discord-RSS.git
+    url: https://github.com/HELIX-Origin/HELIX-Discord-Bot.git
 repository:
   type: git
-  url: https://github.com/HELIX-Origin/Discord-RSS.git
+  url: https://github.com/HELIX-Origin/HELIX-Discord-Bot.git
   branch: main
 title: HELIX Discord Bot
 description: "A self-hosted Discord bot for RSS feed syndication, music playback, GIFs, and guild administration"

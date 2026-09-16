@@ -161,21 +161,20 @@ async function ensurePlayer(
   const guildId = interaction.guild_id;
   if (!guildId) return null;
 
-  const member = interaction.member;
-  // Voice state is not on interaction member; get from guild voice states or gateway
-  // For now, we'll require the channel to be passed or fetched from gateway
-  const voiceState = (member as unknown as { voice_state?: { channel_id?: string } })?.voice_state;
-  const channelId = voiceState?.channel_id;
+  const userId = interaction.user?.id ?? interaction.member?.user.id;
+  if (!userId) return null;
+
+  const channelId = (await deps.bot?.getUserVoiceChannelId(guildId, userId)) ?? null;
 
   if (!channelId) {
     return '❌ You must be in a voice channel to use music commands.';
   }
 
-  const player = await manager.getPlayer(interaction.guild_id!);
+  const player = await manager.getPlayer(guildId);
   if (!player) {
     await manager.createPlayer(guildId);
-    await manager.connectVoice(guildId, channelId);
   }
+  await manager.connectVoice(guildId, channelId);
 
   return null;
 }
@@ -475,6 +474,7 @@ export async function handleMusicCommand(
           };
         }
         await manager.stop(guildIdStr);
+        player.queue.length = 0;
         return {
           type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
           data: { content: '⏹️ Stopped and cleared queue.' },

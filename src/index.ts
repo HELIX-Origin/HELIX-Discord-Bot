@@ -12,7 +12,8 @@ import { DiscordBot } from './bot/bot.js';
 import { LavalinkManager } from './bot/music/lavalink.js';
 import { WebhookRouter } from './dashboard/webhooks/router.js';
 import { fileURLToPath } from 'node:url';
-import { resolve } from 'node:path';
+import { dirname, resolve } from 'node:path';
+import { EmbeddedLavaServer } from './bot/music/embedded-lavalink.js';
 
 export async function main(): Promise<void> {
   const config = defaultConfig();
@@ -44,16 +45,42 @@ export async function main(): Promise<void> {
   // music feature is enabled so both slash commands and the dashboard queue
   // page share the same in-memory player state.
   let lavaManager: LavalinkManager | null = null;
+  let lavaServer: EmbeddedLavaServer | null = null;
 
   if (config.features.lavaEnabled) {
-    logger.info('Connecting to Lavalink server', {
-      host: config.lava.host,
-      port: config.lava.port,
-      secure: config.lava.secure,
-    });
+    if (config.lava.embedded) {
+      logger.info('Starting embedded Lavalink server (@helix-origin/lavalink-server)', {
+        port: config.lava.port,
+      });
+      lavaServer = new EmbeddedLavaServer(config.lava, dirname(config.dbPath), {
+        clientId: config.spotifyClientId,
+        clientSecret: config.spotifyClientSecret,
+      });
+      await lavaServer.start();
 
-    lavaManager = new LavalinkManager(config.lava, logger);
-    lavaManager.connectWS().catch(() => {});
+      if (lavaServer.isRunning()) {
+        const ready = await lavaServer.waitForReady(config.lava.readyTimeoutMs);
+        if (ready) {
+          lavaManager = new LavalinkManager({ ...config.lava, secure: false }, logger);
+          lavaManager.connectWS().catch(() => {});
+        } else {
+          logger.error(
+            'Embedded Lavalink node did not become ready. Verify Java 21 and Lavalink.jar, or set LAVA_EMBEDDED=false to use an external node.',
+          );
+        }
+      } else {
+        logger.error('Embedded Lavalink server failed to start. Set LAVA_EMBEDDED=false to use an external node.');
+      }
+    } else {
+      logger.info('Connecting to external Lavalink server', {
+        host: config.lava.host,
+        port: config.lava.port,
+        secure: config.lava.secure,
+      });
+
+      lavaManager = new LavalinkManager(config.lava, logger);
+      lavaManager.connectWS().catch(() => {});
+    }
   }
 
   // 4. Create Discord Bot as primary application process
@@ -73,6 +100,13 @@ export async function main(): Promise<void> {
   feeds.setBot(bot);
   webhookRouter.setBot(bot);
   webhookRouter.subscribeToAllFeeds();
+
+  if (lavaManager) {
+    lavaManager.setVoiceConnector({
+      joinChannel: (guildId, channelId, deaf, mute) => bot.joinVoiceChannel(guildId, channelId, deaf, mute),
+      leaveChannel: (guildId) => bot.leaveVoiceChannel(guildId),
+    });
+  }
 
   // 4b. Wire optional per-guild forum thread delivery (one thread per feed).
   const threads = new FeedThreadManager(repo, bot, config, config.logLevel);
@@ -104,6 +138,7 @@ export async function main(): Promise<void> {
     scheduler.stop();
     bot.stop();
     void (async () => {
+      await lavaServer?.stop();
       await redis?.close();
       db.close();
       logger.info('Shutdown complete');

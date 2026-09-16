@@ -24,6 +24,56 @@ flowchart TD
 
 ---
 
+## 🎵 Lavalink / Music Playback Issues
+
+### 1. Lavalink Node Not Starting (Embedded Mode)
+
+**Symptoms**: `/play` commands fail, logs show `Lavalink node not ready` or timeout after `LAVA_READY_TIMEOUT_MS`.
+
+**Solutions**:
+1. **Verify Java 21+ is installed**:
+   ```bash
+   java --version
+   # Should show 21.x.x or higher
+   ```
+2. **Check Lavalink.jar download**: The embedded node downloads `Lavalink.jar` automatically on first run. If download fails (network issues), manually download from [Lavalink releases](https://github.com/lavalink-devs/Lavalink/releases) and place in project root.
+3. **Increase ready timeout**:
+   ```env
+   LAVA_READY_TIMEOUT_MS=120000
+   ```
+4. **Check application.yml**: Ensure `application.yml` exists in project root (required by Lavalink server).
+5. **Port conflicts**: Ensure port 2333 is not in use by another process.
+
+### 2. Lavalink Connection Refused / WebSocket Errors
+
+**Symptoms**: `ECONNREFUSED` to `127.0.0.1:2333`, WebSocket handshake failures.
+
+**Solutions**:
+1. **External mode (`LAVA_EMBEDDED=false`)**: Verify `LAVA_HOST`, `LAVA_PORT`, `LAVA_PASS`, `LAVA_SECURE` match your external Lavalink server config.
+2. **Firewall**: Ensure port 2333 is accessible between bot and Lavalink node.
+3. **Password mismatch**: `LAVA_PASS` must match the `password` in Lavalink's `application.yml`.
+4. **Secure WebSocket**: If Lavalink uses `wss://`, set `LAVA_SECURE=true` and ensure valid TLS certs.
+
+### 3. No Audio / Track Stuck
+
+**Symptoms**: Track shows as playing but no audio in voice channel.
+
+**Solutions**:
+1. **Voice gateway**: Ensure bot has `Connect`, `Speak`, `Use Voice Activity` permissions in the voice channel.
+2. **Lavalink version**: Embedded node uses Lavalink v4. External node must be v4 compatible.
+3. **Restart voice connection**: Use `/leave` then `/play` again to re-establish voice WebSocket.
+
+### 4. Java Missing / Wrong Version
+
+**Symptoms**: `java: command not found` or `UnsupportedClassVersionError`.
+
+**Solutions**:
+1. Install Java 21+ (not Java 17 or 8).
+2. Add Java to system PATH.
+3. Verify with `java --version` showing 21.x.
+
+---
+
 ## ⚠️ Common Problems & Resolutions
 
 ### 1. Bot is Not Posting Feed Updates to Channel

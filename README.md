@@ -6,7 +6,7 @@
 
   [![Version](https://img.shields.io/github/package-json/v/HELIX-Origin/HELIX-Discord-Bot?style=plastic&logo=github)](https://github.com/HELIX-Origin/HELIX-Discord-Bot/releases)
   [![License](https://img.shields.io/github/license/HELIX-Origin/HELIX-Discord-Bot?style=plastic)](LICENSE.md)
-  [![Node.js](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FHELIX-Origin%2FHELIX-RSS%2Fmain%2Fpackage.json&query=engines.node&label=Node.js&logo=node.js&logoColor=white&color=339933&style=plastic)](https://nodejs.org/)
+  [![Node.js](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FHELIX-Origin%2FHELIX-Discord-Bot%2Fmain%2Fpackage.json&query=engines.node&label=Node.js&logo=node.js&logoColor=white&color=339933&style=plastic)](https://nodejs.org/)
   [![TypeScript](https://img.shields.io/github/languages/top/HELIX-Origin/HELIX-Discord-Bot?style=plastic&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
   [![Issues](https://img.shields.io/github/issues/HELIX-Origin/HELIX-Discord-Bot?style=plastic)](https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues)
   [![Stars](https://img.shields.io/github/stars/HELIX-Origin/HELIX-Discord-Bot?style=plastic&logo=github)](https://github.com/HELIX-Origin/HELIX-Discord-Bot)
@@ -32,10 +32,27 @@ Featuring a built-in web dashboard, Discord OAuth2 authentication, zero frontend
 - **Rich Store Embeds**: Standardized Discord embeds with official store branding, high-contrast badges, pricing worth, expiration timers, and direct claim links.
 
 ### 🎵 Music Playback via Lavalink
-- **Multi-Source Support**: Native playback from **YouTube**, **Spotify**, **SoundCloud**, **Apple Music**, **Deezer**, and more via external Lavalink v4 server.
+- **Multi-Source Support**: Native playback from **YouTube**, **Spotify**, **SoundCloud**, **Apple Music**, **Deezer**, and more via the official Lavalink v4 server.
 - **Queue Management**: Full queue control with `/play`, `/queue`, `/skip`, `/previous`, `/shuffle`, `/loop`, `/volume`, `/seek`, `/nowplaying`, `/pause`, `/resume`, `/stop`, `/leave`.
-- **Real-time Dashboard Queue Page**: Live queue view with now-playing, up-next, track reordering, and volume/loop controls.
-- **External Lavalink**: Connect to your own Lavalink v4 server via `LAVA_HOST`, `LAVA_PORT`, `LAVA_PASS`, `LAVA_SECURE`.
+- **Bundled Embedded Node (default)**: Ships the official Lavalink v4 engine as a pre-built npm dependency (`@helix-origin/lavalink-server`, installed as a pinned GitHub Release tarball — read-only, no repository linkage). The bot bootstraps the Java node in-process and supervises it — no external audio services required. Requires **Java 21+** and a `Lavalink.jar` placed in the project root next to `application.yml`.
+- **External Node Option**: Set `LAVA_EMBEDDED=false` to connect to your own Lavalink v4 node via `LAVA_HOST`, `LAVA_PORT`, `LAVA_PASS`, `LAVA_SECURE` (`LAVA_SECURE=true` for `wss://`).
+- **Single Global `.env`**: All music configuration lives in the bot's global `.env` — `LAVA_ENABLED`, `LAVA_EMBEDDED`, `LAVA_HOST/PORT/PASS/SECURE`, `LAVA_READY_TIMEOUT_MS`, plus optional `SPOTIFY_CLIENT_ID/SECRET`, `GENIUS_ACCESS_TOKEN`, `YOUTUBE_REFRESH_TOKEN` for the embedded node.
+
+### ⚙️ Feature Flags
+All major subsystems are gated by environment variables (default `true`):
+
+| Flag | Controls |
+| :--- | :--- |
+| `FEEDS_ENABLED` | RSS/Reddit/Free Games feed delivery |
+| `STREAM_ALERTS_ENABLED` | YouTube/Twitch live & upload alerts |
+| `THREADS_ENABLED` | Forum thread delivery |
+| `GIFS_ENABLED` | KLIPY `/gif` and action commands |
+| `ADMINISTRATION_ENABLED` | `/admin` moderation, roles, voice |
+| `LAVA_ENABLED` | Music playback (Lavalink) |
+| `DASHBOARD_ENABLED` | Web dashboard & REST API |
+| `ADMIN_PANEL_ENABLED` | Dashboard admin page |
+
+Disable any flag to completely remove its commands, dashboard pages, and internal wiring.
 
 ### 😂 Entertainment GIF Commands
 - **KLIPY-Powered GIFs**: `/gif [category]` with autocomplete for popular tags (anime, jojo, waifu, slap, gintama, doggo, cat, etc.).
@@ -165,18 +182,21 @@ Comprehensive guides, architecture breakdowns, configuration settings, and API s
 
 | Wiki Page | Description |
 |---|---|
-| [🏠 Wiki Home](wiki/HOME.md) | Central documentation index and quick reference. |
-| [🎁 Free Games Feeds](wiki/Free-Games-Feeds.md) | Supported platforms, weekly Monday cron, manual poll triggers, and embed schemas. |
-| [🤖 Reddit Feeds](wiki/Reddit-Feeds.md) | Pure Image vs Standard RSS modes, animated GIFs, sort filters, and presets. |
-| [📰 Feeds & Web Scraper](wiki/Feeds-and-Scrapers.md) | RSS/Atom parsing, CSS webpage scrapers, and the 700+ News Feeds catalog. |
-| [🤖 Discord Bot & Commands](wiki/Discord-Bot.md) | Developer Portal configuration, slash commands, direct channel delivery, and embed styling. |
-| [🏗️ Architecture & Design](wiki/Architecture-and-Design.md) | SQLite schema, AppState in-memory caching, RedisCoordinator, and FeedWatcher engine. |
-| [⚙️ Configuration Guide](wiki/Configuration.md) | Exhaustive reference for all `.env` environment variables and settings. |
-| [🚀 Deployment & Hosting](wiki/Deployment-and-Hosting.md) | Docker, Docker Compose, VPS/PM2, systemd self-hosting, and native SSL. |
-| [💻 Development & Testing](wiki/Development-and-Testing.md) | Developer environment setup, ESLint, Prettier, TypeScript, and build verification. |
-| [🔒 Integrations & Security](wiki/Integrations-and-Security.md) | Discord OAuth2, session cookies, RBAC permissions, and anti-bot challenge detection. |
-| [📡 REST API Reference](wiki/API-Reference.md) | Complete documentation of all dashboard, feed, and management REST endpoints. |
-| [🔧 Troubleshooting Playbook](wiki/Troubleshooting.md) | Step-by-step diagnostic guide for common configuration and network errors. |
+| [🏠 Wiki Home](../../wiki/HOME) | Central documentation index and quick reference. |
+| [🎁 Free Games Feeds](../../wiki/Free-Games-Feeds) | Supported platforms, weekly Monday cron, manual poll triggers, and embed schemas. |
+| [🤖 Reddit Feeds](../../wiki/Reddit-Feeds) | Pure Image vs Standard RSS modes, animated GIFs, sort filters, and presets. |
+| [📰 Feeds & Web Scraper](../../wiki/Feeds-and-Scrapers) | RSS/Atom parsing, CSS webpage scrapers, and the 700+ News Feeds catalog. |
+| [🤖 Discord Bot & Commands](../../wiki/Discord-Bot) | Developer Portal configuration, slash commands, direct channel delivery, and embed styling. |
+| [🎵 Music & Lavalink](../../wiki/Music) | Lavalink v4 playback (YouTube, Spotify, SoundCloud, Apple Music, Deezer), queue management, embedded node setup, and dashboard queue page. |
+| [😂 Entertainment & GIF Commands](../../wiki/Entertainment) | KLIPY-powered `/gif` with autocomplete, action commands (`/slap`, `/hug`, etc.), and random GIF fallback. |
+| [🛡️ Guild Administration](../../wiki/Administration) | Moderation (`/admin warn`, `/kick`, `/ban`, `/lock`, `/purge`, `/slowmode`, `/announce`), role management, voice controls, permission guards. |
+| [🏗️ Architecture & Design](../../wiki/Architecture-and-Design) | SQLite schema, AppState in-memory caching, RedisCoordinator, and FeedWatcher engine. |
+| [⚙️ Configuration Guide](../../wiki/Configuration) | Exhaustive reference for all `.env` environment variables and settings. |
+| [🚀 Deployment & Hosting](../../wiki/Deployment-and-Hosting) | Docker, Docker Compose, VPS/PM2, systemd self-hosting, and native SSL. |
+| [💻 Development & Testing](../../wiki/Development-and-Testing) | Developer environment setup, test runner commands, TypeScript checking, and code style standards. |
+| [🔒 Integrations & Security](../../wiki/Integrations-and-Security) | Discord OAuth2, session cookies, RBAC permissions, and anti-bot challenge detection. |
+| [📡 REST API Reference](../../wiki/API-Reference) | Complete documentation of all dashboard, feed, and management REST endpoints. |
+| [🔧 Troubleshooting Playbook](../../wiki/Troubleshooting) | Step-by-step diagnostic guide for common configuration and network errors. |
 
 ---
 

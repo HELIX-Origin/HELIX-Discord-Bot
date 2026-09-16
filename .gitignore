@@ -26,6 +26,10 @@ issue21-*.json
 coverage/
 .nyc_output/
 
+# Lavalink Java binary (download yourself; ~50MB binary artifact)
+.youtube-oauth.json
+Lavalink.jar
+
 # IDE / editor
 .idea/
 .vscode/
@@ -41,7 +45,12 @@ npm-shrinkwrap.json
 .pnpm-lock.yaml
 yarn.lock
 
-# agent-related files and directories
+# agent ecosystem
+.agents/
+.opencode/
+.gemini/
 scratch/
-scratch/**
-temp.md
+AGENTS.md
+IMPORTANT.md
+PLAN.md
+BUGS.md

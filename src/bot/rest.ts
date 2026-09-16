@@ -1,4 +1,4 @@
-import type { ApplicationCommand, InteractionResponse, InteractionResponseData } from './utils/types.js';
+import type { ApplicationCommand } from './utils/types.js';
 
 export interface DiscordApplicationInfo {
   id: string;
@@ -298,60 +298,6 @@ export class DiscordRestClient {
       throw new Error(
         `Failed to send Discord channel message in channel ${channelId}: ${formatErrorText(res.status, text)}`,
       );
-    }
-  }
-
-  async sendInteractionResponse(
-    interactionId: string,
-    interactionToken: string,
-    response: InteractionResponse,
-  ): Promise<void> {
-    const res = await fetch(`${this.baseUrl}/interactions/${interactionId}/${interactionToken}/callback`, {
-      method: 'POST',
-      headers: this.headers(),
-      body: JSON.stringify(response),
-      signal: AbortSignal.timeout(DISCORD_API_TIMEOUT_MS),
-    });
-
-    if (!res.ok) {
-      const text = await res.text();
-      throw new Error(`Failed to send interaction callback: ${formatErrorText(res.status, text)}`);
-    }
-  }
-
-  async editOriginalInteractionResponse(
-    applicationId: string,
-    interactionToken: string,
-    data: InteractionResponseData,
-  ): Promise<void> {
-    const res = await fetch(`${this.baseUrl}/webhooks/${applicationId}/${interactionToken}/messages/@original`, {
-      method: 'PATCH',
-      headers: this.headers(),
-      body: JSON.stringify(data),
-      signal: AbortSignal.timeout(DISCORD_API_TIMEOUT_MS),
-    });
-
-    if (!res.ok) {
-      const text = await res.text();
-      throw new Error(`Failed to edit original interaction response: ${formatErrorText(res.status, text)}`);
-    }
-  }
-
-  async sendFollowupMessage(
-    applicationId: string,
-    interactionToken: string,
-    data: InteractionResponseData,
-  ): Promise<void> {
-    const res = await fetch(`${this.baseUrl}/webhooks/${applicationId}/${interactionToken}`, {
-      method: 'POST',
-      headers: this.headers(),
-      body: JSON.stringify(data),
-      signal: AbortSignal.timeout(DISCORD_API_TIMEOUT_MS),
-    });
-
-    if (!res.ok) {
-      const text = await res.text();
-      throw new Error(`Failed to send interaction followup message: ${formatErrorText(res.status, text)}`);
     }
   }
 }

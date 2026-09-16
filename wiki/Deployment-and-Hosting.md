@@ -2,6 +2,8 @@
 
 HELIX Discord Bot is optimized for self-hosted deployments on **Docker**, **Linux VPS**, and bare metal with native SSL. Cloud PaaS platforms are intentionally not supported.
 
+> **Music Playback Requirement**: If `LAVA_EMBEDDED=true` (default), the embedded Lavalink node requires **Java 21+** and a `Lavalink.jar` file placed in the project root next to `application.yml`. The npm package `@helix-origin/lavalink-server` downloads and manages the JAR automatically on startup.
+
 ---
 
 ## 🐳 Option 1: Docker & Docker Compose (Recommended)
@@ -21,6 +23,8 @@ services:
       - "3131:3131"
     volumes:
       - ./data:/app/data
+      - ./Lavalink.jar:/app/Lavalink.jar
+      - ./application.yml:/app/application.yml
     env_file:
       - path: .env
         required: false
@@ -28,6 +32,7 @@ services:
       - NODE_ENV=production
       - INTERNAL_URL=0.0.0.0
       - SQLITE_DATA=/app/data
+      - LAVA_EMBEDDED=true
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3131/health"]
       interval: 30s
@@ -35,6 +40,8 @@ services:
       retries: 3
       start_period: 10s
 ```
+
+> **Note**: The `Lavalink.jar` and `application.yml` are mounted as volumes so the embedded Lavalink server can access them. Ensure `Lavalink.jar` exists in the project root (downloaded automatically on first run if using `@helix-origin/lavalink-server`).
 
 ### 2. Launch Container
 ```bash
@@ -57,20 +64,25 @@ For hosting directly on an Ubuntu/Debian/Rocky Linux server:
 curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
 sudo apt-get install -y nodejs git
 
+# Install Java 21 (required for embedded Lavalink node)
+sudo apt-get install -y openjdk-21-jre-headless
+
 # Install PM2 globally
 sudo npm install -g pm2
 ```
 
 ### 2. Clone and Build Project
 ```bash
-git clone https://github.com/HELIX-Origin/HELIX-Discord-Bot.git /opt/helix-rss
-cd /opt/helix-rss
+git clone https://github.com/HELIX-Origin/HELIX-Discord-Bot.git /opt/helix-discord-bot
+cd /opt/helix-discord-bot
 
 npm install
 npm run build
 cp .env.example .env
 nano .env  # Configure credentials
 ```
+
+> **Music Playback**: If using embedded Lavalink (`LAVA_EMBEDDED=true`), ensure `Lavalink.jar` is present in the project root (downloaded automatically by `@helix-origin/lavalink-server` on first startup) and `application.yml` is present. Java 21 must be installed.
 
 ### 3. Start with PM2
 ```bash
@@ -191,17 +203,22 @@ C:\caddy\caddy.exe run --config C:\caddy\Caddyfile
 
 HELIX Discord Bot runs natively on Windows with Node.js.
 
-### 1. Install Node.js
-Download and install the **Node.js 22.x LTS** (>=22.9.0 for native `node:sqlite`) from [nodejs.org](https://nodejs.org). Make sure `node` and `npm` are available in a new terminal:
+### 1. Install Node.js & Java
+Download and install the **Node.js 22.x LTS** (>=22.9.0 for native `node:sqlite`) from [nodejs.org](https://nodejs.org).
+
+Install **Java 21** (required for embedded Lavalink node) from [Oracle JDK](https://www.oracle.com/java/technologies/downloads/#java21) or [Eclipse Temurin](https://adoptium.net/temurin/releases/?version=21).
+
+Make sure `node`, `npm`, and `java` are available in a new terminal:
 ```powershell
 node --version
 npm --version
+java --version
 ```
 
 ### 2. Clone and Build
 ```powershell
 git clone https://github.com/HELIX-Origin/HELIX-Discord-Bot.git
-cd HELIX-RSS
+cd HELIX-Discord-Bot
 npm install
 npm run build
 Copy-Item .env.example .env
@@ -226,7 +243,7 @@ Use Windows Task Scheduler to start the service automatically at system startup,
 5. On the **Actions** tab, click **New...** and set:
    - **Action:** Start a program
    - **Program/script:** `cmd.exe`
-   - **Add arguments:** `/c ""C:\Program Files\nodejs\npm.cmd" start --prefix C:\path\to\HELIX-RSS"` (replace with the actual project path)
+   - **Add arguments:** `/c ""C:\Program Files\nodejs\npm.cmd" start --prefix C:\path\to\HELIX-Discord-Bot"` (replace with the actual project path)
    - Click OK.
 6. On the **Conditions** tab, uncheck **Start the task only if the computer is on AC power** if you run this on a laptop.
 7. Click **OK**, enter your Windows password when prompted.

@@ -13,6 +13,42 @@ All commands register through Discord's native interaction model and use ephemer
 | `/feed add` | `url: <string>`, `channel: <channel>`, `role: <role?>`, `color: <hex?>` | `Manage Channels` or `Administrator` | Adds a new feed subscription to a channel. |
 | `/feed list` | `channel: <channel?>` | `Manage Channels` or `Administrator` | Displays all active feed subscriptions on the server. |
 | `/feed remove` | `id: <feed_id>` | `Manage Channels` or `Administrator` | Removes an existing feed subscription by ID. |
+| `/play` | `query: <string>` | Everyone | Play music from YouTube, Spotify, SoundCloud, Apple Music, Deezer. |
+| `/queue` | *None* | Everyone | Display the current music queue. |
+| `/skip` | *None* | Everyone | Skip the current track. |
+| `/previous` | *None* | Everyone | Play the previous track. |
+| `/shuffle` | *None* | Everyone | Shuffle the queue. |
+| `/loop` | `mode: off|track|queue` | Everyone | Set loop mode. |
+| `/volume` | `level: <number>` | Everyone | Set playback volume (0-100). |
+| `/seek` | `position: <string>` | Everyone | Seek to position (e.g., `1:30`). |
+| `/nowplaying` | *None* | Everyone | Show currently playing track. |
+| `/pause` | *None* | Everyone | Pause playback. |
+| `/resume` | *None* | Everyone | Resume playback. |
+| `/stop` | *None* | Everyone | Stop playback and clear queue. |
+| `/leave` | *None* | Everyone | Disconnect from voice channel. |
+| `/gif` | `category: <string?>` | Everyone | Get a random GIF (autocomplete: anime, jojo, waifu, slap, etc.). |
+| `/slap` | `user: <user?>` | Everyone | Slap a user (or random GIF). |
+| `/hug` | `user: <user?>` | Everyone | Hug a user. |
+| `/kiss` | `user: <user?>` | Everyone | Kiss a user. |
+| `/pat` | `user: <user?>` | Everyone | Pat a user. |
+| `/bonk` | `user: <user?>` | Everyone | Bonk a user. |
+| `/cuddle` | `user: <user?>` | Everyone | Cuddle a user. |
+| `/tickle` | `user: <user?>` | Everyone | Tickle a user. |
+| `/pet` | `user: <user?>` | Everyone | Pet a user. |
+| `/poke` | `user: <user?>` | Everyone | Poke a user. |
+| `/baka` | `user: <user?>` | Everyone | Baka a user. |
+| `/smug` | `user: <user?>` | Everyone | Smug reaction. |
+| `/cry` | `user: <user?>` | Everyone | Cry reaction. |
+| `/angry` | `user: <user?>` | Everyone | Angry reaction. |
+| `/meme` | *None* | Everyone | Random meme GIF. |
+| `/admin warn` | `user: <user>`, `reason: <string>` | `Moderate Members` | Warn a member. |
+| `/admin kick` | `user: <user>`, `reason: <string>` | `Kick Members` | Kick a member. |
+| `/admin ban` | `user: <user>`, `reason: <string>` | `Ban Members` | Ban a member. |
+| `/admin lock` | `channel: <channel?>` | `Manage Channels` | Lock a channel. |
+| `/admin purge` | `count: <number>` | `Manage Messages` | Bulk delete messages. |
+| `/admin slowmode` | `seconds: <number>`, `channel: <channel?>` | `Manage Channels` | Set slowmode. |
+| `/admin announce` | `channel: <channel>`, `message: <string>` | `Manage Channels` | Send an announcement. |
+| `/admin role` | `user: <user>`, `role: <role>`, `action: add|remove` | `Manage Roles` | Assign/remove a role. |
 | `/stats` | *None* | Everyone | Displays bot uptime, memory usage, and delivery analytics. |
 | `/about` | *None* | Everyone | Shows version info, repository links, and developer credits. |
 | `/help` | `topic: <string?>` | Everyone | Interactive documentation browser with command usage tips. |

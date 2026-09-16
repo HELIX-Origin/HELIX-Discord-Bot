@@ -7,6 +7,7 @@ set -euo pipefail
 # Ensure script is run with root/sudo privileges
 if [ "${EUID:-$(id -u)}" -ne 0 ]; then
   echo "❌ This script must be run as root or with sudo:"
+  echo "   sudo chmod +x ./scripts/install-service.sh"
   echo "   sudo ./scripts/install-service.sh"
   exit 1
 fi

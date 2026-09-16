@@ -1,6 +1,6 @@
 # ⚠️ Important Guidelines & Operational Boundaries
 
-This document outlines critical operational requirements, security practices, architecture decisions, and troubleshooting gotchas for running and maintaining **Discord-RSS**.
+This document outlines critical operational requirements, security practices, architecture decisions, and troubleshooting gotchas for running and maintaining **HELIX Discord Bot**.
 
 ---
 
@@ -55,8 +55,7 @@ This document outlines critical operational requirements, security practices, ar
    - The database maintains an indexed log of processed entries to avoid duplicate notifications even during rapid polling restarts.
 
 2. **Database Support**:
-   - **SQLite**: Default for lightweight single-node deployments. Database file stored at `./data/database.sqlite`.
-   - **PostgreSQL**: Recommended for high-volume clusters or enterprise deployments. Configured via `DATABASE_URL=postgres://...`.
+   - **SQLite**: Default for all deployments. Database file stored at `./data/database.sqlite`.
 
 ---
 

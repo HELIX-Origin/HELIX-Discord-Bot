@@ -18,6 +18,8 @@ export interface LavalinkConfig {
   port: number;
   secure: boolean;
   password: string;
+  embedded: boolean;
+  readyTimeoutMs: number;
 }
 
 export interface AppConfig {
@@ -61,7 +63,6 @@ export interface AppConfig {
   spotifyClientId: string | null;
   spotifyClientSecret: string | null;
   klipyApiKey: string | null;
-  appleMediaToken: string | null;
 }
 
 export function defaultConfig(): AppConfig {
@@ -210,13 +211,19 @@ export function defaultConfig(): AppConfig {
     adminPanelEnabled: parseEnvFlag(process.env['ADMIN_PANEL_ENABLED'], true),
   };
 
-  // Lavalink server (external). The bot always acts as a client.
-  // Configure LAVA_HOST/PORT/SECURE/PASS for the external Lavalink server.
+  // Lavalink node. The bot always acts as a client.
+  // With LAVA_EMBEDDED=true (default) the bot bootstraps the bundled
+  // @helix-origin/lavalink-server npm package which runs the official Lavalink
+  // v4 Java node (requires Java 21 + Lavalink.jar in the project root). Set
+  // LAVA_EMBEDDED=false to connect to your own external Lavalink node via
+  // LAVA_HOST/PORT/SECURE/PASS.
   const lava: LavalinkConfig = {
     host: process.env['LAVA_HOST']?.trim() || '127.0.0.1',
     port: parseOptionalInt(process.env['LAVA_PORT'], 2333),
     secure: parseEnvFlag(process.env['LAVA_SECURE'], false),
     password: process.env['LAVA_PASS']?.trim() || 'youshallnotpass',
+    embedded: parseEnvFlag(process.env['LAVA_EMBEDDED'], true),
+    readyTimeoutMs: parsePositiveInt(process.env['LAVA_READY_TIMEOUT_MS'], 60_000),
   };
 
   return {
@@ -260,7 +267,6 @@ export function defaultConfig(): AppConfig {
     spotifyClientId: process.env['SPOTIFY_CLIENT_ID']?.trim() || null,
     spotifyClientSecret: process.env['SPOTIFY_CLIENT_SECRET']?.trim() || null,
     klipyApiKey: process.env['KLIPY_API_KEY']?.trim() || null,
-    appleMediaToken: process.env['APPLE_MEDIA_TOKEN']?.trim() || null,
   };
 }
 
