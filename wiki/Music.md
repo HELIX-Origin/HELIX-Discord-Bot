@@ -42,20 +42,12 @@ HELIX Discord Bot includes a full-featured music playback system powered by **La
 
 ---
 
-## ⚙️ Embedded vs External Lavalink
+## ⚙️ External Lavalink v4 Server Connection
 
-### Embedded Node (Default: `LAVA_EMBEDDED=true`)
-- Ships as npm package `@helix-origin/lavalink-server` (pinned GitHub Release tarball, read-only).
-- Bot bootstraps the Java node in-process and supervises it.
-- **Requires**: Java 21+, `Lavalink.jar` in project root, `application.yml` in project root.
-- Auto-downloads `Lavalink.jar` on first startup if missing.
-- Configuration via `.env` (see [Configuration → Lavalink](Configuration.md)).
-- No external services required.
-
-### External Node (`LAVA_EMBEDDED=false`)
-- Connect to your own Lavalink v4 server.
-- Set `LAVA_HOST`, `LAVA_PORT`, `LAVA_PASS`, `LAVA_SECURE` in `.env`.
-- You manage Java, Lavalink.jar, plugins, and scaling independently.
+HELIX Discord Bot connects exclusively to an external Lavalink v4 server as a WebSocket client:
+- Set `LAVA_HOST`, `LAVA_PORT`, `LAVA_PASS`, and `LAVA_SECURE` in `.env`.
+- Supports any standard Lavalink v4 instance (local, remote VPS, or hosted provider).
+- Uses the `ws` package for reliable WebSocket connection with proper Discord Authorization headers.
 
 ---
 
@@ -76,18 +68,10 @@ See [Configuration → Lavalink Music Configuration](Configuration.md) for the c
 Key variables:
 ```env
 LAVA_ENABLED=true
-LAVA_EMBEDDED=true
 LAVA_HOST=127.0.0.1
 LAVA_PORT=2333
 LAVA_PASS=youshallnotpass
 LAVA_SECURE=false
-LAVA_READY_TIMEOUT_MS=60000
-LAVA_INTERNAL_URL=0.0.0.0:2333
-LAVA_PUBLIC_URL=0.0.0.0:2333
-GENIUS_ACCESS_TOKEN=        # Optional: lyrics
-YOUTUBE_REFRESH_TOKEN=      # Optional: YouTube age-restricted
-SPOTIFY_CLIENT_ID=          # Optional: Spotify
-SPOTIFY_CLIENT_SECRET=      # Optional: Spotify
 ```
 
 ---
@@ -95,10 +79,9 @@ SPOTIFY_CLIENT_SECRET=      # Optional: Spotify
 ## 🛠️ Troubleshooting
 
 See [Troubleshooting → Lavalink / Music Playback Issues](Troubleshooting.md) for common problems:
-- Lavalink node not starting
-- Connection refused / WebSocket errors
-- No audio / track stuck
-- Java missing / wrong version
+- Lavalink connection refused / WebSocket errors
+- Authorization header or password mismatches
+- Voice gateway connection errors
 
 ---
 
@@ -107,21 +90,19 @@ See [Troubleshooting → Lavalink / Music Playback Issues](Troubleshooting.md) f
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                    HELIX Discord Bot Process                 │
-│  ┌─────────────┐    ┌──────────────────┐    ┌────────────┐  │
-│  │ Discord Bot │───▶│ LavalinkManager  │───▶│ Lavalink v4│  │
-│  │ (Gateway)   │    │ (Native WS v4)   │    │ Java Node  │  │
-│  └─────────────┘    └──────────────────┘    └────────────┘  │
-│         │                    │                    │          │
-│         │                    ▼                    │          │
-│         │           ┌──────────────┐             │          │
-│         └──────────▶│ EmbeddedLava │─────────────┘          │
-│                     │ Server (@h-  │                        │
-│                     │  lx/l-s)     │                        │
-│                     └──────────────┘                        │
+│  ┌─────────────┐    ┌──────────────────┐                    │
+│  │ Discord Bot │───▶│ LavalinkManager  │                    │
+│  │ (Gateway)   │    │ (Native WS v4)   │                    │
+│  └─────────────┘    └──────────────────┘                    │
+│         │                    │                              │
+│         │                    ▼                              │
+│         │           ┌──────────────────┐                    │
+│         └──────────▶│ External Lavalink│                    │
+│                     │ v4 Server (WS)   │                    │
+│                     └──────────────────┘                    │
 └─────────────────────────────────────────────────────────────┘
 ```
 
-- **LavalinkManager** (`src/bot/music/lavalink.ts`): Native Lavalink v4 WebSocket client (fire-and-forget ops: `play`, `stop`, `pause`, `seek`, `volume`, `filters`, `destroy`, `voiceUpdate`).
-- **EmbeddedLavaServer** (`src/bot/music/embedded-lavalink.ts`): Spawns/supervises `@helix-origin/lavalink-server` (Java process), polls `/v4/info` for readiness.
+- **LavalinkManager** (`src/bot/music/lavalink.ts`): Native Lavalink v4 WebSocket client using `ws` (fire-and-forget ops: `play`, `stop`, `pause`, `seek`, `volume`, `filters`, `destroy`, `voiceUpdate`).
 - **VoiceGateway** (`src/bot/bot.ts`): Discord voice state updates → Lavalink `voiceUpdate` op.
 - **Client-side queue**: Lavalink holds no queue state; bot manages queue/history/shuffle/loop and auto-advance on `TrackEndEvent`.

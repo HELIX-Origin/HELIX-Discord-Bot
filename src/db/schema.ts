@@ -1,4 +1,4 @@
-export const SCHEMA_VERSION = 7;
+export const SCHEMA_VERSION = 8;
 
 export const SCHEMA = `
 CREATE TABLE IF NOT EXISTS meta (
@@ -52,6 +52,7 @@ CREATE TABLE IF NOT EXISTS feeds (
   url TEXT NOT NULL,
   topic TEXT,
   channel_id TEXT,
+  forum_channel_id TEXT,
   guild_id TEXT,
   enabled INTEGER NOT NULL DEFAULT 1,
   feed_type TEXT NOT NULL DEFAULT 'rss',

@@ -18,8 +18,6 @@ export interface LavalinkConfig {
   port: number;
   secure: boolean;
   password: string;
-  embedded: boolean;
-  readyTimeoutMs: number;
 }
 
 export interface AppConfig {
@@ -31,10 +29,6 @@ export interface AppConfig {
   dbPath: string;
   pollIntervalMs: number;
   requestTimeoutMs: number;
-  sslKey: string | null;
-  sslCert: string | null;
-  botSslKey: string | null;
-  botSslCert: string | null;
   logLevel: LogLevel;
   botToken: string | null;
   botPort: number;
@@ -60,8 +54,6 @@ export interface AppConfig {
   twitchClientSecret: string | null;
   features: FeatureFlags;
   lava: LavalinkConfig;
-  spotifyClientId: string | null;
-  spotifyClientSecret: string | null;
   klipyApiKey: string | null;
 }
 
@@ -113,20 +105,15 @@ export function defaultConfig(): AppConfig {
     }
   }
 
-  const sslKey = process.env['SITE_SSL_KEY']?.trim() || null;
-  const sslCert = process.env['SITE_SSL_CERT']?.trim() || null;
-  const botSslKey = process.env['DISCORD_SSL_KEY']?.trim() || sslKey;
-  const botSslCert = process.env['DISCORD_SSL_CERT']?.trim() || sslCert;
   const logLevel = parseLogLevel(process.env['LOG_LEVEL']);
   const botToken = process.env['DISCORD_TOKEN']?.trim() || null;
   const clientId = process.env['DISCORD_CLIENT_ID']?.trim() || null;
   const clientSecret = process.env['DISCORD_CLIENT_SECRET']?.trim() || null;
   const callbackHost = host === '127.0.0.1' || host === '0.0.0.0' ? 'localhost' : host;
-  const botProto = botSslKey && botSslCert ? 'https' : 'http';
 
   // Internal URL is derived from the host and the port
   const internalPingHost = host === '0.0.0.0' ? '127.0.0.1' : host;
-  const internalUrl = `${botProto}://${internalPingHost}:${botPort}`;
+  const internalUrl = `http://${internalPingHost}:${botPort}`;
 
   // DISCORD_REDIRECT_URL is the Bot Invite / Authorization URL
   const redirectUrl =
@@ -150,10 +137,10 @@ export function defaultConfig(): AppConfig {
       u.hash = '';
       callbackUrl = u.toString();
     } catch {
-      callbackUrl = `${botProto}://${callbackHost}:${botPort}/api/auth/callback/discord`;
+      callbackUrl = `http://${callbackHost}:${botPort}/api/auth/callback/discord`;
     }
   } else {
-    callbackUrl = `${botProto}://${callbackHost}:${botPort}/api/auth/callback/discord`;
+    callbackUrl = `http://${callbackHost}:${botPort}/api/auth/callback/discord`;
   }
 
   const repoUrl =
@@ -211,19 +198,13 @@ export function defaultConfig(): AppConfig {
     adminPanelEnabled: parseEnvFlag(process.env['ADMIN_PANEL_ENABLED'], true),
   };
 
-  // Lavalink node. The bot always acts as a client.
-  // With LAVA_EMBEDDED=true (default) the bot bootstraps the bundled
-  // @helix-origin/lavalink-server npm package which runs the official Lavalink
-  // v4 Java node (requires Java 21 + Lavalink.jar in the project root). Set
-  // LAVA_EMBEDDED=false to connect to your own external Lavalink node via
-  // LAVA_HOST/PORT/SECURE/PASS.
+  // Lavalink node. The bot always acts as a client and connects to your own
+  // external Lavalink v4 node via LAVA_HOST/PORT/SECURE/PASS.
   const lava: LavalinkConfig = {
     host: process.env['LAVA_HOST']?.trim() || '127.0.0.1',
     port: parseOptionalInt(process.env['LAVA_PORT'], 2333),
     secure: parseEnvFlag(process.env['LAVA_SECURE'], false),
     password: process.env['LAVA_PASS']?.trim() || 'youshallnotpass',
-    embedded: parseEnvFlag(process.env['LAVA_EMBEDDED'], true),
-    readyTimeoutMs: parsePositiveInt(process.env['LAVA_READY_TIMEOUT_MS'], 60_000),
   };
 
   return {
@@ -235,10 +216,6 @@ export function defaultConfig(): AppConfig {
     dbPath: resolve(dataDir, 'database.sqlite'),
     pollIntervalMs: 3_600_000,
     requestTimeoutMs: parsePositiveInt(process.env['REQUEST_TIMEOUT_MS'], 15_000),
-    sslKey,
-    sslCert,
-    botSslKey,
-    botSslCert,
     logLevel,
     botToken,
     botPort,
@@ -264,8 +241,6 @@ export function defaultConfig(): AppConfig {
     twitchClientSecret,
     features,
     lava,
-    spotifyClientId: process.env['SPOTIFY_CLIENT_ID']?.trim() || null,
-    spotifyClientSecret: process.env['SPOTIFY_CLIENT_SECRET']?.trim() || null,
     klipyApiKey: process.env['KLIPY_API_KEY']?.trim() || null,
   };
 }

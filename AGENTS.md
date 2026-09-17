@@ -107,16 +107,16 @@ This section documents active and recently resolved critical issues as required 
   - Gated by `GIFS_ENABLED` feature flag (default `true`).
   - Documentation: `wiki/Entertainment.md`, `wiki/Discord-Bot.md`, `README.md` feature flags table.
 
-### 13. Guild Administration Commands (Resolved)
-- **Problem**: No native moderation/role/voice administration commands.
+### 13. Guild Administration Commands (Resolved / In Progress)
+- **Problem**: Monolithic command architecture risked hitting Discord limits; server moderation and voice controls needed proper modular separation per discord.js v14 standards.
 - **Resolution**:
-  - Added 13 moderation commands: `/admin warn`, `/kick`, `/ban`, `/lock`, `/unlock`, `/purge`, `/slowmode`, `/announce`.
-  - Added role management: `/admin role add`, `/remove`, `/list`.
-  - Added voice controls: `/admin voice mute`, `/unmute`, `/deafen`, `/undeafen`, `/move`, `/disconnect`.
-  - All commands enforce Discord native permissions + role hierarchy.
+  - Implemented discrete administration commands in dedicated files under `src/bot/commands/admin/`:
+    - Moderation: `/kick`, `/ban`, `/warn`, `/purge`, `/slowmode`, `/lock`, `/unlock`, `/announce`.
+    - Roles: `/role add`, `/role remove`, `/role list`.
+    - Voice: `/voice mute`, `/voice unmute`, `/voice deafen`, `/voice undeafen`, `/voice move`, `/voice disconnect`.
+  - All commands enforce Discord native permissions (`default_member_permissions`), role hierarchy (`canManageMember`), and case-numbered mod log embeds.
   - Mod log channel support (`/set mod-log-channel` or dashboard) with case-numbered embed logs.
-  - Gated by `ADMINISTRATION_ENABLED` + `ADMIN_PANEL_ENABLED` feature flags (default `true`).
-  - Dashboard Admin page scaffolded (quick-access panels for moderation, roles, voice, mod log viewer).
+  - Gated by `ADMINISTRATION_ENABLED` feature flag (default `true`).
   - Documentation: `wiki/Administration.md`, `wiki/Discord-Bot.md`, `README.md` feature flags table.
 
 ### 14. Forum Single-Thread Per Source & Weekly Sunday Free Games (Resolved)
@@ -125,13 +125,29 @@ This section documents active and recently resolved critical issues as required 
   - Enforced single thread per feed in `src/feed/threads.ts`: automatically unarchives archived threads and persists existing thread IDs in memory and SQLite.
   - Free Games schedule adjusted to poll strictly once per week at the start of Sunday (`getUTCDay() === 0`), completely eliminating duplicate mid-week alerts.
 
-### 15. Discord.js Standard Rebuild & Modular Command Architecture (Active)
+### 15. Discord.js Standard Rebuild & Modular Command Architecture (Resolved)
 - **Problem**: Monolithic legacy command implementations risking Discord's 4,000 character and 25 option/choice limits; inconsistent embed formatting.
 - **Resolution**:
   - Entire agent ecosystem rebuilt (`AGENTS.md`, `.agents/rules/`, `.agents/agents/`, `.agents/skills/`, `.agents/templates/`).
   - Strict Rule 06: mandatory discord.js v14 standards, zero magic numbers. Subcommands and options stay colocated within their respective command files in `src/bot/commands/<category>/<command>.ts` for clear scoping.
   - `src/bot/lib/` is exclusively dedicated to reusable libraries, modules, and utilities (e.g. `embeds/`, `music/`, `admin/`, `feeds/`).
   - Standardized `EmbedHandler` enforcing strict title/description/field length limits.
+
+### 16. Professional Modular Dashboard Rebuild (Resolved)
+- **Problem**: Monolithic 2,371-line `dashboard.ts` mixing stylesheet, HTML markup for 8 flat unorganized tabs, and 1,300 lines of client-side JavaScript.
+- **Resolution**:
+  - Modularized dashboard view components into `src/dashboard/views/dashboard/`:
+    - `styles.ts`: Theme-aware CSS stylesheet with modern Discord-style navigation, card borders, pills, badges, and responsive layouts.
+    - `sidebar.ts`: Professional categorized sidebar (**General**, **Feeds & Alerts**, **Bot Features**, **System**) with active server switcher banner and footer links.
+    - `overview.ts`: Executive server overview tab with live stat metrics, delivery channel status, and recent activity logs.
+    - `feeds.ts`: News feeds catalog presets, custom RSS/Atom/Scrape creator, topic groupings, and feed setup drawer.
+    - `sources.ts`: Specialized views for Reddit streams, Free Games store drops, and Stream Alerts.
+    - `guildadmin.ts`: Guild administration tab for roles (DJ, Admin), feature toggles, and command prefix.
+    - `music.ts`: Music player and queue management tab powered by external Lavalink v4.
+    - `settings.ts`: Host settings view for public/internal endpoints, active theme engine info, and registered team members.
+    - `client-script.ts`: Browser client script for routing, feed CRUD, preset toggles, modal dialogs, and real-time updates.
+    - `dashboard.ts`: High-level HTML orchestrator combining modular components.
+  - Adheres strictly to Rule 07 (zero external frontend runtime dependencies, SSR HTML + CSS Custom Properties, Discord OAuth2).
 
 ---
 
@@ -178,6 +194,7 @@ flowchart TD
 | **Code Architect** | Backend & Fullstack Architecture | TypeScript ESM architecture, zero-unsolicited runtime injection, SQLite write-through state, HTTP routing | [code-architect.md](.agents/agents/code-architect.md) |
 | **Discord Specialist** | Discord API & Bot Runtime | discord.js v14 standards, categorized `lib/options/` architecture, command registry, event dispatch, permissions, EmbedHandler | [discord-specialist.md](.agents/agents/discord-specialist.md) |
 | **Feed Watcher** | RSS/Atom Ingestion & Delivery | Feed polling, HTML scraping, XML parsing, deduplication, forum single-thread delivery, Sunday weekly free games | [feed-watcher.md](.agents/agents/feed-watcher.md) |
+| **Dashboard Specialist** | Management Dashboard & OAuth | Zero-frontend-dep SSR, Discord OAuth2, guild admin authorization, theme engine, bot RPC | [dashboard-engineer.md](.agents/agents/dashboard-engineer.md) |
 | **Test Automation** | Quality Assurance | Test-driven development (TDD), Vitest suite, mock servers, MSW handlers, regression coverage | [test-automation.md](.agents/agents/test-automation.md) |
 | **Security Auditor** | Security & Code Quality | Vulnerability scanning, secrets protection, ESLint rule enforcement, Prettier formatting, dependency audits | [security-auditor.md](.agents/agents/security-auditor.md) |
 
@@ -207,6 +224,7 @@ All agent actions are bound by `.agents/rules/`:
 - **Rule 04 (`remote-issue-protocol.md`)**: Roadmap-first tracking; the first post is the roadmap edited as progress occurs; Mermaid diagrams required.
 - **Rule 05 (`documentation-standards.md`)**: Keep `wiki/` and agent files synchronized (documentation is hosted entirely via `wiki/`).
 - **Rule 06 (`discord-js-standards.md`)**: **MANDATORY** — Strict discord.js standards for commands, events, embeds, options, handlers, registry, and dispatch. Command options and subcommands remain colocated in command files (`src/bot/commands/<category>/<command>.ts`), while `src/bot/lib/` is dedicated to reusable libraries, modules, and utilities used by commands and events. Strongly prefers dynamic methods over hardcoding (dynamic command registry, dynamic discovery, dynamic option builders). Zero tolerance for violations.
+- **Rule 07 (`dashboard-standards.md`)**: Management dashboard & Discord integration standards — zero runtime frontend dependencies, Discord OAuth2 authentication, guild administrator authorization, SSR HTML with CSS custom properties theme engine, and EmbedHandler preview parity.
 
 ---
 

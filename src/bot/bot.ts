@@ -1,24 +1,12 @@
 import type http from 'node:http';
-import type https from 'node:https';
-import {
-  Client,
-  GatewayIntentBits,
-  Events,
-  REST,
-  Routes,
-  type Interaction,
-  type Guild,
-  type GuildMember,
-  type Channel,
-  type Role,
-  type VoiceState,
-} from 'discord.js';
-import type { DiscordInteraction } from '../bot/utils/types.js';
+import { Client, REST, Routes, type Guild } from 'discord.js';
 import type { AppDeps } from '../app.js';
 import { createLogger, type Logger } from '../util/logger.js';
-import { getEnabledCommands } from './commands/registry.js';
-import { dispatchInteraction, createCommandHandler } from './handlers/commands.js';
+import { getEnabledCommands } from './handlers/registry.js';
+import { registerBotEvents } from './handlers/events.js';
+import { loadAllCommands } from './handlers/loader.js';
 import { DiscordRestClient } from './rest.js';
+import { BOT_DEFAULT_INTENTS } from './config.js';
 import { createHelixRssServer } from '../dashboard/server.js';
 
 export interface DiscordBotOptions {
@@ -28,16 +16,14 @@ export interface DiscordBotOptions {
   callbackUrl?: string | null;
   port?: number;
   host?: string;
-  sslKey?: string | null;
-  sslCert?: string | null;
   startSite?: boolean;
 }
 
 export class DiscordBot {
-  private readonly logger: Logger;
+  readonly logger: Logger;
   readonly rest: DiscordRestClient;
   private readonly client: Client;
-  private server: http.Server | https.Server | null = null;
+  private server: http.Server | null = null;
   private isStarted = false;
   private ownerDiscordIds = new Set<string>();
   private teamAdminDiscordIds = new Set<string>();
@@ -56,36 +42,10 @@ export class DiscordBot {
     this.rest = new DiscordRestClient(options.token, deps.config.discordApiBaseUrl);
 
     this.client = new Client({
-      intents: [
-        GatewayIntentBits.Guilds,
-        GatewayIntentBits.GuildMessages,
-        GatewayIntentBits.GuildVoiceStates,
-        GatewayIntentBits.MessageContent,
-        GatewayIntentBits.GuildMembers,
-      ],
+      intents: [...BOT_DEFAULT_INTENTS],
     });
 
-    this.client.on(Events.InteractionCreate, (interaction) => this.handleInteraction(interaction));
-    this.client.on(Events.GuildDelete, (guild) => this.handleGuildDelete(guild));
-    this.client.on(Events.GuildCreate, (guild) => this.handleGuildCreate(guild));
-    this.client.on(Events.GuildMemberAdd, (member) => this.handleGuildMemberAdd(member));
-    this.client.on(Events.ChannelCreate, (channel) => this.handleChannelCreate(channel));
-    this.client.on(Events.ChannelDelete, (channel) => this.handleChannelDelete(channel));
-    this.client.on(Events.ChannelUpdate, (oldChannel, newChannel) => this.handleChannelUpdate(oldChannel, newChannel));
-    this.client.on(Events.GuildRoleCreate, (role) => this.handleRoleCreate(role));
-    this.client.on(Events.GuildRoleDelete, (role) => this.handleRoleDelete(role));
-    this.client.on(Events.GuildRoleUpdate, (oldRole, newRole) => this.handleRoleUpdate(oldRole, newRole));
-    this.client.on(Events.VoiceStateUpdate, (oldState, newState) => this.handleVoiceStateUpdate(oldState, newState));
-    this.client.on(
-      Events.VoiceServerUpdate,
-      (data) =>
-        void this.handleVoiceServerUpdate({
-          token: data.token,
-          guild_id: data.guildId,
-          endpoint: data.endpoint ?? undefined,
-        }),
-    );
-    this.client.on(Events.ClientReady, () => this.onReady());
+    registerBotEvents(this.client, this, this.deps);
 
     this.deps.bot = this;
   }
@@ -95,6 +55,7 @@ export class DiscordBot {
     this.isStarted = true;
 
     this.logger.info('Starting Discord Bot primary service...');
+    await loadAllCommands();
 
     if (this.options.token) {
       await this.detectApplicationOwners();
@@ -165,66 +126,6 @@ export class DiscordBot {
         server.once('listening', onListening);
         server.listen(port, host);
       });
-    }
-  }
-
-  private async onReady(): Promise<void> {
-    this.logger.info('Discord client ready', { user: this.client.user?.tag });
-    await this.detectApplicationOwners();
-    const { handleReady } = await import('./events/ready.js');
-    await handleReady(this, this.deps);
-  }
-
-  private async handleInteraction(interaction: Interaction): Promise<void> {
-    if (!interaction.isChatInputCommand() && !interaction.isAutocomplete()) return;
-
-    const commandName = interaction.commandName;
-
-    if (interaction.isAutocomplete()) {
-      return;
-    }
-
-    this.logger.debug('Received slash command interaction', {
-      command: commandName,
-      guildId: interaction.guildId,
-      user: interaction.user?.username,
-    });
-
-    try {
-      const handler = createCommandHandler(this.deps);
-      const response = await dispatchInteraction(
-        interaction as unknown as DiscordInteraction,
-        this.deps,
-        this.rest,
-        handler,
-      );
-      if (interaction.replied || interaction.deferred) {
-        await interaction.followUp((response as unknown as { data?: unknown }).data ?? {});
-      } else {
-        await interaction.reply((response as unknown as { data?: unknown }).data ?? {});
-      }
-    } catch (err) {
-      this.logger.error('Error dispatching slash command interaction', {
-        err: (err as Error).message,
-        command: commandName,
-      });
-
-      try {
-        const errorResponse = {
-          type: 4,
-          data: {
-            flags: 64,
-            content: `❌ An unexpected error occurred: ${(err as Error).message}`,
-          },
-        };
-        if (interaction.replied || interaction.deferred) {
-          await interaction.followUp(errorResponse.data);
-        } else {
-          await interaction.reply(errorResponse.data);
-        }
-      } catch {
-        /* ignore fallback failure */
-      }
     }
   }
 
@@ -336,6 +237,41 @@ export class DiscordBot {
     }
   }
 
+  async getGuildMember(
+    guildId: string,
+    userId: string,
+  ): Promise<{
+    id: string;
+    username: string;
+    globalName: string | null;
+    avatar: string | null;
+    nickname: string | null;
+    bot: boolean;
+    joinedAt: string | null;
+    roles: Array<{ id: string; name: string; color: number; position: number }>;
+  } | null> {
+    try {
+      const guild = this.client.guilds.cache.get(guildId);
+      if (!guild) return null;
+      const member = await guild.members.fetch(userId);
+      const roles = [...member.roles.cache.values()]
+        .map((r) => ({ id: r.id, name: r.name, color: r.color, position: r.position }))
+        .sort((a, b) => b.position - a.position);
+      return {
+        id: member.user.id,
+        username: member.user.username,
+        globalName: member.user.globalName ?? null,
+        avatar: member.user.avatar ?? null,
+        nickname: member.nickname ?? null,
+        bot: member.user.bot,
+        joinedAt: member.joinedAt ? member.joinedAt.toISOString() : null,
+        roles,
+      };
+    } catch {
+      return null;
+    }
+  }
+
   async getChannel(threadId: string): Promise<{ id: string; name: string; type: number }> {
     return this.rest.getChannel(threadId);
   }
@@ -435,61 +371,16 @@ export class DiscordBot {
     return Array.from(this.ownerDiscordIds);
   }
 
+  getClient(): Client {
+    return this.client;
+  }
+
   isOwnerDiscordId(discordUserId: string): boolean {
     return this.ownerDiscordIds.has(discordUserId);
   }
 
   isOwnerOrAdminDiscordId(discordUserId: string): boolean {
     return this.ownerDiscordIds.has(discordUserId) || this.teamAdminDiscordIds.has(discordUserId);
-  }
-
-  async handleGuildCreate(guild: Guild): Promise<void> {
-    const { handleGuildCreate } = await import('./events/guild-create.js');
-    await handleGuildCreate(guild, this, this.deps);
-  }
-
-  async handleGuildMemberAdd(member: NonNullable<GuildMember>): Promise<void> {
-    const { handleGuildMemberAdd } = await import('./events/member.js');
-    await handleGuildMemberAdd(member, this, this.deps);
-  }
-
-  async handleChannelCreate(channel: Channel): Promise<void> {
-    const { handleChannelCreate } = await import('./events/channel.js');
-    await handleChannelCreate(channel, this, this.deps);
-  }
-
-  async handleChannelDelete(channel: Channel): Promise<void> {
-    const { handleChannelDelete } = await import('./events/channel.js');
-    await handleChannelDelete(channel.id, this, this.deps);
-  }
-
-  async handleChannelUpdate(oldChannel: Channel, newChannel: Channel): Promise<void> {
-    const { handleChannelUpdate } = await import('./events/channel.js');
-    await handleChannelUpdate(oldChannel, newChannel, this, this.deps);
-  }
-
-  async handleRoleCreate(role: Role): Promise<void> {
-    const { handleRoleCreate } = await import('./events/role.js');
-    await handleRoleCreate(role, this, this.deps);
-  }
-
-  async handleRoleDelete(role: Role): Promise<void> {
-    const { handleRoleDelete } = await import('./events/role.js');
-    await handleRoleDelete(role.id, this, this.deps);
-  }
-
-  async handleRoleUpdate(oldRole: Role, newRole: Role): Promise<void> {
-    const { handleRoleUpdate } = await import('./events/role.js');
-    await handleRoleUpdate(oldRole, newRole, this, this.deps);
-  }
-
-  async handleVoiceStateUpdate(oldState: VoiceState, newState: VoiceState): Promise<void> {
-    const { handleVoiceStateUpdate } = await import('./events/voice-state.js');
-    await handleVoiceStateUpdate(oldState, newState, this, this.deps);
-  }
-
-  async handleVoiceServerUpdate(data: { token: string; guild_id: string; endpoint?: string }): Promise<void> {
-    this.deps.lavaManager?.handleVoiceServerUpdate(data);
   }
 
   async getUserVoiceChannelId(guildId: string, userId: string): Promise<string | null> {

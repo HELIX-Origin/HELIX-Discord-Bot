@@ -97,9 +97,9 @@ export class FeedWatcher {
       }
     }
 
-    const { channelId: targetChannelId, threadChannelId: targetThreadChannelId } = resolveFeedTargets(this.repo, feed);
-    if (!targetChannelId && !targetThreadChannelId) {
-      this.logger.warn('Feed has no configured Discord channel and no category target; skipping poll', {
+    const { channelId: targetChannelId, forumChannelId: targetForumChannelId } = resolveFeedTargets(feed);
+    if (!targetChannelId && !targetForumChannelId) {
+      this.logger.warn('Feed has no configured Discord delivery target; skipping poll', {
         feedId: feed.id,
         feedName: feed.name,
       });
@@ -266,7 +266,7 @@ export class FeedWatcher {
   }
 
   private async deliverEntry(feed: Feed, payload: { content?: string; embeds?: unknown[] }): Promise<boolean> {
-    if (this.threads) {
+    if (this.threads && (feed.forumChannelId || feed.threadChannelId)) {
       const outcome = await this.threads.deliver(feed, payload);
       if (outcome.mode === 'thread') {
         if (outcome.delivered && outcome.threadId) {
@@ -275,7 +275,7 @@ export class FeedWatcher {
         return outcome.delivered;
       }
     }
-    const { channelId } = resolveFeedTargets(this.repo, feed);
+    const { channelId } = resolveFeedTargets(feed);
     if (!this.bot || !channelId) return false;
     await this.bot.sendChannelMessage(channelId, payload);
     return true;
@@ -367,9 +367,9 @@ export class FeedWatcher {
   private async pollStreamAlertFeed(userId: number, feed: Feed): Promise<void> {
     this.logger.debug('Polling stream alert feed (fallback)', { feedId: feed.id, feedType: feed.feedType });
 
-    const { channelId, threadChannelId } = resolveFeedTargets(this.repo, feed);
-    if (!channelId && !threadChannelId) {
-      this.logger.warn('Stream alert feed has no configured Discord channel or thread target; skipping poll', {
+    const { channelId, forumChannelId } = resolveFeedTargets(feed);
+    if (!channelId && !forumChannelId) {
+      this.logger.warn('Stream alert feed has no configured Discord delivery target; skipping poll', {
         feedId: feed.id,
         feedName: feed.name,
       });

@@ -13,22 +13,29 @@
     "dev": "tsc --watch",
     "dev:run": "node --env-file-if-exists=.env --watch dist/index.js",
     "typecheck": "tsc --noEmit",
+    "typecheck:test": "tsc --noEmit --project tsconfig.test.json",
     "lint": "eslint src --max-warnings 0",
     "format": "prettier --write src",
     "format:check": "prettier --check src",
-    "check": "npm run typecheck && npm run format:check && npm run lint"
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "check": "npm run typecheck && npm run typecheck:test && npm run format:check && npm run lint && npm run test"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@types/node": "^26.5.0",
+    "@types/ws": "^8.18.1",
+    "@vitest/coverage-v8": "^5.0.1",
     "eslint": "^10.10.0",
     "prettier": "^3.9.6",
     "typescript": "^5.7.2",
-    "typescript-eslint": "^8.70.0"
+    "typescript-eslint": "^8.70.0",
+    "vitest": "^5.0.1"
   },
   "dependencies": {
-    "@helix-origin/lavalink-server": "https://github.com/HELIX-Origin/Lavalink-Server/releases/download/v1.0.0/helix-origin-lavalink-server-1.0.0.tgz",
     "discord.js": "^14.18.0",
-    "ioredis-mock": "^8.13.1"
+    "ioredis-mock": "^8.13.1",
+    "ws": "^8.18.0"
   }
 }

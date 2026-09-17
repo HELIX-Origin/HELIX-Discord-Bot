@@ -1,10 +1,7 @@
-import { appDisplayName, type AppDeps } from '../../../app.js';
-import {
-  InteractionResponseType,
-  type ApplicationCommand,
-  type DiscordInteraction,
-  type InteractionResponse,
-} from '../../utils/types.js';
+import { type AppDeps } from '../../../app.js';
+import { EmbedHandler } from '../../lib/embeds/builder.js';
+import { type ApplicationCommand, type DiscordInteraction, type InteractionResponse } from '../../utils/types.js';
+import { registerCommandMetadata, type BotCommand } from '../../handlers/registry.js';
 
 export const statsCommandDef: ApplicationCommand = {
   name: 'stats',
@@ -27,52 +24,41 @@ export async function handleStatsCommand(interaction: DiscordInteraction, deps: 
   }
 
   const inviteUrl = deps.config.redirectUrl || 'Not configured';
-
   const dashboardUrl = deps.config.publicBaseUrl || deps.config.internalUrl;
 
-  const appName = appDisplayName(deps);
-
-  return {
-    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-    data: {
-      embeds: [
-        {
-          title: `📊 ${appName} Service Status`,
-          color: 0x06b6d4,
-          fields: [
-            {
-              name: '📡 This Server',
-              value: `**Feeds:** ${guildFeedsCount}`,
-              inline: true,
-            },
-            {
-              name: '🌐 Global Totals',
-              value: `**Feeds:** ${stats.feedCount}\n**Entries Sent:** ${stats.sentCount}`,
-              inline: true,
-            },
-            {
-              name: '⚙️ System Health',
-              value: `**Uptime:** ${uptimeStr}\n**DB Size:** ${(stats.dbSizeBytes / 1024).toFixed(1)} KB\n**Redis:** ${deps.redis ? '🟢 Connected' : '⚪ Single-instance'}`,
-              inline: true,
-            },
-            {
-              name: '🖥️ Web Dashboard',
-              value: `[Open Dashboard](${dashboardUrl})`,
-              inline: true,
-            },
-            {
-              name: '🤖 Bot Invite',
-              value:
-                deps.config.redirectUrl !== null
-                  ? `[Invite Bot to Other Servers](${inviteUrl})`
-                  : 'Set `DISCORD_REDIRECT_URL` in .env',
-              inline: true,
-            },
-          ],
-          footer: { text: `${appName} • Service Status` },
-          timestamp: new Date().toISOString(),
-        },
-      ],
-    },
-  };
+  return EmbedHandler.for(deps)
+    .primary()
+    .title('Service Status', '📊')
+    .field('📡 This Server', `**Feeds:** ${guildFeedsCount}`, true)
+    .field('🌐 Global Totals', `**Feeds:** ${stats.feedCount}\n**Entries Sent:** ${stats.sentCount}`, true)
+    .field(
+      '⚙️ System Health',
+      `**Uptime:** ${uptimeStr}\n**DB Size:** ${(stats.dbSizeBytes / 1024).toFixed(1)} KB\n**Redis:** ${deps.redis ? '🟢 Connected' : '⚪ Single-instance'}`,
+      true,
+    )
+    .field('🖥️ Web Dashboard', `[Open Dashboard](${dashboardUrl})`, true)
+    .field(
+      '🤖 Bot Invite',
+      deps.config.redirectUrl !== null
+        ? `[Invite Bot to Other Servers](${inviteUrl})`
+        : 'Set `DISCORD_REDIRECT_URL` in .env',
+      true,
+    )
+    .footer('Service Status')
+    .respond();
 }
+
+registerCommandMetadata({
+  name: 'stats',
+  description: 'View bot statistics, service status, and dashboard info',
+  category: 'utility',
+  emoji: '🔧',
+  usage: '/stats',
+  examples: ['/stats'],
+});
+
+export const statsCommand: BotCommand = {
+  def: statsCommandDef,
+  category: 'utility',
+  execute: handleStatsCommand,
+};

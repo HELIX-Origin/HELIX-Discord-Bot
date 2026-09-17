@@ -1,6 +1,6 @@
 # 🤖 Discord Bot & Commands
 
-HELIX Discord Bot operates as a Discord application using a **native connection** — a Gateway WebSocket for live events (`src/bot/gateway.ts`) and the Discord REST API for interactions and messages (`src/bot/rest.ts`). No `discord.js` dependency is required. It delivers notifications directly to channels, eliminating the need to manage external webhooks.
+HELIX Discord Bot operates as a Discord application adhering strictly to **discord.js v14** standards. It delivers notifications directly to channels or dedicated forum threads, eliminating the need to manage external webhooks.
 
 ---
 
@@ -10,15 +10,17 @@ All commands register through Discord's native interaction model and use ephemer
 
 | Command | Subcommands / Options | Permissions Required | Description |
 | :--- | :--- | :--- | :--- |
-| `/feed add` | `url: <string>`, `channel: <channel>`, `role: <role?>`, `color: <hex?>` | `Manage Channels` or `Administrator` | Adds a new feed subscription to a channel. |
-| `/feed list` | `channel: <channel?>` | `Manage Channels` or `Administrator` | Displays all active feed subscriptions on the server. |
-| `/feed remove` | `id: <feed_id>` | `Manage Channels` or `Administrator` | Removes an existing feed subscription by ID. |
+| `/rss` | `add`, `list`, `remove`, `toggle` | `Manage Channels` | Manage RSS, Atom, and web scraper feeds. |
+| `/youtube` | `add`, `list`, `remove`, `toggle` | `Manage Channels` | Manage YouTube video and livestream alerts. |
+| `/twitch` | `add`, `list`, `remove`, `toggle` | `Manage Channels` | Manage Twitch livestream alerts. |
+| `/free-games` | `enable`, `status`, `disable` | `Manage Channels` | Manage weekly free game notifications (Epic, Steam, GOG, etc.). |
+| `/reddit` | `add`, `list`, `remove`, `toggle` | `Manage Channels` | Manage Reddit subreddit image and news feeds. |
 | `/play` | `query: <string>` | Everyone | Play music from YouTube, Spotify, SoundCloud, Apple Music, Deezer. |
 | `/queue` | *None* | Everyone | Display the current music queue. |
 | `/skip` | *None* | Everyone | Skip the current track. |
 | `/previous` | *None* | Everyone | Play the previous track. |
 | `/shuffle` | *None* | Everyone | Shuffle the queue. |
-| `/loop` | `mode: off|track|queue` | Everyone | Set loop mode. |
+| `/loop` | `mode: off\|track\|queue` | Everyone | Set loop mode. |
 | `/volume` | `level: <number>` | Everyone | Set playback volume (0-100). |
 | `/seek` | `position: <string>` | Everyone | Seek to position (e.g., `1:30`). |
 | `/nowplaying` | *None* | Everyone | Show currently playing track. |
@@ -41,17 +43,20 @@ All commands register through Discord's native interaction model and use ephemer
 | `/cry` | `user: <user?>` | Everyone | Cry reaction. |
 | `/angry` | `user: <user?>` | Everyone | Angry reaction. |
 | `/meme` | *None* | Everyone | Random meme GIF. |
-| `/admin warn` | `user: <user>`, `reason: <string>` | `Moderate Members` | Warn a member. |
-| `/admin kick` | `user: <user>`, `reason: <string>` | `Kick Members` | Kick a member. |
-| `/admin ban` | `user: <user>`, `reason: <string>` | `Ban Members` | Ban a member. |
-| `/admin lock` | `channel: <channel?>` | `Manage Channels` | Lock a channel. |
-| `/admin purge` | `count: <number>` | `Manage Messages` | Bulk delete messages. |
-| `/admin slowmode` | `seconds: <number>`, `channel: <channel?>` | `Manage Channels` | Set slowmode. |
-| `/admin announce` | `channel: <channel>`, `message: <string>` | `Manage Channels` | Send an announcement. |
-| `/admin role` | `user: <user>`, `role: <role>`, `action: add|remove` | `Manage Roles` | Assign/remove a role. |
+| `/warn` | `user: <user>`, `reason: <string>` | `Moderate Members` | Warn a member. |
+| `/kick` | `user: <user>`, `reason: <string>` | `Kick Members` | Kick a member. |
+| `/ban` | `user: <user>`, `reason: <string>` | `Ban Members` | Ban a member. |
+| `/lock` | `channel: <channel?>` | `Manage Channels` | Lock a channel. |
+| `/unlock` | `channel: <channel?>` | `Manage Channels` | Unlock a channel. |
+| `/purge` | `count: <number>` | `Manage Messages` | Bulk delete messages. |
+| `/slowmode` | `seconds: <number>`, `channel: <channel?>` | `Manage Channels` | Set slowmode. |
+| `/announce` | `channel: <channel>`, `message: <string>` | `Manage Channels` | Send an announcement. |
+| `/role` | `add`, `remove`, `list` | `Manage Roles` | Assign, remove, or list roles. |
+| `/voice` | `mute`, `unmute`, `deafen`, `undeafen`, `move`, `disconnect` | `Mute/Deafen/Move Members` | Voice channel member management. |
+| `/server` | `export`, `import`, `command` | `Administrator` | Guild configurations and per-server command toggles. |
 | `/stats` | *None* | Everyone | Displays bot uptime, memory usage, and delivery analytics. |
-| `/about` | *None* | Everyone | Shows version info, repository links, and developer credits. |
-| `/help` | `topic: <string?>` | Everyone | Interactive documentation browser with command usage tips. |
+| `/about` | `bot`, `user [@user]`, `guild` | Everyone | View bot, user, or guild information and stats. |
+| `/help` | `command: <string?>` | Everyone | Interactive documentation browser with command usage tips. |
 
 ---
 

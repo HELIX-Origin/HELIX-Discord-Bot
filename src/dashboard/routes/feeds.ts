@@ -60,6 +60,7 @@ export function registerFeedsRoutes(router: Router<AppDeps>): void {
       url?: string;
       topic?: string;
       channelId?: string | null;
+      forumChannelId?: string | null;
       guildId?: string | null;
       feedType?: FeedType;
       scrape?: { item?: string; title?: string; link?: string; description?: string } | null;
@@ -78,16 +79,23 @@ export function registerFeedsRoutes(router: Router<AppDeps>): void {
     }
 
     const channelId = body.channelId === undefined ? null : body.channelId ? String(body.channelId).trim() : null;
+    const forumChannelId =
+      body.forumChannelId === undefined ? null : body.forumChannelId ? String(body.forumChannelId).trim() : null;
     const providedGuildId = body.guildId === undefined ? null : body.guildId ? String(body.guildId).trim() : null;
 
-    if (!channelId && !providedGuildId) {
-      return sendError(res, 400, 'Either channelId or guildId is required');
+    if (channelId && forumChannelId) {
+      return sendError(res, 400, 'A feed can target either a channel or a forum channel — not both.');
     }
 
+    if (!channelId && !forumChannelId && !providedGuildId) {
+      return sendError(res, 400, 'Either channelId, forumChannelId, or guildId is required');
+    }
+
+    const targetChannelId = channelId ?? forumChannelId;
     let guildId: string | null = providedGuildId;
-    if (channelId && d.bot) {
+    if (targetChannelId && d.bot) {
       const guilds = await d.bot.getGuildsWithChannels();
-      const targetGuild = guilds.find((g) => g.channels.some((c) => c.id === channelId));
+      const targetGuild = guilds.find((g) => g.channels.some((c) => c.id === targetChannelId));
       if (targetGuild) {
         guildId = targetGuild.id;
       }
@@ -134,7 +142,17 @@ export function registerFeedsRoutes(router: Router<AppDeps>): void {
               description: body.scrape.description?.trim() || undefined,
             }
           : null;
-      const feed = d.repo.addFeed(userId, name, url, channelId, feedType, scrape, guildId, body.topic?.trim() || null);
+      const feed = d.repo.addFeed(
+        userId,
+        name,
+        url,
+        channelId,
+        feedType,
+        scrape,
+        guildId,
+        body.topic?.trim() || null,
+        forumChannelId,
+      );
       const typeLabel =
         feedType === 'reddit'
           ? 'Reddit image '
@@ -160,14 +178,23 @@ export function registerFeedsRoutes(router: Router<AppDeps>): void {
       topic?: string;
       feedType?: FeedType;
       channelId?: string | null;
+      forumChannelId?: string | null;
       enabled?: boolean;
     };
+    const targetChanged = body.channelId !== undefined || body.forumChannelId !== undefined;
+    let channelField: string | null | undefined =
+      body.channelId !== undefined ? body.channelId?.trim() || null : undefined;
+    let forumField: string | null | undefined =
+      body.forumChannelId !== undefined ? body.forumChannelId?.trim() || null : undefined;
+    if (channelField) forumField = null;
+    if (forumField) channelField = null;
+    const newTarget = channelField ?? forumField ?? null;
+
     let guildId: string | null | undefined = undefined;
-    if (body.channelId !== undefined) {
-      const newChannelId = body.channelId?.trim() || null;
-      if (newChannelId && d.bot) {
+    if (targetChanged) {
+      if (newTarget && d.bot) {
         const guilds = await d.bot.getGuildsWithChannels();
-        const targetGuild = guilds.find((g) => g.channels.some((c) => c.id === newChannelId));
+        const targetGuild = guilds.find((g) => g.channels.some((c) => c.id === newTarget));
         if (targetGuild) {
           guildId = targetGuild.id;
           if (!canUserManageGuild(userId, targetGuild.id, d)) {
@@ -179,7 +206,7 @@ export function registerFeedsRoutes(router: Router<AppDeps>): void {
             return;
           }
         }
-      } else if (newChannelId === null) {
+      } else if (!newTarget) {
         guildId = null;
       }
     }
@@ -188,9 +215,11 @@ export function registerFeedsRoutes(router: Router<AppDeps>): void {
       url: body.url?.trim(),
       topic: body.topic !== undefined ? body.topic.trim() || null : undefined,
       feedType: body.feedType,
-      channelId: body.channelId !== undefined ? body.channelId?.trim() || null : undefined,
+      channelId: channelField,
+      forumChannelId: forumField,
       guildId,
       enabled: body.enabled === undefined ? undefined : body.enabled ? 1 : 0,
+      threadChannelId: targetChanged ? null : undefined,
     });
     if (!feed) return sendError(res, 404, 'Feed not found');
     d.repo.logActivity(userId, 'info', 'feeds', `Updated feed "${feed.name}"`);

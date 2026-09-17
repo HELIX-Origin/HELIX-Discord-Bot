@@ -1,5 +1,5 @@
 <div align="center">
-  <!-- <img src="banner.png" width="100%" alt="HELIX Discord Bot Banner" /> -->
+  <img src=".github/assets/images/github-social-banner.jpg" width="100%" alt="HELIX Discord Bot Banner" />
 
   # 📡 HELIX Discord Bot
   **A modern, self-hosted RSS, Web Scraper, Reddit, & Free Games syndication hub for Discord.**
@@ -31,12 +31,11 @@ Featuring a built-in web dashboard, Discord OAuth2 authentication, zero frontend
 - **Automated Daily Drops**: Runs on an automated daily schedule with deduplication so limited-time giveaways are never missed.
 - **Rich Store Embeds**: Standardized Discord embeds with official store branding, high-contrast badges, pricing worth, expiration timers, and direct claim links.
 
-### 🎵 Music Playback via Lavalink
-- **Multi-Source Support**: Native playback from **YouTube**, **Spotify**, **SoundCloud**, **Apple Music**, **Deezer**, and more via the official Lavalink v4 server.
+### 🎵 Music Playback via External Lavalink v4
+- **Multi-Source Support**: Native playback from **YouTube**, **Spotify**, **SoundCloud**, **Apple Music**, **Deezer**, and more via an external Lavalink v4 server.
 - **Queue Management**: Full queue control with `/play`, `/queue`, `/skip`, `/previous`, `/shuffle`, `/loop`, `/volume`, `/seek`, `/nowplaying`, `/pause`, `/resume`, `/stop`, `/leave`.
-- **Bundled Embedded Node (default)**: Ships the official Lavalink v4 engine as a pre-built npm dependency (`@helix-origin/lavalink-server`, installed as a pinned GitHub Release tarball — read-only, no repository linkage). The bot bootstraps the Java node in-process and supervises it — no external audio services required. Requires **Java 21+** and a `Lavalink.jar` placed in the project root next to `application.yml`.
-- **External Node Option**: Set `LAVA_EMBEDDED=false` to connect to your own Lavalink v4 node via `LAVA_HOST`, `LAVA_PORT`, `LAVA_PASS`, `LAVA_SECURE` (`LAVA_SECURE=true` for `wss://`).
-- **Single Global `.env`**: All music configuration lives in the bot's global `.env` — `LAVA_ENABLED`, `LAVA_EMBEDDED`, `LAVA_HOST/PORT/PASS/SECURE`, `LAVA_READY_TIMEOUT_MS`, plus optional `SPOTIFY_CLIENT_ID/SECRET`, `GENIUS_ACCESS_TOKEN`, `YOUTUBE_REFRESH_TOKEN` for the embedded node.
+- **External Lavalink v4 Architecture**: Connects directly to any external Lavalink v4 server via standard WebSocket with resilient auto-reconnect and client-side queue synchronization.
+- **Single Global `.env`**: Clean music configuration in `.env` — `LAVA_ENABLED`, `LAVA_HOST`, `LAVA_PORT`, `LAVA_PASS`, `LAVA_SECURE` (`LAVA_SECURE=true` for `wss://`).
 
 ### ⚙️ Feature Flags
 All major subsystems are gated by environment variables (default `true`):
@@ -66,11 +65,6 @@ Disable any flag to completely remove its commands, dashboard pages, and interna
 - **Per-Guild Permissions**: All commands respect Discord's native permission system.
 
 ### 🤖 Custom Reddit Feeds
-- **Multi-Platform Support**: Official support for **Epic Games Store**, **Steam**, **GOG.com**, **IndieGala**, **Humble Bundle**, **Itch.io**, **Ubisoft Store**, **EA App / Origin**, **Prime Gaming**, and **Battle.net**.
-- **Automated Monday Drops**: Runs on an automated weekly schedule (every Monday) with an instant manual polling trigger in the dashboard.
-- **Rich Store Embeds**: Standardized Discord embeds with official store branding, high-contrast badges, pricing worth, expiration timers, and direct claim links.
-
-### 🤖 Custom Reddit Feeds
 - **Subreddit & User Feeds**: Subscribe to any subreddit (e.g. `r/technology`, `r/wallpapers`, `r/EarthPorn`), user stream, or custom `.rss` URL.
 - **Dual Display Modes**:
   - 🖼️ **Pure Image Mode**: Extracts full-resolution images and animated GIFs while stripping out message text bodies.
@@ -91,8 +85,7 @@ Disable any flag to completely remove its commands, dashboard pages, and interna
 - **Structured Fields**: Links, source attribution, and metadata are cleanly placed in dedicated embed fields rather than cluttered inline text.
 
 ### 🤖 Discord Bot Integration
-- **Direct Channel Delivery**: Delivers directly to text channels via the Discord REST API—no webhook creation or management required.
-- **Forum Thread Delivery** *(optional, per server)*: Each feed can deliver into its own dedicated thread inside a forum channel—threads are kept open via keepalive polling and rotate into a fresh thread when they grow large. Configured from the dashboard Feeds tab or `FORUM_CHANNEL_IDS` env.
+- **Flexible Delivery Targets**: Each feed independently targets either a text channel or a dedicated thread inside a forum channel (auto-created and managed per feed).
 - **Slash Commands**: Interactive commands grouped by category:
   - **Feeds**: `/feed` (add/remove/list/pause/resume), `/stats`
   - **Music**: `/play`, `/queue`, `/skip`, `/previous`, `/shuffle`, `/loop`, `/volume`, `/seek`, `/nowplaying`, `/pause`, `/resume`, `/stop`, `/leave`

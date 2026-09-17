@@ -3,6 +3,7 @@ import { dirname } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import { SCHEMA, SCHEMA_VERSION } from './schema.js';
 import { createLogger, type LogLevel } from '../util/logger.js';
+import { feedCategory, type FeedType } from '../state/types.js';
 
 export interface DbStats {
   feedCount: number;
@@ -107,6 +108,48 @@ export class Database {
       this.db.exec('ALTER TABLE feeds ADD COLUMN topic TEXT;');
     } catch {
       // Column may already exist
+    }
+
+    // Schema v8: per-feed forum (auto-created thread) delivery target
+    try {
+      this.db.exec('ALTER TABLE feeds ADD COLUMN forum_channel_id TEXT;');
+    } catch {
+      // Column may already exist
+    }
+    // Backfill legacy per-guild, per-category targets onto individual feeds so
+    // existing installations keep delivering after the category UI is removed.
+    try {
+      const feeds = this.db
+        .prepare('SELECT id, guild_id, feed_type, channel_id, forum_channel_id FROM feeds')
+        .all() as Array<{
+        id: number;
+        guild_id: string | null;
+        feed_type: string;
+        channel_id: string | null;
+        forum_channel_id: string | null;
+      }>;
+      const getFeedStmt = this.db.prepare(
+        'SELECT channel_id, thread_channel_id FROM guild_categories WHERE guild_id = ? AND category = ?',
+      );
+      const setChannelStmt = this.db.prepare('UPDATE feeds SET channel_id = ? WHERE id = ?');
+      const setForumStmt = this.db.prepare('UPDATE feeds SET forum_channel_id = ? WHERE id = ?');
+      for (const feed of feeds) {
+        if (feed.forum_channel_id !== null) continue;
+        const category = feed.guild_id ? feedCategory(feed.feed_type as FeedType) : null;
+        if (!category) continue;
+        const target = getFeedStmt.get(feed.guild_id, category) as
+          { channel_id: string | null; thread_channel_id: string | null } | undefined;
+        if (!target) continue;
+        if (feed.channel_id === null && target.channel_id) {
+          setChannelStmt.run(target.channel_id, feed.id);
+        } else if (feed.channel_id === null && target.thread_channel_id) {
+          setForumStmt.run(target.thread_channel_id, feed.id);
+        }
+      }
+    } catch (err) {
+      this.logger.warn('Failed to backfill legacy category targets onto feeds', {
+        err: (err as Error).message,
+      });
     }
 
     // Fix oauth_states user_id nullability if created under legacy schema

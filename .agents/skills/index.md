@@ -13,6 +13,7 @@ Index of technical skills, subsystem domain guides, and engineering references f
 | **Feed Syndication & Forums** | Feed & Content Delivery | RSS/Atom/Reddit, weekly Sunday Free Games, single-thread forum delivery | [feed-syndication.md](feed-syndication.md) |
 | **Lavalink v4 Music & Voice** | Audio Subsystem | External Lavalink v4 server client, WebSocket ops, queue management, voice gateway | [lavalink-music.md](lavalink-music.md) |
 | **Guild Administration** | Moderation & Roles | Moderation actions, permissions, role hierarchy, mod log channels | [guild-administration.md](guild-administration.md) |
+| **Management Dashboard Engineering** | Dashboard & OAuth | Zero-frontend-dep SSR, Discord OAuth2, guild admin authorization, EmbedHandler parity | [dashboard-engineering.md](dashboard-engineering.md) |
 | **TypeScript ESM & Node.js** | Language & Runtime | ESM conventions, `.js` imports, `node:sqlite`, in-memory `AppState` | [typescript.md](typescript.md) |
 
 ---

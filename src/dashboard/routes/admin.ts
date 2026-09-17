@@ -1,5 +1,6 @@
 import type { AppDeps } from '../../app.js';
-import { getEnabledCommands } from '../../bot/commands/registry.js';
+import { getEnabledCommands } from '../../bot/handlers/registry.js';
+import { loadAllCommands } from '../../bot/handlers/loader.js';
 import { sendError, sendJson } from '../http/helpers.js';
 import type { Router } from '../http/router.js';
 import { requireOwner } from './shared.js';
@@ -26,6 +27,7 @@ export function registerAdminRoutes(router: Router<AppDeps>): void {
 
   router.add('GET', '/api/admin/bot', async (req, res, _ctx, deps) => {
     if ((await requireOwner(req, res, deps)) === null) return;
+    await loadAllCommands();
     const cfg = deps.config;
     const inviteUrl =
       cfg.redirectUrl ||
@@ -65,6 +67,7 @@ export function registerAdminRoutes(router: Router<AppDeps>): void {
     }
 
     try {
+      await loadAllCommands();
       const enabledCommands = getEnabledCommands(deps);
       await deps.bot.rest.registerGlobalCommands(deps.config.clientId, enabledCommands);
       deps.repo.logActivity(userId, 'info', 'dev-tools', 'Discord global slash commands re-synced successfully');
@@ -114,8 +117,6 @@ export function registerAdminRoutes(router: Router<AppDeps>): void {
       requestTimeoutMs: cfg.requestTimeoutMs,
       internalUrl: cfg.internalUrl,
       publicBaseUrl: cfg.publicBaseUrl,
-      sslConfigured: Boolean(cfg.sslKey && cfg.sslCert),
-      botSslConfigured: Boolean(cfg.botSslKey && cfg.botSslCert),
       redisConfigured: true,
       botEnabled: Boolean(cfg.botToken),
       botHost: cfg.host,

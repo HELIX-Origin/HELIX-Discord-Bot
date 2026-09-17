@@ -1,210 +1,130 @@
-import { appDisplayName, type AppDeps } from '../../../app.js';
+import type { AppDeps } from '../../../app.js';
 import type { DiscordRestClient } from '../../rest.js';
 import {
   ApplicationCommandOptionType,
-  InteractionResponseType,
   type ApplicationCommand,
-  type DiscordEmbed,
+  type ApplicationCommandOption,
   type DiscordInteraction,
   type InteractionOption,
   type InteractionResponse,
 } from '../../utils/types.js';
-import { commandHelpResponse, createEmbed, EMBED_COLORS, successEmbed } from '../../utils/embeds.js';
-import type { FeedCategory } from '../../../state/types.js';
+import { EmbedHandler } from '../../lib/embeds/builder.js';
+import { registerCommandMetadata, type BotCommand } from '../../handlers/registry.js';
+
+export const SET_ACTIONS = ['role', 'feature', 'prefix', 'view', 'reset'] as const;
+export type SetAction = (typeof SET_ACTIONS)[number];
+
+export const SET_FEATURE_NAMES = ['feeds', 'streamalerts', 'music', 'gifs'] as const;
+export const SET_RESET_TARGETS = ['roles', 'features', 'prefix', 'all'] as const;
+
+export const setOptions: ApplicationCommandOption[] = [
+  {
+    name: 'action',
+    description: 'What to configure',
+    type: ApplicationCommandOptionType.STRING,
+    required: true,
+    choices: [
+      { name: 'Configure roles', value: 'role' },
+      { name: 'Enable/disable a feature', value: 'feature' },
+      { name: 'Set the command prefix', value: 'prefix' },
+      { name: 'View current configuration', value: 'view' },
+      { name: 'Reset a setting', value: 'reset' },
+    ],
+  },
+  {
+    name: 'dj',
+    description: 'Set the DJ role for music commands (role)',
+    type: ApplicationCommandOptionType.ROLE,
+    required: false,
+  },
+  {
+    name: 'admin',
+    description: 'Set a role that can manage feeds and bot settings (role)',
+    type: ApplicationCommandOptionType.ROLE,
+    required: false,
+  },
+  {
+    name: 'clear',
+    description: 'Remove a configured role (role)',
+    type: ApplicationCommandOptionType.STRING,
+    required: false,
+    choices: [
+      { name: 'DJ Role', value: 'dj' },
+      { name: 'Admin Role', value: 'admin' },
+    ],
+  },
+  {
+    name: 'feature',
+    description: 'Feature to toggle (feature)',
+    type: ApplicationCommandOptionType.STRING,
+    required: false,
+    choices: [
+      { name: 'Feeds (RSS/Reddit/Free Games)', value: 'feeds' },
+      { name: 'Stream Alerts (YouTube/Twitch)', value: 'streamalerts' },
+      { name: 'Music (Lavalink)', value: 'music' },
+      { name: 'GIF Commands', value: 'gifs' },
+    ],
+  },
+  {
+    name: 'enabled',
+    description: 'Enable or disable the feature (feature)',
+    type: ApplicationCommandOptionType.BOOLEAN,
+    required: false,
+  },
+  {
+    name: 'value',
+    description: 'Prefix string e.g. "!", "?", "." — empty to reset (prefix)',
+    type: ApplicationCommandOptionType.STRING,
+    required: false,
+  },
+  {
+    name: 'reset_target',
+    description: 'What to reset (reset)',
+    type: ApplicationCommandOptionType.STRING,
+    required: false,
+    choices: [
+      { name: 'All Roles', value: 'roles' },
+      { name: 'All Features', value: 'features' },
+      { name: 'Prefix', value: 'prefix' },
+      { name: 'Everything', value: 'all' },
+    ],
+  },
+];
 
 export const setCommandDef: ApplicationCommand = {
   name: 'set',
-  description: 'Configure guild settings (channels, roles, permissions, features)',
+  description: 'Configure guild settings (roles, permissions, features)',
   default_member_permissions: '8',
   dm_permission: false,
-  options: [
-    {
-      name: 'channel',
-      description: 'Set delivery channel for a feed category',
-      type: ApplicationCommandOptionType.SUB_COMMAND,
-      options: [
-        {
-          name: 'category',
-          description: 'Feed category',
-          type: ApplicationCommandOptionType.STRING,
-          required: true,
-          choices: [
-            { name: 'RSS/Atom Feeds', value: 'rss' },
-            { name: 'Reddit Feeds', value: 'reddit' },
-            { name: 'Free Games', value: 'freegames' },
-            { name: 'Stream Alerts (YouTube/Twitch)', value: 'streamalerts' },
-          ],
-        },
-        {
-          name: 'channel',
-          description: 'Target text/announcement channel',
-          type: ApplicationCommandOptionType.CHANNEL,
-          required: false,
-          channel_types: [0, 5],
-        },
-        {
-          name: 'thread_channel',
-          description: 'Forum channel for thread delivery',
-          type: ApplicationCommandOptionType.CHANNEL,
-          required: false,
-          channel_types: [15],
-        },
-      ],
-    },
-    {
-      name: 'role',
-      description: 'Configure role-based permissions',
-      type: ApplicationCommandOptionType.SUB_COMMAND,
-      options: [
-        {
-          name: 'dj',
-          description: 'Set the DJ role for music commands',
-          type: ApplicationCommandOptionType.ROLE,
-          required: false,
-        },
-        {
-          name: 'admin',
-          description: 'Set a role that can manage feeds and bot settings',
-          type: ApplicationCommandOptionType.ROLE,
-          required: false,
-        },
-        {
-          name: 'clear',
-          description: 'Remove a configured role',
-          type: ApplicationCommandOptionType.STRING,
-          required: false,
-          choices: [
-            { name: 'DJ Role', value: 'dj' },
-            { name: 'Admin Role', value: 'admin' },
-          ],
-        },
-      ],
-    },
-    {
-      name: 'feature',
-      description: 'Enable or disable features for this guild',
-      type: ApplicationCommandOptionType.SUB_COMMAND,
-      options: [
-        {
-          name: 'name',
-          description: 'Feature to toggle',
-          type: ApplicationCommandOptionType.STRING,
-          required: true,
-          choices: [
-            { name: 'Feeds (RSS/Reddit/Free Games)', value: 'feeds' },
-            { name: 'Stream Alerts (YouTube/Twitch)', value: 'streamalerts' },
-            { name: 'Thread Delivery', value: 'threads' },
-            { name: 'Music (Lavalink)', value: 'music' },
-            { name: 'GIF Commands', value: 'gifs' },
-          ],
-        },
-        {
-          name: 'enabled',
-          description: 'Enable or disable the feature',
-          type: ApplicationCommandOptionType.BOOLEAN,
-          required: true,
-        },
-      ],
-    },
-    {
-      name: 'prefix',
-      description: 'Set a custom command prefix for this guild',
-      type: ApplicationCommandOptionType.SUB_COMMAND,
-      options: [
-        {
-          name: 'value',
-          description: 'Prefix string (e.g. "!", "?", ".") - empty to reset',
-          type: ApplicationCommandOptionType.STRING,
-          required: false,
-        },
-      ],
-    },
-    {
-      name: 'view',
-      description: 'View current guild configuration',
-      type: ApplicationCommandOptionType.SUB_COMMAND,
-    },
-    {
-      name: 'reset',
-      description: 'Reset a setting to default',
-      type: ApplicationCommandOptionType.SUB_COMMAND,
-      options: [
-        {
-          name: 'target',
-          description: 'What to reset',
-          type: ApplicationCommandOptionType.STRING,
-          required: true,
-          choices: [
-            { name: 'All Channels', value: 'channels' },
-            { name: 'All Roles', value: 'roles' },
-            { name: 'All Features', value: 'features' },
-            { name: 'Prefix', value: 'prefix' },
-            { name: 'Everything', value: 'all' },
-          ],
-        },
-      ],
-    },
-  ],
+  options: setOptions,
 };
 
-const FEED_CATEGORIES: readonly FeedCategory[] = ['rss', 'reddit', 'freegames', 'streamalerts'];
-
-const CATEGORY_LABELS: Record<FeedCategory, string> = {
-  rss: 'RSS / Atom Feeds',
-  reddit: 'Reddit Feeds',
-  freegames: 'Free Games',
-  streamalerts: 'Stream Alerts (YouTube/Twitch)',
-};
-
-const FEATURE_NAMES = ['feeds', 'streamalerts', 'threads', 'music', 'gifs'] as const;
-
-const FEATURE_LABELS: Record<(typeof FEATURE_NAMES)[number], string> = {
+const FEATURE_LABELS: Record<(typeof SET_FEATURE_NAMES)[number], string> = {
   feeds: 'Feeds (RSS/Reddit/Free Games)',
   streamalerts: 'Stream Alerts (YouTube/Twitch)',
-  threads: 'Thread Delivery',
   music: 'Music (Lavalink)',
   gifs: 'GIF Commands',
 };
 
-const RESET_TARGETS = ['channels', 'roles', 'features', 'prefix', 'all'] as const;
-
-const setHelp = (): InteractionResponse =>
-  commandHelpResponse({
-    name: 'set',
-    description: 'Configure guild settings (channels, roles, permissions, features)',
-    subcommands: [
-      { name: 'channel', description: 'Set delivery channel for a feed category', options: [] },
-      { name: 'role', description: 'Configure role-based permissions', options: [] },
-      { name: 'feature', description: 'Enable/disable features for this guild', options: [] },
-      { name: 'prefix', description: 'Set custom command prefix', options: [] },
-      { name: 'view', description: 'View current guild configuration', options: [] },
-      { name: 'reset', description: 'Reset a setting to default', options: [] },
-    ],
-    examples: [
-      '/set channel category:rss channel:#news',
-      '/set role dj:@MusicRole',
-      '/set feature name:music enabled:True',
-      '/set prefix value:!',
-      '/set view',
-      '/set reset target:channels',
-    ],
-  });
-
-function embedResponse(embed: DiscordEmbed): InteractionResponse {
-  return {
-    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-    data: { embeds: [embed] },
-  };
+function optionRaw(options: InteractionOption[], name: string): unknown {
+  return options.find((o) => o.name === name)?.value;
 }
 
-function errorResponse(title: string, description: string): InteractionResponse {
-  return embedResponse(
-    createEmbed({
-      color: EMBED_COLORS.ERROR,
-      title: `❌ ${title}`,
-      description,
-    }),
-  );
+function optionValue(options: InteractionOption[], name: string): string {
+  return String(optionRaw(options, name) ?? '').trim();
+}
+
+function usageEmbed(deps: AppDeps): InteractionResponse {
+  return EmbedHandler.for(deps)
+    .info()
+    .title('Set Command Usage', '⚙️')
+    .description('Use `/set` with one of the actions below.')
+    .field('🎭 role', '`/set action:role dj:@MusicRole` · `admin:@Staff` · `clear:dj`', false)
+    .field('⚙️ feature', '`/set action:feature feature:music enabled:True`', false)
+    .field('🔤 prefix', '`/set action:prefix value:!`', false)
+    .field('👁️ view', '`/set action:view`', false)
+    .field('♻️ reset', '`/set action:reset reset_target:roles`', false)
+    .respond();
 }
 
 export async function handleSetCommand(
@@ -214,20 +134,17 @@ export async function handleSetCommand(
 ): Promise<InteractionResponse> {
   const guildId = interaction.guild_id;
   if (!guildId) {
-    return errorResponse('Server Settings Only', '`/set` can only be used inside a Discord server (guild).');
-  }
-
-  const subCommand = interaction.data?.options?.[0];
-  if (!subCommand) {
-    return setHelp();
+    return EmbedHandler.for(deps)
+      .error()
+      .title('Server Settings Only')
+      .description('`/set` can only be used inside a Discord server (guild).')
+      .respond(true);
   }
 
   const user = deps.repo.getOrCreateGuildUser(guildId);
-  const options = subCommand.options ?? [];
+  const options = interaction.data?.options ?? [];
 
-  switch (subCommand.name) {
-    case 'channel':
-      return handleSetChannel(user.id, guildId, options, deps);
+  switch (optionValue(options, 'action')) {
     case 'role':
       return handleSetRole(user.id, guildId, options, deps);
     case 'feature':
@@ -239,49 +156,8 @@ export async function handleSetCommand(
     case 'reset':
       return handleSetReset(user.id, guildId, options, deps);
     default:
-      return errorResponse('Unknown Subcommand', `\`${subCommand.name}\` is not a valid \`/set\` subcommand.`);
+      return usageEmbed(deps);
   }
-}
-
-function handleSetChannel(
-  userId: number,
-  guildId: string,
-  options: InteractionOption[],
-  deps: AppDeps,
-): InteractionResponse {
-  const rawCategory = String(options.find((o) => o.name === 'category')?.value ?? '').trim();
-  const channelId = String(options.find((o) => o.name === 'channel')?.value ?? '').trim() || null;
-  const threadChannelId = String(options.find((o) => o.name === 'thread_channel')?.value ?? '').trim() || null;
-
-  const category = (FEED_CATEGORIES as readonly string[]).includes(rawCategory) ? (rawCategory as FeedCategory) : null;
-
-  if (!category || (!channelId && !threadChannelId)) {
-    return setHelp();
-  }
-
-  if (channelId && threadChannelId) {
-    return errorResponse(
-      'Choose One Only',
-      'Pick **either** a text channel **or** a forum thread channel — not both. Run `/set channel` again with only one of `channel` / `thread_channel`.',
-    );
-  }
-
-  deps.repo.setGuildCategoryTarget(guildId, category, channelId, threadChannelId);
-  deps.repo.logActivity(
-    userId,
-    'info',
-    'bot',
-    `Set ${category} delivery target (${channelId ? `channel ${channelId}` : `threads ${threadChannelId}`}) for guild ${guildId} via /set`,
-  );
-
-  return embedResponse(
-    successEmbed(
-      'New Delivery Target Set',
-      threadChannelId
-        ? `**${CATEGORY_LABELS[category]}** will now be delivered as threads in <#${threadChannelId}>.`
-        : `**${CATEGORY_LABELS[category]}** will now be delivered to <#${channelId}>.`,
-    ),
-  );
 }
 
 function handleSetRole(
@@ -290,12 +166,12 @@ function handleSetRole(
   options: InteractionOption[],
   deps: AppDeps,
 ): InteractionResponse {
-  const djRole = String(options.find((o) => o.name === 'dj')?.value ?? '').trim();
-  const adminRole = String(options.find((o) => o.name === 'admin')?.value ?? '').trim();
-  const clear = String(options.find((o) => o.name === 'clear')?.value ?? '').trim();
+  const djRole = optionValue(options, 'dj');
+  const adminRole = optionValue(options, 'admin');
+  const clear = optionValue(options, 'clear');
 
   if (!djRole && !adminRole && !clear) {
-    return setHelp();
+    return usageEmbed(deps);
   }
 
   const changes: string[] = [];
@@ -323,19 +199,15 @@ function handleSetRole(
   }
 
   if (changes.length === 0) {
-    return embedResponse(
-      createEmbed({
-        color: EMBED_COLORS.WARNING,
-        title: '⚠️ No Role Changes',
-        description: 'There are no roles configured that match your request.',
-      }),
-    );
+    return EmbedHandler.for(deps)
+      .warning()
+      .title('No Role Changes', '⚠️')
+      .description('There are no roles configured that match your request.')
+      .respond();
   }
 
   deps.repo.logActivity(userId, 'info', 'bot', `Updated guild roles for ${guildId} via /set role`);
-  return embedResponse(
-    successEmbed('Roles Updated', undefined, [{ name: 'Changes', value: changes.join('\n'), inline: false }]),
-  );
+  return EmbedHandler.for(deps).success().title('Roles Updated').section('Changes', changes.join('\n')).respond();
 }
 
 function handleSetFeature(
@@ -344,24 +216,16 @@ function handleSetFeature(
   options: InteractionOption[],
   deps: AppDeps,
 ): InteractionResponse {
-  const rawName = String(options.find((o) => o.name === 'name')?.value ?? '').trim();
-  const enabledOption = options.find((o) => o.name === 'enabled')?.value;
+  const rawName = optionValue(options, 'feature');
+  const enabledOption = optionRaw(options, 'enabled');
 
-  if (!(FEATURE_NAMES as readonly string[]).includes(rawName) || enabledOption === undefined) {
-    return setHelp();
+  if (!(SET_FEATURE_NAMES as readonly string[]).includes(rawName) || enabledOption === undefined) {
+    return usageEmbed(deps);
   }
 
-  const name = rawName as (typeof FEATURE_NAMES)[number];
+  const name = rawName as (typeof SET_FEATURE_NAMES)[number];
   const enabled = Boolean(enabledOption);
   deps.repo.setGuildSetting(guildId, `feature_${name}`, enabled ? '1' : '0');
-
-  if (name === 'threads') {
-    const binding = deps.repo.getGuildBinding(guildId);
-    deps.repo.setGuildThreadConfig(guildId, {
-      threadsEnabled: enabled,
-      forumChannelIds: binding?.forumChannelIds ?? [],
-    });
-  }
 
   deps.repo.logActivity(
     userId,
@@ -370,12 +234,11 @@ function handleSetFeature(
     `${enabled ? 'Enabled' : 'Disabled'} feature "${name}" for guild ${guildId} via /set`,
   );
 
-  return embedResponse(
-    successEmbed(
-      `Feature ${enabled ? 'Enabled' : 'Disabled'}`,
-      `**${FEATURE_LABELS[name]}** is now ${enabled ? '**enabled**' : '**disabled**'} for this server.`,
-    ),
-  );
+  return EmbedHandler.for(deps)
+    .success()
+    .title(`Feature ${enabled ? 'Enabled' : 'Disabled'}`)
+    .description(`**${FEATURE_LABELS[name]}** is now ${enabled ? '**enabled**' : '**disabled**'} for this server.`)
+    .respond();
 }
 
 function handleSetPrefix(
@@ -384,79 +247,54 @@ function handleSetPrefix(
   options: InteractionOption[],
   deps: AppDeps,
 ): InteractionResponse {
-  const raw = String(options.find((o) => o.name === 'value')?.value ?? '').trim();
-  const value = raw.slice(0, 16);
+  const value = optionValue(options, 'value').slice(0, 16);
 
   if (!value) {
     deps.repo.setGuildSetting(guildId, 'prefix', '');
     deps.repo.logActivity(userId, 'info', 'bot', `Cleared command prefix for guild ${guildId} via /set`);
-    return embedResponse(successEmbed('Prefix Cleared', 'This server no longer uses a custom command prefix.'));
+    return EmbedHandler.for(deps)
+      .success()
+      .title('Prefix Cleared')
+      .description('This server no longer uses a custom command prefix.')
+      .respond();
   }
 
   deps.repo.setGuildSetting(guildId, 'prefix', value);
   deps.repo.logActivity(userId, 'info', 'bot', `Set command prefix to "${value}" for guild ${guildId} via /set`);
 
-  return embedResponse(
-    successEmbed(
-      'Prefix Updated',
+  return EmbedHandler.for(deps)
+    .success()
+    .title('Prefix Updated')
+    .description(
       `Custom command prefix is now \`${value}\`. Leave the value empty to reset to slash-commands-only mode.`,
-    ),
-  );
+    )
+    .respond();
 }
 
 function handleSetView(userId: number, guildId: string, deps: AppDeps): InteractionResponse {
   const binding = deps.repo.getGuildBinding(guildId);
-  const targets = deps.repo.getGuildCategoryTargets(guildId);
   const djRole = deps.repo.getGuildSetting(guildId, 'dj_role_id');
   const adminRole = deps.repo.getGuildSetting(guildId, 'admin_role_id');
   const prefix = deps.repo.getGuildSetting(guildId, 'prefix');
   const guildName = (binding?.name || '').trim() || 'this server';
 
-  const channelLines = FEED_CATEGORIES.map((category) => {
-    const target = targets.find((t) => t.category === category);
-    if (!target || (!target.channelId && !target.threadChannelId)) {
-      return `**${CATEGORY_LABELS[category]}:** Not configured`;
-    }
-    if (target.threadChannelId) {
-      return `**${CATEGORY_LABELS[category]}:** Threads in <#${target.threadChannelId}>`;
-    }
-    return `**${CATEGORY_LABELS[category]}:** <#${target.channelId}>`;
-  });
-
-  const featureLines = FEATURE_NAMES.map(
+  const featureLines = SET_FEATURE_NAMES.map(
     (name) => `${deps.repo.getGuildSetting(guildId, `feature_${name}`) === '1' ? '✅' : '⬜'} ${FEATURE_LABELS[name]}`,
   );
 
-  const forumLine = binding
-    ? binding.threadsEnabled
-      ? `Enabled${
-          binding.forumChannelIds.length
-            ? ` (forums: ${binding.forumChannelIds.map((id) => `<#${id}>`).join(', ')})`
-            : ' (forum: per-category or env default)'
-        }`
-      : 'Disabled'
-    : 'Disabled';
-
   deps.repo.logActivity(userId, 'info', 'bot', `Viewed guild config for ${guildId} via /set view`);
 
-  return embedResponse(
-    createEmbed({
-      color: EMBED_COLORS.INFO,
-      title: `⚙️ ${guildName} — Guild Configuration`,
-      fields: [
-        { name: '📨 Category Delivery', value: channelLines.join('\n'), inline: false },
-        {
-          name: '🎭 Roles',
-          value: `**DJ:** ${djRole ? `<@&${djRole}>` : 'Not set'}\n**Admin:** ${adminRole ? `<@&${adminRole}>` : 'Not set'}`,
-          inline: false,
-        },
-        { name: '⚙️ Features', value: featureLines.join('\n'), inline: false },
-        { name: '🧵 Thread Delivery', value: forumLine, inline: false },
-        { name: '🔤 Command Prefix', value: prefix ? `\`${prefix}\`` : 'Slash commands only', inline: false },
-      ],
-      footer: { text: `${appDisplayName(deps)} • /set view` },
-    }),
-  );
+  return EmbedHandler.for(deps)
+    .info()
+    .title(`${guildName} — Guild Configuration`, '⚙️')
+    .section(
+      '🎭 Roles',
+      `**DJ:** ${djRole ? `<@&${djRole}>` : 'Not set'}\n**Admin:** ${adminRole ? `<@&${adminRole}>` : 'Not set'}`,
+    )
+    .section('⚙️ Features', featureLines.join('\n'))
+    .section('🔤 Command Prefix', prefix ? `\`${prefix}\`` : 'Slash commands only')
+    .footer('Guild Configuration')
+    .respond();
 }
 
 function handleSetReset(
@@ -465,20 +303,13 @@ function handleSetReset(
   options: InteractionOption[],
   deps: AppDeps,
 ): InteractionResponse {
-  const rawTarget = String(options.find((o) => o.name === 'target')?.value ?? '').trim();
+  const rawTarget = optionValue(options, 'reset_target');
 
-  if (!(RESET_TARGETS as readonly string[]).includes(rawTarget)) {
-    return setHelp();
+  if (!(SET_RESET_TARGETS as readonly string[]).includes(rawTarget)) {
+    return usageEmbed(deps);
   }
 
   const details: string[] = [];
-
-  if (rawTarget === 'channels' || rawTarget === 'all') {
-    for (const category of FEED_CATEGORIES) {
-      deps.repo.setGuildCategoryTarget(guildId, category, null, null);
-    }
-    details.push('Cleared all category delivery channels.');
-  }
 
   if (rawTarget === 'roles' || rawTarget === 'all') {
     deps.repo.setGuildSetting(guildId, 'dj_role_id', '');
@@ -487,7 +318,7 @@ function handleSetReset(
   }
 
   if (rawTarget === 'features' || rawTarget === 'all') {
-    for (const name of FEATURE_NAMES) {
+    for (const name of SET_FEATURE_NAMES) {
       deps.repo.setGuildSetting(guildId, `feature_${name}`, '');
     }
     details.push('Cleared all feature toggles.');
@@ -498,20 +329,97 @@ function handleSetReset(
     details.push('Cleared the custom command prefix.');
   }
 
-  if (rawTarget === 'all') {
-    deps.repo.setGuildThreadConfig(guildId, { threadsEnabled: false, forumChannelIds: [] });
-    details.push('Disabled thread delivery.');
-  }
-
   deps.repo.logActivity(userId, 'info', 'bot', `Reset "${rawTarget}" settings for guild ${guildId} via /set`);
 
-  return embedResponse(
-    successEmbed('Settings Reset', details.join('\n'), [
-      {
-        name: 'Reset Scope',
-        value: rawTarget === 'all' ? 'Everything' : `\`${rawTarget}\``,
-        inline: false,
-      },
-    ]),
-  );
+  return EmbedHandler.for(deps)
+    .success()
+    .title('Settings Reset')
+    .description(details.join('\n'))
+    .section('Reset Scope', rawTarget === 'all' ? 'Everything' : `\`${rawTarget}\``)
+    .respond();
 }
+
+registerCommandMetadata({
+  name: 'set',
+  description: 'Configure guild settings (roles, permissions, features)',
+  category: 'admin',
+  emoji: '🛡️',
+  usage: '/set <action> [options]',
+  options: [
+    {
+      name: 'action',
+      description: 'What to configure',
+      type: 3,
+      required: true,
+      choices: [
+        { name: 'Configure roles', value: 'role' },
+        { name: 'Enable/disable a feature', value: 'feature' },
+        { name: 'Set the command prefix', value: 'prefix' },
+        { name: 'View current configuration', value: 'view' },
+        { name: 'Reset a setting', value: 'reset' },
+      ],
+    },
+    { name: 'dj', description: 'Set the DJ role for music commands (role)', type: 8, required: false },
+    {
+      name: 'admin',
+      description: 'Set a role that can manage feeds and bot settings (role)',
+      type: 8,
+      required: false,
+    },
+    {
+      name: 'clear',
+      description: 'Remove a configured role (role)',
+      type: 3,
+      required: false,
+      choices: [
+        { name: 'DJ Role', value: 'dj' },
+        { name: 'Admin Role', value: 'admin' },
+      ],
+    },
+    {
+      name: 'feature',
+      description: 'Feature to toggle (feature)',
+      type: 3,
+      required: false,
+      choices: [
+        { name: 'Feeds (RSS/Reddit/Free Games)', value: 'feeds' },
+        { name: 'Stream Alerts (YouTube/Twitch)', value: 'streamalerts' },
+        { name: 'Music (Lavalink)', value: 'music' },
+        { name: 'GIF Commands', value: 'gifs' },
+      ],
+    },
+    { name: 'enabled', description: 'Enable or disable the feature (feature)', type: 5, required: false },
+    {
+      name: 'value',
+      description: 'Prefix string e.g. "!", "?", "." — empty to reset (prefix)',
+      type: 3,
+      required: false,
+    },
+    {
+      name: 'reset_target',
+      description: 'What to reset (reset)',
+      type: 3,
+      required: false,
+      choices: [
+        { name: 'All Roles', value: 'roles' },
+        { name: 'All Features', value: 'features' },
+        { name: 'Prefix', value: 'prefix' },
+        { name: 'Everything', value: 'all' },
+      ],
+    },
+  ],
+  examples: [
+    '/set action:role dj:@MusicRole',
+    '/set action:feature feature:music enabled:True',
+    '/set action:prefix value:!',
+    '/set action:view',
+    '/set action:reset reset_target:roles',
+  ],
+});
+
+export const setCommand: BotCommand = {
+  def: setCommandDef,
+  category: 'admin',
+  isEnabled: (deps) => Boolean(deps.config.features.administrationEnabled),
+  execute: handleSetCommand,
+};

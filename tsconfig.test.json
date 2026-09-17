@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    // Tests and vitest config live outside src/, so rootDir must be relaxed.
+    // We set rootDir to the project root so both src/ and tests/ are valid.
+    "rootDir": ".",
+    // Do not emit compiled output — tsc is used for type-checking only.
+    "noEmit": true,
+    // Vitest provides its own globals (describe, it, expect) — no extra @types needed.
+    "types": ["node", "vitest/globals"]
+  },
+  "include": ["src/**/*.ts", "tests/**/*.ts", "vitest.config.ts"],
+  "exclude": ["node_modules", "dist"]
+}

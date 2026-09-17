@@ -2,11 +2,10 @@ import type { AppDeps } from '../../app.js';
 import { readBodyJson, sendError, sendJson } from '../http/helpers.js';
 import type { Router } from '../http/router.js';
 import { canUserManageGuild, requireDashboardUser } from './shared.js';
-import type { FeedCategory } from '../../state/types.js';
+import { getAllCommands, isCommandDisabled } from '../../bot/handlers/registry.js';
+import { loadAllCommands } from '../../bot/handlers/loader.js';
 
-const VALID_CATEGORIES: FeedCategory[] = ['rss', 'reddit', 'freegames', 'streamalerts'];
-
-const FEATURE_NAMES = ['feeds', 'streamalerts', 'threads', 'music', 'gifs'] as const;
+const FEATURE_NAMES = ['feeds', 'streamalerts', 'music', 'gifs'] as const;
 
 export function registerGuildRoutes(router: Router<AppDeps>): void {
   router.add('GET', '/api/guilds', async (req, res, _ctx, d) => {
@@ -29,7 +28,7 @@ export function registerGuildRoutes(router: Router<AppDeps>): void {
     }
   });
 
-  router.add('GET', '/api/guilds/:guildId/categories', async (req, res, ctx, d) => {
+  router.add('GET', '/api/guilds/:guildId/channels', async (req, res, ctx, d) => {
     const userId = await requireDashboardUser(req, res, d);
     if (userId === null) return;
 
@@ -53,79 +52,15 @@ export function registerGuildRoutes(router: Router<AppDeps>): void {
         .filter((ch) => ch.type === 15)
         .map((ch) => ({ id: ch.id, name: ch.name, type: ch.type }));
 
-      const targets = d.repo.getGuildCategoryTargets(guildId);
-      const categories = VALID_CATEGORIES.map((category) => {
-        const target = targets.find((t) => t.category === category);
-        return {
-          category,
-          channelId: target?.channelId ?? null,
-          threadChannelId: target?.threadChannelId ?? null,
-        };
-      });
-
       sendJson(res, 200, {
         guildId,
         name: guild.name,
         icon: guild.icon,
-        categories,
         textChannels,
         forumChannels,
       });
     } catch (err) {
-      sendError(res, 500, err instanceof Error ? err.message : 'Failed to fetch guild categories');
-    }
-  });
-
-  router.add('PUT', '/api/guilds/:guildId/categories/:category', async (req, res, ctx, d) => {
-    const userId = await requireDashboardUser(req, res, d);
-    if (userId === null) return;
-
-    const guildId = ctx.params['guildId'];
-    const category = ctx.params['category'];
-    if (!guildId) return sendError(res, 400, 'guildId is required');
-    if (!VALID_CATEGORIES.includes(category as FeedCategory)) {
-      return sendError(res, 400, 'Invalid category. Must be rss, reddit, freegames, or streamalerts.');
-    }
-    if (!d.bot) return sendError(res, 400, 'Discord bot is not enabled');
-    if (!canUserManageGuild(userId, guildId, d)) {
-      return sendError(res, 403, 'Forbidden: You cannot manage this server.');
-    }
-
-    const body = (await readBodyJson(req)) as {
-      channelId?: string | null;
-      threadChannelId?: string | null;
-    };
-
-    const channelId = body.channelId === undefined ? null : body.channelId ? String(body.channelId).trim() : null;
-    const threadChannelId =
-      body.threadChannelId === undefined ? null : body.threadChannelId ? String(body.threadChannelId).trim() : null;
-
-    if (channelId && threadChannelId) {
-      return sendError(res, 400, 'Choose one only: pick either a text channel or a forum thread channel, not both.');
-    }
-
-    try {
-      const allChannels = await d.bot.getGuildChannelsAll(guildId).catch(() => []);
-      const validTextIds = new Set(allChannels.filter((ch) => ch.type === 0 || ch.type === 5).map((ch) => ch.id));
-      const validForumIds = new Set(allChannels.filter((ch) => ch.type === 15).map((ch) => ch.id));
-
-      if (channelId && !validTextIds.has(channelId)) {
-        return sendError(res, 400, `Channel ${channelId} is not a valid text channel in this server.`);
-      }
-      if (threadChannelId && !validForumIds.has(threadChannelId)) {
-        return sendError(res, 400, `Channel ${threadChannelId} is not a valid forum channel in this server.`);
-      }
-
-      const updated = d.repo.setGuildCategoryTarget(guildId, category as FeedCategory, channelId, threadChannelId);
-      d.repo.logActivity(
-        userId,
-        'info',
-        'guild-categories',
-        `Updated ${category} target for guild "${guildId}" (channel=${channelId ?? 'none'}, thread=${threadChannelId ?? 'none'}).`,
-      );
-      sendJson(res, 200, updated);
-    } catch (err) {
-      sendError(res, 500, err instanceof Error ? err.message : 'Failed to save category target');
+      sendError(res, 500, err instanceof Error ? err.message : 'Failed to fetch guild channels');
     }
   });
 
@@ -145,7 +80,6 @@ export function registerGuildRoutes(router: Router<AppDeps>): void {
       const guild = allGuilds.find((g) => g.id === guildId);
       if (!guild) return sendError(res, 404, 'Guild not found');
 
-      const binding = d.repo.getGuildBinding(guildId);
       const roles = {
         djRoleId: d.repo.getGuildSetting(guildId, 'dj_role_id') || null,
         adminRoleId: d.repo.getGuildSetting(guildId, 'admin_role_id') || null,
@@ -165,27 +99,24 @@ export function registerGuildRoutes(router: Router<AppDeps>): void {
         .filter((ch) => ch.type === 15)
         .map((ch) => ({ id: ch.id, name: ch.name, type: ch.type }));
 
-      const targets = d.repo.getGuildCategoryTargets(guildId);
-      const categories = VALID_CATEGORIES.map((category) => {
-        const target = targets.find((t) => t.category === category);
-        return {
-          category,
-          channelId: target?.channelId ?? null,
-          threadChannelId: target?.threadChannelId ?? null,
-        };
-      });
+      await loadAllCommands();
+      const allCommands = getAllCommands();
+      const commands = allCommands.map((c) => ({
+        name: c.def.name,
+        category: c.category,
+        description: c.def.description,
+        disabled: isCommandDisabled(guildId, c.def.name, d),
+      }));
 
       sendJson(res, 200, {
         guildId,
         name: guild.name,
         icon: guild.icon,
-        threadsEnabled: Boolean(binding?.threadsEnabled),
-        forumChannelIds: binding?.forumChannelIds ?? [],
         roles,
         prefix,
         features,
+        commands,
         guildRoles,
-        categories,
         textChannels,
         forumChannels,
       });
@@ -210,15 +141,12 @@ export function registerGuildRoutes(router: Router<AppDeps>): void {
       adminRoleId?: string | null;
       prefix?: string | null;
       features?: Record<string, boolean>;
-      threadsEnabled?: boolean;
-      forumChannelIds?: string[];
+      commands?: Record<string, boolean>;
     };
 
     try {
       const guildRoles = await d.bot.getGuildRoles(guildId);
       const roleIds = new Set(guildRoles.map((r) => r.id));
-      const allChannels = await d.bot.getGuildChannelsAll(guildId).catch(() => []);
-      const forumIds = new Set(allChannels.filter((ch) => ch.type === 15).map((ch) => ch.id));
 
       if (body.djRoleId) {
         const id = String(body.djRoleId).trim();
@@ -257,33 +185,14 @@ export function registerGuildRoutes(router: Router<AppDeps>): void {
           d.repo.setGuildSetting(guildId, `feature_${name}`, enabled ? '1' : '0');
           changes.push(`${name} ${enabled ? 'enabled' : 'disabled'}`);
         }
-
-        if (typeof body.features['threads'] === 'boolean') {
-          const binding = d.repo.getGuildBinding(guildId);
-          d.repo.setGuildThreadConfig(guildId, {
-            threadsEnabled: body.features['threads'],
-            forumChannelIds: binding?.forumChannelIds ?? [],
-          });
-        }
       }
 
-      if (body.threadsEnabled !== undefined || body.forumChannelIds !== undefined) {
-        const forumChannelIds = Array.isArray(body.forumChannelIds)
-          ? body.forumChannelIds.map((id) => String(id).trim()).filter((id) => id.length > 0)
-          : (d.repo.getGuildBinding(guildId)?.forumChannelIds ?? []);
-        const unknown = forumChannelIds.filter((id) => !forumIds.has(id));
-        if (unknown.length > 0) {
-          return sendError(res, 400, `Forum channel ${unknown[0]} is not a valid forum channel in this server.`);
+      if (body.commands) {
+        for (const [name, enabled] of Object.entries(body.commands)) {
+          const cmdName = name.toLowerCase().replace(/^\//, '');
+          d.repo.setGuildSetting(guildId, `cmd_disabled_${cmdName}`, enabled ? '0' : '1');
+          changes.push(`command /${cmdName} ${enabled ? 'enabled' : 'disabled'}`);
         }
-        const threadsEnabled =
-          body.threadsEnabled !== undefined
-            ? Boolean(body.threadsEnabled)
-            : Boolean(d.repo.getGuildBinding(guildId)?.threadsEnabled);
-        d.repo.setGuildThreadConfig(guildId, { threadsEnabled, forumChannelIds });
-        d.repo.setGuildSetting(guildId, 'feature_threads', threadsEnabled ? '1' : '0');
-        changes.push(
-          `Thread delivery ${threadsEnabled ? 'enabled' : 'disabled'} (${forumChannelIds.length} forum channel${forumChannelIds.length === 1 ? '' : 's'})`,
-        );
       }
 
       d.repo.logActivity(

@@ -1,0 +1,137 @@
+export function renderSourcesTabs(): string {
+  return `
+    <!-- TAB: REDDIT -->
+    <section id="tab-reddit" class="tab-pane">
+      <div>
+        <div class="section-title"><i class="fa-brands fa-reddit" style="color: #ff4500;"></i> Reddit Feeds</div>
+        <div class="section-desc">Subreddit image and post streams delivered straight to channels or forum threads.</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title" style="font-size: 0.9375rem;"><i class="fa-brands fa-reddit" style="color: #ff4500;"></i> Add Reddit Feed</div>
+        <div class="form-grid" style="margin-top: 0.75rem;">
+          <div class="form-group">
+            <label class="form-label">Subreddit</label>
+            <input type="text" id="add-reddit-sub" placeholder="e.g. wallpapers" oninput="handleRedditSubInput(this.value)">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Display Name (optional)</label>
+            <input type="text" id="add-reddit-name" placeholder="Reddit · r/wallpapers">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Delivery Target</label>
+            <select id="add-reddit-target" class="form-input">
+              <option value="">(none)</option>
+            </select>
+            <span style="font-size: 0.6875rem; color: var(--text-dim); margin-top: 0.25rem; display: block;">Pick a channel, or a forum to auto-create one thread per feed.</span>
+          </div>
+        </div>
+        <div class="form-group" style="margin-top: 0.5rem;">
+          <label class="form-label" style="display: flex; align-items: center; gap: 0.5rem;">
+            <input type="checkbox" id="add-reddit-image-mode" checked>
+            <span>Pure image mode (images/GIFs only)</span>
+          </label>
+        </div>
+        <button onclick="submitAddRedditFeed()" class="btn btn-primary btn-sm btn-block" style="margin-top: 0.75rem; background: #ff4500; border-color: #ff4500;"><i class="fa-brands fa-reddit"></i> Add Reddit Feed</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title" style="font-size: 0.9375rem;"><i class="fa-brands fa-reddit" style="color: #ff4500;"></i> Reddit Feeds</div>
+        <div id="reddit-feeds-list" class="feed-list" style="margin-top: 0.75rem;">
+          <div class="empty-state">Loading feeds...</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB: FREE GAMES -->
+    <section id="tab-freegames" class="tab-pane">
+      <div>
+        <div class="section-title"><i class="fa-solid fa-gift" style="color: #10b981;"></i> Free Games</div>
+        <div class="section-desc">Automated giveaway alerts from Epic Games Store, Steam, GOG, and more.</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title" style="font-size: 0.9375rem;"><i class="fa-solid fa-gift" style="color: #10b981;"></i> Add Free Games Feed</div>
+        <div class="form-grid" style="margin-top: 0.75rem;">
+          <div class="form-group">
+            <label class="form-label">Platform</label>
+            <select id="add-freegames-platform" onchange="handleFreeGamesPlatformChange(this.value)">
+              <option value="all">All Platforms</option>
+              <option value="epic">Epic Games Store</option>
+              <option value="steam">Steam Giveaways</option>
+              <option value="gog">GOG Promotions</option>
+              <option value="indiegala">IndieGala Freebies</option>
+              <option value="humble">Humble Bundle</option>
+              <option value="itchio">Itch.io Freebies</option>
+              <option value="ubisoft">Ubisoft Giveaways</option>
+              <option value="prime">Prime Gaming</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Display Name (optional)</label>
+            <input type="text" id="add-freegames-name" placeholder="Free Games · All Stores">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Delivery Target</label>
+            <select id="add-freegames-target" class="form-input">
+              <option value="">(none)</option>
+            </select>
+            <span style="font-size: 0.6875rem; color: var(--text-dim); margin-top: 0.25rem; display: block;">Pick a channel, or a forum to auto-create one thread per feed.</span>
+          </div>
+        </div>
+        <button onclick="submitAddFreeGamesFeed()" class="btn btn-primary btn-sm btn-block" style="margin-top: 0.75rem; background: #10b981; border-color: #10b981;"><i class="fa-solid fa-gift"></i> Add Free Games Feed</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title" style="font-size: 0.9375rem;"><i class="fa-solid fa-list-check" style="color: #10b981;"></i> Free Games Feeds</div>
+        <div id="freegames-feeds-list" class="feed-list" style="margin-top: 0.75rem;">
+          <div class="empty-state">Loading feeds...</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB: STREAM ALERTS -->
+    <section id="tab-streamalerts" class="tab-pane">
+      <div>
+        <div class="section-title"><i class="fa-solid fa-satellite-dish" style="color: #9146ff;"></i> Stream Alerts</div>
+        <div class="section-desc">YouTube uploads &amp; Twitch live stream notifications delivered to your community.</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title" style="font-size: 0.9375rem;"><i class="fa-solid fa-video" style="color: #9146ff;"></i> Add Stream Alert Feed</div>
+        <div class="form-grid" style="margin-top: 0.75rem;">
+          <div class="form-group">
+            <label class="form-label">Platform</label>
+            <select id="add-streamalerts-platform" onchange="handleStreamAlertsPlatformChange(this.value)">
+              <option value="youtube">YouTube</option>
+              <option value="twitch">Twitch</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Channel Handle</label>
+            <input type="text" id="add-streamalerts-handle" placeholder="e.g. @channel or twitch.tv/name">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Display Name (optional)</label>
+            <input type="text" id="add-streamalerts-name" placeholder="YouTube · @channel">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Delivery Target</label>
+            <select id="add-streamalerts-target" class="form-input">
+              <option value="">(none)</option>
+            </select>
+            <span style="font-size: 0.6875rem; color: var(--text-dim); margin-top: 0.25rem; display: block;">Pick a channel, or a forum to auto-create one thread per feed.</span>
+          </div>
+        </div>
+        <button onclick="submitAddStreamAlertFeed()" class="btn btn-primary btn-sm btn-block" style="margin-top: 0.75rem; background: #9146ff; border-color: #9146ff;"><i class="fa-solid fa-video"></i> Add Stream Alert</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title" style="font-size: 0.9375rem;"><i class="fa-solid fa-tower-broadcast" style="color: #9146ff;"></i> Stream Alert Feeds</div>
+        <div id="streamalerts-feeds-list" class="feed-list" style="margin-top: 0.75rem;">
+          <div class="empty-state">Loading feeds...</div>
+        </div>
+      </div>
+    </section>
+  `;
+}

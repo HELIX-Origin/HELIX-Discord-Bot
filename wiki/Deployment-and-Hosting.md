@@ -1,8 +1,8 @@
 # 🚀 Deployment & Hosting Guide
 
-HELIX Discord Bot is optimized for self-hosted deployments on **Docker**, **Linux VPS**, and bare metal with native SSL. Cloud PaaS platforms are intentionally not supported.
+HELIX Discord Bot is optimized for self-hosted deployments on **Docker**, **Linux VPS**, and bare metal (with SSL handled by reverse proxies like Nginx/Caddy or the host system). Cloud PaaS platforms are intentionally not supported.
 
-> **Music Playback Requirement**: If `LAVA_EMBEDDED=true` (default), the embedded Lavalink node requires **Java 21+** and a `Lavalink.jar` file placed in the project root next to `application.yml`. The npm package `@helix-origin/lavalink-server` downloads and manages the JAR automatically on startup.
+> **Music Playback**: Connects to an external Lavalink v4 server. Configure `LAVA_HOST`, `LAVA_PORT`, `LAVA_PASS`, and `LAVA_SECURE` in `.env`.
 
 ---
 
@@ -23,8 +23,6 @@ services:
       - "3131:3131"
     volumes:
       - ./data:/app/data
-      - ./Lavalink.jar:/app/Lavalink.jar
-      - ./application.yml:/app/application.yml
     env_file:
       - path: .env
         required: false
@@ -32,7 +30,6 @@ services:
       - NODE_ENV=production
       - INTERNAL_URL=0.0.0.0
       - SQLITE_DATA=/app/data
-      - LAVA_EMBEDDED=true
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3131/health"]
       interval: 30s
@@ -40,8 +37,6 @@ services:
       retries: 3
       start_period: 10s
 ```
-
-> **Note**: The `Lavalink.jar` and `application.yml` are mounted as volumes so the embedded Lavalink server can access them. Ensure `Lavalink.jar` exists in the project root (downloaded automatically on first run if using `@helix-origin/lavalink-server`).
 
 ### 2. Launch Container
 ```bash
@@ -64,9 +59,6 @@ For hosting directly on an Ubuntu/Debian/Rocky Linux server:
 curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
 sudo apt-get install -y nodejs git
 
-# Install Java 21 (required for embedded Lavalink node)
-sudo apt-get install -y openjdk-21-jre-headless
-
 # Install PM2 globally
 sudo npm install -g pm2
 ```
@@ -81,8 +73,6 @@ npm run build
 cp .env.example .env
 nano .env  # Configure credentials
 ```
-
-> **Music Playback**: If using embedded Lavalink (`LAVA_EMBEDDED=true`), ensure `Lavalink.jar` is present in the project root (downloaded automatically by `@helix-origin/lavalink-server` on first startup) and `application.yml` is present. Java 21 must be installed.
 
 ### 3. Start with PM2
 ```bash

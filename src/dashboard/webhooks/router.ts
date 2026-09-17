@@ -30,6 +30,7 @@ export interface WebhookSubscription {
 export class WebhookRouter {
   private readonly logger;
   private subscriptions = new Map<string, WebhookSubscription>();
+  private readonly youtubeChannelIdCache = new Map<string, string>();
   private readonly deps: AppDeps;
   private readonly baseUrl: string;
   private bot: DiscordBot | null = null;
@@ -189,26 +190,12 @@ export class WebhookRouter {
   }
 
   private parseYouTubeContent(body: string): FeedEntry[] {
+    // Google's hub pushes the channel's Atom feed (XML), not JSON. The atom
+    // parser extracts title/link/author/date; normalize the <yt:video:ID> id
+    // to the bare video id so webhook delivery dedupes against polling.
     try {
-      const data = JSON.parse(body);
-      const entries: FeedEntry[] = [];
-
-      if (data.items) {
-        for (const item of data.items) {
-          if (item.snippet) {
-            entries.push({
-              id: item.id.videoId || item.id,
-              title: item.snippet.title,
-              link: `https://www.youtube.com/watch?v=${item.id.videoId || item.id}`,
-              publishedAt: item.snippet.publishedAt,
-              author: item.snippet.channelTitle,
-              description: item.snippet.description,
-              imageUrl: item.snippet.thumbnails?.high?.url || item.snippet.thumbnails?.default?.url,
-            });
-          }
-        }
-      }
-      return entries;
+      const parsed = parseFeed(body);
+      return parsed.entries.map((e) => ({ ...e, id: e.id.replace(/^yt:video:/, '') }));
     } catch {
       return [];
     }
@@ -282,7 +269,7 @@ export class WebhookRouter {
   private async deliverToTargets(feed: Feed, embed: unknown): Promise<boolean> {
     const payload = { embeds: [embed] };
 
-    if (this.threads) {
+    if (this.threads && (feed.forumChannelId || feed.threadChannelId)) {
       const outcome = await this.threads.deliver(feed, payload);
       if (outcome.mode === 'thread') {
         if (outcome.delivered && outcome.threadId) {
@@ -298,7 +285,7 @@ export class WebhookRouter {
       }
     }
 
-    const { channelId } = resolveFeedTargets(this.deps.repo, feed);
+    const { channelId } = resolveFeedTargets(feed);
     if (!this.bot || !channelId) {
       this.logger.warn('No Discord bot or channel target for webhook entry', { feedId: feed.id });
       return false;
@@ -314,7 +301,7 @@ export class WebhookRouter {
   }
 
   async subscribeToFeed(feed: Feed): Promise<boolean> {
-    const topic = this.getTopicForFeed(feed);
+    const topic = await this.getTopicForFeed(feed);
     if (!topic) return false;
 
     const existing = this.subscriptions.get(topic);
@@ -368,14 +355,18 @@ export class WebhookRouter {
     }
   }
 
-  private getTopicForFeed(feed: Feed): string | null {
+  private async getTopicForFeed(feed: Feed): Promise<string | null> {
     if (feed.feedType === 'youtube') {
-      const handle = this.channelHandle(feed.url, /(?:channel\/|user\/|c\/|@)([^/?]+)/);
-      return `https://www.youtube.com/feeds/videos.xml?channel_id=${encodeURIComponent(handle)}`;
+      // Google's PubSubHubbub only accepts youtube/xml feed topics whose
+      // channel_id is a real channel ID (UC...). Handles/custom names never
+      // work, so resolve the ID from the channel page (cached per URL).
+      const channelId = await this.resolveYouTubeChannelId(feed.url);
+      if (!channelId) return null;
+      return `https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`;
     }
     if (feed.feedType === 'twitch') {
-      const handle = this.channelHandle(feed.url, /twitch\.tv\/([^/?]+)/);
-      return `https://api.twitch.tv/helix/streams?user_login=${encodeURIComponent(handle)}`;
+      // Twitch uses EventSub, not PubSubHubbub; covered by polling fallback.
+      return null;
     }
     if (feed.feedType === 'rss' || feed.feedType === 'scrape' || feed.feedType === 'reddit') {
       return feed.url;
@@ -383,9 +374,29 @@ export class WebhookRouter {
     return null;
   }
 
-  private channelHandle(url: string, pattern: RegExp): string {
-    const match = url.match(pattern);
-    return match?.[1] ?? url;
+  private async resolveYouTubeChannelId(url: string): Promise<string | null> {
+    const direct = /(?:^|\/)(?:channel|c)\/(UC[\w-]+)/i.exec(url);
+    if (direct?.[1]) return direct[1];
+    const feedMatch = /feeds\/videos\.xml\?channel_id=(UC[\w-]+)/i.exec(url);
+    if (feedMatch?.[1]) return feedMatch[1];
+    const cached = this.youtubeChannelIdCache.get(url);
+    if (cached) return cached;
+
+    try {
+      const res = await fetch(url, {
+        redirect: 'follow',
+        headers: { 'user-agent': 'Mozilla/5.0 (compatible; HELIX-Discord-Bot/0.4.0)' },
+        signal: AbortSignal.timeout(10_000),
+      });
+      if (!res.ok) return null;
+      const html = await res.text();
+      const match = /channel_id=(UC[\w-]+)/.exec(html) ?? /"externalId"\s*:\s*"(UC[\w-]+)"/.exec(html);
+      if (!match?.[1]) return null;
+      this.youtubeChannelIdCache.set(url, match[1]);
+      return match[1];
+    } catch {
+      return null;
+    }
   }
 
   private async getHubUrl(feed: Feed): Promise<string | null> {

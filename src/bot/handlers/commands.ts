@@ -6,15 +6,9 @@ import {
   type DiscordInteraction,
   type InteractionResponse,
 } from '../utils/types.js';
-import { aboutCommandDef, handleAboutCommand } from '../commands/utility/about.js';
-import { feedCommandDef, handleFeedCommand } from '../commands/feeds/feed.js';
-import { handleHelpCommand, helpCommandDef } from '../commands/utility/help.js';
-import { handleStatsCommand, statsCommandDef } from '../commands/utility/stats.js';
-import { gifCommandDef, handleGifCommand } from '../commands/entertainment/gif.js';
-import { setCommandDef, handleSetCommand } from '../commands/admin/set.js';
-import { welcomeCommandDef, handleWelcomeCommand } from '../commands/admin/welcome.js';
-import { ticketCommandDef, handleTicketCommand } from '../commands/admin/ticket.js';
-import { musicCommandDefs, handleMusicCommand } from '../commands/music/music.js';
+import { getEnabledCommands, getCommand, isCommandDisabled } from './registry.js';
+import { EmbedHandler } from '../lib/embeds/builder.js';
+import { loadAllCommands } from './loader.js';
 
 export interface CommandHandler {
   readonly commands: ApplicationCommand[];
@@ -25,35 +19,22 @@ export interface CommandHandler {
 }
 
 export function createCommandHandler(deps: AppDeps): CommandHandler {
-  const f = deps.config.features;
-  const commands: ApplicationCommand[] = [aboutCommandDef, statsCommandDef];
-  if (f.feedsEnabled) commands.push(feedCommandDef);
-  if (f.gifsEnabled && deps.config.klipyApiKey) commands.push(gifCommandDef);
-  if (f.administrationEnabled) commands.push(setCommandDef, welcomeCommandDef, ticketCommandDef);
-  if (f.lavaEnabled) commands.push(...musicCommandDefs);
-
-  commands.push(helpCommandDef);
-
-  const autocompleteHandlers = new Map<
-    string,
-    (interaction: DiscordInteraction, deps: AppDeps) => Promise<InteractionResponse>
-  >();
-
-  return { commands, autocompleteHandlers };
+  return { commands: getEnabledCommands(deps), autocompleteHandlers: new Map() };
 }
 
 export async function dispatchInteraction(
   interaction: DiscordInteraction,
   deps: AppDeps,
   rest: DiscordRestClient,
-  handler: CommandHandler,
 ): Promise<InteractionResponse> {
-  const commandName = interaction.data?.name ?? '';
+  await loadAllCommands();
+  const commandName = (interaction.data?.name ?? '').toLowerCase();
 
+  // Handle autocomplete interactions
   if (interaction.type === 4) {
-    const autocompleteHandler = handler.autocompleteHandlers.get(commandName);
-    if (autocompleteHandler) {
-      return autocompleteHandler(interaction, deps);
+    const cmd = getCommand(commandName);
+    if (cmd?.autocomplete) {
+      return cmd.autocomplete(interaction, deps);
     }
     return {
       type: InteractionResponseType.APPLICATION_COMMAND_AUTOCOMPLETE_RESULT,
@@ -61,60 +42,25 @@ export async function dispatchInteraction(
     };
   }
 
-  const enabledNames = new Set(handler.commands.map((c) => c.name));
-
-  if (!enabledNames.has(commandName)) {
-    return {
-      type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-      data: {
-        flags: 64,
-        content: `❌ Unknown command: /${commandName}`,
-      },
-    };
+  const cmd = getCommand(commandName);
+  if (!cmd) {
+    return EmbedHandler.for(deps)
+      .error()
+      .title('Unknown Command')
+      .description(`Unknown command: \`/${commandName}\``)
+      .respond(true);
   }
 
-  switch (commandName) {
-    case 'feed':
-      return handleFeedCommand(interaction, deps, rest);
-    case 'stats':
-      return handleStatsCommand(interaction, deps);
-    case 'about':
-      return handleAboutCommand(interaction, deps);
-    case 'help':
-      return handleHelpCommand(interaction, handler.commands, deps);
-    case 'gif':
-      return handleGifCommand(interaction, deps, rest);
-    case 'set':
-      return handleSetCommand(interaction, deps, rest);
-    case 'welcome':
-      return handleWelcomeCommand(interaction, deps, rest);
-    case 'ticket':
-      return handleTicketCommand(interaction, deps, rest);
-    case 'play':
-    case 'queue':
-    case 'skip':
-    case 'next':
-    case 'previous':
-    case 'jump':
-    case 'leave':
-    case 'volume':
-    case 'equalizer':
-    case 'nowplaying':
-    case 'np':
-    case 'pause':
-    case 'resume':
-    case 'stop':
-    case 'seek':
-    case 'shuffle':
-    case 'loop':
-      return handleMusicCommand(interaction, deps, rest);
-    default:
-      return {
-        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-        data: {
-          flags: 64,
-          content: `❌ Unknown command: /${commandName}`,
-        },
-      };
+  if (isCommandDisabled(interaction.guild_id, commandName, deps)) {
+    const isGuildDisabled = Boolean(
+      interaction.guild_id && deps.repo.getGuildSetting(interaction.guild_id, `cmd_disabled_${commandName}`) === '1',
+    );
+    const desc = isGuildDisabled
+      ? `The command \`/${commandName}\` is disabled in this server.`
+      : `The command \`/${commandName}\` is currently disabled on this bot.`;
+
+    return EmbedHandler.for(deps).error().title('Command Disabled').description(desc).respond(true);
   }
+
+  return cmd.execute(interaction, deps, rest);
 }

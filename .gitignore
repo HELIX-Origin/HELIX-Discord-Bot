@@ -7,6 +7,8 @@ build/
 
 # Runtime data (SQLite database lives here)
 data/
+*.sqlite
+*.db
 
 # Secrets (self-hosting env file; never commit)
 .env
@@ -17,18 +19,12 @@ data-cookies.txt
 
 # Local scratch / temporary work
 scratch/
-comment-*.json
-comment-*.md
-issue21-*.md
-issue21-*.json
+temp/
+TODO.md
 
 # Coverage
 coverage/
 .nyc_output/
-
-# Lavalink Java binary (download yourself; ~50MB binary artifact)
-.youtube-oauth.json
-Lavalink.jar
 
 # IDE / editor
 .idea/
@@ -39,18 +35,3 @@ Lavalink.jar
 # OS
 .DS_Store
 Thumbs.db
-
-# Lock files for alternative package managers (npm lock file is committed)
-npm-shrinkwrap.json
-.pnpm-lock.yaml
-yarn.lock
-
-# agent ecosystem
-.agents/
-.opencode/
-.gemini/
-scratch/
-AGENTS.md
-IMPORTANT.md
-PLAN.md
-BUGS.md

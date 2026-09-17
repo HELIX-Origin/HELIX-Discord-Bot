@@ -3,133 +3,108 @@ import type { DiscordRestClient } from '../../rest.js';
 import {
   ApplicationCommandOptionType,
   type ApplicationCommand,
+  type ApplicationCommandOption,
   type DiscordEmbed,
   type DiscordInteraction,
   type InteractionOption,
   type InteractionResponse,
 } from '../../utils/types.js';
-import { commandHelpResponse, createEmbed, EMBED_COLORS, successEmbed } from '../../utils/embeds.js';
+import { createEmbed, EMBED_COLORS, successEmbed } from '../../utils/embeds.js';
+import { registerCommandMetadata, type BotCommand } from '../../handlers/registry.js';
+
+export const TICKET_ACTIONS = [
+  'setup',
+  'disable',
+  'view',
+  'create',
+  'close',
+  'add',
+  'remove',
+  'claim',
+  'transcript',
+] as const;
+export type TicketAction = (typeof TICKET_ACTIONS)[number];
+
+export const ticketOptions: ApplicationCommandOption[] = [
+  {
+    name: 'action',
+    description: 'What to do',
+    type: ApplicationCommandOptionType.STRING,
+    required: true,
+    choices: [
+      { name: 'Configure the ticket system', value: 'setup' },
+      { name: 'Disable the ticket system', value: 'disable' },
+      { name: 'View current configuration', value: 'view' },
+      { name: 'Create a support ticket', value: 'create' },
+      { name: 'Close the current ticket', value: 'close' },
+      { name: 'Add a user to the ticket', value: 'add' },
+      { name: 'Remove a user from the ticket', value: 'remove' },
+      { name: 'Claim the ticket', value: 'claim' },
+      { name: 'Generate a transcript', value: 'transcript' },
+    ],
+  },
+  {
+    name: 'manager_role',
+    description: 'Role that can manage tickets (setup)',
+    type: ApplicationCommandOptionType.ROLE,
+    required: false,
+  },
+  {
+    name: 'category',
+    description: 'Forum channel for tickets (setup)',
+    type: ApplicationCommandOptionType.CHANNEL,
+    required: false,
+    channel_types: [15],
+  },
+  {
+    name: 'transcript_channel',
+    description: 'Channel for ticket transcripts (setup)',
+    type: ApplicationCommandOptionType.CHANNEL,
+    required: false,
+    channel_types: [0, 5],
+  },
+  {
+    name: 'log_channel',
+    description: 'Channel for ticket logs (setup)',
+    type: ApplicationCommandOptionType.CHANNEL,
+    required: false,
+    channel_types: [0, 5],
+  },
+  {
+    name: 'welcome_message',
+    description: 'Message shown when a ticket is created (setup)',
+    type: ApplicationCommandOptionType.STRING,
+    required: false,
+  },
+  {
+    name: 'reason',
+    description: 'Reason for creating or closing the ticket (create / close)',
+    type: ApplicationCommandOptionType.STRING,
+    required: false,
+  },
+  {
+    name: 'user',
+    description: 'User to add or remove from the ticket (add / remove)',
+    type: ApplicationCommandOptionType.USER,
+    required: false,
+  },
+];
 
 export const ticketCommandDef: ApplicationCommand = {
   name: 'ticket',
   description: 'Manage support ticket system',
   default_member_permissions: '8',
   dm_permission: false,
-  options: [
-    {
-      name: 'setup',
-      description: 'Configure the ticket system',
-      type: ApplicationCommandOptionType.SUB_COMMAND,
-      options: [
-        {
-          name: 'manager_role',
-          description: 'Role that can manage tickets (auto-added)',
-          type: ApplicationCommandOptionType.ROLE,
-          required: true,
-        },
-        {
-          name: 'category',
-          description: 'Forum channel for tickets (optional)',
-          type: ApplicationCommandOptionType.CHANNEL,
-          required: false,
-          channel_types: [15],
-        },
-        {
-          name: 'transcript_channel',
-          description: 'Channel for ticket transcripts',
-          type: ApplicationCommandOptionType.CHANNEL,
-          required: false,
-          channel_types: [0, 5],
-        },
-        {
-          name: 'log_channel',
-          description: 'Channel for ticket logs',
-          type: ApplicationCommandOptionType.CHANNEL,
-          required: false,
-          channel_types: [0, 5],
-        },
-        {
-          name: 'welcome_message',
-          description: 'Message shown when ticket is created',
-          type: ApplicationCommandOptionType.STRING,
-          required: false,
-        },
-      ],
-    },
-    {
-      name: 'disable',
-      description: 'Disable the ticket system',
-      type: ApplicationCommandOptionType.SUB_COMMAND,
-    },
-    {
-      name: 'view',
-      description: 'View current ticket configuration',
-      type: ApplicationCommandOptionType.SUB_COMMAND,
-    },
-    {
-      name: 'create',
-      description: 'Create a support ticket',
-      type: ApplicationCommandOptionType.SUB_COMMAND,
-      options: [
-        {
-          name: 'reason',
-          description: 'Reason for creating the ticket',
-          type: ApplicationCommandOptionType.STRING,
-          required: true,
-        },
-      ],
-    },
-    {
-      name: 'close',
-      description: 'Close a ticket (run inside ticket channel)',
-      type: ApplicationCommandOptionType.SUB_COMMAND,
-      options: [
-        {
-          name: 'reason',
-          description: 'Reason for closing',
-          type: ApplicationCommandOptionType.STRING,
-          required: false,
-        },
-      ],
-    },
-    {
-      name: 'add',
-      description: 'Add a user to the ticket',
-      type: ApplicationCommandOptionType.SUB_COMMAND,
-      options: [
-        {
-          name: 'user',
-          description: 'User to add',
-          type: ApplicationCommandOptionType.USER,
-          required: true,
-        },
-      ],
-    },
-    {
-      name: 'remove',
-      description: 'Remove a user from the ticket',
-      type: ApplicationCommandOptionType.SUB_COMMAND,
-      options: [
-        {
-          name: 'user',
-          description: 'User to remove',
-          type: ApplicationCommandOptionType.USER,
-          required: true,
-        },
-      ],
-    },
-    {
-      name: 'claim',
-      description: 'Claim a ticket as a manager',
-      type: ApplicationCommandOptionType.SUB_COMMAND,
-    },
-    {
-      name: 'transcript',
-      description: 'Generate transcript for current ticket',
-      type: ApplicationCommandOptionType.SUB_COMMAND,
-    },
-  ],
+  options: ticketOptions,
 };
+
+function optionRaw(options: InteractionOption[], name: string): unknown {
+  return options.find((o) => o.name === name)?.value;
+}
+
+function optionValue(options: InteractionOption[], name: string): string {
+  return String(optionRaw(options, name) ?? '').trim();
+}
 
 const DEFAULT_TICKET_WELCOME =
   '📩 A support agent will be with you shortly. Please describe your issue in detail and remain patient.';
@@ -187,14 +162,9 @@ export async function handleTicketCommand(
     return errorResponse('Server Settings Only', '`/ticket` can only be used inside a Discord server (guild).');
   }
 
-  const subCommand = interaction.data?.options?.[0];
-  if (!subCommand) {
-    return ticketHelp();
-  }
+  const options = interaction.data?.options ?? [];
 
-  const options = subCommand.options ?? [];
-
-  switch (subCommand.name) {
+  switch (optionValue(options, 'action')) {
     case 'setup':
       return handleSetup(guildId, options, deps);
     case 'disable':
@@ -214,45 +184,36 @@ export async function handleTicketCommand(
     case 'transcript':
       return handleTranscript(interaction, guildId, deps, rest);
     default:
-      return errorResponse('Unknown Subcommand', `\`${subCommand.name}\` is not a valid \`/ticket\` subcommand.`);
+      return ticketUsage();
   }
 }
 
-function ticketHelp(): InteractionResponse {
-  return commandHelpResponse({
-    name: 'ticket',
-    description: 'Manage support ticket system with forum thread support',
-    subcommands: [
-      { name: 'setup', description: 'Configure the ticket system', options: [] },
-      { name: 'disable', description: 'Disable the ticket system', options: [] },
-      { name: 'view', description: 'View current ticket configuration', options: [] },
-      { name: 'create', description: 'Create a support ticket', options: [] },
-      { name: 'close', description: 'Close a ticket', options: [] },
-      { name: 'add', description: 'Add a user to the ticket', options: [] },
-      { name: 'remove', description: 'Remove a user from the ticket', options: [] },
-      { name: 'claim', description: 'Claim a ticket as a manager', options: [] },
-      { name: 'transcript', description: 'Generate transcript for current ticket', options: [] },
-    ],
-    examples: [
-      '/ticket setup manager_role:@Support category:#tickets transcript_channel:#transcripts',
-      '/ticket create reason:"Need help with feeds"',
-      '/ticket close reason:"Issue resolved"',
-      '/ticket add user:@user',
-      '/ticket transcript',
-    ],
-  });
+function ticketUsage(): InteractionResponse {
+  return embedResponse(
+    createEmbed({
+      color: EMBED_COLORS.INFO,
+      title: '🎫 Ticket Command Usage',
+      description: 'Use `/ticket` with one of the actions below.',
+      fields: [
+        { name: '⚙️ setup', value: '`/ticket action:setup manager_role:@Support category:#tickets`', inline: false },
+        { name: '🎟️ create', value: '`/ticket action:create reason:"Need help"`', inline: false },
+        { name: '🔒 close', value: '`/ticket action:close reason:"Resolved"`', inline: false },
+        { name: '➕ add / ➖ remove', value: '`/ticket action:add user:@user`', inline: false },
+        { name: '📜 claim / transcript · 👁️ view · 🚫 disable', value: '`/ticket action:transcript`', inline: false },
+      ],
+    }),
+  );
 }
 
 function handleSetup(guildId: string, options: InteractionOption[], deps: AppDeps): InteractionResponse {
-  const categoryId = String(options.find((o) => o.name === 'category')?.value ?? '').trim() || undefined;
-  const managerRoleId = String(options.find((o) => o.name === 'manager_role')?.value ?? '').trim();
-  const transcriptChannelId =
-    String(options.find((o) => o.name === 'transcript_channel')?.value ?? '').trim() || undefined;
-  const logChannelId = String(options.find((o) => o.name === 'log_channel')?.value ?? '').trim() || undefined;
-  const welcomeMessage = String(options.find((o) => o.name === 'welcome_message')?.value ?? '').trim() || undefined;
+  const categoryId = optionValue(options, 'category') || undefined;
+  const managerRoleId = optionValue(options, 'manager_role');
+  const transcriptChannelId = optionValue(options, 'transcript_channel') || undefined;
+  const logChannelId = optionValue(options, 'log_channel') || undefined;
+  const welcomeMessage = optionValue(options, 'welcome_message') || undefined;
 
   if (!managerRoleId) {
-    return ticketHelp();
+    return ticketUsage();
   }
 
   const config = getTicketConfig(deps, guildId);
@@ -345,12 +306,12 @@ async function handleCreate(
     return errorResponse('Tickets Disabled', 'The ticket system is disabled on this server. Contact a server admin.');
   }
   if (!config.categoryId) {
-    return errorResponse('No Ticket Forum', 'A forum channel is not configured. Run `/ticket setup` first.');
+    return errorResponse('No Ticket Forum', 'A forum channel is not configured. Run `/ticket action:setup` first.');
   }
 
-  const reason = String(options.find((o) => o.name === 'reason')?.value ?? '').trim();
+  const reason = optionValue(options, 'reason');
   if (!reason) {
-    return ticketHelp();
+    return ticketUsage();
   }
 
   const userId = interaction.member?.user?.id || interaction.user?.id || '0';
@@ -404,7 +365,7 @@ async function handleClose(
   rest: DiscordRestClient,
 ): Promise<InteractionResponse> {
   const channelId = interaction.channel_id;
-  const reason = String(options.find((o) => o.name === 'reason')?.value ?? '').trim();
+  const reason = optionValue(options, 'reason');
 
   if (!channelId) {
     return errorResponse('No Channel', 'This command must be run inside a ticket thread.');
@@ -461,7 +422,7 @@ async function handleAdd(
   rest: DiscordRestClient,
 ): Promise<InteractionResponse> {
   const channelId = interaction.channel_id;
-  const targetUserId = String(options.find((o) => o.name === 'user')?.value ?? '').trim();
+  const targetUserId = optionValue(options, 'user');
 
   if (!channelId || !targetUserId) {
     return errorResponse('Usage', 'Run this command inside a ticket thread with `user:<member>`.');
@@ -484,7 +445,7 @@ async function handleRemove(
   rest: DiscordRestClient,
 ): Promise<InteractionResponse> {
   const channelId = interaction.channel_id;
-  const targetUserId = String(options.find((o) => o.name === 'user')?.value ?? '').trim();
+  const targetUserId = optionValue(options, 'user');
 
   if (!channelId || !targetUserId) {
     return errorResponse('Usage', 'Run this command inside a ticket thread with `user:<member>`.');
@@ -581,3 +542,79 @@ async function buildTranscript(rest: DiscordRestClient, channelId: string): Prom
     return '⚠️ Could not fetch messages. Check that the bot can read the ticket thread.';
   }
 }
+
+registerCommandMetadata({
+  name: 'ticket',
+  description: 'Manage support ticket system',
+  category: 'admin',
+  emoji: '🛡️',
+  usage: '/ticket <action> [options]',
+  options: [
+    {
+      name: 'action',
+      description: 'What to do',
+      type: 3,
+      required: true,
+      choices: [
+        { name: 'Configure the ticket system', value: 'setup' },
+        { name: 'Disable the ticket system', value: 'disable' },
+        { name: 'View current configuration', value: 'view' },
+        { name: 'Create a support ticket', value: 'create' },
+        { name: 'Close the current ticket', value: 'close' },
+        { name: 'Add a user to the ticket', value: 'add' },
+        { name: 'Remove a user from the ticket', value: 'remove' },
+        { name: 'Claim the ticket', value: 'claim' },
+        { name: 'Generate a transcript', value: 'transcript' },
+      ],
+    },
+    { name: 'manager_role', description: 'Role that can manage tickets (setup)', type: 8, required: false },
+    {
+      name: 'category',
+      description: 'Forum channel for tickets (setup)',
+      type: 7,
+      required: false,
+      channel_types: [15],
+    },
+    {
+      name: 'transcript_channel',
+      description: 'Channel for ticket transcripts (setup)',
+      type: 7,
+      required: false,
+      channel_types: [0, 5],
+    },
+    {
+      name: 'log_channel',
+      description: 'Channel for ticket logs (setup)',
+      type: 7,
+      required: false,
+      channel_types: [0, 5],
+    },
+    {
+      name: 'welcome_message',
+      description: 'Message shown when a ticket is created (setup)',
+      type: 3,
+      required: false,
+    },
+    {
+      name: 'reason',
+      description: 'Reason for creating or closing the ticket (create / close)',
+      type: 3,
+      required: false,
+    },
+    { name: 'user', description: 'User to add or remove from the ticket (add / remove)', type: 6, required: false },
+  ],
+  examples: [
+    '/ticket action:setup manager_role:@Support category:#tickets',
+    '/ticket action:create reason:"Need help with feeds"',
+    '/ticket action:close reason:"Issue resolved"',
+    '/ticket action:add user:@user',
+    '/ticket action:transcript',
+  ],
+});
+
+export const ticketCommand: BotCommand = {
+  def: ticketCommandDef,
+  category: 'admin',
+  isEnabled: (deps) => Boolean(deps.config.features.administrationEnabled),
+  execute: handleTicketCommand,
+};

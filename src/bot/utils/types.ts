@@ -71,6 +71,10 @@ export interface ApplicationCommandOption {
   choices?: ApplicationCommandOptionChoice[];
   options?: ApplicationCommandOption[];
   channel_types?: number[];
+  min_value?: number;
+  max_value?: number;
+  min_length?: number;
+  max_length?: number;
 }
 
 export interface ApplicationCommand {

@@ -32,6 +32,7 @@ export class FeedRepository {
     scrape: Feed['scrape'],
     guildId?: string | null,
     topic?: string | null,
+    forumChannelId?: string | null,
   ): Feed {
     if (feedType === 'scrape' && !scrape) {
       throw new Error('Scrape feeds require a scrape configuration');
@@ -44,10 +45,14 @@ export class FeedRepository {
           : topic.trim()
         : null;
 
+    if (channelId && forumChannelId) {
+      throw new Error('A feed can target either a channel or a forum channel — not both.');
+    }
+
     const result = this.db.raw
       .prepare(
-        `INSERT INTO feeds (user_id, name, url, topic, channel_id, guild_id, feed_type, scrape_item, scrape_title, scrape_link, scrape_description, created_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        `INSERT INTO feeds (user_id, name, url, topic, channel_id, forum_channel_id, guild_id, feed_type, scrape_item, scrape_title, scrape_link, scrape_description, created_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       )
       .run(
         userId,
@@ -55,6 +60,7 @@ export class FeedRepository {
         url,
         cleanTopic,
         channelId,
+        forumChannelId ?? null,
         guildId ?? null,
         feedType,
         scrape && feedType === 'scrape' ? scrape.item : null,
@@ -70,6 +76,7 @@ export class FeedRepository {
       url,
       topic: cleanTopic,
       channelId,
+      forumChannelId: forumChannelId ?? null,
       guildId: guildId ?? null,
       enabled: 1,
       feedType,
@@ -93,6 +100,7 @@ export class FeedRepository {
       topic?: string | null;
       feedType?: FeedType;
       channelId?: string | null;
+      forumChannelId?: string | null;
       guildId?: string | null;
       enabled?: number;
       threadChannelId?: string | null;
@@ -101,6 +109,9 @@ export class FeedRepository {
   ): Feed | null {
     const current = this.state.getFeed(userId, id);
     if (!current) return null;
+    if (fields.channelId && fields.forumChannelId) {
+      throw new Error('A feed can target either a channel or a forum channel — not both.');
+    }
     const updated: Feed = {
       ...current,
       name: fields.name ?? current.name,
@@ -115,6 +126,7 @@ export class FeedRepository {
           : current.topic,
       feedType: fields.feedType ?? current.feedType,
       channelId: fields.channelId !== undefined ? fields.channelId : current.channelId,
+      forumChannelId: fields.forumChannelId !== undefined ? fields.forumChannelId : current.forumChannelId,
       guildId: fields.guildId !== undefined ? fields.guildId : current.guildId,
       enabled: fields.enabled ?? current.enabled,
       threadChannelId: fields.threadChannelId !== undefined ? fields.threadChannelId : current.threadChannelId,
@@ -122,7 +134,7 @@ export class FeedRepository {
     };
     this.db.raw
       .prepare(
-        'UPDATE feeds SET name = ?, url = ?, topic = ?, feed_type = ?, channel_id = ?, guild_id = ?, enabled = ?, thread_channel_id = ?, thread_entry_count = ? WHERE id = ? AND user_id = ?',
+        'UPDATE feeds SET name = ?, url = ?, topic = ?, feed_type = ?, channel_id = ?, forum_channel_id = ?, guild_id = ?, enabled = ?, thread_channel_id = ?, thread_entry_count = ? WHERE id = ? AND user_id = ?',
       )
       .run(
         updated.name,
@@ -130,6 +142,7 @@ export class FeedRepository {
         updated.topic,
         updated.feedType,
         updated.channelId ?? null,
+        updated.forumChannelId ?? null,
         updated.guildId ?? null,
         updated.enabled,
         updated.threadChannelId,

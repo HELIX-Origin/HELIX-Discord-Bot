@@ -1,21 +1,18 @@
-import type { Repository } from '../db/repository.js';
-import { feedCategory, type Feed } from '../state/types.js';
+import type { Feed } from '../state/types.js';
 
 export interface FeedDeliveryTargets {
   channelId: string | null;
-  threadChannelId: string | null;
+  forumChannelId: string | null;
 }
 
 /**
- * Resolves the delivery targets for a feed, preferring the per-guild,
- * per-category binding (RSS/Reddit/FreeGames/StreamAlerts) configured in the
- * dashboard and falling back to the legacy feed-level channel/thread fields.
+ * Resolves the delivery target for a feed. Each feed carries its own target:
+ * either a text/announcement channel (`channelId`) or a forum channel where the
+ * bot auto-creates one dedicated thread per feed (`forumChannelId`).
  */
-export function resolveFeedTargets(repo: Pick<Repository, 'getGuildCategoryTarget'>, feed: Feed): FeedDeliveryTargets {
-  const category = feed.guildId ? feedCategory(feed.feedType) : null;
-  const target = category && feed.guildId ? repo.getGuildCategoryTarget(feed.guildId, category) : null;
+export function resolveFeedTargets(feed: Feed): FeedDeliveryTargets {
   return {
-    channelId: target?.channelId ?? feed.channelId ?? null,
-    threadChannelId: target?.threadChannelId ?? feed.threadChannelId ?? null,
+    channelId: feed.channelId ?? null,
+    forumChannelId: feed.forumChannelId ?? null,
   };
 }

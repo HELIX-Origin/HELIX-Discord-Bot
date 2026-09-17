@@ -25,14 +25,14 @@ This guide covers local development workflows, debugging techniques, TypeScript 
 
 ---
 
-## 🎵 Lavalink Verification (Embedded Node)
+## 🎵 Lavalink Verification (External Node)
 
-When developing with the embedded Lavalink node (`LAVA_EMBEDDED=true`):
+When developing with music playback enabled (`LAVA_ENABLED=true`):
 
-1. Ensure **Java 21+** is installed and on PATH.
-2. Run `npm run dev` — the embedded Lavalink server (`@helix-origin/lavalink-server`) will download `Lavalink.jar` automatically on first startup (if missing) and start the Java node.
-3. Verify Lavalink is ready by checking logs for `Lavalink v4 ready on port 2333` or hitting `GET http://localhost:2333/v4/info` (Authorization: `youshallnotpass`).
-4. If `LAVA_READY_TIMEOUT_MS` is exceeded, increase it in `.env` or check Java installation.
+1. Start your external Lavalink v4 server instance.
+2. Verify connection settings in `.env` (`LAVA_HOST`, `LAVA_PORT`, `LAVA_PASS`, `LAVA_SECURE`).
+3. Run `npm start` (or `npm run dev`) — the bot connects to the Lavalink node via WebSocket using the `ws` client with authentication headers.
+4. Verify connection by observing log output: `Connected to Lavalink v4 node at <host>:<port>`.
 
 ---
 

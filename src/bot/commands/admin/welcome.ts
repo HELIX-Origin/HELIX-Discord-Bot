@@ -3,89 +3,88 @@ import type { DiscordRestClient } from '../../rest.js';
 import {
   ApplicationCommandOptionType,
   type ApplicationCommand,
+  type ApplicationCommandOption,
   type DiscordEmbed,
   type DiscordInteraction,
   type InteractionOption,
   type InteractionResponse,
 } from '../../utils/types.js';
-import { commandHelpResponse, createEmbed, EMBED_COLORS, successEmbed } from '../../utils/embeds.js';
+import { createEmbed, EMBED_COLORS, successEmbed } from '../../utils/embeds.js';
+import { registerCommandMetadata, type BotCommand } from '../../handlers/registry.js';
+
+export const WELCOME_ACTIONS = ['channel', 'message', 'disable', 'view', 'test'] as const;
+export type WelcomeAction = (typeof WELCOME_ACTIONS)[number];
+
+export const welcomeOptions: ApplicationCommandOption[] = [
+  {
+    name: 'action',
+    description: 'What to configure',
+    type: ApplicationCommandOptionType.STRING,
+    required: true,
+    choices: [
+      { name: 'Set the welcome channel', value: 'channel' },
+      { name: 'Set the welcome message', value: 'message' },
+      { name: 'Disable the welcome system', value: 'disable' },
+      { name: 'View current configuration', value: 'view' },
+      { name: 'Send a test message', value: 'test' },
+    ],
+  },
+  {
+    name: 'channel',
+    description: 'Channel to send welcome messages (channel)',
+    type: ApplicationCommandOptionType.CHANNEL,
+    required: false,
+    channel_types: [0, 5],
+  },
+  {
+    name: 'content',
+    description: 'Welcome message template, supports placeholders (message)',
+    type: ApplicationCommandOptionType.STRING,
+    required: false,
+  },
+  {
+    name: 'embed',
+    description: 'Use embed format (message)',
+    type: ApplicationCommandOptionType.BOOLEAN,
+    required: false,
+  },
+  {
+    name: 'color',
+    description: 'Embed color hex, e.g. #06b6d4 (message)',
+    type: ApplicationCommandOptionType.STRING,
+    required: false,
+  },
+  {
+    name: 'thumbnail',
+    description: 'Show user avatar as thumbnail (message)',
+    type: ApplicationCommandOptionType.BOOLEAN,
+    required: false,
+  },
+  {
+    name: 'banner',
+    description: 'Banner image URL for embed (message)',
+    type: ApplicationCommandOptionType.STRING,
+    required: false,
+  },
+];
 
 export const welcomeCommandDef: ApplicationCommand = {
   name: 'welcome',
   description: 'Configure welcome system for new members',
   default_member_permissions: '8',
   dm_permission: false,
-  options: [
-    {
-      name: 'channel',
-      description: 'Set the welcome channel',
-      type: ApplicationCommandOptionType.SUB_COMMAND,
-      options: [
-        {
-          name: 'channel',
-          description: 'Channel to send welcome messages',
-          type: ApplicationCommandOptionType.CHANNEL,
-          required: true,
-          channel_types: [0, 5],
-        },
-      ],
-    },
-    {
-      name: 'message',
-      description: 'Set the welcome message template',
-      type: ApplicationCommandOptionType.SUB_COMMAND,
-      options: [
-        {
-          name: 'content',
-          description: 'Welcome message template (supports placeholders)',
-          type: ApplicationCommandOptionType.STRING,
-          required: true,
-        },
-        {
-          name: 'embed',
-          description: 'Use embed format',
-          type: ApplicationCommandOptionType.BOOLEAN,
-          required: false,
-        },
-        {
-          name: 'color',
-          description: 'Embed color (hex, e.g. #06b6d4)',
-          type: ApplicationCommandOptionType.STRING,
-          required: false,
-        },
-        {
-          name: 'thumbnail',
-          description: 'Show user avatar as thumbnail',
-          type: ApplicationCommandOptionType.BOOLEAN,
-          required: false,
-        },
-        {
-          name: 'banner',
-          description: 'Banner image URL for embed',
-          type: ApplicationCommandOptionType.STRING,
-          required: false,
-        },
-      ],
-    },
-    {
-      name: 'disable',
-      description: 'Disable the welcome system',
-      type: ApplicationCommandOptionType.SUB_COMMAND,
-    },
-    {
-      name: 'view',
-      description: 'View current welcome configuration',
-      type: ApplicationCommandOptionType.SUB_COMMAND,
-    },
-    {
-      name: 'test',
-      description: 'Send a test welcome message',
-      type: ApplicationCommandOptionType.SUB_COMMAND,
-    },
-  ],
+  options: welcomeOptions,
 };
 
 const DEFAULT_WELCOME_MESSAGE = 'Welcome {mention} to **{server}**! We are now {membercount} members. 🎉';
+
+function optionRaw(options: InteractionOption[], name: string): unknown {
+  return options.find((o) => o.name === name)?.value;
+}
+
+function optionValue(options: InteractionOption[], name: string): string {
+  return String(optionRaw(options, name) ?? '').trim();
+}
 
 function embedResponse(embed: DiscordEmbed): InteractionResponse {
   return {
@@ -200,14 +199,9 @@ export async function handleWelcomeCommand(
     return errorResponse('Server Settings Only', '`/welcome` can only be used inside a Discord server (guild).');
   }
 
-  const subCommand = interaction.data?.options?.[0];
-  if (!subCommand) {
-    return welcomeHelp();
-  }
+  const options = interaction.data?.options ?? [];
 
-  const options = subCommand.options ?? [];
-
-  switch (subCommand.name) {
+  switch (optionValue(options, 'action')) {
     case 'channel':
       return handleSetChannel(guildId, options, deps);
     case 'message':
@@ -219,35 +213,31 @@ export async function handleWelcomeCommand(
     case 'test':
       return handleTest(interaction, guildId, deps);
     default:
-      return errorResponse('Unknown Subcommand', `\`${subCommand.name}\` is not a valid \`/welcome\` subcommand.`);
+      return welcomeUsage();
   }
 }
 
-function welcomeHelp(): InteractionResponse {
-  return commandHelpResponse({
-    name: 'welcome',
-    description: 'Configure welcome system for new members with embed support',
-    subcommands: [
-      { name: 'channel', description: 'Set the welcome channel', options: [] },
-      { name: 'message', description: 'Set the welcome message template', options: [] },
-      { name: 'disable', description: 'Disable the welcome system', options: [] },
-      { name: 'view', description: 'View current welcome configuration', options: [] },
-      { name: 'test', description: 'Send a test welcome message', options: [] },
-    ],
-    examples: [
-      '/welcome channel channel:#welcome',
-      '/welcome message content:"Welcome {user} to {server}!" embed:True color:#06b6d4',
-      '/welcome test',
-      '/welcome view',
-      '/welcome disable',
-    ],
-  });
+function welcomeUsage(): InteractionResponse {
+  return embedResponse(
+    createEmbed({
+      color: EMBED_COLORS.INFO,
+      title: '👋 Welcome Command Usage',
+      description: 'Use `/welcome` with one of the actions below.',
+      fields: [
+        { name: '📢 channel', value: '`/welcome action:channel channel:#welcome`', inline: false },
+        { name: '📝 message', value: '`/welcome action:message content:"Welcome {user}!" embed:True`', inline: false },
+        { name: '🧪 test', value: '`/welcome action:test`', inline: false },
+        { name: '👁️ view', value: '`/welcome action:view`', inline: false },
+        { name: '🚫 disable', value: '`/welcome action:disable`', inline: false },
+      ],
+    }),
+  );
 }
 
 function handleSetChannel(guildId: string, options: InteractionOption[], deps: AppDeps): InteractionResponse {
-  const channelId = String(options.find((o) => o.name === 'channel')?.value ?? '').trim();
+  const channelId = optionValue(options, 'channel');
   if (!channelId) {
-    return welcomeHelp();
+    return welcomeUsage();
   }
 
   deps.repo.setGuildSetting(guildId, 'welcome_channel_id', channelId);
@@ -256,20 +246,20 @@ function handleSetChannel(guildId: string, options: InteractionOption[], deps: A
   return embedResponse(
     successEmbed(
       'Welcome Channel Set',
-      `Welcome messages will be delivered to <#${channelId}>. Use \`/welcome message\` to customize the message and \`/welcome test\` to preview it.`,
+      `Welcome messages will be delivered to <#${channelId}>. Use \`/welcome action:message\` to customize the message and \`/welcome action:test\` to preview it.`,
     ),
   );
 }
 
 function handleSetMessage(guildId: string, options: InteractionOption[], deps: AppDeps): InteractionResponse {
-  const content = String(options.find((o) => o.name === 'content')?.value ?? '').trim();
-  const embedFlag = options.find((o) => o.name === 'embed')?.value;
-  const rawColor = String(options.find((o) => o.name === 'color')?.value ?? '').trim();
-  const thumbnailFlag = options.find((o) => o.name === 'thumbnail')?.value;
-  const banner = String(options.find((o) => o.name === 'banner')?.value ?? '').trim();
+  const content = optionValue(options, 'content');
+  const embedFlag = optionRaw(options, 'embed');
+  const rawColor = optionValue(options, 'color');
+  const thumbnailFlag = optionRaw(options, 'thumbnail');
+  const banner = optionValue(options, 'banner');
 
   if (!content) {
-    return welcomeHelp();
+    return welcomeUsage();
   }
 
   if (rawColor && !parseHexColor(rawColor)) {
@@ -318,7 +308,7 @@ function handleView(guildId: string, deps: AppDeps): InteractionResponse {
       title: `👋 ${guildName} — Welcome Configuration`,
       description: config.enabled
         ? 'Welcome messages are **enabled**.'
-        : 'Welcome messages are **disabled**. Set a channel with `/welcome channel` to enable.',
+        : 'Welcome messages are **disabled**. Set a channel with `/welcome action:channel` to enable.',
       fields: [
         { name: '📢 Channel', value: config.channelId ? `<#${config.channelId}>` : 'Not configured', inline: true },
         { name: '🎨 Format', value: config.embed ? 'Embed' : 'Plain text', inline: true },
@@ -338,7 +328,7 @@ async function handleTest(
   if (!config.channelId) {
     return errorResponse(
       'No Welcome Channel',
-      'Set a welcome channel first with `/welcome channel channel:<channel>`.',
+      'Set a welcome channel first with `/welcome action:channel channel:<channel>`.',
     );
   }
 
@@ -370,3 +360,57 @@ async function handleTest(
     successEmbed('Test Welcome Sent', `A test welcome message was delivered to <#${config.channelId}>.`),
   );
 }
+
+registerCommandMetadata({
+  name: 'welcome',
+  description: 'Configure welcome system for new members',
+  category: 'admin',
+  emoji: '🛡️',
+  usage: '/welcome <action> [options]',
+  options: [
+    {
+      name: 'action',
+      description: 'What to configure',
+      type: 3,
+      required: true,
+      choices: [
+        { name: 'Set the welcome channel', value: 'channel' },
+        { name: 'Set the welcome message', value: 'message' },
+        { name: 'Disable the welcome system', value: 'disable' },
+        { name: 'View current configuration', value: 'view' },
+        { name: 'Send a test message', value: 'test' },
+      ],
+    },
+    {
+      name: 'channel',
+      description: 'Channel to send welcome messages (channel)',
+      type: 7,
+      required: false,
+      channel_types: [0, 5],
+    },
+    {
+      name: 'content',
+      description: 'Welcome message template, supports placeholders (message)',
+      type: 3,
+      required: false,
+    },
+    { name: 'embed', description: 'Use embed format (message)', type: 5, required: false },
+    { name: 'color', description: 'Embed color hex, e.g. #06b6d4 (message)', type: 3, required: false },
+    { name: 'thumbnail', description: 'Show user avatar as thumbnail (message)', type: 5, required: false },
+    { name: 'banner', description: 'Banner image URL for embed (message)', type: 3, required: false },
+  ],
+  examples: [
+    '/welcome action:channel channel:#welcome',
+    '/welcome action:message content:"Welcome {user}!" embed:True',
+    '/welcome action:test',
+    '/welcome action:view',
+    '/welcome action:disable',
+  ],
+});
+
+export const welcomeCommand: BotCommand = {
+  def: welcomeCommandDef,
+  category: 'admin',
+  isEnabled: (deps) => Boolean(deps.config.features.administrationEnabled),
+  execute: handleWelcomeCommand,
+};

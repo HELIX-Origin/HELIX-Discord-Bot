@@ -51,32 +51,17 @@ HELIX Discord Bot is configured entirely via environment variables defined in a 
 
 > SQLite is the only supported database engine; there is no PostgreSQL/MySQL support.
 
-### 🔐 Native SSL / HTTPS (Optional)
-
-| Variable | Required | Default | Description |
-| :--- | :--- | :--- | :--- |
-| `SITE_SSL_KEY` / `SITE_SSL_CERT` | No | — | Paths (or PEM contents) for native HTTPS on the web dashboard. |
-| `DISCORD_SSL_KEY` / `DISCORD_SSL_CERT` | No | Falls back to `SITE_SSL_*` | HTTPS certificates for the Discord bot endpoint. |
-
 ### 🎵 Lavalink Music Configuration
 
-> All music configuration lives in the bot's global `.env`. The embedded Lavalink node (`@helix-origin/lavalink-server`) is enabled by default and requires **Java 21+** and a `Lavalink.jar` placed in the project root next to `application.yml`.
+> All music configuration lives in the bot's global `.env`. HELIX Discord Bot connects directly to an external Lavalink v4 server.
 
 | Variable | Required | Default | Description |
 | :--- | :--- | :--- | :--- |
 | `LAVA_ENABLED` | No | `true` | Enable/disable music playback entirely. |
-| `LAVA_EMBEDDED` | No | `true` | Use embedded Lavalink node (`@helix-origin/lavalink-server`). Set `false` to connect to external Lavalink. |
-| `LAVA_HOST` | No | `127.0.0.1` | Lavalink REST/WebSocket host (client → node). |
-| `LAVA_PORT` | No | `2333` | Lavalink port. |
-| `LAVA_PASS` | No | `youshallnotpass` | Lavalink password. |
+| `LAVA_HOST` | No | `127.0.0.1` | External Lavalink REST/WebSocket host. |
+| `LAVA_PORT` | No | `2333` | External Lavalink port. |
+| `LAVA_PASS` | No | `youshallnotpass` | External Lavalink password. |
 | `LAVA_SECURE` | No | `false` | Use `wss://` for WebSocket (`true`) or `ws://` (`false`). |
-| `LAVA_READY_TIMEOUT_MS` | No | `60000` | Max wait time for embedded Lavalink node to become ready. |
-| `LAVA_INTERNAL_URL` | No | `0.0.0.0:2333` | Internal bind address for embedded Lavalink server (server-side). |
-| `LAVA_PUBLIC_URL` | No | `LAVA_INTERNAL_URL` | Public URL for embedded Lavalink server (used for OAuth callbacks). |
-| `GENIUS_ACCESS_TOKEN` | No | — | Genius API token for lyrics (embedded node). |
-| `YOUTUBE_REFRESH_TOKEN` | No | — | YouTube OAuth refresh token (embedded node). |
-| `SPOTIFY_CLIENT_ID` | No | — | Spotify API client ID (via Lavalink plugins). |
-| `SPOTIFY_CLIENT_SECRET` | No | — | Spotify API client secret (via Lavalink plugins). |
 
 ---
 
@@ -144,10 +129,6 @@ DISCORD_CLIENT_SECRET=
 
 # Bot Invite / Authorization URL
 DISCORD_REDIRECT_URL=https://discord.com/oauth2/authorize?client_id=your_client_id&permissions=8&integration_type=0&scope=bot+applications.commands
-
-# Optional: Native SSL certificates
-SITE_SSL_KEY=
-SITE_SSL_CERT=
 
 # Optional: Forum Thread Delivery (per-server, dashboard configurable)
 # FORUM_CHANNEL_IDS=123456789012345678,987654321098765432

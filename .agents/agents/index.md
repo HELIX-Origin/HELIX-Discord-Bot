@@ -37,6 +37,7 @@ flowchart TD
 | **Code Architect** | Backend & System Design | TypeScript ESM architecture, SQLite write-through state, HTTP dashboard | [code-architect.md](code-architect.md) |
 | **Discord Specialist** | Discord.js v14 & Bot Engineering | Slash commands, modular `lib/options/`, events, EmbedHandler, voice gateway | [discord-specialist.md](discord-specialist.md) |
 | **Feed Watcher** | Feed Syndication & Delivery | RSS/Atom/Reddit ingestion, weekly Sunday free games, single-thread forum delivery | [feed-watcher.md](feed-watcher.md) |
+| **Dashboard Specialist** | Dashboard & Discord Integration | Zero-frontend-dep SSR, Discord OAuth2, guild admin authorization, EmbedHandler parity | [dashboard-engineer.md](dashboard-engineer.md) |
 | **Test Automation** | Quality Assurance | Verification gate (`npm run check`), test harnesses, mock servers | [test-automation.md](test-automation.md) |
 | **Security Auditor** | Security & Code Quality | Secrets protection, zero unsolicited injection, ESLint compliance | [security-auditor.md](security-auditor.md) |
 

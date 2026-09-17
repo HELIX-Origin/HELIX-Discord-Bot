@@ -93,6 +93,7 @@ export interface Feed {
   url: string;
   topic: string | null;
   channelId: string | null;
+  forumChannelId: string | null;
   guildId?: string | null;
   enabled: number;
   feedType: FeedType;
@@ -180,6 +181,8 @@ export const rowToFeed = (r: Row | undefined): Feed | null => {
   const scrapeDescription =
     r.scrape_description === null || r.scrape_description === undefined ? null : String(r.scrape_description);
   const channelId = r.channel_id !== null && r.channel_id !== undefined ? String(r.channel_id) : null;
+  const forumChannelId =
+    r.forum_channel_id !== null && r.forum_channel_id !== undefined ? String(r.forum_channel_id) : null;
   const guildId = r.guild_id !== null && r.guild_id !== undefined ? String(r.guild_id) : null;
   const rawFeedType = r.feed_type === null || r.feed_type === undefined ? 'rss' : String(r.feed_type);
   const feedType: FeedType = isFeedType(rawFeedType) ? rawFeedType : 'rss';
@@ -194,6 +197,7 @@ export const rowToFeed = (r: Row | undefined): Feed | null => {
     url: String(r.url),
     topic,
     channelId,
+    forumChannelId,
     guildId,
     enabled: Number(r.enabled),
     feedType,

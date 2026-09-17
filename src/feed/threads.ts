@@ -1,7 +1,7 @@
 import type { AppConfig } from '../config.js';
 import type { Repository } from '../db/repository.js';
 import type { DiscordChannelSnapshot } from '../bot/rest.js';
-import { feedCategory, type Feed, type FeedCategory } from '../state/types.js';
+import { type Feed } from '../state/types.js';
 import { createLogger, type LogLevel } from '../util/logger.js';
 
 export interface ThreadSender {
@@ -45,9 +45,9 @@ const MAX_AUTO_ARCHIVE_MINUTES = 10080;
  *   right before Discord would auto-archive them.
  * - When a feed thread reaches `threadMaxMessages` entries it is archived and
  *   a fresh thread is opened in its place.
- * - Feature is optional: it applies only to guilds with threads enabled
- *   (dashboard config) or when `FORUM_CHANNEL_IDS` points at a forum in the
- *   same guild. Otherwise feeds keep delivering to their regular channel.
+ * - Applies only to feeds that explicitly select a forum channel as their
+ *   delivery target (`feeds.forum_channel_id`). Otherwise feeds keep delivering
+ *   to their regular channel.
  */
 export class FeedThreadManager {
   private readonly logger;
@@ -62,17 +62,12 @@ export class FeedThreadManager {
     this.logger = createLogger('threads', logLevel);
   }
 
-  /** Forum channel ids available for a guild (dashboard config first, env defaults second). */
+  /** Forum channel ids available for a guild (per-guild config first, env defaults second). */
   async forumChannelsForGuild(guildId: string | null | undefined): Promise<string[]> {
     if (!guildId) return [];
     const binding = this.repo.getGuildBinding(guildId);
-    if (binding) {
-      if (binding.threadsEnabled && binding.forumChannelIds.length > 0) {
-        return binding.forumChannelIds;
-      }
-      if (binding.threadsEnabled) {
-        return this.envChannelsForGuild(guildId);
-      }
+    if (binding && binding.forumChannelIds.length > 0) {
+      return binding.forumChannelIds;
     }
     return this.envChannelsForGuild(guildId);
   }
@@ -120,14 +115,10 @@ export class FeedThreadManager {
 
   /** Picks a forum channel for a feed, stable across deliveries. */
   async forumChannelForFeed(feed: Feed): Promise<string | null> {
+    if (feed.forumChannelId) return feed.forumChannelId;
+
     const guildId = await this.resolveFeedGuild(feed);
     if (!guildId) return null;
-
-    const category = feedCategory(feed.feedType) as FeedCategory | null;
-    if (category) {
-      const target = this.repo.getGuildCategoryTarget(guildId, category);
-      if (target?.threadChannelId) return target.threadChannelId;
-    }
 
     const channels = await this.forumChannelsForGuild(guildId);
     if (channels.length === 0) return null;
@@ -142,7 +133,7 @@ export class FeedThreadManager {
     const forumChannelId = await this.forumChannelForFeed(feed);
     if (!forumChannelId) {
       if (feed.threadChannelId) {
-        // Guild no longer has thread delivery configured; release the stale binding.
+        // No forum target anymore; release the stale thread binding.
         this.repo.setFeedThread(feed.userId, feed.id, null, 0);
       }
       if (!this.bot) {
@@ -152,7 +143,7 @@ export class FeedThreadManager {
         });
         return { delivered: false, mode: 'channel', fallbackReason: 'bot offline' };
       }
-      return { delivered: false, mode: 'channel', fallbackReason: 'threads not configured for guild' };
+      return { delivered: false, mode: 'channel', fallbackReason: 'no forum target configured for feed' };
     }
 
     if (!this.bot) {

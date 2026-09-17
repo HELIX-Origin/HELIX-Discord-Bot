@@ -6,10 +6,12 @@ This directory provides standardized code templates and workflow guides for **HE
 
 ## 1. Code Templates
 
-- **[command-template.ts](command-template.ts)**: Standard standalone slash command structure with colocated option definitions and execution handler.
-- **[subcommand-template.ts](subcommand-template.ts)**: Subcommand / subcommand group pattern for complex commands (e.g., `/admin`, `/feed`) with colocated subcommands.
-- **[event-template.ts](event-template.ts)**: Strongly typed Discord event listener pattern with isolated execution boundaries.
-- **[embed-template.ts](embed-template.ts)**: `EmbedHandler` utility pattern for error, success, warning, and info embeds with automatic character and field clamping.
+- **[command-template.md](command-template.md)**: Standard standalone slash command structure with colocated option definitions and execution handler.
+- **[subcommand-template.md](subcommand-template.md)**: Subcommand / subcommand group pattern for complex commands (e.g., `/admin`, `/feed`) with colocated subcommands.
+- **[event-template.md](event-template.md)**: Strongly typed Discord event listener pattern with isolated execution boundaries.
+- **[embed-template.md](embed-template.md)**: `EmbedHandler` utility pattern for error, success, warning, and info embeds with automatic character and field clamping.
+- **[dashboard-route-template.md](dashboard-route-template.md)**: Standard dashboard domain route handler with authentication and audit logging.
+- **[dashboard-view-template.md](dashboard-view-template.md)**: Standard dashboard SSR view component template with HTML escaping.
 
 ---
 

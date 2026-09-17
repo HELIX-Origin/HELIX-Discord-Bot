@@ -8,14 +8,14 @@ HELIX Discord Bot includes a comprehensive administration system for server mode
 
 | Command | Options | Required Permission | Description |
 | :--- | :--- | :--- | :--- |
-| `/admin warn` | `user: <user>`, `reason: <string>` | `Moderate Members` | Issue a warning to a member (logged to mod log channel if configured). |
-| `/admin kick` | `user: <user>`, `reason: <string>` | `Kick Members` | Kick a member from the server. |
-| `/admin ban` | `user: <user>`, `reason: <string>` | `Ban Members` | Ban a member (with optional message deletion). |
-| `/admin lock` | `channel: <channel?>` | `Manage Channels` | Lock a channel (deny `Send Messages` for `@everyone`). |
-| `/admin unlock` | `channel: <channel?>` | `Manage Channels` | Unlock a previously locked channel. |
-| `/admin purge` | `count: <number>` (1–100), `channel: <channel?>` | `Manage Messages` | Bulk delete messages in a channel. |
-| `/admin slowmode` | `seconds: <number>` (0–21600), `channel: <channel?>` | `Manage Channels` | Set slowmode delay on a channel. |
-| `/admin announce` | `channel: <channel>`, `message: <string>` | `Manage Channels` | Send an announcement embed to a channel. |
+| `/warn` | `user: <user>`, `reason: <string>` | `Moderate Members` | Issue a warning to a member (logged to mod log channel if configured). |
+| `/kick` | `user: <user>`, `reason: <string?>` | `Kick Members` | Kick a member from the server. |
+| `/ban` | `user: <user>`, `delete_days: <number?>`, `reason: <string?>` | `Ban Members` | Ban a member (with optional message deletion). |
+| `/lock` | `channel: <channel?>`, `reason: <string?>` | `Manage Channels` | Lock a channel (deny `Send Messages` for `@everyone`). |
+| `/unlock` | `channel: <channel?>` | `Manage Channels` | Unlock a previously locked channel. |
+| `/purge` | `count: <number>` (1–100) | `Manage Messages` | Bulk delete messages in a channel. |
+| `/slowmode` | `seconds: <number>` (0–21600), `channel: <channel?>` | `Manage Channels` | Set slowmode delay on a channel. |
+| `/announce` | `channel: <channel>`, `message: <string>`, `title: <string?>` | `Manage Channels` | Send an announcement embed to a channel. |
 
 > All moderation actions are logged to the configured mod log channel (set via `/set mod-log-channel` or dashboard).
 
@@ -25,9 +25,9 @@ HELIX Discord Bot includes a comprehensive administration system for server mode
 
 | Command | Options | Required Permission | Description |
 | :--- | :--- | :--- | :--- |
-| `/admin role add` | `user: <user>`, `role: <role>` | `Manage Roles` | Assign a role to a member. |
-| `/admin role remove` | `user: <user>`, `role: <role>` | `Manage Roles` | Remove a role from a member. |
-| `/admin role list` | `user: <user?>` | `Manage Roles` | List roles for a member (or all assignable roles). |
+| `/role add` | `user: <user>`, `role: <role>` | `Manage Roles` | Assign a role to a member. |
+| `/role remove` | `user: <user>`, `role: <role>` | `Manage Roles` | Remove a role from a member. |
+| `/role list` | `user: <user?>` | `Manage Roles` | List roles for a member (or all assignable roles). |
 
 > Role hierarchy is enforced — you cannot assign/remove roles higher than your own highest role.
 
@@ -37,12 +37,12 @@ HELIX Discord Bot includes a comprehensive administration system for server mode
 
 | Command | Options | Required Permission | Description |
 | :--- | :--- | :--- | :--- |
-| `/admin voice mute` | `user: <user>`, `reason: <string?>` | `Mute Members` | Server-mute a member in their current voice channel. |
-| `/admin voice unmute` | `user: <user>` | `Mute Members` | Server-unmute a member. |
-| `/admin voice deafen` | `user: <user>`, `reason: <string?>` | `Deafen Members` | Server-deafen a member. |
-| `/admin voice undeafen` | `user: <user>` | `Deafen Members` | Server-undeafen a member. |
-| `/admin voice move` | `user: <user>`, `channel: <voice channel>` | `Move Members` | Move a member to another voice channel. |
-| `/admin voice disconnect` | `user: <user>`, `reason: <string?>` | `Move Members` | Disconnect a member from voice. |
+| `/voice mute` | `user: <user>`, `reason: <string?>` | `Mute Members` | Server-mute a member in their current voice channel. |
+| `/voice unmute` | `user: <user>` | `Mute Members` | Server-unmute a member. |
+| `/voice deafen` | `user: <user>`, `reason: <string?>` | `Deafen Members` | Server-deafen a member. |
+| `/voice undeafen` | `user: <user>` | `Deafen Members` | Server-undeafen a member. |
+| `/voice move` | `user: <user>`, `channel: <voice channel>` | `Move Members` | Move a member to another voice channel. |
+| `/voice disconnect` | `user: <user>`, `reason: <string?>` | `Move Members` | Disconnect a member from voice. |
 
 ---
 

@@ -1,21 +1,6 @@
+import WebSocket from 'ws';
 import type { Logger } from '../../util/logger.js';
 import type { LavalinkConfig } from '../../config.js';
-
-interface WebSocketOptions {
-  headers?: Record<string, string>;
-}
-
-interface WebSocketConstructor {
-  new (url: string | URL, protocols?: string | string[], options?: WebSocketOptions): WebSocket;
-  new (url: string | URL, protocols?: string | string[]): WebSocket;
-  readonly prototype: WebSocket;
-  readonly CLOSED: number;
-  readonly CLOSING: number;
-  readonly CONNECTING: number;
-  readonly OPEN: number;
-}
-
-const WebSocketClient: WebSocketConstructor = WebSocket as unknown as WebSocketConstructor;
 
 export interface Track {
   identifier: string;
@@ -130,12 +115,12 @@ export class LavalinkManager {
         'Num-Shards': '1',
       };
 
-      this.ws = new WebSocketClient(this.wsUrl, undefined, { headers: wsHeaders });
+      const ws = new WebSocket(this.wsUrl, { headers: wsHeaders });
+      this.ws = ws;
 
       const onOpen = () => {
         this.logger.info('Lavalink WebSocket connected');
         this.reconnectAttempts = 0;
-        this.ws?.removeEventListener?.('open', onOpen);
         resolve();
       };
 
@@ -145,43 +130,51 @@ export class LavalinkManager {
         this.logger.info('Lavalink session ready', { sessionId: this.sessionId, resumed: msg.resumed ?? false });
       };
 
-      this.once('ready', onReady);
+      const offReady = this.once('ready', onReady);
 
-      this.ws.onopen = onOpen;
+      ws.on('open', onOpen);
 
-      this.ws.onclose = (event) => {
-        this.logger.warn('Lavalink WebSocket closed', { code: event.code, reason: event.reason });
-        this.handleDisconnect();
-      };
-
-      this.ws.onerror = (error) => {
-        this.logger.error('Lavalink WebSocket error', { error: String(error) });
-        reject(new Error('WebSocket connection failed'));
-      };
-
-      this.ws.onmessage = (event) => {
+      ws.on('message', (data, isBinary) => {
+        if (isBinary) return;
         try {
-          const data = JSON.parse(event.data);
-          this.handleMessage(data);
+          const raw = data as unknown;
+          const text = typeof raw === 'string' ? raw : Buffer.from(raw as string | Uint8Array).toString('utf8');
+          this.handleMessage(JSON.parse(text));
         } catch (err) {
-          this.logger.error('Failed to parse Lavalink message', { error: String(err), raw: event.data });
+          this.logger.error('Failed to parse Lavalink message', { error: String(err) });
         }
-      };
+      });
+
+      ws.on('close', (code, reason) => {
+        offReady();
+        if (this.ws !== ws) return;
+        this.ws = null;
+        this.logger.warn('Lavalink WebSocket closed', { code, reason: reason.toString() });
+        this.handleDisconnect();
+      });
+
+      ws.on('error', (err) => {
+        offReady();
+        const message = (err as Error & { message?: string }).message ?? String(err);
+        this.logger.error('Lavalink WebSocket error', { error: message });
+        reject(new Error(message));
+      });
 
       setTimeout(() => {
-        if (this.ws?.readyState !== WebSocket.OPEN) {
-          this.ws?.close();
-          reject(new Error('Connection timeout'));
+        if (this.ws === ws && ws.readyState !== WebSocket.OPEN) {
+          reject(new Error('Lavalink WebSocket connection timeout'));
         }
-      }, 10000);
+      }, 10000).unref();
     });
   }
 
-  private once(event: string, handler: (data: unknown) => void): void {
-    const off = this.on(event, (data) => {
-      off();
+  private once(event: string, handler: (data: unknown) => void): () => void {
+    let off: (() => void) | null = null;
+    off = this.on(event, (data) => {
+      off?.();
       handler(data);
     });
+    return () => off?.();
   }
 
   private handleDisconnect(): void {

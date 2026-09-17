@@ -1,6 +1,4 @@
-import { existsSync, readFileSync } from 'node:fs';
 import { createServer as createHttpServer, type IncomingMessage, type Server, type ServerResponse } from 'node:http';
-import https from 'node:https';
 import { appDisplayName, type AppDeps } from '../app.js';
 import { getRequestBaseUrl, sendError, sendHtml, sendJson, sendText } from './http/helpers.js';
 import { Router } from './http/router.js';
@@ -22,23 +20,9 @@ import { registerStatsRoutes } from './routes/stats.js';
 import { registerWebhookRoutes, initWebhookRouter } from './routes/webhooks.js';
 import { authedUserId, isAdminOrOwner } from './routes/shared.js';
 import { createLogger } from '../util/logger.js';
-import { dispatchInteraction, createCommandHandler } from '../bot/handlers/commands.js';
+import { dispatchInteraction } from '../bot/handlers/commands.js';
 import { DiscordRestClient } from '../bot/rest.js';
 import type { DiscordInteraction } from '../bot/utils/types.js';
-
-export function loadTlsCredentials(
-  keyConfig: string | null,
-  certConfig: string | null,
-): { key: string; cert: string } | null {
-  if (!keyConfig || !certConfig) return null;
-  try {
-    const key = existsSync(keyConfig) ? readFileSync(keyConfig, 'utf8') : keyConfig;
-    const cert = existsSync(certConfig) ? readFileSync(certConfig, 'utf8') : certConfig;
-    return { key, cert };
-  } catch {
-    return null;
-  }
-}
 
 export function createHelixRssServer(deps: AppDeps): Server {
   const router = new Router<AppDeps>();
@@ -48,8 +32,7 @@ export function createHelixRssServer(deps: AppDeps): Server {
   router.add('GET', '/', async (req, res, _ctx, d) => {
     const acceptHeader = req.headers['accept'] ?? '';
     if (acceptHeader.includes('application/json')) {
-      const proto = d.config.sslKey || d.config.botSslKey ? 'https' : 'http';
-      sendJson(res, 200, { status: 'ok', service: 'helix-discord-bot', proto, uptime: process.uptime() });
+      sendJson(res, 200, { status: 'ok', service: 'helix-discord-bot', proto: 'http', uptime: process.uptime() });
       return;
     }
     if (d.config.landingPageEnabled) {
@@ -192,8 +175,7 @@ export function createHelixRssServer(deps: AppDeps): Server {
       sendText(res, 200, 'ok');
       return;
     }
-    const proto = deps.config.sslKey || deps.config.botSslKey ? 'https' : 'http';
-    sendJson(res, 200, { status: 'ok', service: 'helix-discord-bot', proto, uptime: process.uptime() });
+    sendJson(res, 200, { status: 'ok', service: 'helix-discord-bot', proto: 'http', uptime: process.uptime() });
   });
 
   // robots.txt for SEO
@@ -235,8 +217,7 @@ export function createHelixRssServer(deps: AppDeps): Server {
           return;
         }
         const rest = d.bot?.rest ?? new DiscordRestClient(d.config.botToken ?? '', d.config.discordApiBaseUrl);
-        const handler = createCommandHandler(d);
-        const response = await dispatchInteraction(interaction, d, rest, handler);
+        const response = await dispatchInteraction(interaction, d, rest);
         sendJson(res, 200, response);
       } catch (err) {
         sendError(res, 500, (err as Error).message);
@@ -285,13 +266,7 @@ export function createHelixRssServer(deps: AppDeps): Server {
     }
   };
 
-  const keyConfig = deps.config.sslKey || deps.config.botSslKey;
-  const certConfig = deps.config.sslCert || deps.config.botSslCert;
-  const tlsCredentials = loadTlsCredentials(keyConfig, certConfig);
-  const server = tlsCredentials
-    ? (https.createServer(tlsCredentials, requestHandler) as unknown as Server)
-    : createHttpServer(requestHandler);
-
+  const server = createHttpServer(requestHandler);
   return server;
 }
 
