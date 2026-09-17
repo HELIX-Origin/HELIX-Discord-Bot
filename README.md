@@ -8,6 +8,7 @@
   [![License](https://img.shields.io/github/license/HELIX-Origin/HELIX-Discord-Bot?style=flat-square)](LICENSE.md)
   [![Node.js](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FHELIX-Origin%2FHELIX-Discord-Bot%2Fmain%2Fpackage.json&query=engines.node&label=Node.js&logo=node.js&logoColor=white&color=339933&style=flat-square)](https://nodejs.org/)
   [![TypeScript](https://img.shields.io/github/languages/top/HELIX-Origin/HELIX-Discord-Bot?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+  <br />
   [![Issues](https://img.shields.io/github/issues/HELIX-Origin/HELIX-Discord-Bot?style=flat-square)](https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues)
   [![Stars](https://img.shields.io/github/stars/HELIX-Origin/HELIX-Discord-Bot?style=flat-square&logo=github)](https://github.com/HELIX-Origin/HELIX-Discord-Bot)
   [![Last Commit](https://img.shields.io/github/last-commit/HELIX-Origin/HELIX-Discord-Bot?style=flat-square)](https://github.com/HELIX-Origin/HELIX-Discord-Bot/commits/main)
