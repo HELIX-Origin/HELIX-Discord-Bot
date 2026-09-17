@@ -17,7 +17,7 @@ All templates adhere strictly to:
 | [**`command-template.md`**](command-template.md) | Slash Command | Standalone command template with colocated options, execution handler, and error catching |
 | [**`subcommand-template.md`**](subcommand-template.md) | Complex Command | Subcommand and subcommand group pattern (e.g., `/role`, `/voice`) |
 | [**`event-template.md`**](event-template.md) | Discord Event | Strongly typed Discord event listener pattern with isolated execution boundaries |
-| [**`embed-template.md`**](embed-template.md) | Embed Builder | Standardized `EmbedHandler` utility pattern for responses with character clamping |
+| [**`embed-template.md`**](embed-template.md) | Embed Standards | Standardized `EmbedHandler` template, formatting guide, and production blueprints |
 | [**`dashboard-route-template.md`**](dashboard-route-template.md) | HTTP API Route | Dashboard domain REST route handler with authentication and audit logging |
 | [**`dashboard-view-template.md`**](dashboard-view-template.md) | SSR View Component | Dashboard SSR HTML component template with safe escaping |
 
@@ -30,7 +30,6 @@ All templates adhere strictly to:
 | [**`issue-roadmap-template.md`**](issue-roadmap-template.md) | GitHub Issues | Living roadmap template for GitHub issues with Mermaid diagrams and progress tracking |
 | [**`issue-template.md`**](issue-template.md) | Issue Body | Standard issue reporting blueprint |
 | [**`commit-message-guide.md`**](commit-message-guide.md) | Git Commits | Conventional commit standard with emojis and subsystem scopes |
-| [**`embed-formatting-template.md`**](embed-formatting-template.md) | Embed Formatting | Comprehensive guide and blueprints for Discord embed formatting via `EmbedHandler` |
 
 ---
 

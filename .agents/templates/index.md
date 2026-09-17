@@ -9,7 +9,7 @@ This directory provides standardized code templates and workflow guides for **HE
 - **[command-template.md](command-template.md)**: Standard standalone slash command structure with colocated option definitions and execution handler.
 - **[subcommand-template.md](subcommand-template.md)**: Subcommand / subcommand group pattern for complex commands (e.g., `/admin`, `/feed`) with colocated subcommands.
 - **[event-template.md](event-template.md)**: Strongly typed Discord event listener pattern with isolated execution boundaries.
-- **[embed-template.md](embed-template.md)**: `EmbedHandler` utility pattern for error, success, warning, and info embeds with automatic character and field clamping.
+- **[embed-template.md](embed-template.md)**: Standard `EmbedHandler` formatting guide, production blueprints, and semantic variant patterns.
 - **[dashboard-route-template.md](dashboard-route-template.md)**: Standard dashboard domain route handler with authentication and audit logging.
 - **[dashboard-view-template.md](dashboard-view-template.md)**: Standard dashboard SSR view component template with HTML escaping.
 
@@ -19,7 +19,6 @@ This directory provides standardized code templates and workflow guides for **HE
 
 - **[issue-roadmap-template.md](issue-roadmap-template.md)**: GitHub issue template where the first post serves as the living roadmap with Mermaid diagrams and progress checklists.
 - **[commit-message-guide.md](commit-message-guide.md)**: Conventional commit message standards with emojis and subsystem scopes (`commands`, `admin`, `music`, `feeds`, `events`, `lib`).
-- **[embed-formatting-template.md](embed-formatting-template.md)**: Comprehensive guide and blueprints for Discord embed formatting via `EmbedHandler`.
 
 ---
 
