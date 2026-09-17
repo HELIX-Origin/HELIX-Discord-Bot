@@ -24,5 +24,5 @@ repository:
   branch: main
 title: HELIX Discord Bot
 description: "A self-hosted Discord bot for RSS feed syndication, music playback, GIFs, and guild administration"
-version: 0.4.0
+version: 0.4.1
 license: BSD-3-Clause

@@ -385,7 +385,7 @@ export class WebhookRouter {
     try {
       const res = await fetch(url, {
         redirect: 'follow',
-        headers: { 'user-agent': 'Mozilla/5.0 (compatible; HELIX-Discord-Bot/0.4.0)' },
+        headers: { 'user-agent': 'Mozilla/5.0 (compatible; HELIX-Discord-Bot/0.4.1)' },
         signal: AbortSignal.timeout(10_000),
       });
       if (!res.ok) return null;

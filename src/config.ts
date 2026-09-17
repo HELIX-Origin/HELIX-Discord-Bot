@@ -164,7 +164,7 @@ export function defaultConfig(): AppConfig {
   const userAgent =
     process.env['USER_AGENT']?.trim() ||
     process.env['DISCORD_USER_AGENT']?.trim() ||
-    (repoUrl ? `DiscordBot (${repoUrl}, 0.4.0)` : 'DiscordBot (0.4.0)');
+    (repoUrl ? `DiscordBot (${repoUrl}, 0.4.1)` : 'DiscordBot (0.4.1)');
 
   const rawTheme =
     process.env['DASHBOARD_THEME']?.trim().toLowerCase() ||
