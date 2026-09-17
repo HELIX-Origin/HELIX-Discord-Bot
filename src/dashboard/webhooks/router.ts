@@ -285,6 +285,9 @@ export class WebhookRouter {
     if (this.threads) {
       const outcome = await this.threads.deliver(feed, payload);
       if (outcome.mode === 'thread') {
+        if (outcome.delivered && outcome.threadId) {
+          feed.threadChannelId = outcome.threadId;
+        }
         if (!outcome.delivered) {
           this.logger.warn('Thread delivery failed for webhook entry', {
             feedId: feed.id,

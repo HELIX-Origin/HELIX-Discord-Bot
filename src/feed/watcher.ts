@@ -110,11 +110,21 @@ export class FeedWatcher {
     const isYouTubeFeed = feed.feedType === 'youtube';
     const isTwitchFeed = feed.feedType === 'twitch';
 
-    // For Free Games feeds: automated polling runs daily (UTC) so limited-time giveaways are not missed.
+    // For Free Games feeds: automated polling runs weekly at the start of every Sunday (UTC).
     if (isFreeGamesFeed) {
-      const todayIso = new Date().toISOString().slice(0, 10);
+      const now = new Date();
+      const isSunday = now.getUTCDay() === 0;
+      if (!isSunday) {
+        this.logger.debug('Skipping free games poll; free games feeds only poll on Sundays', {
+          feedId: feed.id,
+          feedName: feed.name,
+        });
+        return;
+      }
+
+      const todayIso = now.toISOString().slice(0, 10);
       if (feed.lastCheckedAt && feed.lastCheckedAt.slice(0, 10) === todayIso) {
-        this.logger.debug('Skipping free games poll; already polled today', {
+        this.logger.debug('Skipping free games poll; already polled this Sunday', {
           feedId: feed.id,
           feedName: feed.name,
           lastCheckedAt: feed.lastCheckedAt,
@@ -258,7 +268,12 @@ export class FeedWatcher {
   private async deliverEntry(feed: Feed, payload: { content?: string; embeds?: unknown[] }): Promise<boolean> {
     if (this.threads) {
       const outcome = await this.threads.deliver(feed, payload);
-      if (outcome.mode === 'thread') return outcome.delivered;
+      if (outcome.mode === 'thread') {
+        if (outcome.delivered && outcome.threadId) {
+          feed.threadChannelId = outcome.threadId;
+        }
+        return outcome.delivered;
+      }
     }
     const { channelId } = resolveFeedTargets(this.repo, feed);
     if (!this.bot || !channelId) return false;

@@ -340,6 +340,25 @@ export async function fetchGamerPowerGiveaways(platformKey: FreeGamePlatformKey 
 }
 
 /**
+ * Normalizes game titles by stripping store tags, parenthetical platforms, and giveaway suffixes.
+ */
+export function normalizeGameTitle(title: string): string {
+  let cleaned = decodeHtmlEntities(title);
+  cleaned = cleaned.replace(/\s*[-–—]\s*(?:Steam|Epic|GOG|Ubisoft|PC).*$/i, '');
+  cleaned = cleaned.replace(
+    /\s*\([^)]*(?:epic|steam|gog|ubisoft|origin|ea|indie|humble|itch|prime|blizzard|battle\.net|pc|giveaway|free)[^)]*\)/gi,
+    '',
+  );
+  cleaned = cleaned.replace(
+    /\s*\[[^\]]*(?:epic|steam|gog|ubisoft|origin|ea|indie|humble|itch|prime|blizzard|battle\.net|pc|giveaway|free)[^\]]*\]/gi,
+    '',
+  );
+  cleaned = cleaned.replace(/\b(?:giveaway|free to keep|free key|key giveaway|free)\b/gi, '');
+  cleaned = cleaned.replace(/\s+/g, ' ').trim();
+  return cleaned || title.trim();
+}
+
+/**
  * Fetch unified free games list for any requested platform
  */
 export async function fetchFreeGames(platform: FreeGamePlatformKey = 'all'): Promise<FreeGameItem[]> {
@@ -354,14 +373,18 @@ export async function fetchFreeGames(platform: FreeGamePlatformKey = 'all'): Pro
   const results = await Promise.all(fetchers);
   const allItems = results.flat();
 
-  // Deduplicate by clean title + platformKey
+  // Deduplicate by clean normalized title + platformKey
   const seen = new Set<string>();
   const uniqueItems: FreeGameItem[] = [];
 
   for (const item of allItems) {
-    const cleanKey = `${item.platformKey}:${item.title.toLowerCase().replace(/[^a-z0-9]/g, '')}`;
+    const normTitle = normalizeGameTitle(item.title);
+    const cleanKey = `${item.platformKey}:${normTitle.toLowerCase().replace(/[^a-z0-9]/g, '')}`;
     if (seen.has(cleanKey)) continue;
     seen.add(cleanKey);
+    if (normTitle && normTitle.length >= 2) {
+      item.title = normTitle;
+    }
     uniqueItems.push(item);
   }
 

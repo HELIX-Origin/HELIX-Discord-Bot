@@ -355,6 +355,10 @@ export class DiscordBot {
     await this.rest.archiveThread(threadId);
   }
 
+  async unarchiveThread(threadId: string): Promise<void> {
+    await this.rest.unarchiveThread(threadId);
+  }
+
   async detectApplicationOwners(): Promise<{ ownerIds: string[]; adminIds: string[] }> {
     try {
       const app = await this.rest.getCurrentApplication();

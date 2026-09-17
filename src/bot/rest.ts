@@ -233,6 +233,21 @@ export class DiscordRestClient {
     }
   }
 
+  /** Unarchives a thread so new messages can be posted to it without starting a new thread. */
+  async unarchiveThread(threadId: string): Promise<void> {
+    const res = await fetch(`${this.baseUrl}/channels/${threadId}`, {
+      method: 'PATCH',
+      headers: this.headers(),
+      body: JSON.stringify({ archived: false }),
+      signal: AbortSignal.timeout(DISCORD_API_TIMEOUT_MS),
+    });
+
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(`Failed to unarchive thread ${threadId}: ${formatErrorText(res.status, text)}`);
+    }
+  }
+
   /** Adds a user to a private thread (admin-style tickets rely on this). */
   async addThreadMember(threadId: string, userId: string): Promise<void> {
     const res = await fetch(`${this.baseUrl}/channels/${threadId}/thread-members/${userId}`, {

@@ -16,6 +16,7 @@ export interface ThreadSender {
     },
   ): Promise<{ id: string; name: string; type: number }>;
   archiveThread(threadId: string): Promise<void>;
+  unarchiveThread?(threadId: string): Promise<void>;
   getGuildsWithChannels?(): Promise<
     Array<{
       id: string;
@@ -163,29 +164,53 @@ export class FeedThreadManager {
     }
 
     try {
-      const currentThreadId = feed.threadChannelId;
+      const currentThreadId = feed.threadChannelId || this.repo.getFeed(feed.userId, feed.id)?.threadChannelId || null;
       if (!currentThreadId) {
         const threadId = await this.createThread(feed, forumChannelId, payload);
         return { delivered: true, mode: 'thread', threadId };
       }
 
       // Check whether the tracked thread is still open before posting.
-      const snapshot = await this.bot.getChannel(currentThreadId);
-      const archived = snapshot.thread_metadata?.archived ?? false;
+      let snapshot: DiscordChannelSnapshot;
+      try {
+        snapshot = await this.bot.getChannel(currentThreadId);
+      } catch (channelErr) {
+        const msg = channelErr instanceof Error ? channelErr.message : String(channelErr);
+        // Only open a replacement if the thread was deleted / not found (HTTP 404 / Unknown Channel)
+        if (msg.includes('404') || msg.includes('10003') || msg.toLowerCase().includes('unknown channel')) {
+          this.logger.info('Feed thread was deleted; opening a replacement', {
+            feedId: feed.id,
+            feedName: feed.name,
+            threadId: currentThreadId,
+          });
+          const threadId = await this.createThread(feed, forumChannelId, payload);
+          return { delivered: true, mode: 'thread', threadId, fallbackReason: 'previous thread deleted' };
+        }
+        throw channelErr;
+      }
 
-      if (archived || snapshot.type !== 11) {
-        this.logger.info('Feed thread no longer active; opening a replacement', {
-          feedId: feed.id,
-          feedName: feed.name,
-          threadId: currentThreadId,
-        });
-        const threadId = await this.createThread(feed, forumChannelId, payload);
-        return { delivered: true, mode: 'thread', threadId, fallbackReason: 'previous thread archived' };
+      // If thread is archived, unarchive it so we can keep delivering into the same thread
+      if (snapshot.thread_metadata?.archived && this.bot.unarchiveThread) {
+        try {
+          await this.bot.unarchiveThread(currentThreadId);
+          this.logger.info('Unarchived feed thread for new entry', {
+            feedId: feed.id,
+            threadId: currentThreadId,
+          });
+        } catch (unarchiveErr) {
+          this.logger.warn('Failed to unarchive feed thread; attempting delivery anyway', {
+            feedId: feed.id,
+            threadId: currentThreadId,
+            error: unarchiveErr instanceof Error ? unarchiveErr.message : String(unarchiveErr),
+          });
+        }
       }
 
       await this.bot.sendChannelMessage(currentThreadId, payload);
 
-      const entryCount = feed.threadEntryCount + 1;
+      const entryCount = (feed.threadEntryCount || 0) + 1;
+      feed.threadChannelId = currentThreadId;
+      feed.threadEntryCount = entryCount;
       if (entryCount >= this.config.threadMaxMessages) {
         await this.rotate(feed, currentThreadId, forumChannelId, entryCount);
         return {
@@ -219,6 +244,8 @@ export class FeedThreadManager {
         message: payload,
         autoArchiveDuration: MAX_AUTO_ARCHIVE_MINUTES,
       });
+      feed.threadChannelId = thread.id;
+      feed.threadEntryCount = 1;
       this.repo.setFeedThread(feed.userId, feed.id, thread.id, 1);
       this.repo.logActivity(feed.userId, 'info', 'threads', `Opened forum thread "${name}" for feed "${feed.name}".`);
       return thread.id;
@@ -231,6 +258,8 @@ export class FeedThreadManager {
         name,
         message: payload,
       });
+      feed.threadChannelId = thread.id;
+      feed.threadEntryCount = 1;
       this.repo.setFeedThread(feed.userId, feed.id, thread.id, 1);
       this.repo.logActivity(feed.userId, 'info', 'threads', `Opened forum thread "${name}" for feed "${feed.name}".`);
       return thread.id;
@@ -268,12 +297,16 @@ export class FeedThreadManager {
         message: intro,
         autoArchiveDuration: MAX_AUTO_ARCHIVE_MINUTES,
       });
+      feed.threadChannelId = thread.id;
+      feed.threadEntryCount = 0;
       this.repo.setFeedThread(feed.userId, feed.id, thread.id, 0);
     } catch (err) {
       this.logger.warn('Failed to open replacement thread during rotation', {
         feedId: feed.id,
         error: err instanceof Error ? err.message : String(err),
       });
+      feed.threadChannelId = null;
+      feed.threadEntryCount = 0;
       this.repo.setFeedThread(feed.userId, feed.id, null, 0);
     }
   }
@@ -286,12 +319,24 @@ export class FeedThreadManager {
       feeds.map(async (feed) => {
         try {
           const threadId = feed.threadChannelId!;
-          const snapshot = await this.bot!.getChannel(threadId);
-          if (!snapshot.thread_metadata || snapshot.thread_metadata.archived) {
-            this.repo.setFeedThread(feed.userId, feed.id, null, 0);
+          let snapshot: DiscordChannelSnapshot;
+          try {
+            snapshot = await this.bot!.getChannel(threadId);
+          } catch (err) {
+            const msg = err instanceof Error ? err.message : String(err);
+            if (msg.includes('404') || msg.includes('10003') || msg.toLowerCase().includes('unknown channel')) {
+              this.repo.setFeedThread(feed.userId, feed.id, null, 0);
+            }
             return;
           }
-          const archiveTs = snapshot.thread_metadata.archive_timestamp;
+
+          if (snapshot.thread_metadata?.archived) {
+            if (this.bot!.unarchiveThread) {
+              await this.bot!.unarchiveThread(threadId).catch(() => {});
+            }
+            return;
+          }
+          const archiveTs = snapshot.thread_metadata?.archive_timestamp;
           if (!archiveTs) return;
           const archiveTime = new Date(archiveTs).getTime();
           const now = Date.now();
