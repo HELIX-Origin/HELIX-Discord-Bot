@@ -82,12 +82,6 @@ EnvironmentFile=-${PROJECT_DIR}/.env
 AmbientCapabilities=CAP_NET_BIND_SERVICE
 CapabilityBoundingSet=CAP_NET_BIND_SERVICE
 
-# Security & Sandboxing hardening
-NoNewPrivileges=true
-ProtectSystem=full
-ProtectHome=read-only
-ReadWritePaths=${PROJECT_DIR}/data
-
 # Logging configuration
 StandardOutput=journal
 StandardError=journal

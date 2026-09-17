@@ -91,9 +91,6 @@ TimeoutStopSec=30
 # Environment variables from project root .env
 EnvironmentFile=-${PROJECT_DIR}/.env
 
-# Allow Lavalink to write plugins, logs, and cache inside lavalink/
-ReadWritePaths=${LAVALINK_DIR}
-
 StandardOutput=journal
 StandardError=journal
 SyslogIdentifier=helix-lavalink
