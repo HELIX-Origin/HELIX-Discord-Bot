@@ -2,6 +2,8 @@
 
 This document is the central entry point and operating manual for all AI agents, coding assistants, and automated agents working on this repository.
 
+> **Local Tracking Files**: `PLAN.md`, `BUGS.md`, and `TODO.md` are local-only workspace scratchpads and are gitignored. They must never be committed to the repository. All architecture rules, standards, and permanent documentation reside in `AGENTS.md`, `.agents/`, and `wiki/`.
+
 ## Project
 
 **HELIX Discord Bot** is a self-hosted, multi-user Discord bot built in TypeScript ESM — RSS/Atom/Reddit/Free-Games feed delivery, YouTube & Twitch live/upload alerts, external Lavalink v4 music playback, guild administration, and an integrated management dashboard.

@@ -21,6 +21,8 @@ data-cookies.txt
 scratch/
 temp/
 TODO.md
+PLAN.md
+BUGS.md
 
 # Coverage
 coverage/
