@@ -81,6 +81,11 @@ export function createHelixRssServer(deps: AppDeps): Server {
     const appIconUrl = d.bot?.getAppIconUrl() || null;
     sendHtml(res, 200, renderLegalHtml('Privacy Policy', 'PRIVACY.md', appName, appIconUrl, d.config.defaultTheme));
   });
+  router.add('GET', '/security', (_req, res, _ctx, d) => {
+    const appName = appDisplayName(d);
+    const appIconUrl = d.bot?.getAppIconUrl() || null;
+    sendHtml(res, 200, renderLegalHtml('Security Policy', 'SECURITY.md', appName, appIconUrl, d.config.defaultTheme));
+  });
   router.add('GET', '/tos', (_req, res, _ctx, d) => {
     const appName = appDisplayName(d);
     const appIconUrl = d.bot?.getAppIconUrl() || null;
@@ -195,6 +200,7 @@ export function createHelixRssServer(deps: AppDeps): Server {
       'Allow: /home',
       'Allow: /landing',
       'Allow: /privacy',
+      'Allow: /security',
       'Allow: /tos',
       'Allow: /invite',
       '',

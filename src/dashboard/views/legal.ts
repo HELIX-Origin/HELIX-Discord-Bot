@@ -21,6 +21,7 @@ function markdownToHtml(md: string): string {
   const lines = md.replace(/\r\n/g, '\n').split('\n');
   const out: string[] = [];
   let listType: 'ul' | 'ol' | null = null;
+  let inTable = false;
 
   const closeList = (): void => {
     if (listType) {
@@ -29,13 +30,57 @@ function markdownToHtml(md: string): string {
     }
   };
 
+  const closeTable = (): void => {
+    if (inTable) {
+      out.push('</tbody></table></div>');
+      inTable = false;
+    }
+  };
+
   for (const rawLine of lines) {
     const line = rawLine.trim();
 
     if (line === '') {
       closeList();
+      closeTable();
       continue;
     }
+
+    // Table rows
+    if (line.startsWith('|') && line.endsWith('|')) {
+      closeList();
+      const cells = line
+        .slice(1, -1)
+        .split('|')
+        .map((c) => c.trim());
+
+      // Check if separator line (e.g. | :--- | :--- |)
+      if (cells.every((c) => /^:?-+:?$/.test(c))) {
+        continue;
+      }
+
+      if (!inTable) {
+        inTable = true;
+        out.push(
+          '<div style="overflow-x: auto; margin: 1rem 0;"><table style="width: 100%; border-collapse: collapse; font-size: 0.875rem;"><thead><tr style="border-bottom: 2px solid var(--border); text-align: left;">',
+        );
+        for (const cell of cells) {
+          out.push(
+            `<th style="padding: 0.6rem 0.75rem; font-weight: 700; color: var(--text);">${inlineFormat(cell)}</th>`,
+          );
+        }
+        out.push('</tr></thead><tbody>');
+      } else {
+        out.push('<tr style="border-bottom: 1px solid var(--border);">');
+        for (const cell of cells) {
+          out.push(`<td style="padding: 0.6rem 0.75rem; color: var(--text-muted);">${inlineFormat(cell)}</td>`);
+        }
+        out.push('</tr>');
+      }
+      continue;
+    }
+
+    closeTable();
 
     // Horizontal rule
     if (/^(-{3,}|\*{3,}|_{3,})$/.test(line)) {
@@ -93,6 +138,7 @@ function markdownToHtml(md: string): string {
   }
 
   closeList();
+  closeTable();
   return out.join('\n');
 }
 

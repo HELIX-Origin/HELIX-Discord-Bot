@@ -1,71 +1,85 @@
 # Privacy Policy for HELIX Discord Bot
 
-**Last Updated**: September 11, 2026
+**Last Updated**: September 17, 2026
 
-Welcome to **HELIX Discord Bot**. This Privacy Policy explains how our self-hosted RSS/Atom-to-Discord service handles information when you use the software, dashboard, and associated Discord bot.
+Welcome to **HELIX Discord Bot**. This Privacy Policy explains how our self-hosted Discord bot, management dashboard, and associated services handle information when you deploy, host, or interact with the software.
 
 ---
 
 ## 1. Core Principle: Self-Hosted & Zero Telemetry
 
 HELIX Discord Bot is an open-source, self-hosted application.
-- **No Third-Party Tracking**: We do not collect, transmit, sell, or analyze your personal information.
-- **No Analytics / Telemetry**: The application contains zero tracking cookies, remote analytics beacons, or centralized diagnostic pingbacks.
-- **Local Data Custody**: All database records (feeds, articles, users, logs) reside exclusively on the server or filesystem managed by the instance administrator.
+- **No Central Tracking**: We do not collect, harvest, monetize, sell, or analyze your personal information.
+- **No Analytics or Telemetry**: The application contains zero tracking cookies, remote analytics beacons, phone-home telemetry, or centralized diagnostic pingbacks.
+- **Local Data Custody**: All database records (feed subscriptions, alert monitors, server configurations, moderation logs, user accounts, and cached delivery entries) reside exclusively on the server, container, or filesystem managed by the instance administrator.
 
 ---
 
 ## 2. Information Handled by the Service
 
-When operating an instance of HELIX Discord Bot, the software stores and processes the following data locally within an embedded SQLite database (`database.sqlite`):
+When operating an instance of HELIX Discord Bot, the software stores and processes data locally within an embedded SQLite database (`database.sqlite`):
 
-### A. Discord Account & OAuth Data
-- **Discord User ID & Username**: Used to authenticate administrators and members for dashboard access.
-- **Guild (Server) and Channel IDs**: Used to identify channels where RSS feed updates are posted.
-- **OAuth Access Tokens**: Stored locally in encrypted/session cookies solely to manage authenticated sessions with the Discord API. Tokens are never transmitted to external third parties.
+### A. Discord Account & OAuth2 Data
+- **Discord User ID, Username, and Avatar**: Used to identify guild members, verify permissions, and authenticate dashboard sessions.
+- **Guild (Server) and Channel IDs**: Used to identify delivery targets for RSS/Atom posts, live stream notifications, giveaway alerts, and moderation audit logs.
+- **OAuth Access Tokens**: Stored locally in secured session storage solely to manage authenticated sessions with the Discord API. Tokens are never transmitted to external third parties.
 
-### B. Feed Configurations
-- **Feed URLs & Titles**: Target RSS/Atom feed links and scrape URLs provided by users.
-- **Delivery Preferences**: Channel routing IDs, ping roles, and custom filter rules.
-- **Sent Entry Cache**: Feed article GUIDs or URLs stored locally to deduplicate and prevent repeat notifications.
+### B. Feed & Source Configurations
+- **Feed URLs & Subscriptions**: Target RSS/Atom feeds, Reddit subreddit feeds, and free-game store monitors configured by server administrators.
+- **Stream Alerts**: Twitch channels and YouTube channels monitored for upload and live status notifications.
+- **Delivery Preferences**: Designated guild delivery channels, forum thread targets, ping role IDs, and filter options.
+- **Sent Entry Cache**: Unique post GUIDs, article IDs, and URLs stored locally to deduplicate entries and prevent repeat notifications.
 
-### C. Local Dashboard Accounts
-- If local dashboard registration is enabled, encrypted password hashes (using Node.js native scrypt/crypto) and email addresses are stored in the local SQLite database.
+### C. Guild Administration & Moderation Logs
+- **Audit Records**: Moderation actions executed through administrative commands (`/warn`, `/kick`, `/ban`, `/purge`, `/lock`, `/slowmode`, etc.) record the target user ID, moderator user ID, timestamp, and specified reason within local SQLite storage for audit review.
+- **Role & Voice Configurations**: Guild DJ roles, administrative roles, and mod-log channel designations.
+
+### D. Entertainment & Audio Playback
+- **Music Queue State**: Track metadata, song titles, audio URLs, and queue positions for playback via an external Lavalink v4 audio server.
+- **Reaction GIFs**: Search keywords processed via public API integrations (such as KLIPY) solely to return relevant GIF assets. No personal identifiers are attached to search queries.
+
+### E. Local Dashboard Accounts (Optional)
+- If local dashboard account registration is explicitly enabled by the administrator, securely salted and hashed passwords (utilizing Node.js native cryptographic primitives) and email addresses are stored strictly in the local SQLite database.
 
 ---
 
 ## 3. External Network Interactions
 
-To perform its intended functions, HELIX Discord Bot initiates outgoing network requests to:
-1. **Discord API (`discord.com`)**:
-   - Deliver rich embeds to designated server channels via the configured Discord Bot token.
-   - Register slash commands (`/feed`, `/stats`, `/about`, `/help`).
+To deliver its core capabilities, an active HELIX Discord Bot instance communicates directly with:
+1. **Discord Gateway & REST API (`discord.com`)**:
+   - Deliver rich embeds, forum thread updates, and announcements to designated guild channels.
+   - Register and dispatch discrete slash commands (e.g., `/rss`, `/reddit`, `/free-games`, `/youtube`, `/twitch`, `/play`, `/admin`, `/role`, `/voice`, `/gif`, `/about`, `/help`).
    - Authenticate users via Discord OAuth2.
-2. **Configured Feed Sources**:
-   - Periodically poll public RSS, Atom, or webpage endpoints provided by users.
-   - Fetched content is parsed in-memory and committed to local cache.
+2. **Configured Content Providers**:
+   - Periodically poll public RSS/Atom feeds, Reddit endpoints, and Epic Games/giveaway APIs configured by server administrators.
+   - Query YouTube or Twitch alert endpoints for live-stream and video upload status.
+3. **External Audio Server (Lavalink v4)**:
+   - Stream audio WebSocket signals and voice update state to external Lavalink v4 servers configured by the host administrator in `.env`.
+4. **Entertainment API (KLIPY)**:
+   - Query public reaction and anime GIF endpoints on-demand when users run entertainment commands.
 
 ---
 
 ## 4. Data Retention & Erasure
 
-Because HELIX Discord Bot is self-hosted:
-- **Feed Deletion**: Deleting a feed from the dashboard or via `/feed remove` immediately purges its configuration and associated delivery logs from the local database.
-- **Account Deletion**: Instance administrators can delete users via the Settings tab or directly query SQLite.
-- **Complete Erasure**: Deleting the local `data/database.sqlite` file permanently removes all stored data.
+Because HELIX Discord Bot operates on a self-hosted architecture:
+- **Feed & Alert Removal**: Deleting a feed or alert subscription from the web dashboard or slash command immediately purges its subscription record and associated delivery cache from the local database.
+- **Audit Log Deletion**: Instance administrators can purge moderation history or audit records through the dashboard or direct SQLite administration.
+- **Complete Erasure**: Deleting the local `data/database.sqlite` file completely and irreversibly removes all stored records, sessions, and configurations.
 
 ---
 
-## 5. Security Measures
+## 5. Security Architecture
 
-- **Native Node.js Security**: Uses Node.js native HTTP/HTTPS and cryptography libraries with zero unnecessary runtime dependencies.
-- **HTTPS & Secure Cookies**: Session cookies are automatically tagged with `HttpOnly`, `SameSite=Lax`, and `Secure` attributes over HTTPS connections.
-- **Role-Based Access Control (RBAC)**: Only authorized server owners and administrators have permission to alter service settings.
+- **Native Cryptography**: Password hashing, token validation, and session signatures utilize native Node.js cryptographic primitives with zero untrusted dependencies.
+- **Session Protection**: Dashboard cookies enforce `HttpOnly` and `SameSite=Lax` attributes. Production deployments should serve the dashboard behind a reverse proxy terminating HTTPS to enable browser `Secure` cookie enforcement.
+- **Permission Bitfield Verification**: Discord native permissions and guild role hierarchies are validated before permitting access to sensitive administrative commands and dashboard settings.
 
 ---
 
-## 6. Contact & Open Source Inquiries
+## 6. Community & Contact
 
-For questions regarding the open-source software, security disclosures, or feature requests, visit:
-- **Repository**: [https://github.com/HELIX-Origin/HELIX-Discord-Bot](https://github.com/HELIX-Origin/HELIX-Discord-Bot)
-- **Discord Community**: [HELIX Origin Discord](https://discord.com/invite/Ww3XBZC2HV)
+For questions regarding this policy, security questions, or open-source inquiries:
+- **GitHub Repository**: [https://github.com/HELIX-Origin/HELIX-Discord-Bot](https://github.com/HELIX-Origin/HELIX-Discord-Bot)
+- **Discord Community**: [HELIX Origin Discord](https://discord.gg/Ww3XBZC2HV)
+- **Security Policy**: [SECURITY.md](SECURITY.md)

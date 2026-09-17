@@ -18,6 +18,7 @@ export function renderFooter(depsOrAppName: AppDeps | string, opts: FooterOption
   const links = [
     ...(dashboardEnabled ? [{ href: '/dashboard', label: 'Web Dashboard' }] : []),
     { href: '/privacy', label: 'Privacy Policy' },
+    { href: '/security', label: 'Security Policy' },
     { href: '/tos', label: 'Terms of Service' },
     ...extraLinks,
   ];

@@ -208,11 +208,13 @@ Comprehensive guides, architecture breakdowns, configuration settings, and API s
 
 ---
 
-## 🤝 Contributing
+## 🤝 Contributing & Policies
 
 Contributions, feature suggestions, and bug reports are welcome!
 - Review [CONTRIBUTING.md](CONTRIBUTING.md) for code quality standards and git commit conventions.
 - Report issues and request features on our [GitHub Issue Tracker](https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues).
+- Review our [Security Policy](SECURITY.md) for vulnerability reporting and security principles.
+- Review our [Privacy Policy](PRIVACY.md) and [Terms of Service](TOS.md).
 
 ---
 
