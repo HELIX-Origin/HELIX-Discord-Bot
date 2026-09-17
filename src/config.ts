@@ -72,7 +72,23 @@ export function defaultConfig(): AppConfig {
     }
   }
 
-  const defaultHost = '127.0.0.1';
+  // Port resolution: prefers INTERNAL_URL, then PORT (standard across cloud PaaS),
+  // then DISCORD_PORT, defaulting to 3131.
+  const envPortFromProcess = process.env['PORT'] ? Number(process.env['PORT']) : undefined;
+  const envPortFromDiscord = process.env['DISCORD_PORT'] ? Number(process.env['DISCORD_PORT']) : undefined;
+  const botPort =
+    (envPort && Number.isFinite(envPort) && envPort > 0 ? envPort : undefined) ??
+    (envPortFromProcess && Number.isFinite(envPortFromProcess) && envPortFromProcess > 0
+      ? envPortFromProcess
+      : undefined) ??
+    (envPortFromDiscord && Number.isFinite(envPortFromDiscord) && envPortFromDiscord > 0
+      ? envPortFromDiscord
+      : undefined) ??
+    3131;
+  const port = botPort;
+
+  // When PORT is provided (typical in cloud PaaS runtimes), default host to 0.0.0.0
+  const defaultHost = envPortFromProcess ? '0.0.0.0' : '127.0.0.1';
   const host = (envHost === 'localhost' ? '0.0.0.0' : envHost) ?? process.env['HOST']?.trim() ?? defaultHost;
   const dataDir = process.env['SQLITE_DATA'] ?? resolve(process.cwd(), 'data');
 
@@ -81,11 +97,6 @@ export function defaultConfig(): AppConfig {
   //   sqlite://./data/database.sqlite (or sqlite:./data/database.sqlite)
   // Falls back to SQLite file in SQLITE_DATA directory.
   const dbUri = process.env['DB_URI']?.trim() || `sqlite:${resolve(dataDir, 'database.sqlite')}`;
-
-  // Port is derived exclusively from INTERNAL_URL (default 3131). No PORT-style
-  // environment variables are used; proxies/tunnels mask ports on PUBLIC_URL.
-  const botPort = envPort || 3131;
-  const port = botPort;
 
   // Public URL: optional public URL for the service (behind reverse proxy or native SSL)
   const rawPublic =

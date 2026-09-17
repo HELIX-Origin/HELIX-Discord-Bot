@@ -199,7 +199,7 @@ Comprehensive guides, architecture breakdowns, configuration settings, and API s
 | [🛡️ Guild Administration](../../wiki/Administration) | Moderation (`/admin warn`, `/kick`, `/ban`, `/lock`, `/purge`, `/slowmode`, `/announce`), role management, voice controls, permission guards. |
 | [🏗️ Architecture & Design](../../wiki/Architecture-and-Design) | SQLite schema, AppState in-memory caching, RedisCoordinator, and FeedWatcher engine. |
 | [⚙️ Configuration Guide](../../wiki/Configuration) | Exhaustive reference for all `.env` environment variables and settings. |
-| [🚀 Deployment & Hosting](../../wiki/Deployment-and-Hosting) | Docker, Docker Compose, VPS/PM2, systemd self-hosting, and native SSL. |
+| [🚀 Deployment & Hosting](../../wiki/Deployment-and-Hosting) | Docker, Docker Compose, Linux VPS/systemd, and manual Cloud PaaS (Railway, Render, Fly.io). |
 | [💻 Development & Testing](../../wiki/Development-and-Testing) | Developer environment setup, test runner commands, TypeScript checking, and code style standards. |
 | [🔒 Integrations & Security](../../wiki/Integrations-and-Security) | Discord OAuth2, session cookies, RBAC permissions, and anti-bot challenge detection. |
 | [📡 REST API Reference](../../wiki/API-Reference) | Complete documentation of all dashboard, feed, and management REST endpoints. |

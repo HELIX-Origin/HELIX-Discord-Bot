@@ -1,6 +1,6 @@
 # 🚀 Deployment & Hosting Guide
 
-HELIX Discord Bot is optimized for self-hosted deployments on **Docker**, **Linux VPS**, and bare metal (with SSL handled by reverse proxies like Nginx/Caddy or the host system). Cloud PaaS platforms are intentionally not supported.
+HELIX Discord Bot is optimized for self-hosted deployments on **Docker**, **Linux VPS**, and bare metal, with support for manual hosting on container-enabled cloud PaaS platforms (Railway, Render, Fly.io). One-click deployment buttons are intentionally not provided.
 
 > **Music Playback**: Connects to an external Lavalink v4 server. Configure `LAVA_HOST`, `LAVA_PORT`, `LAVA_PASS`, and `LAVA_SECURE` in `.env`.
 
@@ -319,6 +319,94 @@ The task will start the dashboard/bot whenever Windows boots. To stop it, use Ta
 
 ---
 
-## 🚫 Cloud PaaS Platforms (Retired)
+## ☁️ Option 4: Manual Cloud PaaS Hosting (Railway, Render, Fly.io)
 
-Heroku, Render, Fly.io, and Railway deployment support has been **retired**. HELIX Discord Bot is self-hosted exclusively on Local, VPS, and Docker. This removes platform-lock-in, payment barriers, and out-of-sync credential state.
+For users who prefer managed container hosting instead of maintaining a VPS, HELIX Discord Bot can be deployed manually on container-enabled cloud PaaS providers.
+
+> [!NOTE]
+> **No One-Click Deploy Buttons**: One-click deployment buttons and automated templates are intentionally not provided. Automated templates frequently fail over time, inject out-of-sync credentials, and hide storage configuration. Users connect their own repository fork and explicitly configure persistent storage and environment variables.
+
+### ⚠️ Critical PaaS Prerequisites
+
+1. **Persistent Storage Volume (Mandatory for SQLite)**:
+   HELIX Discord Bot stores feeds, server settings, mod logs, and command toggles in a local SQLite file (`database.sqlite`).
+   Cloud containers are ephemeral by default — **you must attach a persistent volume** mounted to `/app/data` (or set `SQLITE_DATA=/app/data`). Without a persistent volume, database changes will be wiped on every redeploy or container restart.
+2. **Environment Variables**:
+   All configuration is provided via the platform's Environment Variables dashboard (never hardcoded in repo code).
+3. **Public URL & OAuth Callback**:
+   Set `PUBLIC_URL` to your assigned HTTPS domain (e.g. `https://my-helix-bot.up.railway.app`). Ensure this exact callback URL is registered in the Discord Developer Portal under **OAuth2 > Redirects**:
+   `https://<your-domain>/api/auth/callback/discord`
+4. **Dynamic Port Binding**:
+   HELIX Discord Bot automatically reads `process.env.PORT` injected by cloud providers and binds to `0.0.0.0:$PORT`.
+5. **External Lavalink Music**:
+   For music playback, provide credentials for an external Lavalink v4 server (`LAVA_HOST`, `LAVA_PORT`, `LAVA_PASS`, `LAVA_SECURE=true`).
+
+---
+
+### Platform Walkthroughs
+
+#### 🚂 Railway (Recommended PaaS)
+Railway provides seamless Dockerfile support and persistent volume attachments:
+1. **New Project**: Click **New Project** > **Deploy from GitHub repo** > select your repository.
+2. **Attach Volume**:
+   - In your service view, go to **Settings** > **Volumes** (or right-click the canvas > **Volume**).
+   - Mount path: `/app/data`.
+3. **Set Variables**:
+   In the **Variables** tab, add:
+   - `NODE_ENV`: `production`
+   - `SQLITE_DATA`: `/app/data`
+   - `PUBLIC_URL`: `https://${{RAILWAY_PUBLIC_DOMAIN}}`
+   - `DISCORD_TOKEN`: `your_bot_token`
+   - `DISCORD_CLIENT_ID`: `your_client_id`
+   - `DISCORD_CLIENT_SECRET`: `your_client_secret`
+   - `DISCORD_REDIRECT_URL`: `https://discord.com/oauth2/authorize?client_id=your_client_id&permissions=8&integration_type=0&scope=bot+applications.commands`
+4. **Networking**: Under **Settings** > **Networking**, click **Generate Domain** to get a public HTTPS address.
+
+#### 🌐 Render (Web Service + Persistent Disk)
+1. **New Web Service**: Click **New +** > **Web Service** > connect your GitHub repository.
+2. **Build & Start**:
+   - **Environment**: `Docker` (Render will build using the repository `Dockerfile`)
+   - **Instance Type**: Select an instance tier that supports disks (Starter or higher).
+3. **Attach Disk**:
+   - Under **Disks**, click **Add Disk**.
+   - **Name**: `helix-data`
+   - **Mount Path**: `/app/data`
+   - **Size**: `1 GB` (or larger)
+4. **Environment Variables**:
+   Add `NODE_ENV=production`, `SQLITE_DATA=/app/data`, `PUBLIC_URL=https://<your-subdomain>.onrender.com`, and your Discord API tokens.
+
+#### 🪰 Fly.io (Fly CLI)
+1. Launch app configuration without immediate deployment:
+   ```bash
+   fly launch --no-deploy
+   ```
+2. Create a persistent volume for the SQLite database:
+   ```bash
+   fly volumes create helix_data --size 1
+   ```
+3. Update `fly.toml` to attach the volume to `/app/data`:
+   ```toml
+   [mounts]
+     source = "helix_data"
+     destination = "/app/data"
+
+   [http_service]
+     internal_port = 3131
+     force_https = true
+     auto_stop_machines = false
+     auto_start_machines = true
+     min_machines_running = 1
+   ```
+4. Set required secrets:
+   ```bash
+   fly secrets set \
+     DISCORD_TOKEN="your_token" \
+     DISCORD_CLIENT_ID="your_client_id" \
+     DISCORD_CLIENT_SECRET="your_client_secret" \
+     PUBLIC_URL="https://your-app.fly.dev" \
+     SQLITE_DATA="/app/data"
+   ```
+5. Deploy:
+   ```bash
+   fly deploy
+   ```

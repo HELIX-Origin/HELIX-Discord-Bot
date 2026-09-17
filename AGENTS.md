@@ -36,13 +36,13 @@ This section documents active and recently resolved critical issues as required 
 - **Problem**: Site status monitors added unnecessary complexity and maintenance overhead without Cloudflare support.
 - **Resolution**: Decommissioned and removed status monitoring across backend services, SQLite persistence, dashboard UI, and bot commands (`/monitor`). Service is streamlined to focus exclusively on RSS/Atom/Scrape feeds to Discord.
 
-### 5. Cloud Hosting Retirement (Resolved / Retired)
-- **Problem**: Cloud PaaS targets (Heroku, Render, Fly.io, Railway, Vercel) and one-click deploy buttons added maintenance overhead, inconsistent environment handling, out-of-sync credentials, and continuous platform-blocking/payment barriers.
+### 5. One-Click Cloud Deploy Retirement & Manual PaaS Policy (Resolved)
+- **Problem**: One-click cloud deploy buttons (Heroku, Render, Railway templates) added maintenance overhead, fragile out-of-sync credentials, and payment barriers.
 - **Resolution**:
-  - **All cloud hosting was retired**; the service is self-hosted exclusively on **Local**, **VPS**, and **Docker**.
-  - `app.json`, the Deploy to Heroku button, and the Heroku `Procfile` were removed.
-  - PaaS-only `$PORT` binding handling was removed from `src/config.ts`; port binding is configured via `INTERNAL_URL` / `DISCORD_PORT`.
-  - Deployment documentation in `README.md` and `wiki/Deployment-and-Hosting.md` now covers only Local, VPS, and Docker.
+  - One-click deploy buttons, `app.json`, and Heroku `Procfile` were retired.
+  - Manual container-based PaaS hosting (Railway, Render, Fly.io) is supported when users configure their own persistent storage volumes for SQLite (`/app/data`) and manage credentials in their provider dashboard.
+  - Port binding supports `PORT` / `INTERNAL_URL` / `DISCORD_PORT` (default 3131).
+  - Deployment documentation in `wiki/Deployment-and-Hosting.md` details Docker, VPS/systemd, Local Windows, and manual PaaS (Railway, Render, Fly.io).
 
 ### 6. News Feeds Tab Regression & Dashboard Env Theme Engine (Resolved)
 - **Problem**: Renaming the "Popular Feeds" tab to "News Feeds" left a lingering `loadPopularTab()` call in `src/dashboard/views/dashboard.ts`, throwing `loadPopularTab is not defined` after enabling a catalog feed. Dashboard looked fixed/dark-only with no configurable appearance.

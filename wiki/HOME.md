@@ -18,7 +18,7 @@ Welcome to the comprehensive technical and operational wiki for **HELIX Discord 
 | [**🔌 REST API Reference**](API-Reference.md) | Complete documentation of all REST endpoints, request/response schemas, and query params. |
 | [**🏗️ Architecture & Design**](Architecture-and-Design.md) | System components, data flow diagrams, background polling engine, caching, and state management. |
 | [**⚙️ Configuration Guide**](Configuration.md) | Exhaustive reference of all `.env` variables, timeouts, polling, dashboard themes, and hosting settings. |
-| [**🚀 Deployment & Hosting**](Deployment-and-Hosting.md) | Deployment guides for Docker, Docker Compose, VPS/PM2, systemd, and reverse proxy SSL termination. |
+| [**🚀 Deployment & Hosting**](Deployment-and-Hosting.md) | Deployment guides for Docker, Linux VPS/systemd, Windows, and manual Cloud PaaS (Railway, Render, Fly.io). |
 | [**🧪 Development & Testing**](Development-and-Testing.md) | Local environment setup, test runner commands, TypeScript checking, and code style standards. |
 | [**🔒 Integrations & Security**](Integrations-and-Security.md) | Discord OAuth2, Owner ID resolution, CSRF/XSS protection, rate limiting, and database security. |
 | [**🩺 Troubleshooting & FAQ**](Troubleshooting.md) | Diagnostic flows for feed delivery failures, permission errors, Reddit 429s, and database locks. |
