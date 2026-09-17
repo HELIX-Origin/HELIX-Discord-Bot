@@ -62,15 +62,9 @@ fi
 
 # Ensure application.yml exists from example template
 if [ ! -f "${LAVALINK_DIR}/application.yml" ]; then
-  if [ -f "${PROJECT_DIR}/application.yml" ]; then
-    echo "📋 Copying application.yml from project root into lavalink/application.yml..."
-    cp "${PROJECT_DIR}/application.yml" "${LAVALINK_DIR}/application.yml"
-  elif [ -f "${LAVALINK_DIR}/application.yml.example" ]; then
+  if [ -f "${LAVALINK_DIR}/application.yml.example" ]; then
     echo "📋 Initializing application.yml from lavalink/application.yml.example..."
     cp "${LAVALINK_DIR}/application.yml.example" "${LAVALINK_DIR}/application.yml"
-  elif [ -f "${PROJECT_DIR}/application.yml.example" ]; then
-    echo "📋 Initializing application.yml from project root application.yml.example..."
-    cp "${PROJECT_DIR}/application.yml.example" "${LAVALINK_DIR}/application.yml"
   fi
 fi
 
@@ -90,17 +84,14 @@ User=${TARGET_USER}
 Group=${TARGET_GROUP}
 WorkingDirectory=${LAVALINK_DIR}
 ExecStart=${JAVA_BIN} -jar ${LAVALINK_DIR}/Lavalink.jar
-Restart=always
+Restart=on-failure
 RestartSec=5
-TimeoutStopSec=15
+TimeoutStopSec=30
 
 # Environment variables from project root .env
 EnvironmentFile=-${PROJECT_DIR}/.env
 
-# Sandboxing & security
-NoNewPrivileges=true
-ProtectSystem=full
-ProtectHome=read-only
+# Allow Lavalink to write plugins, logs, and cache inside lavalink/
 ReadWritePaths=${LAVALINK_DIR}
 
 StandardOutput=journal
