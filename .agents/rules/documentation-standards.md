@@ -1,8 +1,27 @@
-# Rule 05: Documentation Standards & Root Landing
+# Rule 05: Documentation Standards & Wiki Synchronization
 
 ## Mandatory Standards
-1. **Documentation Landing**: Documentation is hosted entirely via the `wiki/` directory. `wiki/HOME.md` and `wiki/_Sidebar.md` serve as the central index and entry points. Every documentation page must be linked from them. No separate `docs/` folder exists.
-2. **Markdown Conventions**: All `.md` files must use `#` for titles, `---` for separators, and bullet lists with consistent indentation. No broken internal links.
-3. **Agent Documentation Sync**: Any change to `.agents/` (rules, bugs, plans, skills, templates, agents) must be reflected in the corresponding index file update (`.agents/rules/index.md`, `.agents/agents/index.md`, `.agents/skills/index.md`, `AGENTS.md`).
-4. **No Uncommitted Secret Documentation**: Documentation must reference `.env.example` for the `DISCORD_RSS_*` runtime settings. Feeds and OAuth credentials are **SQLite records managed from the dashboard — never documented as env vars**. Never include real webhook URLs, tokens, or site URLs in docs unless they are public demonstration URLs. The `.env` file must never be committed (Rule 00).
-5. **Standards Documentation**: Issue/PR/commit naming and message standards are defined in `.agents/rules/remote-issue-protocol.md` (Issue/PR/commit formats) and `.agents/templates/commit-message-guide.md` (emoji type/scope matrix).
+
+1. **Documentation Resides in `wiki/`**:
+   - Technical documentation is hosted in the `wiki/` directory.
+   - `wiki/Home.md` and `wiki/_Sidebar.md` serve as the central table of contents and navigation index. Every documentation article must be linked from `_Sidebar.md`.
+   - Do NOT create a separate `docs/` directory.
+
+2. **Agent Documentation Synchronization**:
+   - Any architectural, command, or schema changes must be synchronized with:
+     - `AGENTS.md` (root operating manual)
+     - Relevant index files: `.agents/rules/index.md`, `.agents/agents/index.md`, `.agents/skills/index.md`, `.agents/templates/index.md`
+     - Matching articles in `wiki/` (e.g. `wiki/Discord-Bot.md`, `wiki/Configuration.md`).
+
+3. **Markdown Conventions**:
+   - Standard GitHub-Flavored Markdown.
+   - Headings must follow `#` hierarchy (H1 -> H2 -> H3).
+   - Use Mermaid diagrams (`flowchart TD`, `sequenceDiagram`) for architectural flows and lifecycle sequences.
+   - Fenced code blocks with language identifiers.
+
+4. **Secrets in Documentation**:
+   - Documentation must reference `.env.example` placeholders only.
+   - Never commit real tokens, API keys, webhook URLs, or passwords in documentation or examples.
+
+5. **Commit Message Standards**:
+   - Follow `.agents/templates/commit-message-guide.md` (emoji type, scope, imperative mood).

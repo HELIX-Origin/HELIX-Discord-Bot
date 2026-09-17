@@ -1,35 +1,55 @@
 # Test Automation Agent
 
-The **Test Automation Agent** enforces quality, regression resistance, and comprehensive test coverage across unit, integration, and HTTP router layers.
+The **Test Automation Agent** enforces quality assurance, regression prevention, and strict validation across **HELIX Discord Bot**. It ensures all code passes strict TypeScript compilation, ESLint rules, and formatting standards, with isolated mock harnesses for verification.
 
-## Testing Architecture
+---
+
+## Validation & Quality Gate
 
 ```mermaid
 flowchart LR
-    subgraph TestSuites [Vitest Test Framework]
-        Unit[Unit Tests\n(tests/unit/*)]
-        Integration[Integration Tests\n(tests/integration/*)]
-        Mocks[Mock Server / MSW\n(tests/mocks/*)]
+    subgraph QualityGate [Validation Pipeline: npm run check]
+        Typecheck[tsc --noEmit\nType Integrity]
+        Format[prettier --check\nStyle Consistency]
+        Lint[eslint --max-warnings 0\nCode Safety]
     end
 
-    Unit --> VitestRun[vitest run]
-    Integration --> VitestRun
-    Mocks --> Integration
-    VitestRun --> CheckResult{All Tests Pass?}
-    CheckResult -->|Yes| GatePass[Pass Verification]
-    CheckResult -->|No| Diagnoser[Generate Failure Diagnostics]
+    Typecheck --> GatePass{All Checks Pass?}
+    Format --> GatePass
+    Lint --> GatePass
+    GatePass -->|Yes| Approved[Ready for Commit / Push]
+    GatePass -->|No| FixLoop[Automated Diagnosis & Correction]
 ```
 
+---
+
 ## Testing Protocol
-1. **Test-First Methodology**: Write or update tests prior to introducing complex logic changes.
-2. **Ephemeral Databases**: Always use in-memory or ephemeral test database paths in `SQLITE_TEST_DATA` (never touch production SQLite data).
-3. **Network Isolation**: Mock external HTTP requests via Mock Service Worker (`msw`) or internal mock HTTP servers in `tests/mocks/`.
 
-## Commands
+1. **Mandatory Validation Gate**:
+   - Every task must pass `npm run check` (`tsc --noEmit && prettier --check src && eslint src --max-warnings 0`).
+   - Zero errors, zero warnings.
+
+2. **Ephemeral Databases**:
+   - In-memory SQLite (`:memory:`) or ephemeral test database directories must be used for testing. Never point test runs at `data/database.sqlite`.
+
+3. **Isolated Network Testing**:
+   - External APIs (Discord API, YouTube API, Twitch API, Epic Store, GamerPower) must be mocked using local mock servers or fixture data.
+   - Do not perform live unmocked external requests in automated tests.
+
+---
+
+## Operational Commands
+
 ```bash
-# Run full Vitest suite
-npm test
+# Typecheck only
+npm run typecheck
 
-# Watch mode for iterative development
-npm run test:watch
+# Full validation gate (typecheck + format:check + lint)
+npm run check
+
+# Format fix
+npm run format
+
+# Compile to dist/
+npm run build
 ```

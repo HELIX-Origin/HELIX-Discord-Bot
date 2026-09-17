@@ -17,6 +17,7 @@ flowchart TD
 
 ## Standards & Constraints
 - **Zero Runtime Dependencies**: Keep the application purely powered by Node.js built-ins (`node:http`, `node:sqlite`, `node:crypto`) and approved coordination layers (`redis`).
+- **Dynamic Methods Over Hardcoding**: Implement dynamic registries, dynamic discovery, dynamic options/choices, and automated dispatch instead of rigid static tables or hardcoded mappings.
 - **ESM Syntax**: Strict use of `.js` extensions in all relative imports.
 - **Write-Through Persistence**: In-memory `AppState` serves all fast read paths while synchronizing directly to SQLite.
 - **Theme Support**: Maintain responsive Light and Dark themes with zero style layout shifts.

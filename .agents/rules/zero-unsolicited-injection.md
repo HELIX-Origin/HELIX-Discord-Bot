@@ -1,28 +1,32 @@
-# Rule 01: Dependency & Tool Approval
+# Rule 01: Dependency & Tool Approval (Zero Unsolicited Injection)
 
-## Effective Policy
+## Purpose
+Enforce strict dependency hygiene across **HELIX Discord Bot**. The codebase leverages modern native Node.js APIs (`http`, `node:sqlite`, Web Standards `fetch`/`URL`) and minimal external dependencies. Unsolicited injection of runtime dependencies is strictly prohibited.
 
-The previous native-only dependency restriction is **rescinded**. Discord RSS is a modern TypeScript service; standard development tooling (linters, formatters, test frameworks, type definitions) and reasonable runtime libraries are allowed when they solve a real problem.
+---
 
 ## Mandatory Invariants
 
-1. **Runtime dependencies require explicit approval.** Any package added to `dependencies` in `package.json` must be approved by the user before `npm install`. Rationale and a fallback plan must be documented in the relevant issue/PR body.
-2. **Dev dependencies are allowed without per-package approval.** Linters (ESLint), formatters (Prettier), test reporters, coverage tools, and similar dev-time tooling may be added as needed. Still prefer lightweight, widely-used tools.
-3. **No unnecessary bloat.** Do not add frameworks that duplicate Node.js built-ins (e.g. an HTTP client when `fetch` is sufficient, or a full ORM when `node:sqlite` is sufficient).
-4. **Discohook Removed.** Discohook is not part of this project. Discord posting is direct via `src/webhook/discord.ts`.
-5. **Static Intelligence Only.** Feed parsing, filtering, dedupe, and message formatting are local TypeScript logic in this repository. No remote AI parsing services.
+1. **Runtime Dependencies Require Explicit User Approval**:
+   - Any package to be added to `"dependencies"` in `package.json` MUST be explicitly requested or approved by the user before installation.
+   - Do NOT add runtime frameworks that duplicate Node.js native capabilities (e.g. Express, Fastify, Axios, Got, Prisma, TypeORM).
 
-## Approved Runtime Dependencies
+2. **Dev Dependencies Allowed for Tooling**:
+   - Standard development tooling (linters, formatters, test runners, type definitions) may be added if strictly necessary for project quality.
+   - Always prefer lightweight, standard packages (`eslint`, `prettier`, `typescript`, `@types/node`).
 
-- `ioredis-mock` — in-memory coordination (dedupe + poll locks) eliminating need for external redis binary.
-- `playwright` — permitted only for Cloudflare challenge resolution on scrape/feed fetching.
+3. **Approved Runtime Stack**:
+   - `discord.js` (`^14.18.0`): Mandatory Discord gateway and interaction client.
+   - `ioredis-mock` (`^8.13.1`): In-memory coordination (feed locks and deduplication) without external Redis binaries.
+   - `ws` (`^8.18.0`): WebSocket client for external Lavalink v4 audio nodes.
+   - **External-Only Lavalink**: Music playback connects exclusively to external Lavalink v4 nodes. In-process embedded Lavalink server packages are abandoned/retired.
 
-## Approved Dev Dependencies
+4. **Native Node.js First**:
+   - Native HTTP server via `node:http`.
+   - Native SQLite persistence via `node:sqlite`.
+   - Native networking via global `fetch`, `WebSocket`, `URL`, `AbortSignal`.
+   - Native crypto via `node:crypto`.
 
-- `typescript`, `@types/node`
-- `vitest`, `@vitest/coverage-v8`
-- `msw`
-- `eslint`, `@eslint/js`, `typescript-eslint`, `eslint-plugin-*` as needed
-- `prettier`
-
-Any other runtime dependency still requires explicit user approval.
+5. **Static Intelligence Only**:
+   - Feed parsing, scraping, deduplication, and embed formatting are self-contained local TypeScript modules in `src/`.
+   - No external AI parsing, cloud proxies, or third-party webhooks.

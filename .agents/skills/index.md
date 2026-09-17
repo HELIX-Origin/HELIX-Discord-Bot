@@ -1,23 +1,30 @@
-# Skills Index
+# Skills Catalog
 
-This directory contains technical skill definitions for frameworks, languages, platforms, and workflows supported by Discord RSS (rebuild of Site-Feed-Discohook).
+Index of technical skills, subsystem domain guides, and engineering references for **HELIX Discord Bot**.
 
-## Available Skills
+---
 
-### TypeScript & Node
-- [typescript.md](typescript.md) — TypeScript ESM / Node `>=22.9`, native runtimes (`node:sqlite`, `fetch`), approved `redis@^5`, vitest.
+## Active Skills Directory
 
-### Web & Feed Technologies
-- [rss-atom.md](rss-atom.md) — RSS 2.0, Atom feeds, native XML parsing, encoding fallbacks, scrape branch.
-- [discord-webhooks.md](discord-webhooks.md) — Direct Discord webhooks; per-user SQLite rows (dashboard-managed, not env vars); embed construction; retry/backoff.
+| Skill | Target Domain | Core Focus | File |
+|---|---|---|---|
+| **Discord.js v14 Engineering** | Discord Subsystem | Modular `lib/options/<category>/`, commands, events, EmbedHandler, API limits | [discord-js.md](discord-js.md) |
+| **HELIX Development Workflow** | Bot Architecture | Command creation, event registration, persistence, verification checklist | [helix-discord-bot.md](helix-discord-bot.md) |
+| **Feed Syndication & Forums** | Feed & Content Delivery | RSS/Atom/Reddit, weekly Sunday Free Games, single-thread forum delivery | [feed-syndication.md](feed-syndication.md) |
+| **Lavalink v4 Music & Voice** | Audio Subsystem | External Lavalink v4 server client, WebSocket ops, queue management, voice gateway | [lavalink-music.md](lavalink-music.md) |
+| **Guild Administration** | Moderation & Roles | Moderation actions, permissions, role hierarchy, mod log channels | [guild-administration.md](guild-administration.md) |
+| **TypeScript ESM & Node.js** | Language & Runtime | ESM conventions, `.js` imports, `node:sqlite`, in-memory `AppState` | [typescript.md](typescript.md) |
 
-### Platform & CI/CD
-- [code-hosting-platforms.md](code-hosting-platforms.md) — GitHub (`gh`), roadmap-first issue tracking (Rule 04).
-- [web-basics.md](web-basics.md) — HTTP/HTTPS fundamentals, status codes, timeouts, URL normalization.
+---
 
-### External APIs & Challenge Resolution
-- [cloudflare.md](cloudflare.md) — Cloudflare challenge detection, `playwright` browser automation (permitted), safe credential handling.
+## Skill Domain Mapping
 
-Notes:
-- Discohook has been removed from the project (direct Discord posting only). See `discord-webhooks.md`.
-- Env-secret naming (`{SERVICE_NAME}_WEBHOOK_URL_{###}`, `{SOURCE}_RSS_URL_{###}`) is obsolete; webhooks/feeds are dashboard-managed SQLite rows.
+```mermaid
+flowchart TD
+    Helix[HELIX Discord Bot] --> Discord[discord-js.md]
+    Helix --> Workflow[helix-discord-bot.md]
+    Helix --> Feeds[feed-syndication.md]
+    Helix --> Music[lavalink-music.md]
+    Helix --> Admin[guild-administration.md]
+    Helix --> TS[typescript.md]
+```

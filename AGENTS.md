@@ -4,9 +4,10 @@ This document is the central entry point and operating manual for all AI agents,
 
 ## Project
 
-**HELIX Discord Bot** is a self-hosted, multi-user Discord bot built in TypeScript ESM — RSS/Atom/Reddit/Free-Games feed delivery, YouTube & Twitch live/upload alerts, and an integrated management dashboard.
-- **Runtime dependencies**: Minimal (uses native Node.js `http`, `node:sqlite`, and web standard APIs; in-memory `ioredis-mock` for coordination without external redis binaries).
-- **Architecture**: In-memory write-through repository layer (`AppState`), native SQLite persistence, integrated dashboard UI with Light/Dark themes, Discord OAuth authentication, and direct message embed delivery to Discord channels.
+**HELIX Discord Bot** is a self-hosted, multi-user Discord bot built in TypeScript ESM — RSS/Atom/Reddit/Free-Games feed delivery, YouTube & Twitch live/upload alerts, external Lavalink v4 music playback, guild administration, and an integrated management dashboard.
+- **Runtime dependencies**: Minimal (uses native Node.js `http`, `node:sqlite`, and web standard APIs; in-memory `ioredis-mock` for coordination without external redis binaries; `ws` for external Lavalink v4 audio).
+- **Architecture**: In-memory write-through repository layer (`AppState`), native SQLite persistence, integrated dashboard UI with Light/Dark themes, Discord OAuth authentication, and direct message embed delivery to Discord channels/threads.
+- **Discord.js Standard**: Strict adherence to **discord.js v14** standards, self-contained commands with subcommands and options colocated directly in their command files (`src/bot/commands/<category>/<command>.ts`), modular shared libraries/modules/utilities in `src/bot/lib/`, builder patterns, and robust event handling.
 
 ---
 
@@ -86,17 +87,16 @@ This section documents active and recently resolved critical issues as required 
   - **Product expansion (tracked in [#21](https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues/21), Phases 11+):** dashboard **Feeds primary tab** with per-feed sub-pages, **Guild Admin** page + administration commands, **entertainment GIF commands (KLIPY API)**, and **music via NodeLink** with a **Queue Management** dashboard page.
   - The project/development name is **HELIX Discord Bot** (renamed from HELIX RSS); the dashboard and bot embeds keep using the live Discord application name + icon at runtime.
 
-### 11. Embedded Lavalink v4 Integration (Resolved)
-- **Problem**: Music playback relied on external Lavalink node only; no self-contained embedded option. Previous NodeLink client was incompatible with official Lavalink v4.
+### 11. External Lavalink v4 Integration & Embedded Node Retirement (Resolved / Retired)
+- **Problem**: Music playback using an embedded in-process Lavalink node required heavy local Java runtimes, bundle bloat, and maintenance fragility across diverse host platforms.
 - **Resolution**:
-  - Migrated to `@helix-origin/lavalink-server` npm package (pinned GitHub Release tarball, read-only).
-  - Embedded node (`LAVA_EMBEDDED=true`, default) bootstraps Java 21 + Lavalink.jar in-process; zero external services required.
-  - Rewrote `LavalinkManager` to native Lavalink v4 WebSocket protocol (fire-and-forget ops: `play`, `stop`, `pause`, `seek`, `volume`, `filters`, `destroy`, `voiceUpdate`).
+  - Embedded Lavalink server was retired and abandoned completely.
+  - HELIX Discord Bot exclusively connects to external Lavalink v4 servers as a standard WebSocket client.
+  - Native Lavalink v4 WebSocket protocol (`play`, `stop`, `pause`, `seek`, `volume`, `filters`, `destroy`, `voiceUpdate`).
   - Client-side queue/history/shuffle/loop with `TrackEndEvent` auto-advance.
-  - `VoiceGateway` interface bridges Discord voice state updates → Lavalink `voiceUpdate` op.
-  - All music config in single global `.env` (`LAVA_ENABLED`, `LAVA_EMBEDDED`, `LAVA_HOST/PORT/PASS/SECURE`, `LAVA_READY_TIMEOUT_MS`, `LAVA_INTERNAL_URL`, `LAVA_PUBLIC_URL`, `GENIUS_ACCESS_TOKEN`, `YOUTUBE_REFRESH_TOKEN`, `SPOTIFY_CLIENT_ID/SECRET`).
-  - External node option retained (`LAVA_EMBEDDED=false`).
-  - Documentation: `wiki/Music.md`, `wiki/Configuration.md`, `wiki/Deployment-and-Hosting.md`, `wiki/Development-and-Testing.md`, `wiki/Troubleshooting.md`, `README.md` feature flags table.
+  - `VoiceGateway` interface bridges Discord voice state updates → external Lavalink `voiceUpdate` op.
+  - All music config managed in `.env` (`LAVA_ENABLED`, `LAVA_HOST`, `LAVA_PORT`, `LAVA_PASS`, `LAVA_SECURE`).
+  - Documentation updated across `wiki/Music.md`, `wiki/Configuration.md`, `wiki/Deployment-and-Hosting.md`, and `README.md`.
 
 ### 12. Entertainment GIF Commands — KLIPY Integration (Resolved)
 - **Problem**: No entertainment/reaction GIF commands.
@@ -119,6 +119,20 @@ This section documents active and recently resolved critical issues as required 
   - Dashboard Admin page scaffolded (quick-access panels for moderation, roles, voice, mod log viewer).
   - Documentation: `wiki/Administration.md`, `wiki/Discord-Bot.md`, `README.md` feature flags table.
 
+### 14. Forum Single-Thread Per Source & Weekly Sunday Free Games (Resolved)
+- **Problem**: Each RSS post created a new forum thread instead of sticking to one dedicated thread per source. Free Games was duplicating posts during daily polling.
+- **Resolution**:
+  - Enforced single thread per feed in `src/feed/threads.ts`: automatically unarchives archived threads and persists existing thread IDs in memory and SQLite.
+  - Free Games schedule adjusted to poll strictly once per week at the start of Sunday (`getUTCDay() === 0`), completely eliminating duplicate mid-week alerts.
+
+### 15. Discord.js Standard Rebuild & Modular Command Architecture (Active)
+- **Problem**: Monolithic legacy command implementations risking Discord's 4,000 character and 25 option/choice limits; inconsistent embed formatting.
+- **Resolution**:
+  - Entire agent ecosystem rebuilt (`AGENTS.md`, `.agents/rules/`, `.agents/agents/`, `.agents/skills/`, `.agents/templates/`).
+  - Strict Rule 06: mandatory discord.js v14 standards, zero magic numbers. Subcommands and options stay colocated within their respective command files in `src/bot/commands/<category>/<command>.ts` for clear scoping.
+  - `src/bot/lib/` is exclusively dedicated to reusable libraries, modules, and utilities (e.g. `embeds/`, `music/`, `admin/`, `feeds/`).
+  - Standardized `EmbedHandler` enforcing strict title/description/field length limits.
+
 ---
 
 ## Agent Ecosystem Architecture & Orchestration
@@ -133,15 +147,19 @@ flowchart TD
         Orchestrator -->|Task Decomposition| RoadmapPlan[Roadmap & Sub-Issues]
         RoadmapPlan -->|Phase Assignment| DevTeam{Agent Assignment}
         
-        DevTeam -->|Architecture & Core Logic| Architect[Code Architect Agent]
-        DevTeam -->|Test-First Spec & Harness| Tester[Test Automation Agent]
-        DevTeam -->|Security & Compliance Audit| Auditor[Security Auditor Agent]
+        DevTeam -->|Backend & Fullstack Architecture| Architect[Code Architect Agent]
+        DevTeam -->|Discord.js v14 Standards & Lib Options| DiscordAgent[Discord Specialist Agent]
+        DevTeam -->|Feed Ingestion & Delivery| FeedWatcher[Feed Watcher Agent]
+        DevTeam -->|Vitest / MSW Testing Suite| Tester[Test Automation Agent]
+        DevTeam -->|Security & Dependency Auditing| Auditor[Security Auditor Agent]
         
         Architect -->|Code Implementation| VerifyGate{Verification Gate}
-        Tester -->|Vitest / MSW Suite| VerifyGate
+        DiscordAgent -->|Commands & Events| VerifyGate
+        FeedWatcher -->|Feed Logic| VerifyGate
+        Tester -->|Automated Tests| VerifyGate
         Auditor -->|Lint, Types, Safety Rules| VerifyGate
         
-        VerifyGate -->|Failure Detected| Rollback[Git Rollback / Fix Loop]
+        VerifyGate -->|Failure Detected| Rollback[Fix Loop / Rollback]
         Rollback --> Architect
         
         VerifyGate -->|Pass: npm run check| DocsSync[Documentation & Wiki Sync]
@@ -157,10 +175,11 @@ flowchart TD
 | Agent | Target Domain | Key Responsibilities | Specification File |
 |---|---|---|---|
 | **Orchestrator** | Project Management & Workflow | Task decomposition, roadmap execution, permission handling, user approval gateways, rollback coordination | [orchestrator.md](.agents/agents/orchestrator.md) |
-| **Code Architect** | Backend & UI Engineering | TypeScript ESM architecture, zero-unsolicited runtime injection, SQLite write-through state, HTTP routing | [code-architect.md](.agents/agents/code-architect.md) |
+| **Code Architect** | Backend & Fullstack Architecture | TypeScript ESM architecture, zero-unsolicited runtime injection, SQLite write-through state, HTTP routing | [code-architect.md](.agents/agents/code-architect.md) |
+| **Discord Specialist** | Discord API & Bot Runtime | discord.js v14 standards, categorized `lib/options/` architecture, command registry, event dispatch, permissions, EmbedHandler | [discord-specialist.md](.agents/agents/discord-specialist.md) |
+| **Feed Watcher** | RSS/Atom Ingestion & Delivery | Feed polling, HTML scraping, XML parsing, deduplication, forum single-thread delivery, Sunday weekly free games | [feed-watcher.md](.agents/agents/feed-watcher.md) |
 | **Test Automation** | Quality Assurance | Test-driven development (TDD), Vitest suite, mock servers, MSW handlers, regression coverage | [test-automation.md](.agents/agents/test-automation.md) |
 | **Security Auditor** | Security & Code Quality | Vulnerability scanning, secrets protection, ESLint rule enforcement, Prettier formatting, dependency audits | [security-auditor.md](.agents/agents/security-auditor.md) |
-| **Feed Watcher** | RSS/Atom Ingestion | Feed polling, HTML scraping, XML parsing, deduplication, Discord embed formatting and dispatch | [feed-watcher.md](.agents/agents/feed-watcher.md) |
 
 ---
 
@@ -184,9 +203,10 @@ All agent actions are bound by `.agents/rules/`:
 - **Rule 00 (`agent-safety-compliance.md`)**: Safety invariants, zero irreversible damage, credentials/tokens stay in `.env`, never committed.
 - **Rule 01 (`zero-unsolicited-injection.md`)**: Runtime dependencies require explicit user approval; only standard dev tooling is permitted.
 - **Rule 02 (`typescript-architecture.md`)**: Strict TypeScript ESM structure across `src/`.
-- **Rule 03 (`message-formatting.md`)**: Embed building and Discord channel routing standards.
+- **Rule 03 (`message-formatting.md`)**: Embed building and Discord channel routing standards via `EmbedHandler`.
 - **Rule 04 (`remote-issue-protocol.md`)**: Roadmap-first tracking; the first post is the roadmap edited as progress occurs; Mermaid diagrams required.
 - **Rule 05 (`documentation-standards.md`)**: Keep `wiki/` and agent files synchronized (documentation is hosted entirely via `wiki/`).
+- **Rule 06 (`discord-js-standards.md`)**: **MANDATORY** — Strict discord.js standards for commands, events, embeds, options, handlers, registry, and dispatch. Command options and subcommands remain colocated in command files (`src/bot/commands/<category>/<command>.ts`), while `src/bot/lib/` is dedicated to reusable libraries, modules, and utilities used by commands and events. Strongly prefers dynamic methods over hardcoding (dynamic command registry, dynamic discovery, dynamic option builders). Zero tolerance for violations.
 
 ---
 

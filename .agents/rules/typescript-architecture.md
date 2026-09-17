@@ -1,79 +1,83 @@
-# Rule 02: TypeScript Source Conventions
+# Rule 02: TypeScript Source Conventions & Architecture
 
 ## Project
-**Discord RSS** — native TypeScript ESM, Node `>=22.9`. No runtime framework; `node --env-file-if-exists=.env` for env loading.
+**HELIX Discord Bot** — native TypeScript ESM, Node.js `>=22.9`. Minimal runtime dependencies; `node --env-file-if-exists=.env` for local configuration loading.
+
+---
 
 ## Mandatory Source Layout
 
 ```text
 src/
-├── bot/
-│   ├── bot.ts                      # Bot entry point (client setup, event registration, command registration)
-│   ├── commands/
-│   │   ├── feeds.ts                # /feed command
-│   │   ├── music.ts                # /play /queue /skip etc. music commands
-│   │   ├── gif.ts                  # /gif /slap /hug etc. GIF commands
-│   │   ├── set.ts                  # /set command
-│   │   ├── ticket.ts               # /ticket command
-│   │   ├── welcome.ts              # /welcome command
-│   │   └── admin.ts                # /admin command
-│   └── events/
-│       ├── message-create.ts       # messageCreate event
-│       ├── interaction-create.ts   # interactionCreate event
-│       └── ready.ts                # ready event
-├── index.ts                        # Entry: boot config, db, repo, redis, watchers, server
-├── app.ts                          # AppDeps interface (config, db, repo, oauth, feeds, status, redis)
-├── config.ts                       # Env parsing (DISCORD_RSS_*)
-├── server.ts                       # HTTP server assembly + route mounting
-├── auth/
-│   ├── password.ts                 # Password hashing (scrypt)
-│   └── service.ts                  # AuthService (register/login/session)
-├── db/
-│   ├── database.ts                 # node:sqlite wrapper (DatabaseSync)
-│   ├── schema.ts                   # DDL + migrations
-│   └── repository.ts               # Write-through persistence over AppState
-├── feed/
-│   ├── fetch.ts                    # fetchRaw + Cloudflare challenge detection
-│   ├── html.ts                     # HTML parsing (DOMParser equivalent)
-│   ├── parser.ts                   # RSS/Atom parsing, stripHtml, withGuid, FeedEntry
-│   ├── xml.ts                       # XML helpers
-│   ├── scraper.ts                  # HTML item scraping (selector-based)
-│   ├── presets.ts                  # Popular feeds presets
-│   ├── builder.ts                  # Feed builder (analyze + scrape config)
-│   └── watcher.ts                  # FeedWatcher (poll, dedupe, send)
-├── http/
-│   ├── router.ts                   # Route matching
-│   ├── helpers.ts                  # Request/response utils, auth guard
-│   ├── login.ts                    # Login/register page
-│   ├── dashboard.ts                # Dashboard page + API handlers (UI/JS)
-│   └── oauth-callback.ts           # OAuth callback handler
-├── oauth/
-│   ├── types.ts                    # OAuth provider types
-│   ├── cloudflare.ts               # Cloudflare OAuth provider
-│   └── service.ts                  # OAuthService (state, exchange, callback)
+├── app.ts                          # AppDeps interface & core dependency wiring
+├── config.ts                       # AppConfig schema & environment variable parsing
+├── index.ts                        # Application bootstrap entry point
+├── bot/                            # Discord Bot subsystem (discord.js v14)
+│   ├── bot.ts                      # DiscordBot client wrapper (Gateway & lifecycle)
+│   ├── rest.ts                     # DiscordRestClient (REST API client)
+│   ├── commands/                   # Slash command implementations (categorized)
+│   │   ├── admin/                  # /admin subcommands, /set, /ticket, /welcome
+│   │   ├── entertainment/          # /gif, /slap, /hug, and action reaction commands
+│   │   ├── feeds/                  # /feed syndication commands
+│   │   ├── music/                  # /play, /skip, /queue, /volume, /filters, etc.
+│   │   └── utility/                # /about, /stats, /ping, /help
+│   ├── events/                     # Client event handlers (one file per event)
+│   ├── handlers/                   # Command & event registries / dispatchers
+│   ├── lib/                        # Discord UI libraries (EmbedHandler, limits, variants)
+│   ├── music/                      # LavalinkManager & voice gateway integration
+│   └── utils/                      # Discord API types & embed helpers
+├── dashboard/                      # Integrated Web Management Dashboard
+│   ├── server.ts                   # Native Node.js HTTP/HTTPS server
+│   ├── auth/                       # Password hashing & user auth service
+│   ├── http/                       # Router, request helpers, static asset handlers
+│   ├── oauth/                      # Discord OAuth service & callback logic
+│   ├── routes/                     # REST API route controllers
+│   ├── views/                      # SSR view templates (Dashboard, Landing, Legal, Admin)
+│   └── webhooks/                   # Webhook receiver router (YouTube/Twitch)
+├── db/                             # Persistence layer
+│   ├── database.ts                 # Native node:sqlite wrapper
+│   ├── schema.ts                   # DDL migrations & indices
+│   ├── repository.ts               # Unified write-through repository interface
+│   └── repositories/               # Entity-specific repository delegates
+├── feed/                           # Feed syndication subsystem
+│   ├── fetch.ts                    # HTTP fetch with challenge detection
+│   ├── parser.ts                   # RSS/Atom XML feed parsing & normalization
+│   ├── freegames.ts                # Weekly free games aggregator (Epic + GamerPower)
+│   ├── scraper.ts                  # Selector-based HTML scraping
+│   ├── targets.ts                  # Channel/forum target resolution
+│   ├── threads.ts                  # Forum thread manager (single thread per feed)
+│   └── watcher.ts                  # FeedWatcher polling engine
 ├── scheduler/
-│   └── scheduler.ts                # Interval scheduler
+│   └── scheduler.ts                # Non-overlapping interval timer scheduler
 ├── state/
-│   ├── types.ts                    # Entity interfaces + row mappers
-│   ├── app-state.ts                # AppState (in-memory primary layer)
-│   └── redis.ts                    # RedisCoordinator (optional cross-instance)
-├── status/
-│   └── watcher.ts                  # StatusWatcher (transition-only alerts)
-└── webhook/
-    └── discord.ts                  # Direct Discord webhook POST + retry, feedEmbed
+│   ├── types.ts                    # Canonical data interfaces & row mappers
+│   ├── app-state.ts                # In-memory write-through primary state store
+│   └── redis.ts                    # In-memory / mock coordinator (locks & dedupe)
+└── util/
+    └── logger.ts                   # Structured leveled console logger
 ```
 
-## TypeScript Conventions
-- Strict TypeScript (`tsconfig.json` with `"strict": true`), ESM (`"type": "module"`), imports use `.js` extensions.
-- Architecture: **AppState (in-memory) is the primary read/mutate layer**; SQLite (`node:sqlite`) is persistence-only via write-through repository. Dashboard/watchers must never block on DB reads.
-- Optional Redis behind `DISCORD_RSS_REDIS_URL` for cross-instance dedupe + poll locks; graceful no-op when unset.
-- All feed parsing must handle network errors gracefully (try/catch). Encoding fallbacks required for non-UTF-8 feeds.
-- When targeting Cloudflare-protected domains, `playwright` or external challenge API is permitted; fall back to native `fetch` when no challenge markers are present.
-- No `.env` is ever committed; reference `.env.example` (Rule 00/05).
+---
 
-## Deployment Conventions
-- Self-hosted; the app runs its own `Scheduler` in-process, no host cron needed.
-- Verify locally with `npm run build` before deployment.
+## Mandatory TypeScript Invariants
 
-## Later Direction (approved)
-- Large modules to be split into `lib/` mirroring `src/` as the single source of truth (post-verification).
+1. **Strict ESM & Import Extensions**:
+   - All relative imports must include the explicit `.js` extension (e.g., `import { foo } from './bar.js';`).
+   - Package is defined with `"type": "module"` in `package.json`.
+
+2. **Strict Type Checking**:
+   - Compiles with zero errors under `tsc --noEmit` (`npm run typecheck`).
+   - `noImplicitAny: true`, `strict: true` must be satisfied.
+   - Avoid `any`. Use unknown, generics, or defined interfaces in `src/state/types.ts` or `src/bot/utils/types.js`.
+
+3. **Type-Only Imports**:
+   - Use `import type { ... }` when importing interfaces or type definitions to prevent runtime overhead and circular import issues.
+
+4. **No Circular Dependencies**:
+   - Subsystems must adhere to a clean layered architecture:
+     - `state/` and `db/` do NOT depend on `bot/` or `dashboard/`.
+     - `bot/` and `dashboard/` depend on `state/`, `db/`, and `config.ts` via `AppDeps` in `app.ts`.
+
+5. **In-Memory Primary Layer (`AppState`)**:
+   - All reads are served from in-memory `AppState` Maps/Sets.
+   - All writes go through `Repository`, which updates SQLite and writes through to `AppState`.
