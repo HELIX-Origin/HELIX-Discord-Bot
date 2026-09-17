@@ -165,12 +165,21 @@ export async function startLavalink() {
 
   const appYml = resolve(LAVALINK_DIR, 'application.yml');
   const appYmlExample = resolve(LAVALINK_DIR, 'application.yml.example');
+  const rootAppYml = resolve(REPO_ROOT, 'application.yml');
+  const rootAppYmlExample = resolve(REPO_ROOT, 'application.yml.example');
+
   if (!existsSync(appYml)) {
-    if (existsSync(appYmlExample)) {
-      console.log('[Lavalink] application.yml not found. Initializing from application.yml.example...');
+    if (existsSync(rootAppYml)) {
+      console.log('[Lavalink] Copying application.yml from project root into lavalink/application.yml...');
+      copyFileSync(rootAppYml, appYml);
+    } else if (existsSync(appYmlExample)) {
+      console.log('[Lavalink] application.yml not found. Initializing from lavalink/application.yml.example...');
       copyFileSync(appYmlExample, appYml);
+    } else if (existsSync(rootAppYmlExample)) {
+      console.log('[Lavalink] application.yml not found. Initializing from application.yml.example...');
+      copyFileSync(rootAppYmlExample, appYml);
     } else {
-      console.warn(`[Lavalink] ⚠️  Warning: ${appYml} not found. Lavalink will start with built-in defaults.`);
+      console.warn(`[Lavalink] ⚠️  Warning: application.yml not found. Lavalink will start with built-in defaults.`);
     }
   }
 

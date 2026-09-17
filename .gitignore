@@ -39,6 +39,7 @@ coverage/
 Thumbs.db
 
 # Lavalink binary and runtime state (use application.yml.example as template)
+application.yml
 lavalink/Lavalink.jar
 lavalink/Lavalink.jar.tmp
 lavalink/application.yml

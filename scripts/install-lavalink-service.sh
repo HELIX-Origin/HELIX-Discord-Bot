@@ -61,9 +61,17 @@ if [ ! -f "${LAVALINK_DIR}/Lavalink.jar" ]; then
 fi
 
 # Ensure application.yml exists from example template
-if [ ! -f "${LAVALINK_DIR}/application.yml" ] && [ -f "${LAVALINK_DIR}/application.yml.example" ]; then
-  echo "📋 Initializing application.yml from application.yml.example..."
-  cp "${LAVALINK_DIR}/application.yml.example" "${LAVALINK_DIR}/application.yml"
+if [ ! -f "${LAVALINK_DIR}/application.yml" ]; then
+  if [ -f "${PROJECT_DIR}/application.yml" ]; then
+    echo "📋 Copying application.yml from project root into lavalink/application.yml..."
+    cp "${PROJECT_DIR}/application.yml" "${LAVALINK_DIR}/application.yml"
+  elif [ -f "${LAVALINK_DIR}/application.yml.example" ]; then
+    echo "📋 Initializing application.yml from lavalink/application.yml.example..."
+    cp "${LAVALINK_DIR}/application.yml.example" "${LAVALINK_DIR}/application.yml"
+  elif [ -f "${PROJECT_DIR}/application.yml.example" ]; then
+    echo "📋 Initializing application.yml from project root application.yml.example..."
+    cp "${PROJECT_DIR}/application.yml.example" "${LAVALINK_DIR}/application.yml"
+  fi
 fi
 
 chown -R "${TARGET_USER}:${TARGET_GROUP}" "${LAVALINK_DIR}"
