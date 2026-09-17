@@ -19,6 +19,15 @@ import { finished } from 'node:stream/promises';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const REPO_ROOT = resolve(__dirname, '..');
+const ENV_PATH = resolve(REPO_ROOT, '.env');
+if (existsSync(ENV_PATH) && typeof process.loadEnvFile === 'function') {
+  try {
+    process.loadEnvFile(ENV_PATH);
+  } catch {
+    /* ignore if already loaded */
+  }
+}
+
 const LAVALINK_DIR = resolve(REPO_ROOT, 'lavalink');
 const JAR_PATH = resolve(LAVALINK_DIR, 'Lavalink.jar');
 const TEMP_JAR_PATH = resolve(LAVALINK_DIR, 'Lavalink.jar.tmp');
