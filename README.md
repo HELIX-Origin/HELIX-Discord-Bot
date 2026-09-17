@@ -220,4 +220,4 @@ Contributions, feature suggestions, and bug reports are welcome!
 
 ## 📄 License
 
-This project is open source and available under the terms of the [MIT License](LICENSE.md).
+This project is open source and available under the terms of the [BSD 3-Clause License](LICENSE.md).
