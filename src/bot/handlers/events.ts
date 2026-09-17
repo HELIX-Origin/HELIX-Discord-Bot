@@ -7,10 +7,13 @@ import {
   type Channel,
   type Role,
   type VoiceState,
+  type ChatInputCommandInteraction,
+  type AutocompleteInteraction,
+  type CommandInteractionOption,
 } from 'discord.js';
 import type { DiscordBot } from '../bot.js';
 import type { AppDeps } from '../../app.js';
-import type { DiscordInteraction } from '../utils/types.js';
+import type { DiscordInteraction, InteractionOption, ApplicationCommandOptionType } from '../utils/types.js';
 import { dispatchInteraction } from './commands.js';
 import { handleReady } from '../events/ready.js';
 import { handleGuildCreate } from '../events/guild-create.js';
@@ -18,6 +21,78 @@ import { handleGuildMemberAdd } from '../events/member.js';
 import { handleChannelCreate, handleChannelDelete, handleChannelUpdate } from '../events/channel.js';
 import { handleRoleCreate, handleRoleDelete, handleRoleUpdate } from '../events/role.js';
 import { handleVoiceStateUpdate } from '../events/voice-state.js';
+
+/**
+ * Recursively transforms discord.js CommandInteractionOptions into raw Discord API InteractionOptions.
+ */
+export function transformOptions(options?: readonly CommandInteractionOption[]): InteractionOption[] | undefined {
+  if (!options || options.length === 0) return undefined;
+  return options.map((opt) => {
+    const item: InteractionOption = {
+      name: opt.name,
+      type: opt.type as unknown as ApplicationCommandOptionType,
+    };
+    const val = opt.value ?? opt.user?.id ?? opt.channel?.id ?? opt.role?.id;
+    if (val !== undefined) {
+      item.value = val as string | number | boolean;
+    }
+    if ((opt as { focused?: boolean }).focused !== undefined) {
+      item.focused = (opt as { focused?: boolean }).focused;
+    }
+    if (opt.options && opt.options.length > 0) {
+      item.options = transformOptions(opt.options);
+    }
+    return item;
+  });
+}
+
+/**
+ * Converts a discord.js ChatInputCommandInteraction or AutocompleteInteraction
+ * into the standardized DiscordInteraction structure expected by commands and EmbedHandler.
+ */
+export function toDiscordInteraction(
+  interaction: ChatInputCommandInteraction | AutocompleteInteraction,
+): DiscordInteraction {
+  const member = interaction.member
+    ? {
+        user: {
+          id: interaction.user.id,
+          username: interaction.user.username,
+          global_name: interaction.user.globalName ?? undefined,
+          avatar: interaction.user.avatar,
+        },
+        permissions: interaction.memberPermissions?.bitfield.toString() ?? '0',
+      }
+    : undefined;
+
+  const user = {
+    id: interaction.user.id,
+    username: interaction.user.username,
+    global_name: interaction.user.globalName ?? undefined,
+    avatar: interaction.user.avatar,
+  };
+
+  const options = transformOptions(interaction.options?.data);
+
+  return {
+    id: interaction.id,
+    application_id: interaction.applicationId,
+    type: interaction.isAutocomplete() ? 4 : 2,
+    guild_id: interaction.guildId ?? undefined,
+    channel_id: interaction.channelId ?? undefined,
+    member,
+    user,
+    token: interaction.token,
+    version: interaction.version ?? 1,
+    data: {
+      id: interaction.commandId,
+      name: interaction.commandName,
+      type: 1, // CHAT_INPUT
+      options,
+      guild_id: interaction.guildId ?? undefined,
+    },
+  };
+}
 
 export function registerBotEvents(client: Client, bot: DiscordBot, deps: AppDeps): void {
   // Client ready
@@ -31,7 +106,8 @@ export function registerBotEvents(client: Client, bot: DiscordBot, deps: AppDeps
 
     if (interaction.isAutocomplete()) {
       try {
-        const response = await dispatchInteraction(interaction as unknown as DiscordInteraction, deps, bot.rest);
+        const discordInteraction = toDiscordInteraction(interaction);
+        const response = await dispatchInteraction(discordInteraction, deps, bot.rest);
         if (response.data?.choices) {
           await interaction.respond(response.data.choices as { name: string; value: string | number }[]);
         }
@@ -49,12 +125,17 @@ export function registerBotEvents(client: Client, bot: DiscordBot, deps: AppDeps
     });
 
     try {
-      const response = await dispatchInteraction(interaction as unknown as DiscordInteraction, deps, bot.rest);
-      const data = (response as unknown as { data?: unknown }).data ?? {};
+      const discordInteraction = toDiscordInteraction(interaction);
+      const response = await dispatchInteraction(discordInteraction, deps, bot.rest);
+      const data = (response as unknown as { data?: Record<string, unknown> }).data ?? {};
+      const replyPayload = {
+        ...data,
+        ephemeral: (data as { flags?: number }).flags === 64,
+      };
       if (interaction.replied || interaction.deferred) {
-        await interaction.followUp(data);
+        await interaction.followUp(replyPayload);
       } else {
-        await interaction.reply(data);
+        await interaction.reply(replyPayload);
       }
     } catch (err) {
       bot.logger.error('Error dispatching slash command interaction', {
@@ -64,7 +145,7 @@ export function registerBotEvents(client: Client, bot: DiscordBot, deps: AppDeps
 
       try {
         const errorData = {
-          flags: 64,
+          ephemeral: true,
           content: `❌ An unexpected error occurred: ${(err as Error).message}`,
         };
         if (interaction.replied || interaction.deferred) {

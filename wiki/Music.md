@@ -42,12 +42,45 @@ HELIX Discord Bot includes a full-featured music playback system powered by **La
 
 ---
 
+## ⚙️ Running Lavalink v4 Alongside the Bot
+
+HELIX provides turnkey tooling to run a dedicated local Lavalink v4 server directly alongside the bot:
+
+### 1. Requirements
+- **Java 17+** (Java 21 recommended):
+  - Debian/Ubuntu: `sudo apt update && sudo apt install -y openjdk-21-jre-headless`
+  - Windows: Download and install OpenJDK 21 from [Adoptium](https://adoptium.net/)
+
+### 2. Auto-Download and Run
+HELIX includes an automated downloader script that fetches the latest official Lavalink v4 jar:
+```bash
+# Auto-download Lavalink.jar if not already present:
+npm run lavalink:download
+
+# Start the local Lavalink server:
+npm run lavalink
+```
+
+### 3. Preconfigured Plugins
+The provided `lavalink/application.yml` comes preconfigured with:
+- **`youtube-plugin`** (`dev.lavalink.youtube:youtube-plugin:1.18.2`): Official Lavalink YouTube source with Android & Web clients.
+- **`lavasrc-plugin`** (`com.github.topi314.lavasrc:lavasrc-plugin:4.8.3`): Spotify track and playlist resolution using credentials from `.env`.
+
+### 4. 24/7 systemd Service on Linux
+To keep Lavalink running alongside the bot 24/7 on Ubuntu/Debian VPS:
+```bash
+sudo chmod +x scripts/install-lavalink-service.sh
+sudo ./scripts/install-lavalink-service.sh
+```
+
+---
+
 ## ⚙️ External Lavalink v4 Server Connection
 
-HELIX Discord Bot connects exclusively to an external Lavalink v4 server as a WebSocket client:
-- Set `LAVA_HOST`, `LAVA_PORT`, `LAVA_PASS`, and `LAVA_SECURE` in `.env`.
+HELIX connects to Lavalink v4 over standard WebSocket and REST:
+- Set `LAVA_HOST=127.0.0.1`, `LAVA_PORT=2333`, `LAVA_PASS=youshallnotpass`, and `LAVA_SECURE=false` in `.env` for local hosting.
 - Supports any standard Lavalink v4 instance (local, remote VPS, or hosted provider).
-- Uses the `ws` package for reliable WebSocket connection with proper Discord Authorization headers.
+- Uses the native WebSocket client with proper Discord Authorization headers.
 
 ---
 

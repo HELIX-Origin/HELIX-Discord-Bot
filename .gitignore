@@ -37,3 +37,10 @@ coverage/
 # OS
 .DS_Store
 Thumbs.db
+
+# Lavalink binary and runtime state (downloaded automatically on demand)
+lavalink/Lavalink.jar
+lavalink/Lavalink.jar.tmp
+lavalink/plugins/
+lavalink/logs/
+lavalink/cache/

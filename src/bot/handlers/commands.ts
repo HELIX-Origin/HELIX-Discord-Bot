@@ -28,7 +28,12 @@ export async function dispatchInteraction(
   rest: DiscordRestClient,
 ): Promise<InteractionResponse> {
   await loadAllCommands();
-  const commandName = (interaction.data?.name ?? '').toLowerCase();
+  const commandName = (
+    interaction.data?.name ||
+    (interaction as unknown as { commandName?: string }).commandName ||
+    ''
+  ).toLowerCase();
+  const guildId = interaction.guild_id ?? (interaction as unknown as { guildId?: string }).guildId;
 
   // Handle autocomplete interactions
   if (interaction.type === 4) {
@@ -51,9 +56,9 @@ export async function dispatchInteraction(
       .respond(true);
   }
 
-  if (isCommandDisabled(interaction.guild_id, commandName, deps)) {
+  if (isCommandDisabled(guildId, commandName, deps)) {
     const isGuildDisabled = Boolean(
-      interaction.guild_id && deps.repo.getGuildSetting(interaction.guild_id, `cmd_disabled_${commandName}`) === '1',
+      guildId && deps.repo.getGuildSetting(guildId, `cmd_disabled_${commandName}`) === '1',
     );
     const desc = isGuildDisabled
       ? `The command \`/${commandName}\` is disabled in this server.`
