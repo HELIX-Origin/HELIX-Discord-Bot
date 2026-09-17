@@ -49,42 +49,121 @@ docker compose logs -f
 
 ---
 
-## 🖥️ Option 2: Linux VPS with PM2 & Systemd
+## 🖥️ Option 2: Linux VPS with systemd & Root Access (Recommended)
 
-For hosting directly on an Ubuntu/Debian/Rocky Linux server:
+For hosting directly on an Ubuntu, Debian, or Rocky Linux server with root or sudo access.
 
-### 1. Install Node.js & Global Process Manager
+> [!IMPORTANT]
+> **Recommended Directory: `/etc/servers/helix-discord-bot`**  
+> When self-hosting on a Linux VPS with root access, running the bot directly from `/root` (or a subfolder in `/root`) causes systemd to fail to find or enter the working directory (resulting in `CHDIR` errors / exit code 200) due to strict Linux directory permissions (`0700` on `/root`) and systemd filesystem isolation (`ProtectHome`).  
+> **Always clone and run the bot from a standard system directory such as `/etc/servers/helix-discord-bot`.**
+
+### 1. Install Node.js 22+ & Git
 ```bash
 # Install Node.js 22.x LTS (required: >= 22.9.0 for native node:sqlite)
 curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
 sudo apt-get install -y nodejs git
-
-# Install PM2 globally
-sudo npm install -g pm2
 ```
 
-### 2. Clone and Build Project
+### 2. Clone to `/etc/servers/helix-discord-bot` and Build
 ```bash
-git clone https://github.com/HELIX-Origin/HELIX-Discord-Bot.git /opt/helix-discord-bot
-cd /opt/helix-discord-bot
+# Create dedicated server directory
+sudo mkdir -p /etc/servers
+cd /etc/servers
 
+# Clone repository
+sudo git clone https://github.com/HELIX-Origin/HELIX-Discord-Bot.git helix-discord-bot
+cd /etc/servers/helix-discord-bot
+
+# Install dependencies and compile TypeScript
 npm install
 npm run build
+
+# Configure environment variables
 cp .env.example .env
-nano .env  # Configure credentials
+nano .env
 ```
 
-### 3. Start with PM2
+### 3a. Start as 24/7 systemd Service (Recommended)
+
+The repository provides an automated installation script that configures, secures, and enables a native systemd service with automatic restarts and sandbox protections:
+
 ```bash
-# Start the compiled server
+# Make script executable and run as root/sudo
+sudo chmod +x ./scripts/install-service.sh
+sudo ./scripts/install-service.sh
+```
+
+The installer configures `/etc/systemd/system/helix-discord-bot.service` targeting `/etc/servers/helix-discord-bot`:
+
+```ini
+[Unit]
+Description=HELIX Discord Bot - Self-Hosted Discord Bot & Dashboard
+Documentation=https://github.com/HELIX-Origin/HELIX-Discord-Bot/wiki
+After=network.target network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=root
+Group=root
+WorkingDirectory=/etc/servers/helix-discord-bot
+ExecStart=/usr/bin/npm start
+Restart=always
+RestartSec=10
+TimeoutStopSec=20
+
+# Environment & capabilities
+Environment=NODE_ENV=production
+EnvironmentFile=-/etc/servers/helix-discord-bot/.env
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+CapabilityBoundingSet=CAP_NET_BIND_SERVICE
+
+# Security & Sandboxing hardening
+NoNewPrivileges=true
+ProtectSystem=full
+ProtectHome=read-only
+ReadWritePaths=/etc/servers/helix-discord-bot/data
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=helix-discord-bot
+
+[Install]
+WantedBy=multi-user.target
+```
+
+**Service Management Commands:**
+```bash
+# Check service status
+sudo systemctl status helix-discord-bot
+
+# Stream live service logs
+sudo journalctl -u helix-discord-bot -f
+
+# Restart or stop service
+sudo systemctl restart helix-discord-bot
+sudo systemctl stop helix-discord-bot
+```
+
+### 3b. Alternative: PM2 Process Manager
+If you prefer PM2 for process monitoring:
+
+```bash
+# Install PM2 globally
+sudo npm install -g pm2
+
+# Start compiled application
+cd /etc/servers/helix-discord-bot
 pm2 start dist/index.js --name "helix-discord-bot"
 
-# Save PM2 process list and configure auto-restart on system reboot
+# Save PM2 process list and configure startup on boot
 pm2 save
 pm2 startup
 ```
 
-### 3b. Alternative: Start with tmux (Session-Based)
+### 3c. Alternative: tmux (Session-Based)
 Prefer a lightweight no-daemon approach? Use `tmux` to keep the process alive inside a persistent terminal session — great for quick VPS setups that don't need process management.
 
 ```bash
@@ -94,23 +173,19 @@ sudo apt-get install -y tmux
 # Start a new detachable session named "helix-discord-bot"
 tmux new -s helix-discord-bot
 
-# Inside the session, start the compiled server
+# Inside the session, start the server
+cd /etc/servers/helix-discord-bot
 npm start
 
-# Detach and keep it running in the background
+# Detach and keep it running in the background:
 # Press Ctrl+B, then D
 ```
 
-Reattach the session later to see logs or restart the process:
+Reattach the session later to view logs or manage the process:
 ```bash
-# List sessions
 tmux ls
-
-# Reattach
 tmux attach -t helix-discord-bot
 ```
-
-> **Note:** tmux keeps the process running only while the session persists. For auto-restart across reboots, use PM2 (`pm2 startup`) or a systemd unit instead.
 
 ---
 

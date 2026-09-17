@@ -29,6 +29,21 @@ echo "👤 Service User:      ${TARGET_USER}:${TARGET_GROUP}"
 echo "📦 npm Executable:    ${NPM_BIN}"
 echo "=========================================================="
 
+# Check if project directory is inside /root
+if [[ "${PROJECT_DIR}" =~ ^/root(/.*)?$ ]]; then
+  echo "⚠️  WARNING: You are installing from inside /root (${PROJECT_DIR})!"
+  echo "    systemd fails to access directories inside /root due to 0700 permissions"
+  echo "    and systemd ProtectHome security isolation."
+  echo "    The recommended directory for self-hosting is /etc/servers/helix-discord-bot"
+  echo ""
+  echo "    To fix and relocate:"
+  echo "      sudo mkdir -p /etc/servers"
+  echo "      sudo mv '${PROJECT_DIR}' /etc/servers/helix-discord-bot"
+  echo "      cd /etc/servers/helix-discord-bot"
+  echo "      sudo ./scripts/install-service.sh"
+  echo "=========================================================="
+fi
+
 # Ensure project has build dist ready
 if [ ! -d "${PROJECT_DIR}/dist" ]; then
   echo "🔨 Building project distribution..."
@@ -47,7 +62,7 @@ chown -R "${TARGET_USER}:${TARGET_GROUP}" "${PROJECT_DIR}/data"
 cat <<EOF > "${SERVICE_FILE}"
 [Unit]
 Description=HELIX Discord Bot - Self-Hosted Discord Bot & Dashboard
-Documentation=https://github.com/HELIX-Origin/HELIX-RSS/wiki
+Documentation=https://github.com/HELIX-Origin/HELIX-Discord-Bot/wiki
 After=network.target network-online.target
 Wants=network-online.target
 
