@@ -19,7 +19,7 @@ This directory provides standardized code templates and workflow guides for **HE
 
 - **[issue-roadmap-template.md](issue-roadmap-template.md)**: GitHub issue template where the first post serves as the living roadmap with Mermaid diagrams and progress checklists.
 - **[commit-message-guide.md](commit-message-guide.md)**: Conventional commit message standards with emojis and subsystem scopes (`commands`, `admin`, `music`, `feeds`, `events`, `lib`).
-- **[embed-migration-guide.md](embed-migration-guide.md)**: Reference guide for migrating legacy raw Discord payloads and webhooks to `EmbedHandler` embeds.
+- **[embed-formatting-template.md](embed-formatting-template.md)**: Comprehensive guide and blueprints for Discord embed formatting via `EmbedHandler`.
 
 ---
 

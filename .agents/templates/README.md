@@ -30,7 +30,7 @@ All templates adhere strictly to:
 | [**`issue-roadmap-template.md`**](issue-roadmap-template.md) | GitHub Issues | Living roadmap template for GitHub issues with Mermaid diagrams and progress tracking |
 | [**`issue-template.md`**](issue-template.md) | Issue Body | Standard issue reporting blueprint |
 | [**`commit-message-guide.md`**](commit-message-guide.md) | Git Commits | Conventional commit standard with emojis and subsystem scopes |
-| [**`embed-migration-guide.md`**](embed-migration-guide.md) | Embed Migration | Guide for replacing raw embed payloads with `EmbedHandler` methods |
+| [**`embed-formatting-template.md`**](embed-formatting-template.md) | Embed Formatting | Comprehensive guide and blueprints for Discord embed formatting via `EmbedHandler` |
 
 ---
 
