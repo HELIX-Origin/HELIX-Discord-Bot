@@ -61,8 +61,8 @@ npm run lavalink:download
 npm run lavalink
 ```
 
-### 3. Preconfigured Plugins
-The provided `lavalink/application.yml` comes preconfigured with:
+### 3. Preconfigured Template & Plugins
+The provided template [`lavalink/application.yml.example`](../lavalink/application.yml.example) (renamed to `application.yml` or auto-initialized on first run) comes preconfigured with:
 - **`youtube-plugin`** (`dev.lavalink.youtube:youtube-plugin:1.18.2`): Official Lavalink YouTube source with Android & Web clients.
 - **`lavasrc-plugin`** (`com.github.topi314.lavasrc:lavasrc-plugin:4.8.3`): Spotify track and playlist resolution using credentials from `.env`.
 

@@ -6,16 +6,13 @@ server:
 
 lavalink:
   plugins:
-    # YouTube Source Plugin (official lavalink-devs v2)
     - dependency: "dev.lavalink.youtube:youtube-plugin:1.18.2"
       snapshot: false
-    # LavaSrc Plugin (Spotify, YouTube, Apple Music, Deezer metadata resolution)
     - dependency: "com.github.topi314.lavasrc:lavasrc-plugin:4.8.3"
       snapshot: false
   server:
     password: "${LAVA_PASS:youshallnotpass}"
     sources:
-      # Disabled here because dev.lavalink.youtube:youtube-plugin handles YouTube playback
       youtube: false
       bandcamp: true
       soundcloud: true

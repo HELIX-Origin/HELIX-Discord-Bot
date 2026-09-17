@@ -9,7 +9,7 @@
  *   node scripts/lavalink.js start      # Ensures jar exists and runs Lavalink v4
  */
 
-import { existsSync, createWriteStream, renameSync, unlinkSync, mkdirSync, statSync } from 'node:fs';
+import { existsSync, createWriteStream, renameSync, unlinkSync, mkdirSync, statSync, copyFileSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawn, spawnSync } from 'node:child_process';
@@ -164,8 +164,14 @@ export async function startLavalink() {
   }
 
   const appYml = resolve(LAVALINK_DIR, 'application.yml');
+  const appYmlExample = resolve(LAVALINK_DIR, 'application.yml.example');
   if (!existsSync(appYml)) {
-    console.warn(`[Lavalink] ⚠️  Warning: ${appYml} not found. Lavalink will start with built-in defaults.`);
+    if (existsSync(appYmlExample)) {
+      console.log('[Lavalink] application.yml not found. Initializing from application.yml.example...');
+      copyFileSync(appYmlExample, appYml);
+    } else {
+      console.warn(`[Lavalink] ⚠️  Warning: ${appYml} not found. Lavalink will start with built-in defaults.`);
+    }
   }
 
   console.log(`[Lavalink] Starting Lavalink v4 from ${LAVALINK_DIR}...`);

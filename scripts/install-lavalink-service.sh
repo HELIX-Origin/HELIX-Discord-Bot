@@ -60,6 +60,12 @@ if [ ! -f "${LAVALINK_DIR}/Lavalink.jar" ]; then
   fi
 fi
 
+# Ensure application.yml exists from example template
+if [ ! -f "${LAVALINK_DIR}/application.yml" ] && [ -f "${LAVALINK_DIR}/application.yml.example" ]; then
+  echo "📋 Initializing application.yml from application.yml.example..."
+  cp "${LAVALINK_DIR}/application.yml.example" "${LAVALINK_DIR}/application.yml"
+fi
+
 chown -R "${TARGET_USER}:${TARGET_GROUP}" "${LAVALINK_DIR}"
 
 # Generate customized systemd service unit
