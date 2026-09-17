@@ -1,0 +1,46 @@
+name: Release Tracker
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch: {}
+
+jobs:
+  release-verification:
+    name: Verify Release Tag & Artifacts
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run verification gate
+        run: npm run check
+
+      - name: Verify production build
+        run: npm run build
+
+      - name: Verify version matches tag
+        run: |
+          TAG_NAME="${{ github.ref_name }}"
+          PKG_VERSION=$(node -p "require('./package.json').version")
+          EXPECTED_TAG="v${PKG_VERSION}"
+          
+          echo "GitHub Ref Tag: $TAG_NAME"
+          echo "package.json Version: $PKG_VERSION (expected tag: $EXPECTED_TAG)"
+          
+          if [ "$TAG_NAME" != "$EXPECTED_TAG" ]; then
+            echo "::error::Tag $TAG_NAME does not match package.json version $EXPECTED_TAG"
+            exit 1
+          fi
+          echo "Version verification passed successfully."
