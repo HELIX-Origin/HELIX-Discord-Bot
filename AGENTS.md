@@ -227,6 +227,7 @@ All agent actions are bound by `.agents/rules/`:
 - **Rule 05 (`documentation-standards.md`)**: Keep `wiki/` and agent files synchronized (documentation is hosted entirely via `wiki/`).
 - **Rule 06 (`discord-js-standards.md`)**: **MANDATORY** — Strict discord.js standards for commands, events, embeds, options, handlers, registry, and dispatch. Command options and subcommands remain colocated in command files (`src/bot/commands/<category>/<command>.ts`), while `src/bot/lib/` is dedicated to reusable libraries, modules, and utilities used by commands and events. Strongly prefers dynamic methods over hardcoding (dynamic command registry, dynamic discovery, dynamic option builders). Zero tolerance for violations.
 - **Rule 07 (`dashboard-standards.md`)**: Management dashboard & Discord integration standards — zero runtime frontend dependencies, Discord OAuth2 authentication, guild administrator authorization, SSR HTML with CSS custom properties theme engine, and EmbedHandler preview parity.
+- **Rule 08 (`release-standards.md`)**: Semantic versioning (`MAJOR.MINOR.PATCH`), multi-file version synchronization, and structured GitHub release notes with emojis and code blocks.
 
 ---
 

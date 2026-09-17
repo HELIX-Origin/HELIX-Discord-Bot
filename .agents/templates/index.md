@@ -19,6 +19,7 @@ This directory provides standardized code templates and workflow guides for **HE
 
 - **[issue-roadmap-template.md](issue-roadmap-template.md)**: GitHub issue template where the first post serves as the living roadmap with Mermaid diagrams and progress checklists.
 - **[commit-message-guide.md](commit-message-guide.md)**: Conventional commit message standards with emojis and subsystem scopes (`commands`, `admin`, `music`, `feeds`, `events`, `lib`).
+- **[release-notes-template.md](release-notes-template.md)**: Structured GitHub release notes template following Rule 08 with emoji markers and upgrade instructions.
 
 ---
 

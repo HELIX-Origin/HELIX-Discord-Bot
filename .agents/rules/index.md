@@ -16,6 +16,7 @@ Index of permanent, non-negotiable rules for all AI coding assistants, automated
 | **Rule 05** | Documentation Standards & Wiki Synchronization | Wiki Alignment & Markdown Quality | [documentation-standards.md](documentation-standards.md) |
 | **Rule 06** | Discord.js Standards & Modular Lib Architecture | Discord API Limits, Options & Commands | [discord-js-standards.md](discord-js-standards.md) |
 | **Rule 07** | Management Dashboard & Discord Integration Standards | Zero-Frontend-Dep SSR & Discord OAuth2 | [dashboard-standards.md](dashboard-standards.md) |
+| **Rule 08** | Semantic Versioning & Release Management Standards | SemVer (`X.Y.Z`), Version Sync & GitHub Releases | [release-standards.md](release-standards.md) |
 
 ---
 
