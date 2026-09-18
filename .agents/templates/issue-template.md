@@ -16,7 +16,7 @@ Issue titles are **short, human-readable, general plan ideas** — never detaile
 
 ## Type
 - [ ] Feature / Rebuild Plan
-- [ ] Bug Report ([BUG-XXX])
+- [ ] Bug Report (🐛)
 - [ ] Documentation Update
 - [ ] Agent Rule Update
 
