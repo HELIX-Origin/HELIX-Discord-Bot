@@ -1,8 +1,7 @@
 /**
  * tests/unit/config/features.test.ts
  *
- * Unit tests for feature flag configuration defaults, verifying that
- * GIF commands are disabled by default (deprecated / broken upstream).
+ * Unit tests for feature flag configuration defaults and overrides.
  */
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { defaultConfig } from '../../../src/config.js';
@@ -11,7 +10,6 @@ describe('defaultConfig feature flags', () => {
   const originalEnv = { ...process.env };
 
   beforeEach(() => {
-    delete process.env['GIFS_ENABLED'];
     delete process.env['FEEDS_ENABLED'];
     delete process.env['STREAM_ALERTS_ENABLED'];
     delete process.env['THREADS_ENABLED'];
@@ -24,12 +22,7 @@ describe('defaultConfig feature flags', () => {
     process.env = { ...originalEnv };
   });
 
-  it('defaults gifsEnabled to false (broken & discontinued)', () => {
-    const config = defaultConfig();
-    expect(config.features.gifsEnabled).toBe(false);
-  });
-
-  it('keeps other core features enabled by default', () => {
+  it('keeps core features enabled by default', () => {
     const config = defaultConfig();
     expect(config.features.feedsEnabled).toBe(true);
     expect(config.features.streamAlertsEnabled).toBe(true);
@@ -39,15 +32,14 @@ describe('defaultConfig feature flags', () => {
     expect(config.features.adminPanelEnabled).toBe(true);
   });
 
-  it('allows explicitly enabling gifsEnabled when set to "true"', () => {
-    process.env['GIFS_ENABLED'] = 'true';
+  it('allows disabling features via environment variables', () => {
+    process.env['FEEDS_ENABLED'] = 'false';
+    process.env['STREAM_ALERTS_ENABLED'] = 'false';
+    process.env['ADMINISTRATION_ENABLED'] = 'false';
     const config = defaultConfig();
-    expect(config.features.gifsEnabled).toBe(true);
-  });
-
-  it('keeps gifsEnabled false when set to "false"', () => {
-    process.env['GIFS_ENABLED'] = 'false';
-    const config = defaultConfig();
-    expect(config.features.gifsEnabled).toBe(false);
+    expect(config.features.feedsEnabled).toBe(false);
+    expect(config.features.streamAlertsEnabled).toBe(false);
+    expect(config.features.administrationEnabled).toBe(false);
+    expect(config.features.threadsEnabled).toBe(true);
   });
 });

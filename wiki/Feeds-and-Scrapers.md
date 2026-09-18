@@ -38,6 +38,30 @@ graph LR
 
 ---
 
+## 📊 Subscription Limits (Per Dashboard Tab)
+
+Each dashboard **tab** maps to a feed category. Feeds are counted per category, per server user.
+
+| Tab (category) | Feed types | Max feeds |
+| :--- | :--- | :--- |
+| **News & RSS** | `rss`, `scrape` | **5** |
+| **Reddit** | `reddit` | **5** |
+| **Free Games** | `free_games` (all stores) | Unlimited |
+| **Stream Alerts** | `youtube`, `twitch` | Unlimited |
+
+Attempting to exceed a limit returns a clear `Subscription limit reached` error in the dashboard and via the slash commands.
+
+---
+
+## ⏱️ Delivery Cadence
+
+- **RSS / Atom / Scrape feeds**: published **once per day, one post per source** (a 6-hour minimum floor also applies). Pending posts stay queued and are delivered by the next eligible polling window.
+- **Reddit feeds**: follow the dashboard's configurable 10–60 minute interval.
+- **Free Games**: polled **daily**, delivering only new giveaways.
+- **Stream Alerts (YouTube / Twitch)**: delivered immediately on live/upload events via webhooks (periodic polling as fallback).
+
+---
+
 ## 🔍 Composite Deduplication Engine
 
 To eliminate duplicated notifications across server restarts, feed updates, or modified publishing dates, HELIX Discord Bot uses a 3-tier composite deduplication strategy:

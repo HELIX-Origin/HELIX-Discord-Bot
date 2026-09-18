@@ -53,6 +53,7 @@ export type DiscordChannelSnapshot = {
   } | null;
   message_count?: number;
   total_message_sent?: number;
+  nsfw?: boolean;
 };
 
 export class DiscordRestClient {
@@ -133,7 +134,7 @@ export class DiscordRestClient {
 
   async getGuildChannels(
     guildId: string,
-  ): Promise<Array<{ id: string; name: string; type: number; position?: number }>> {
+  ): Promise<Array<{ id: string; name: string; type: number; position?: number; nsfw?: boolean }>> {
     const res = await fetch(`${this.baseUrl}/guilds/${guildId}/channels`, {
       method: 'GET',
       headers: this.headers(),
@@ -145,7 +146,13 @@ export class DiscordRestClient {
       throw new Error(`Failed to fetch channels for guild ${guildId}: ${formatErrorText(res.status, text)}`);
     }
 
-    const all = (await res.json()) as Array<{ id: string; name: string; type: number; position?: number }>;
+    const all = (await res.json()) as Array<{
+      id: string;
+      name: string;
+      type: number;
+      position?: number;
+      nsfw?: boolean;
+    }>;
     // Filter to text and announcement channels (0 = GUILD_TEXT, 5 = GUILD_ANNOUNCEMENT)
     return all.filter((c) => c.type === 0 || c.type === 5);
   }
@@ -153,7 +160,7 @@ export class DiscordRestClient {
   /** Returns every channel of a guild without filtering (includes forums and categories). */
   async getGuildChannelsAll(
     guildId: string,
-  ): Promise<Array<{ id: string; name: string; type: number; position?: number }>> {
+  ): Promise<Array<{ id: string; name: string; type: number; position?: number; nsfw?: boolean }>> {
     const res = await fetch(`${this.baseUrl}/guilds/${guildId}/channels`, {
       method: 'GET',
       headers: this.headers(),
@@ -165,7 +172,13 @@ export class DiscordRestClient {
       throw new Error(`Failed to fetch channels for guild ${guildId}: ${formatErrorText(res.status, text)}`);
     }
 
-    return (await res.json()) as Array<{ id: string; name: string; type: number; position?: number }>;
+    return (await res.json()) as Array<{
+      id: string;
+      name: string;
+      type: number;
+      position?: number;
+      nsfw?: boolean;
+    }>;
   }
 
   /** Fetches a channel (including threads) with its metadata, archive state and message counts. */

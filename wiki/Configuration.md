@@ -82,7 +82,6 @@ Thread delivery is a **per-server** feature — each feed delivers into its own 
 | `FEEDS_ENABLED` | No | `true` | RSS/Reddit/Free Games feed delivery. |
 | `STREAM_ALERTS_ENABLED` | No | `true` | YouTube/Twitch live & upload alerts. |
 | `THREADS_ENABLED` | No | `true` | Forum thread delivery support. |
-| `GIFS_ENABLED` | No | `false` | **Broken & Deprecated**: GIF commands via KLIPY. Disabled by default; scheduled for complete removal in the next update. |
 | `ADMINISTRATION_ENABLED` | No | `true` | Moderation, roles, and voice administration commands. |
 | `DASHBOARD_ENABLED` | No | `true` | Web dashboard & REST API. |
 | `ADMIN_PANEL_ENABLED` | No | `true` | Developer tools / admin panel. |
@@ -151,16 +150,10 @@ YOUTUBE_CLIENT_SECRET=
 TWITCH_CLIENT_ID=
 TWITCH_CLIENT_SECRET=
 
-# KLIPY API (Entertainment GIF commands) [DEPRECATED / BROKEN]
-# GIF commands are currently broken upstream and will be removed in the next update.
-KLIPY_API_KEY=
-
 # Global Feature Flags (defaults to true unless noted)
 FEEDS_ENABLED=true
 STREAM_ALERTS_ENABLED=true
 THREADS_ENABLED=true
-# GIF commands are broken and slated for removal in the next update (default: false)
-GIFS_ENABLED=false
 ADMINISTRATION_ENABLED=true
 DASHBOARD_ENABLED=true
 ADMIN_PANEL_ENABLED=true

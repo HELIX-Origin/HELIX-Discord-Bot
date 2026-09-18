@@ -13,7 +13,6 @@ export interface EmbedColors {
   readonly ERROR: number;
   readonly INFO: number;
   readonly DISCORD: number;
-  readonly GIF: number;
 }
 
 export const EMBED_COLORS: EmbedColors = {
@@ -23,7 +22,6 @@ export const EMBED_COLORS: EmbedColors = {
   ERROR: 0xef4444,
   INFO: 0x3b82f6,
   DISCORD: 0x5865f2,
-  GIF: 0x06b6d4,
 };
 
 export const STANDARD_EMBED_COLOR = EMBED_COLORS.PRIMARY;
@@ -77,18 +75,6 @@ export function infoEmbed(title: string, description?: string, fields?: DiscordE
     title: `ℹ️ ${title}`,
     description,
     fields,
-  });
-}
-
-export function gifEmbed(url: string, category?: string, requester?: string): DiscordEmbed {
-  return createEmbed({
-    color: EMBED_COLORS.GIF,
-    title: category ? `GIF — ${category}` : 'Random GIF',
-    description: requester ? `Requested by ${requester}` : undefined,
-    image: { url },
-    footer: {
-      text: 'Powered by KLIPY',
-    },
   });
 }
 

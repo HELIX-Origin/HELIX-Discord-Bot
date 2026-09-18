@@ -7,6 +7,7 @@ import type { RedisCoordinator } from './state/redis.js';
 import type { WebhookRouter } from './dashboard/webhooks/router.js';
 import type { DiscordBot } from './bot/bot.js';
 import type { Scheduler } from './scheduler/scheduler.js';
+import type { RedditFeedsService } from './feed/reddit.js';
 
 export interface AppDeps {
   config: AppConfig;
@@ -18,6 +19,7 @@ export interface AppDeps {
   bot?: DiscordBot | null;
   scheduler?: Scheduler | null;
   webhookRouter?: WebhookRouter;
+  reddit?: RedditFeedsService | null;
 }
 
 /**

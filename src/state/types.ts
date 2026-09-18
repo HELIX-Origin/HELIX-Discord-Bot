@@ -100,6 +100,7 @@ export interface Feed {
   scrape: { item: string; title: string; link: string; description?: string } | null;
   lastEntryId: string | null;
   lastCheckedAt: string | null;
+  lastPostedAt: string | null;
   createdAt: string;
   threadChannelId: string | null;
   threadEntryCount: number;
@@ -207,6 +208,7 @@ export const rowToFeed = (r: Row | undefined): Feed | null => {
         : null,
     lastEntryId: r.last_entry_id === null ? null : String(r.last_entry_id),
     lastCheckedAt: r.last_checked_at === null ? null : String(r.last_checked_at),
+    lastPostedAt: r.last_posted_at === null || r.last_posted_at === undefined ? null : String(r.last_posted_at),
     createdAt: String(r.created_at),
     threadChannelId,
     threadEntryCount,
@@ -262,6 +264,15 @@ export function feedCategory(feedType: FeedType): FeedCategory | null {
   if (feedType === 'youtube' || feedType === 'twitch') return 'streamalerts';
   return null;
 }
+
+/**
+ * Per-category subscription caps (dashboard "tab" limits). Categories absent
+ * from this map are unlimited.
+ */
+export const FEED_CATEGORY_LIMITS: Readonly<Partial<Record<FeedCategory, number>>> = {
+  rss: 5,
+  reddit: 5,
+};
 
 export function feedTopic(feed: Feed): string {
   if (feed.topic && feed.topic.trim()) {

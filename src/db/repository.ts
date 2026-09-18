@@ -288,6 +288,10 @@ export class Repository {
     this.feeds.setFeedChecked(userId, id, lastEntryId);
   }
 
+  setFeedPosted(userId: number, id: number): void {
+    this.feeds.setFeedPosted(userId, id);
+  }
+
   deleteFeed(userId: number, id: number): void {
     this.feeds.deleteFeed(userId, id);
   }

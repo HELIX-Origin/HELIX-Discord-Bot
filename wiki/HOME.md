@@ -11,9 +11,8 @@ Welcome to the comprehensive technical and operational wiki for **HELIX Discord 
 | [**📡 Feeds & Scrapers Engine**](Feeds-and-Scrapers.md) | Deep dive into XML/RSS/Atom parsing, Reddit, Free Games, and custom scrapers. |
 | [**🎮 Free Games & Giveaways**](Free-Games-Feeds.md) | Multi-store aggregation (Epic Games, Steam, GOG, Humble, etc.), Monday cron scheduler, and store branding. |
 | [**🤖 Reddit Feeds & Pure Image Mode**](Reddit-Feeds.md) | Reddit scraping, Pure Image Mode vs Standard RSS Mode, animated GIF/gifv banners, and subreddit filtering. |
-| [**🤖 Discord Bot & Commands**](Discord-Bot.md) | Slash commands (`/feed`, `/stats`, `/about`, `/help`), direct channel + forum thread delivery, embed formatting, and Discord permissions. |
-| [**😂 Entertainment & GIF Commands (Deprecated)**](Entertainment.md) | *(Broken & Deprecated — Discontinued in next update)* KLIPY GIF commands; disabled by default (`GIFS_ENABLED=false`). |
-| [**🛡️ Guild Administration**](Administration.md) | Moderation (`/admin warn`, `/kick`, `/ban`, `/lock`, `/purge`, `/slowmode`, `/announce`), role management, voice controls, permission guards. |
+| [**🤖 Discord Bot & Commands**](Discord-Bot.md) | Slash commands (`/rss`, `/youtube`, `/twitch`, `/free-games`, `/reddit`, `/stats`, `/about`, `/help`), direct channel + forum thread delivery, embed formatting, and Discord permissions. |
+| [**🛡️ Guild Administration**](Administration.md) | Moderation (`/warn`, `/kick`, `/ban`, `/lock`, `/purge`, `/slowmode`, `/announce`), role management, voice controls, permission guards. |
 | [**🔌 REST API Reference**](API-Reference.md) | Complete documentation of all REST endpoints, request/response schemas, and query params. |
 | [**🏗️ Architecture & Design**](Architecture-and-Design.md) | System components, data flow diagrams, background polling engine, caching, and state management. |
 | [**⚙️ Configuration Guide**](Configuration.md) | Exhaustive reference of all `.env` variables, timeouts, polling, dashboard themes, and hosting settings. |
@@ -44,14 +43,13 @@ flowchart TD
         DB[(SQLite Database)]
         Bot["Native Discord Bot Engine (Gateway + REST API)"]
         Web["Native HTTP Web Dashboard & REST API"]
-        GIF["KLIPY GIF Engine"]
         Admin["Guild Admin Engine"]
     end
 
     subgraph Discord["Discord Platform"]
         Channels["Target Server Guild Channels"]
         Threads["Forum Threads"]
-        SlashCmd["User Slash Commands (Feeds, GIFs, Admin)"]
+        SlashCmd["User Slash Commands (Feeds, Alerts, Admin)"]
     end
 
     Sources -->|Poll/Scrape| Parser
@@ -64,7 +62,6 @@ flowchart TD
     SlashCmd <--> Bot
     Web <--> DB
     Web <--> Bot
-    GIF <--> Bot
     Admin <--> Bot
 ```
 
@@ -76,5 +73,4 @@ flowchart TD
 5. **No Webhook Hassle**: Messages are dispatched directly to guild channels using Discord REST API endpoints with granular role/user pings and embed color customization.
 6. **Forum Thread Delivery**: Optional per-server delivery of each feed into its own dedicated thread inside a forum channel — kept open via keepalive polling, auto-rotated into a fresh thread when large (configurable from the dashboard Feeds tab).
 7. **Glassmorphism Web Dashboard**: Real-time management interface with Discord OAuth2 login, feed analytics, log streaming, and preset browsing.
-8. **Entertainment GIF Commands (Deprecated)**: *(Broken & Deprecated — Scheduled for removal in next update)* KLIPY-powered GIF commands; disabled by default (`GIFS_ENABLED=false`).
-9. **Guild Administration**: Moderation (`/admin warn`, `/kick`, `/ban`, `/lock`, `/purge`, `/slowmode`, `/announce`), role management, voice controls (mute/deafen/move/disconnect), all with Discord permission guards.
+8. **Guild Administration**: Moderation (`/warn`, `/kick`, `/ban`, `/lock`, `/purge`, `/slowmode`, `/announce`), role management, voice controls (mute/deafen/move/disconnect), all with Discord permission guards.

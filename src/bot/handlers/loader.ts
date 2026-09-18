@@ -20,7 +20,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 /** Recognised command category directory names under src/bot/commands/. */
-const COMMAND_CATEGORIES = ['feeds', 'admin', 'mod', 'entertainment', 'utility'] as const;
+const COMMAND_CATEGORIES = ['feeds', 'admin', 'mod', 'utility'] as const;
 
 /**
  * Returns true when a module export value looks like a BotCommand —

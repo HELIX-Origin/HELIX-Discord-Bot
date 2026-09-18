@@ -5,7 +5,7 @@ import { canUserManageGuild, requireDashboardUser } from './shared.js';
 import { getAllCommands, isCommandDisabled } from '../../bot/handlers/registry.js';
 import { loadAllCommands } from '../../bot/handlers/loader.js';
 
-const FEATURE_NAMES = ['feeds', 'streamalerts', 'gifs'] as const;
+const FEATURE_NAMES = ['feeds', 'streamalerts'] as const;
 
 export function registerGuildRoutes(router: Router<AppDeps>): void {
   router.add('GET', '/api/guilds', async (req, res, _ctx, d) => {
@@ -47,10 +47,10 @@ export function registerGuildRoutes(router: Router<AppDeps>): void {
       const allChannels = await d.bot.getGuildChannelsAll(guildId).catch(() => []);
       const textChannels = allChannels
         .filter((ch) => ch.type === 0 || ch.type === 5)
-        .map((ch) => ({ id: ch.id, name: ch.name, type: ch.type }));
+        .map((ch) => ({ id: ch.id, name: ch.name, type: ch.type, nsfw: ch.nsfw ?? false }));
       const forumChannels = allChannels
         .filter((ch) => ch.type === 15)
-        .map((ch) => ({ id: ch.id, name: ch.name, type: ch.type }));
+        .map((ch) => ({ id: ch.id, name: ch.name, type: ch.type, nsfw: ch.nsfw ?? false }));
 
       sendJson(res, 200, {
         guildId,
@@ -93,10 +93,10 @@ export function registerGuildRoutes(router: Router<AppDeps>): void {
       const allChannels = await d.bot.getGuildChannelsAll(guildId).catch(() => []);
       const textChannels = allChannels
         .filter((ch) => ch.type === 0 || ch.type === 5)
-        .map((ch) => ({ id: ch.id, name: ch.name, type: ch.type }));
+        .map((ch) => ({ id: ch.id, name: ch.name, type: ch.type, nsfw: ch.nsfw ?? false }));
       const forumChannels = allChannels
         .filter((ch) => ch.type === 15)
-        .map((ch) => ({ id: ch.id, name: ch.name, type: ch.type }));
+        .map((ch) => ({ id: ch.id, name: ch.name, type: ch.type, nsfw: ch.nsfw ?? false }));
 
       await loadAllCommands();
       const allCommands = getAllCommands();

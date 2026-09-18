@@ -7,7 +7,7 @@ import type {
   InteractionResponse,
 } from '../utils/types.js';
 
-export type CommandCategory = 'feeds' | 'admin' | 'mod' | 'entertainment' | 'utility';
+export type CommandCategory = 'feeds' | 'admin' | 'mod' | 'utility';
 
 export interface CommandHelpMetadata {
   name: string;
@@ -42,7 +42,6 @@ const CATEGORY_EMOJIS: Record<CommandCategory, string> = {
   feeds: '📰',
   admin: '🛡️',
   mod: '⚖️',
-  entertainment: '🎉',
   utility: '🔧',
 };
 
@@ -143,7 +142,6 @@ export interface CategorizedCommands {
   feeds: CommandHelpMetadata[];
   admin: CommandHelpMetadata[];
   mod: CommandHelpMetadata[];
-  entertainment: CommandHelpMetadata[];
   utility: CommandHelpMetadata[];
 }
 
@@ -152,7 +150,6 @@ export function getCategorizedCommands(): CategorizedCommands {
     feeds: [],
     admin: [],
     mod: [],
-    entertainment: [],
     utility: [],
   };
   for (const meta of metadataRegistry.values()) {

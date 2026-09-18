@@ -1,6 +1,6 @@
 import type { Database } from '../database.js';
 import { AppState } from '../../state/app-state.js';
-import { nowIso, type Feed, type FeedType } from '../../state/types.js';
+import { nowIso, feedCategory, FEED_CATEGORY_LIMITS, type Feed, type FeedType } from '../../state/types.js';
 
 /**
  * Feed persistence.
@@ -36,6 +36,16 @@ export class FeedRepository {
   ): Feed {
     if (feedType === 'scrape' && !scrape) {
       throw new Error('Scrape feeds require a scrape configuration');
+    }
+
+    const category = feedCategory(feedType);
+    const limit = category ? FEED_CATEGORY_LIMITS[category] : undefined;
+    if (limit !== undefined) {
+      const currentCount = this.state.listFeeds(userId).filter((f) => feedCategory(f.feedType) === category).length;
+      if (currentCount >= limit) {
+        const label = category === 'rss' ? 'News & RSS' : category === 'reddit' ? 'Reddit' : category;
+        throw new Error(`Subscription limit reached: at most ${limit} ${label} feed(s) allowed.`);
+      }
     }
 
     const cleanTopic =
@@ -83,6 +93,7 @@ export class FeedRepository {
       scrape: scrape && feedType === 'scrape' ? scrape : null,
       lastEntryId: null,
       lastCheckedAt: null,
+      lastPostedAt: null,
       createdAt: nowIso(),
       threadChannelId: null,
       threadEntryCount: 0,
@@ -175,6 +186,16 @@ export class FeedRepository {
     this.db.raw
       .prepare('UPDATE feeds SET last_checked_at = ?, last_entry_id = ? WHERE id = ? AND user_id = ?')
       .run(updated.lastCheckedAt, lastEntryId, id, userId);
+    this.state.putFeed(updated);
+  }
+
+  setFeedPosted(userId: number, id: number): void {
+    const current = this.state.getFeed(userId, id);
+    if (!current) return;
+    const updated: Feed = { ...current, lastPostedAt: nowIso() };
+    this.db.raw
+      .prepare('UPDATE feeds SET last_posted_at = ? WHERE id = ? AND user_id = ?')
+      .run(updated.lastPostedAt, id, userId);
     this.state.putFeed(updated);
   }
 

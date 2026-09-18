@@ -6,7 +6,7 @@ This document is the central entry point and operating manual for all AI agents,
 
 ## Project
 
-**HELIX Discord Bot** is a self-hosted, multi-user Discord bot built in TypeScript ESM — RSS/Atom/Reddit/Free-Games feed delivery, YouTube & Twitch live/upload alerts, KLIPY GIF entertainment, guild administration, and an integrated management dashboard.
+**HELIX Discord Bot** is a self-hosted, multi-user Discord bot built in TypeScript ESM — RSS/Atom/Reddit/Free-Games feed delivery, YouTube & Twitch live/upload alerts, guild administration, and an integrated management dashboard.
 - **Runtime dependencies**: Minimal (uses native Node.js `http`, `node:sqlite`, and web standard APIs; in-memory `ioredis-mock` for coordination without external redis binaries).
 - **Architecture**: In-memory write-through repository layer (`AppState`), native SQLite persistence, integrated dashboard UI with Light/Dark themes, Discord OAuth authentication, and direct message embed delivery to Discord channels/threads.
 - **Discord.js Standard**: Strict adherence to **discord.js v14** standards, self-contained commands with subcommands and options colocated directly in their command files (`src/bot/commands/<category>/<command>.ts`), modular shared libraries/modules/utilities in `src/bot/lib/`, builder patterns, and robust event handling.
@@ -145,12 +145,14 @@ This section documents active and recently resolved critical issues as required 
     - `client-script.ts`: Browser client script for routing, feed CRUD, preset toggles, modal dialogs, and real-time updates.
   - Adheres strictly to Rule 07 (zero external frontend runtime dependencies, SSR HTML + CSS Custom Properties, Discord OAuth2).
 
-### 17. Entertainment GIF Commands Deprecation & Discontinuation (Broken / Disabled by Default)
-- **Problem**: GIF commands powered by the upstream KLIPY API are broken and non-functional. External entertainment APIs add maintenance overhead and runtime fragility.
+### 17. Entertainment GIF Commands Retirement & Removal (Resolved / Retired)
+- **Problem**: GIF commands powered by the upstream KLIPY API were broken and non-functional. External entertainment APIs added maintenance overhead and runtime fragility.
 - **Resolution**:
-  - Marked all GIF commands as broken and deprecated across documentation (`wiki/Entertainment.md`, `wiki/Discord-Bot.md`, `wiki/HOME.md`, `README.md`).
-  - Disabled by default: `GIFS_ENABLED` flag changed to default to `false` in `src/config.ts` and `.env.example`.
-  - Documented scheduled complete retirement and removal of all entertainment commands (`/gif`, `/slap`, `/hug`, etc.) and the KLIPY client in the next update.
+  - Completely retired and removed all 22 entertainment slash commands (`/gif`, `/slap`, `/hug`, `/kiss`, `/pat`, `/bonk`, `/cuddle`, `/tickle`, `/pet`, `/poke`, `/baka`, `/smug`, `/cry`, `/angry`, `/meme`, `/anime`, `/jojo`, `/waifu`, `/amongus`, `/doggo`, `/gintama`, `/triggered`).
+  - Removed `src/bot/commands/entertainment/` and `src/bot/utils/klipy.ts`.
+  - Removed `'entertainment'` category from command loader and registry.
+  - Removed `GIFS_ENABLED` and `KLIPY_API_KEY` configuration options and feature flags across backend, `.env.example`, and dashboard guild admin.
+  - Synchronized documentation across wiki (`wiki/Entertainment.md` removed), `README.md`, and `AGENTS.md`.
 
 ---
 

@@ -12,6 +12,8 @@ import { feedEmbed, freeGameEmbed, streamAlertEmbed } from '../bot/utils/embeds.
 import { createLogger, type LogLevel } from '../util/logger.js';
 import { FeedThreadManager } from './threads.js';
 
+const RSS_POST_INTERVAL_FLOOR_MS = 6 * 60 * 60 * 1000;
+
 interface YouTubeItem {
   id?: { videoId?: string };
   snippet?: {
@@ -224,7 +226,16 @@ export class FeedWatcher {
     }
     toSend.reverse(); // oldest first
 
-    for (const entry of toSend) {
+    // RSS/scrape feeds publish at most one post per source at a time, at most
+    // once per UTC day, with a minimum 6-hour floor between posts (rate limiting).
+    const todayUtc = new Date().toISOString().slice(0, 10);
+    const lastPosted = feed.lastPostedAt ? new Date(feed.lastPostedAt).getTime() : Number.NaN;
+    const lastPostedDay = feed.lastPostedAt ? feed.lastPostedAt.slice(0, 10) : null;
+    const sinceLastPost = Number.isFinite(lastPosted) ? Date.now() - lastPosted : Number.POSITIVE_INFINITY;
+    const canPost = !feed.lastPostedAt || (lastPostedDay !== todayUtc && sinceLastPost >= RSS_POST_INTERVAL_FLOOR_MS);
+
+    if (canPost && toSend.length > 0) {
+      const entry = toSend[0];
       const embed = feedEmbed({
         title: entry.title,
         url: entry.link,
@@ -249,6 +260,7 @@ export class FeedWatcher {
       if (delivered) {
         this.repo.markEntrySent(feed.id, entry.guid);
         await this.redis?.markEntrySent(feed.id, entry.guid);
+        this.repo.setFeedPosted(userId, feed.id);
       } else {
         this.logger.warn('Delivery failed for feed entry', {
           feedId: feed.id,
@@ -256,8 +268,13 @@ export class FeedWatcher {
           entryGuid: entry.guid,
           error: errorDetail,
         });
-        break;
       }
+    } else if (toSend.length > 0) {
+      this.logger.debug('Skipping feed entry delivery; publishing window not reached', {
+        feedId: feed.id,
+        feedName: feed.name,
+        pending: toSend.length,
+      });
     }
 
     this.repo.setFeedChecked(

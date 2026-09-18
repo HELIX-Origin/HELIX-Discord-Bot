@@ -37,13 +37,13 @@ export const serverOptions: ApplicationCommandOption[] = [
     options: [
       {
         name: 'name',
-        description: 'Command name e.g. "play", "gif"',
+        description: 'Command name e.g. "free-games", "stats"',
         type: ApplicationCommandOptionType.STRING,
         required: true,
       },
       {
         name: 'enabled',
-        description: 'Whether the command should be enabled',
+        description: 'Whether the command should be enabled (true/false)',
         type: ApplicationCommandOptionType.BOOLEAN,
         required: true,
       },
@@ -69,29 +69,20 @@ export async function handleServerCommand(
     return EmbedHandler.for(deps)
       .error()
       .title('Server Only')
-      .description('This command can only be used in a server.')
+      .description('Server configuration commands can only be used inside a Discord server.')
       .respond(true);
   }
 
-  const subCommand = interaction.data?.options?.[0];
-  const subName = subCommand?.name;
-  const subOptions = subCommand?.options ?? [];
+  const subOptions = interaction.data?.options ?? [];
+  const sub = subOptions[0];
+  const subName = sub?.name;
 
   if (subName === 'export') {
     const binding = deps.repo.getGuildBinding(guildId);
     const allFeeds = deps.repo.listFeedsForAllUsers();
     const feeds = allFeeds.filter((f) => f.guildId === guildId);
 
-    const settingKeys = [
-      'dj_role_id',
-      'admin_role_id',
-      'prefix',
-      'feature_feeds',
-      'feature_streamalerts',
-      'feature_music',
-      'feature_gifs',
-      'mod_log_channel_id',
-    ];
+    const settingKeys = ['admin_role_id', 'prefix', 'feature_feeds', 'feature_streamalerts', 'mod_log_channel_id'];
 
     const settings: Record<string, string> = {};
     for (const k of settingKeys) {
@@ -197,7 +188,7 @@ registerCommandMetadata({
     { name: 'import', description: 'Import guild configuration from JSON' },
     { name: 'command', description: 'Enable or disable a command in this guild' },
   ],
-  examples: ['/server export', '/server command name:gif enabled:false'],
+  examples: ['/server export', '/server command name:stats enabled:false'],
 });
 
 export const serverCommand: BotCommand = {

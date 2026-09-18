@@ -110,11 +110,6 @@ async function handleBotSubcommand(deps: AppDeps): Promise<InteractionResponse> 
       value: 'Moderation, tickets, welcome system, roles, and voice controls',
       inline: true,
     },
-    {
-      name: '😂 Entertainment (Deprecated)',
-      value: 'GIF commands via KLIPY API (broken; discontinued in next update)',
-      inline: true,
-    },
     { name: '🎛️ Web Dashboard', value: 'Light & Dark themes with live logs and per-feed management', inline: true },
     { name: '⚙️ Runtime', value: 'Native Node.js & TypeScript ESM (zero runtime dependencies)', inline: true },
     { name: '💾 Storage', value: 'In-memory AppState with SQLite write-through persistence', inline: true },

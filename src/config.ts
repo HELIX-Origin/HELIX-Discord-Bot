@@ -6,7 +6,6 @@ export interface FeatureFlags {
   feedsEnabled: boolean;
   streamAlertsEnabled: boolean;
   threadsEnabled: boolean;
-  gifsEnabled: boolean;
   administrationEnabled: boolean;
   dashboardEnabled: boolean;
   adminPanelEnabled: boolean;
@@ -45,7 +44,6 @@ export interface AppConfig {
   twitchClientId: string | null;
   twitchClientSecret: string | null;
   features: FeatureFlags;
-  klipyApiKey: string | null;
 }
 
 export function defaultConfig(): AppConfig {
@@ -193,8 +191,6 @@ export function defaultConfig(): AppConfig {
     feedsEnabled: parseEnvFlag(process.env['FEEDS_ENABLED'], true),
     streamAlertsEnabled: parseEnvFlag(process.env['STREAM_ALERTS_ENABLED'], true),
     threadsEnabled: parseEnvFlag(process.env['THREADS_ENABLED'], true),
-    // GIF feature is broken upstream (KLIPY) and deprecated; disabled by default pending removal in next update
-    gifsEnabled: parseEnvFlag(process.env['GIFS_ENABLED'], false),
     administrationEnabled: parseEnvFlag(process.env['ADMINISTRATION_ENABLED'], true),
     dashboardEnabled: parseEnvFlag(process.env['DASHBOARD_ENABLED'], true),
     adminPanelEnabled: parseEnvFlag(process.env['ADMIN_PANEL_ENABLED'], true),
@@ -233,7 +229,6 @@ export function defaultConfig(): AppConfig {
     twitchClientId,
     twitchClientSecret,
     features,
-    klipyApiKey: process.env['KLIPY_API_KEY']?.trim() || null,
   };
 }
 

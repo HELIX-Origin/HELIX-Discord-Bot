@@ -1,16 +1,6 @@
-export function renderSourcesTabs(): string {
-  return `
-    <!-- TAB: REDDIT -->
-    <section id="tab-reddit" class="tab-pane">
-      <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
-        <div>
-          <div class="section-title"><i class="fa-brands fa-reddit" style="color: #ff4500;"></i> Reddit Feeds</div>
-          <div class="section-desc">Subreddit image and post streams delivered straight to channels or forum threads.</div>
-        </div>
-        <button onclick="triggerGuildPoll()" class="btn btn-ghost btn-sm"><i class="fa-solid fa-bolt"></i> Check Now</button>
-      </div>
-
-      <div class="card">
+export function renderSourcesTabs(redditAvailable: boolean): string {
+  const redditSection = redditAvailable
+    ? `      <div class="card">
         <div class="card-title" style="font-size: 0.9375rem;"><i class="fa-brands fa-reddit" style="color: #ff4500;"></i> Add Reddit Feed</div>
         <div class="form-grid" style="margin-top: 0.75rem;">
           <div class="form-group">
@@ -26,7 +16,7 @@ export function renderSourcesTabs(): string {
             <select id="add-reddit-target" class="form-input">
               <option value="">(none)</option>
             </select>
-            <span style="font-size: 0.6875rem; color: var(--text-dim); margin-top: 0.25rem; display: block;">Pick a channel, or a forum to auto-create one thread per feed.</span>
+            <span style="font-size: 0.6875rem; color: var(--text-dim); margin-top: 0.25rem; display: block;">Pick a channel, or a forum to auto-create one thread per feed. NSFW subreddits can only target age-restricted (NSFW) channels.</span>
           </div>
         </div>
         <div class="form-group" style="margin-top: 0.5rem;">
@@ -36,7 +26,27 @@ export function renderSourcesTabs(): string {
           </label>
         </div>
         <button onclick="submitAddRedditFeed()" class="btn btn-primary btn-sm btn-block" style="margin-top: 0.75rem; background: #ff4500; border-color: #ff4500;"><i class="fa-brands fa-reddit"></i> Add Reddit Feed</button>
+      </div>`
+    : `      <div class="card" style="border-color: rgba(255, 69, 0, 0.4);">
+        <div class="card-title" style="font-size: 0.9375rem; color: #ff4500;"><i class="fa-solid fa-triangle-exclamation"></i> Reddit Feeds Disabled</div>
+        <p style="font-size: 0.8125rem; color: var(--text-muted); line-height: 1.5; margin-top: 0.5rem;">
+          Reddit feeds are disabled because no Reddit session cookie file was found. Place a <code style="font-size: 0.75rem;">cookies.json</code> (or <code style="font-size: 0.75rem;">cookies.txt</code>) file with a logged-in Reddit session in the repo root, or set <code style="font-size: 0.75rem;">REDDIT_COOKIES_FILE</code>, then restart the bot. See <code style="font-size: 0.75rem;">wiki/Reddit-Feeds.md</code>.
+        </p>
+        <p style="font-size: 0.75rem; color: var(--text-dim); line-height: 1.5;">Use a dedicated alt Reddit account when exporting your cookies to avoid bans on your primary account.</p>
+      </div>`;
+
+  return `
+    <!-- TAB: REDDIT -->
+    <section id="tab-reddit" class="tab-pane">
+      <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
+        <div>
+          <div class="section-title"><i class="fa-brands fa-reddit" style="color: #ff4500;"></i> Reddit Feeds</div>
+          <div class="section-desc">Subreddit image and post streams delivered straight to channels or forum threads.</div>
+        </div>
+        <button onclick="triggerGuildPoll()" class="btn btn-ghost btn-sm"><i class="fa-solid fa-bolt"></i> Check Now</button>
       </div>
+
+      ${redditSection}
 
       <div class="card">
         <div class="card-title" style="font-size: 0.9375rem;"><i class="fa-brands fa-reddit" style="color: #ff4500;"></i> Reddit Feeds</div>

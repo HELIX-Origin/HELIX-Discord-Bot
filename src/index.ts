@@ -3,6 +3,7 @@ import { Database } from './db/database.js';
 import { Repository } from './db/repository.js';
 import { FeedWatcher } from './feed/watcher.js';
 import { FeedThreadManager } from './feed/threads.js';
+import { createRedditFeeds } from './feed/reddit.js';
 import { OAuthService } from './dashboard/oauth/service.js';
 import { Scheduler } from './scheduler/scheduler.js';
 import { createRedisCoordinator } from './state/redis.js';
@@ -25,6 +26,7 @@ export async function main(): Promise<void> {
   const oauth = new OAuthService(repo, config);
   const redis = await createRedisCoordinator(config.logLevel);
   const feeds = new FeedWatcher(repo, redis, config.logLevel);
+  const reddit = createRedditFeeds();
 
   // 3. Start background polling scheduler
   const scheduler = new Scheduler(config.logLevel);
@@ -35,13 +37,13 @@ export async function main(): Promise<void> {
 
   // Initialize webhook router for real-time feed updates
   const webhookRouter = new WebhookRouter(
-    { config, db, repo, oauth, feeds, redis, scheduler, bot: null },
+    { config, db, repo, oauth, feeds, redis, scheduler, bot: null, reddit },
     config.logLevel,
   );
 
   // 4. Create Discord Bot as primary application process
   const bot = new DiscordBot(
-    { config, db, repo, oauth, feeds, redis, scheduler, webhookRouter },
+    { config, db, repo, oauth, feeds, redis, scheduler, webhookRouter, reddit },
     {
       token: config.botToken || '',
       clientId: config.clientId,

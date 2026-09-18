@@ -34,11 +34,7 @@ When operating an instance of HELIX Discord Bot, the software stores and process
 - **Audit Records**: Moderation actions executed through administrative commands (`/warn`, `/kick`, `/ban`, `/purge`, `/lock`, `/slowmode`, etc.) record the target user ID, moderator user ID, timestamp, and specified reason within local SQLite storage for audit review.
 - **Role & Voice Configurations**: Guild DJ roles, administrative roles, and mod-log channel designations.
 
-### D. Entertainment & Audio Playback
-- **Music Queue State**: Track metadata, song titles, audio URLs, and queue positions for playback via an external Lavalink v4 audio server.
-- **Reaction GIFs**: Search keywords processed via public API integrations (such as KLIPY) solely to return relevant GIF assets. No personal identifiers are attached to search queries.
-
-### E. Local Dashboard Accounts (Optional)
+### D. Local Dashboard Accounts (Optional)
 - If local dashboard account registration is explicitly enabled by the administrator, securely salted and hashed passwords (utilizing Node.js native cryptographic primitives) and email addresses are stored strictly in the local SQLite database.
 
 ---
@@ -48,15 +44,11 @@ When operating an instance of HELIX Discord Bot, the software stores and process
 To deliver its core capabilities, an active HELIX Discord Bot instance communicates directly with:
 1. **Discord Gateway & REST API (`discord.com`)**:
    - Deliver rich embeds, forum thread updates, and announcements to designated guild channels.
-   - Register and dispatch discrete slash commands (e.g., `/rss`, `/reddit`, `/free-games`, `/youtube`, `/twitch`, `/play`, `/admin`, `/role`, `/voice`, `/gif`, `/about`, `/help`).
+   - Register and dispatch discrete slash commands (e.g., `/rss`, `/reddit`, `/free-games`, `/youtube`, `/twitch`, `/admin`, `/role`, `/voice`, `/about`, `/help`).
    - Authenticate users via Discord OAuth2.
 2. **Configured Content Providers**:
    - Periodically poll public RSS/Atom feeds, Reddit endpoints, and Epic Games/giveaway APIs configured by server administrators.
    - Query YouTube or Twitch alert endpoints for live-stream and video upload status.
-3. **External Audio Server (Lavalink v4)**:
-   - Stream audio WebSocket signals and voice update state to external Lavalink v4 servers configured by the host administrator in `.env`.
-4. **Entertainment API (KLIPY)**:
-   - Query public reaction and anime GIF endpoints on-demand when users run entertainment commands.
 
 ---
 

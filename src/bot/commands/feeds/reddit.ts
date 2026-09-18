@@ -1,5 +1,6 @@
 import { appDisplayName, type AppDeps } from '../../../app.js';
 import type { DiscordRestClient } from '../../rest.js';
+import { createRedditFeeds } from '../../../feed/reddit.js';
 import {
   ApplicationCommandOptionType,
   type ApplicationCommand,
@@ -141,6 +142,29 @@ export async function handleRedditCommand(
       (opts.find((o) => o.name === 'channel')?.value as string | undefined) || interaction.channel_id || null;
 
     try {
+      const reddit = deps.reddit ?? createRedditFeeds();
+      if (!reddit.available()) {
+        return EmbedHandler.for(deps)
+          .error()
+          .title('Reddit Feeds Disabled')
+          .description(
+            'Reddit feeds are disabled: a cookies.json (or cookies.txt) file with a logged-in Reddit session is required at the repo root (or set REDDIT_COOKIES_FILE). See wiki/Reddit-Feeds.md.',
+          )
+          .respond(true);
+      }
+
+      let targetNsfw = false;
+      if (channelId && deps.bot) {
+        try {
+          const snapshot = await deps.bot.getChannel(channelId);
+          targetNsfw = Boolean(snapshot.nsfw);
+        } catch {
+          targetNsfw = false;
+        }
+      }
+      const sub = reddit.subredditFromUrlOrName(rawSub) ?? normalizeSubreddit(rawSub).name.replace(/^r\//i, '');
+      await reddit.assertTargetAllowed(sub, targetNsfw);
+
       const feed = deps.repo.addFeed(user.id, name, url, channelId, 'reddit', null, guildId);
       deps.repo.logActivity(user.id, 'info', 'bot', `Added Reddit feed "${name}" via Discord bot`);
 
@@ -370,6 +394,6 @@ registerCommandMetadata({
 export const redditCommand: BotCommand = {
   def: redditCommandDef,
   category: 'feeds',
-  isEnabled: (deps) => Boolean(deps.config.features.feedsEnabled),
+  isEnabled: (deps) => Boolean(deps.config.features.feedsEnabled) && (deps.reddit ?? createRedditFeeds()).available(),
   execute: handleRedditCommand,
 };

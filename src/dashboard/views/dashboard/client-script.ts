@@ -1083,7 +1083,6 @@ export function renderClientScript(): string {
     const GUILD_ADMIN_FEATURES = [
       { key: 'feeds', label: 'Feeds', desc: 'RSS, Reddit, and Free Games polling' },
       { key: 'streamalerts', label: 'Stream Alerts', desc: 'YouTube & Twitch live/upload alerts' },
-      { key: 'gifs', label: 'GIF Commands (Deprecated)', desc: 'Broken upstream; disabled by default & discontinued in next update' },
     ];
 
     function populateRoleSelect(selectId, roles, currentRoleId, placeholder) {

@@ -34,6 +34,13 @@ function makeDeps(): { deps: AppDeps; feeds: Feed[]; polledIds: number[] } {
     bot: {
       getAppName: () => 'HELIX Bot',
       getAppIconUrl: () => 'https://cdn.example.com/icon.png',
+      getChannel: async (id: string) => ({ id, name: 'general', type: 0, nsfw: false }),
+    },
+    reddit: {
+      available: () => true,
+      detectNsfw: async () => 'sfw' as const,
+      assertTargetAllowed: async () => {},
+      subredditFromUrlOrName: (input: string) => input.replace(/^r\//i, '').split(/[/?#]/)[0] || 'memes',
     },
     feeds: {
       pollFeed: async (_userId: number, feedId: number, _force?: boolean) => {
@@ -67,6 +74,7 @@ function makeDeps(): { deps: AppDeps; feeds: Feed[]; polledIds: number[] } {
           scrape,
           lastEntryId: null,
           lastCheckedAt: null,
+          lastPostedAt: null,
           createdAt: new Date().toISOString(),
           threadChannelId: null,
           threadEntryCount: 0,
@@ -533,5 +541,84 @@ describe('/reddit command', () => {
     );
     expect(pollRes.data?.embeds![0].title).toContain('Reddit Check Triggered');
     expect(polledIds).toContain(1);
+  });
+
+  it('rejects an NSFW subreddit when the target channel is not age-restricted', async () => {
+    const { deps, feeds } = makeDeps();
+    (deps.reddit as unknown as { assertTargetAllowed: (s: string, nsfw: boolean) => Promise<void> }).assertTargetAllowed =
+      async () => {
+        throw new Error('r/memes is flagged NSFW and can only be delivered to an age-restricted (NSFW) channel or thread.');
+      };
+    const interaction = makeInteraction({
+      data: {
+        id: 'cmd-reddit-nsfw',
+        type: 1,
+        name: 'reddit',
+        options: [
+          {
+            name: 'add',
+            type: 1,
+            options: [{ name: 'subreddit', type: 3, value: 'memes' }],
+          },
+        ],
+      },
+    });
+
+    const res = await handleRedditCommand(interaction, deps, {} as any);
+    expect(feeds).toHaveLength(0);
+    expect(res.data?.embeds![0].title).toContain('Failed to Add Reddit Feed');
+    expect(res.data?.embeds![0].description).toContain('flagged NSFW');
+  });
+
+  it('allows an NSFW subreddit when the target channel is age-restricted', async () => {
+    const { deps, feeds } = makeDeps();
+    (deps.bot as unknown as { getChannel: (id: string) => Promise<{ nsfw: boolean }> }).getChannel = async (id) => ({
+      id,
+      name: 'nsfw-general',
+      type: 0,
+      nsfw: true,
+    });
+    const interaction = makeInteraction({
+      data: {
+        id: 'cmd-reddit-nsfw-ok',
+        type: 1,
+        name: 'reddit',
+        options: [
+          {
+            name: 'add',
+            type: 1,
+            options: [{ name: 'subreddit', type: 3, value: 'memes' }],
+          },
+        ],
+      },
+    });
+
+    const res = await handleRedditCommand(interaction, deps, {} as any);
+    expect(feeds).toHaveLength(1);
+    expect(feeds[0].feedType).toBe('reddit');
+    expect(res.data?.embeds![0].title).toContain('Reddit Feed Added');
+  });
+
+  it('rejects reddit feed addition when the Reddit feature is disabled (no cookie file)', async () => {
+    const { deps, feeds } = makeDeps();
+    (deps.reddit as unknown as { available: () => boolean }).available = () => false;
+    const interaction = makeInteraction({
+      data: {
+        id: 'cmd-reddit-disabled',
+        type: 1,
+        name: 'reddit',
+        options: [
+          {
+            name: 'add',
+            type: 1,
+            options: [{ name: 'subreddit', type: 3, value: 'memes' }],
+          },
+        ],
+      },
+    });
+
+    const res = await handleRedditCommand(interaction, deps, {} as any);
+    expect(feeds).toHaveLength(0);
+    expect(res.data?.embeds![0].title).toContain('Reddit Feeds Disabled');
   });
 });

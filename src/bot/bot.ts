@@ -149,7 +149,7 @@ export class DiscordBot {
     id: string;
     name: string;
     icon: string | null;
-    channels: Array<{ id: string; name: string; type: number; position?: number }>;
+    channels: Array<{ id: string; name: string; type: number; position?: number; nsfw?: boolean }>;
   }> | null = null;
   private cachedGuildsTimestamp = 0;
 
@@ -158,7 +158,7 @@ export class DiscordBot {
       id: string;
       name: string;
       icon: string | null;
-      channels: Array<{ id: string; name: string; type: number; position?: number }>;
+      channels: Array<{ id: string; name: string; type: number; position?: number; nsfw?: boolean }>;
     }>
   > {
     const now = Date.now();
@@ -183,6 +183,11 @@ export class DiscordBot {
                   name: c.name ?? 'unknown',
                   type: c.type,
                   position: (c as unknown as { position?: number }).position ?? 0,
+                  nsfw:
+                    (c as { nsfw?: boolean }).nsfw ??
+                    ((c as { isThread?: () => boolean }).isThread?.()
+                      ? ((c as unknown as { parent?: { nsfw?: boolean } }).parent?.nsfw ?? false)
+                      : false),
                 })),
             };
           } catch {
@@ -209,7 +214,7 @@ export class DiscordBot {
 
   async getGuildChannelsAll(
     guildId: string,
-  ): Promise<Array<{ id: string; name: string; type: number; position?: number }>> {
+  ): Promise<Array<{ id: string; name: string; type: number; position?: number; nsfw?: boolean }>> {
     return this.rest.getGuildChannelsAll(guildId);
   }
 
@@ -272,7 +277,7 @@ export class DiscordBot {
     }
   }
 
-  async getChannel(threadId: string): Promise<{ id: string; name: string; type: number }> {
+  async getChannel(threadId: string): Promise<{ id: string; name: string; type: number; nsfw?: boolean }> {
     return this.rest.getChannel(threadId);
   }
 

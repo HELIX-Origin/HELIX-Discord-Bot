@@ -5,6 +5,7 @@ import { readBodyJson, sendError, sendJson, sendText } from '../http/helpers.js'
 import type { Router } from '../http/router.js';
 import { authedUserId, canUserManageGuild, isValidHttpUrl, requireDashboardUser } from './shared.js';
 import { FeedListener } from '../../feed/listener.js';
+import { createRedditFeeds } from '../../feed/reddit.js';
 import type { IncomingMessage } from 'node:http';
 
 export function registerFeedsRoutes(router: Router<AppDeps>): void {
@@ -142,6 +143,31 @@ export function registerFeedsRoutes(router: Router<AppDeps>): void {
               description: body.scrape.description?.trim() || undefined,
             }
           : null;
+
+      const isReddit = feedType === 'reddit' || url.includes('reddit.com/r/') || url.includes('/r/');
+      if (isReddit) {
+        const reddit = d.reddit ?? createRedditFeeds();
+        if (!reddit.available()) {
+          throw new Error(
+            'Reddit feeds are disabled: a cookies.json (or cookies.txt) file with a logged-in Reddit session is required at the repo root (or set REDDIT_COOKIES_FILE). See wiki/Reddit-Feeds.md.',
+          );
+        }
+        const sub = reddit.subredditFromUrlOrName(url) ?? reddit.subredditFromUrlOrName(name) ?? null;
+        let targetNsfw = false;
+        if (targetChannelId && d.bot) {
+          try {
+            const guilds = await d.bot.getGuildsWithChannels();
+            const channel = guilds.flatMap((g) => g.channels).find((c) => c.id === targetChannelId);
+            targetNsfw = Boolean(channel?.nsfw);
+          } catch {
+            targetNsfw = false;
+          }
+        }
+        if (sub) {
+          await reddit.assertTargetAllowed(sub, targetNsfw);
+        }
+      }
+
       const feed = d.repo.addFeed(
         userId,
         name,
@@ -208,6 +234,38 @@ export function registerFeedsRoutes(router: Router<AppDeps>): void {
         }
       } else if (!newTarget) {
         guildId = null;
+      }
+    }
+    const existing = d.repo.getFeed(userId, id);
+    if (existing && targetChanged && newTarget) {
+      const isReddit = existing.feedType === 'reddit' || existing.url.includes('reddit.com/r/');
+      if (isReddit) {
+        const reddit = d.reddit ?? createRedditFeeds();
+        if (!reddit.available()) {
+          return sendError(
+            res,
+            409,
+            'Reddit feeds are disabled: a cookies.json (or cookies.txt) file with a logged-in Reddit session is required at the repo root (or set REDDIT_COOKIES_FILE). See wiki/Reddit-Feeds.md.',
+          );
+        }
+        let targetNsfw = false;
+        if (d.bot) {
+          try {
+            const guilds = await d.bot.getGuildsWithChannels();
+            const channel = guilds.flatMap((g) => g.channels).find((c) => c.id === newTarget);
+            targetNsfw = Boolean(channel?.nsfw);
+          } catch {
+            targetNsfw = false;
+          }
+        }
+        const sub = reddit.subredditFromUrlOrName(existing.url) ?? reddit.subredditFromUrlOrName(existing.name) ?? null;
+        if (sub) {
+          try {
+            await reddit.assertTargetAllowed(sub, targetNsfw);
+          } catch (err) {
+            return sendError(res, 409, err instanceof Error ? err.message : 'Failed to update feed');
+          }
+        }
       }
     }
     const feed = d.repo.updateFeed(userId, id, {

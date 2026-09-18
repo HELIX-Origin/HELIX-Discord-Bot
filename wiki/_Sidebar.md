@@ -5,7 +5,6 @@
 - [🎮 Free Games & Giveaways](Free-Games-Feeds.md)
 - [🤖 Reddit Feeds & Pure Image Mode](Reddit-Feeds.md)
 - [🤖 Discord Bot & Commands](Discord-Bot.md)
-- [😂 Entertainment & GIF Commands *(Deprecated)*](Entertainment.md)
 - [🛡️ Guild Administration](Administration.md)
 - [🔌 REST API Reference](API-Reference.md)
 - [🏗️ Architecture & Design](Architecture-and-Design.md)

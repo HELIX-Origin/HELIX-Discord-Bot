@@ -9,6 +9,7 @@ import { renderSourcesTabs } from './dashboard/sources.js';
 import { renderGuildAdminTab } from './dashboard/guildadmin.js';
 import { renderSettingsTab } from './dashboard/settings.js';
 import { renderClientScript } from './dashboard/client-script.js';
+import { createRedditFeeds } from '../../feed/reddit.js';
 
 export { getThemeInfo, getColorSchemeInfo } from './theme.js';
 
@@ -73,6 +74,7 @@ export function renderDashboardHtml(
   const isAdmin = !isOwner && isAdminOrOwner(userId, deps);
   const isHost = isOwner || isAdmin;
   const dbStats = deps.db.stats();
+  const redditAvailable = (deps.reddit ?? createRedditFeeds()).available();
 
   return `<!DOCTYPE html>
 <html lang="en" class="${theme.id} scheme-${colorScheme.id}">
@@ -160,14 +162,14 @@ export function renderDashboardHtml(
     <!-- Active Server Dashboard View -->
     <div id="dashboard-view" class="tab-pane" style="width: 100%; flex-direction: row;">
       <!-- Categorized Sidebar Navigation -->
-      ${renderSidebar({ isHost })}
+      ${renderSidebar({ isHost, redditAvailable })}
 
       <!-- Main Content Tabs -->
       <main>
         ${renderOverviewTab({ dbSizeBytes: dbStats.dbSizeBytes })}
         ${renderGuildAdminTab()}
         ${renderFeedsTab()}
-        ${renderSourcesTabs()}
+        ${renderSourcesTabs(redditAvailable)}
         ${
           isHost
             ? renderSettingsTab({

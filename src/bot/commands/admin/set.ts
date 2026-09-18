@@ -14,7 +14,7 @@ import { registerCommandMetadata, type BotCommand } from '../../handlers/registr
 export const SET_ACTIONS = ['role', 'feature', 'prefix', 'view', 'reset'] as const;
 export type SetAction = (typeof SET_ACTIONS)[number];
 
-export const SET_FEATURE_NAMES = ['feeds', 'streamalerts', 'gifs'] as const;
+export const SET_FEATURE_NAMES = ['feeds', 'streamalerts'] as const;
 export const SET_RESET_TARGETS = ['roles', 'features', 'prefix', 'all'] as const;
 
 export const setOptions: ApplicationCommandOption[] = [
@@ -52,7 +52,6 @@ export const setOptions: ApplicationCommandOption[] = [
     choices: [
       { name: 'Feeds (RSS/Reddit/Free Games)', value: 'feeds' },
       { name: 'Stream Alerts (YouTube/Twitch)', value: 'streamalerts' },
-      { name: 'GIF Commands', value: 'gifs' },
     ],
   },
   {
@@ -92,7 +91,6 @@ export const setCommandDef: ApplicationCommand = {
 const FEATURE_LABELS: Record<(typeof SET_FEATURE_NAMES)[number], string> = {
   feeds: 'Feeds (RSS/Reddit/Free Games)',
   streamalerts: 'Stream Alerts (YouTube/Twitch)',
-  gifs: 'GIF Commands',
 };
 
 function optionRaw(options: InteractionOption[], name: string): unknown {
@@ -109,7 +107,7 @@ function usageEmbed(deps: AppDeps): InteractionResponse {
     .title('Set Command Usage', '⚙️')
     .description('Use `/set` with one of the actions below.')
     .field('🎭 role', '`/set action:role admin:@Staff` · `clear:admin`', false)
-    .field('⚙️ feature', '`/set action:feature feature:gifs enabled:True`', false)
+    .field('⚙️ feature', '`/set action:feature feature:feeds enabled:True`', false)
     .field('🔤 prefix', '`/set action:prefix value:!`', false)
     .field('👁️ view', '`/set action:view`', false)
     .field('♻️ reset', '`/set action:reset reset_target:roles`', false)
@@ -352,7 +350,6 @@ registerCommandMetadata({
       choices: [
         { name: 'Feeds (RSS/Reddit/Free Games)', value: 'feeds' },
         { name: 'Stream Alerts (YouTube/Twitch)', value: 'streamalerts' },
-        { name: 'GIF Commands', value: 'gifs' },
       ],
     },
     { name: 'enabled', description: 'Enable or disable the feature (feature)', type: 5, required: false },
@@ -377,7 +374,7 @@ registerCommandMetadata({
   ],
   examples: [
     '/set action:role admin:@Staff',
-    '/set action:feature feature:gifs enabled:True',
+    '/set action:feature feature:feeds enabled:True',
     '/set action:prefix value:!',
     '/set action:view',
     '/set action:reset reset_target:roles',

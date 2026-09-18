@@ -1,4 +1,4 @@
-export const SCHEMA_VERSION = 8;
+export const SCHEMA_VERSION = 9;
 
 export const SCHEMA = `
 CREATE TABLE IF NOT EXISTS meta (
@@ -62,6 +62,7 @@ CREATE TABLE IF NOT EXISTS feeds (
   scrape_description TEXT,
   last_entry_id TEXT,
   last_checked_at TEXT,
+  last_posted_at TEXT,
   created_at TEXT NOT NULL,
   thread_channel_id TEXT,
   thread_entry_count INTEGER NOT NULL DEFAULT 0,

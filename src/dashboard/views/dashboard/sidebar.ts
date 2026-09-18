@@ -1,9 +1,10 @@
 export interface SidebarOptions {
   isHost: boolean;
+  redditAvailable: boolean;
 }
 
 export function renderSidebar(options: SidebarOptions): string {
-  const { isHost } = options;
+  const { isHost, redditAvailable } = options;
 
   return `
     <nav class="sidebar">
@@ -45,8 +46,14 @@ export function renderSidebar(options: SidebarOptions): string {
             <button onclick="switchTab('rss')" id="tab-btn-rss" class="tab-btn active">
               <i class="fa-solid fa-newspaper" style="color: var(--amber);"></i> <span>News &amp; RSS</span>
             </button>
-            <button onclick="switchTab('reddit')" id="tab-btn-reddit" class="tab-btn">
-              <i class="fa-brands fa-reddit" style="color: #ff4500;"></i> <span>Reddit</span>
+            <button onclick="switchTab('reddit')" id="tab-btn-reddit" class="tab-btn" ${
+              redditAvailable ? '' : 'disabled title="Reddit feeds are disabled — add cookies.json to the repo root"'
+            }>
+              <i class="fa-brands fa-reddit" style="color: #ff4500;"></i> <span>Reddit</span> ${
+                redditAvailable
+                  ? ''
+                  : '<i class="fa-solid fa-lock" style="color: var(--text-dim); margin-left: 0.25rem; font-size: 0.625rem;"></i>'
+              }
             </button>
             <button onclick="switchTab('freegames')" id="tab-btn-freegames" class="tab-btn">
               <i class="fa-solid fa-gift" style="color: #10b981;"></i> <span>Free Games</span>

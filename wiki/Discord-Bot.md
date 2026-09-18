@@ -15,21 +15,6 @@ All commands register through Discord's native interaction model and use ephemer
 | `/twitch` | `add`, `list`, `remove`, `toggle`, `check` | `Manage Channels` | Manage Twitch livestream alerts, or trigger manual live checks. |
 | `/free-games` | `enable`, `status`, `disable`, `check` | `Manage Channels` | Manage weekly free game notifications and trigger manual giveaway checks. |
 | `/reddit` | `add`, `list`, `remove`, `toggle`, `poll` | `Manage Channels` | Manage Reddit subreddit image and news feeds, or trigger immediate checks. |
-| `/gif` | `category: <string?>` | Everyone | *(Broken / Deprecated — Discontinued in next update)* Get a random GIF. Disabled by default. |
-| `/slap` | `user: <user?>` | Everyone | *(Broken / Deprecated — Discontinued in next update)* Slap a user. Disabled by default. |
-| `/hug` | `user: <user?>` | Everyone | *(Broken / Deprecated — Discontinued in next update)* Hug a user. Disabled by default. |
-| `/kiss` | `user: <user?>` | Everyone | *(Broken / Deprecated — Discontinued in next update)* Kiss a user. Disabled by default. |
-| `/pat` | `user: <user?>` | Everyone | *(Broken / Deprecated — Discontinued in next update)* Pat a user. Disabled by default. |
-| `/bonk` | `user: <user?>` | Everyone | *(Broken / Deprecated — Discontinued in next update)* Bonk a user. Disabled by default. |
-| `/cuddle` | `user: <user?>` | Everyone | *(Broken / Deprecated — Discontinued in next update)* Cuddle a user. Disabled by default. |
-| `/tickle` | `user: <user?>` | Everyone | *(Broken / Deprecated — Discontinued in next update)* Tickle a user. Disabled by default. |
-| `/pet` | `user: <user?>` | Everyone | *(Broken / Deprecated — Discontinued in next update)* Pet a user. Disabled by default. |
-| `/poke` | `user: <user?>` | Everyone | *(Broken / Deprecated — Discontinued in next update)* Poke a user. Disabled by default. |
-| `/baka` | `user: <user?>` | Everyone | *(Broken / Deprecated — Discontinued in next update)* Baka a user. Disabled by default. |
-| `/smug` | `user: <user?>` | Everyone | *(Broken / Deprecated — Discontinued in next update)* Smug reaction. Disabled by default. |
-| `/cry` | `user: <user?>` | Everyone | *(Broken / Deprecated — Discontinued in next update)* Cry reaction. Disabled by default. |
-| `/angry` | `user: <user?>` | Everyone | *(Broken / Deprecated — Discontinued in next update)* Angry reaction. Disabled by default. |
-| `/meme` | *None* | Everyone | *(Broken / Deprecated — Discontinued in next update)* Random meme GIF. Disabled by default. |
 | `/warn` | `user: <user>`, `reason: <string>` | `Moderate Members` | Warn a member. |
 | `/kick` | `user: <user>`, `reason: <string>` | `Kick Members` | Kick a member. |
 | `/ban` | `user: <user>`, `reason: <string>` | `Ban Members` | Ban a member. |

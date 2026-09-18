@@ -92,3 +92,40 @@ Reddit enforces rate limits on RSS and XML queries based on the HTTP `User-Agent
    ```
 2. Avoid short delivery intervals for high-volume Reddit subscriptions — use the dashboard's 10–60 minute posting options.
 3. If you run multiple subreddits, combine them using the multi-reddit format (e.g., `r/tech+gadgets+hardware`) rather than 3 separate feeds.
+
+---
+
+## 🔐 Reddit Session Cookies (Required)
+
+Reddit no longer supplies a public API key for developers and blocks unauthenticated `about.json` probes (HTTP 403). To read each subreddit's content rating and keep Reddit feeds working, HELIX needs a **logged-in Reddit session cookie file**.
+
+### Setup
+1. Export your Reddit session cookies to a **`cookies.json`** file (preferred format, e.g. with the **"Get Cookies Locally"** browser extension while logged in to reddit.com) — or a Netscape-format **`cookies.txt`** file.
+2. Place the file **at the repo root** (next to `.env`), or point to it explicitly:
+   ```env
+   REDDIT_COOKIES_FILE=/absolute/path/to/cookies.json
+   ```
+3. Restart the bot.
+
+Resolution order: `REDDIT_COOKIES_FILE` → `cookies.json` (preferred) → `cookies.txt` (fallback).
+
+> ⚠️ **Security**: always use a dedicated **alt Reddit account** for this cookie file to avoid possible account bans on your primary account. The files are gitignored — never commit them.
+
+### Feature Gating
+Without a cookie file the **Reddit tab in the dashboard and the `/reddit` commands are disabled**. The command returns a `Reddit Feeds Disabled` notice and the dashboard tab shows a banner explaining how to enable Reddit feeds.
+
+---
+
+## 🛡️ Age-Restriction (NSFW) Enforcement
+
+HELIX verifies each subreddit's rating via the authenticated `about.json` endpoint (`data.over18`) and enforces Discord's age-restriction flag:
+
+| Subreddit rating | Allowed delivery targets |
+| :--- | :--- |
+| Verified **SFW** | Any text channel, forum thread, or announcement channel |
+| **NSFW** (`over18: true`) | Only **age-restricted (NSFW)** Discord channels, or threads inside an age-restricted forum |
+| **Unverifiable** (probe failed / no session) | Denied for normal channels — only age-restricted targets (fails closed) |
+
+- A thread inherits the age-restriction state of its parent **forum channel**.
+- If the selected channel is not age-restricted, adding or moving an NSFW/unverifiable subreddit is rejected with a clear error message both in the dashboard and via `/reddit add`.
+- This keeps NSFW content locked to channels explicitly marked as **NSFW** in Discord's age-restricted channel settings.

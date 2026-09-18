@@ -116,6 +116,13 @@ export class Database {
     } catch {
       // Column may already exist
     }
+
+    // Schema v9: last posting time for once-per-day / per-source cadence
+    try {
+      this.db.exec('ALTER TABLE feeds ADD COLUMN last_posted_at TEXT;');
+    } catch {
+      // Column may already exist
+    }
     // Backfill legacy per-guild, per-category targets onto individual feeds so
     // existing installations keep delivering after the category UI is removed.
     try {

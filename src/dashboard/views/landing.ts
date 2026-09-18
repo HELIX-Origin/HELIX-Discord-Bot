@@ -402,16 +402,6 @@ export function renderLandingHtml(deps: AppDeps, userId: number | null = null): 
         </div>
 
         <div class="feature-card">
-          <div class="feature-icon" style="background: rgba(244, 63, 94, 0.15); color: #f43f5e;">
-            <i class="fa-solid fa-gift"></i>
-          </div>
-          <h3 class="feature-title">Entertainment GIF Commands <span style="font-size: 0.75rem; color: #f43f5e; font-weight: 500;">(Deprecated)</span></h3>
-          <p class="feature-desc">
-            GIF commands powered by KLIPY API — <code>/gif</code>, <code>/slap</code>, <code>/hug</code>, etc. <em>Currently broken upstream and disabled by default; scheduled for complete removal in the next update.</em>
-          </p>
-        </div>
-
-        <div class="feature-card">
           <div class="feature-icon" style="background: rgba(99, 102, 241, 0.15); color: #6366f1;">
             <i class="fa-solid fa-user-shield"></i>
           </div>
@@ -432,20 +422,16 @@ export function renderLandingHtml(deps: AppDeps, userId: number | null = null): 
 
       <div class="code-showcase">
         <div class="code-line">
-          <span class="code-cmd">/feed add url:&lt;feed_url&gt; channel:#announcements role:@NewsPings</span>
-          <span class="code-comment"># Subscribe channel to any RSS or Reddit feed</span>
+          <span class="code-cmd">/rss add url:&lt;feed_url&gt; channel:#news</span>
+          <span class="code-comment"># Subscribe channel to any RSS or Atom feed</span>
         </div>
         <div class="code-line">
-          <span class="code-cmd">/feed add url:freegames:all channel:#free-games</span>
+          <span class="code-cmd">/free-games enable channel:#free-games</span>
           <span class="code-comment"># Subscribe to 100% free game promotions across all stores</span>
         </div>
         <div class="code-line">
-          <span class="code-cmd">/gif anime</span>
-          <span class="code-comment"># GIF commands (deprecated &amp; disabled by default)</span>
-        </div>
-        <div class="code-line">
-          <span class="code-cmd">/admin warn @user reason:<reason></span>
-          <span class="code-comment"># Moderation commands</span>
+          <span class="code-cmd">/warn user:@user reason:&lt;reason&gt;</span>
+          <span class="code-comment"># Moderation commands with audit log tracking</span>
         </div>
         <div class="code-line">
           <span class="code-cmd">/stats</span>

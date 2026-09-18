@@ -46,21 +46,11 @@ All major subsystems are gated by environment variables (default `true`):
 | `FEEDS_ENABLED` | RSS/Reddit/Free Games feed delivery |
 | `STREAM_ALERTS_ENABLED` | YouTube/Twitch live & upload alerts |
 | `THREADS_ENABLED` | Forum thread delivery |
-| `GIFS_ENABLED` | KLIPY `/gif` and action commands (default: `false` — broken & slated for removal in next update) |
-| `ADMINISTRATION_ENABLED` | `/admin` moderation, roles, voice |
-| `LAVA_ENABLED` | Music playback (Lavalink) |
+| `ADMINISTRATION_ENABLED` | Moderation, roles, voice commands |
 | `DASHBOARD_ENABLED` | Web dashboard & REST API |
 | `ADMIN_PANEL_ENABLED` | Dashboard admin page |
 
 Disable any flag to completely remove its commands, dashboard pages, and internal wiring.
-
-### 😂 Entertainment GIF Commands (Deprecated)
-> [!WARNING]
-> **Broken & Deprecated**: Entertainment GIF commands are non-functional due to upstream provider failures (KLIPY API). They are **disabled by default** (`GIFS_ENABLED=false`) and **scheduled for complete removal in the next update**.
-
-- **KLIPY-Powered GIFs**: `/gif [category]` with autocomplete for popular tags (anime, jojo, waifu, slap, gintama, doggo, cat, etc.).
-- **Action Commands**: Convenience commands `/slap`, `/hug`, `/kiss`, `/pat`, `/bonk`, `/cuddle`, `/tickle`, `/pet`, `/poke`, `/baka`, `/smug`, `/cry`, `/angry`, `/meme` — each maps to its KLIPY tag internally.
-- **Random GIF Fallback**: `/gif` without arguments returns a random GIF from the general pool.
 
 ### 🛡️ Guild Administration
 - **Moderation Commands**: `/admin warn`, `/admin kick`, `/admin ban`, `/admin lock`, `/admin purge`, `/admin slowmode`, `/admin announce`.
@@ -75,6 +65,18 @@ Disable any flag to completely remove its commands, dashboard pages, and interna
   - 📰 **Standard RSS Mode**: Formats complete message prose, author badges, and dedicated discussion link fields.
 - **Animated GIF Prioritization**: Automatically resolves and displays direct `.gif` animations and Imgur `.gifv` media.
 - **Interactive Mode Switcher**: Toggle any active Reddit feed between Image and RSS mode in one click.
+- **Session-Cookie Required**: Reddit feeds need a `cookies.json` (preferred) or `cookies.txt` file in the repo root (or `REDDIT_COOKIES_FILE`). Without it the Reddit tab and `/reddit` commands are disabled. Use a dedicated alt Reddit account for the cookie file. See [wiki/Reddit-Feeds.md](wiki/Reddit-Feeds.md).
+- **NSFW Enforcement**: NSFW or unverifiable subreddits can only be delivered to **age-restricted (NSFW) Discord channels** (or threads in age-restricted forums).
+
+### 📖 Subscription Limits
+| Dashboard tab | Category | Max feeds |
+| :--- | :--- | :--- |
+| **News & RSS** | `rss`, `scrape` | 5 |
+| **Reddit** | `reddit` | 5 |
+| **Free Games** | `free_games` | Unlimited |
+| **Stream Alerts** | `youtube`, `twitch` | Unlimited |
+
+RSS/Atom/scrape sources publish **once per day, one post per source** (6-hour minimum floor); Free Games polls daily; Stream Alerts deliver immediately.
 
 ### 📰 Curated News Feeds Catalog
 - **700+ Verified Presets**: One-click subscription to top publications across Technology, Artificial Intelligence, Gaming, Science, Cybersecurity, Hardware, Apple, Linux, Programming, Finance, and Entertainment.
@@ -91,11 +93,10 @@ Disable any flag to completely remove its commands, dashboard pages, and interna
 ### 🤖 Discord Bot Integration
 - **Flexible Delivery Targets**: Each feed independently targets either a text channel or a dedicated thread inside a forum channel (auto-created and managed per feed).
 - **Slash Commands**: Interactive commands grouped by category:
-  - **Feeds**: `/feed` (add/remove/list/pause/resume), `/stats`
-  - **Music**: `/play`, `/queue`, `/skip`, `/previous`, `/shuffle`, `/loop`, `/volume`, `/seek`, `/nowplaying`, `/pause`, `/resume`, `/stop`, `/leave`
-  - **Entertainment (Deprecated)**: `/gif`, `/slap`, `/hug`, `/kiss`, `/pat`, `/bonk`, `/cuddle`, `/tickle`, `/pet`, `/poke`, `/baka`, `/smug`, `/cry`, `/angry`, `/meme` *(broken & disabled by default; slated for removal in next update)*
-  - **Admin**: `/admin warn`, `/admin kick`, `/admin ban`, `/admin lock`, `/admin purge`, `/admin slowmode`, `/admin announce`, `/admin role`
-  - **Utility**: `/about`, `/help`
+  - **Feeds**: `/rss`, `/youtube`, `/twitch`, `/free-games`, `/reddit`
+  - **Moderation**: `/warn`, `/kick`, `/ban`, `/lock`, `/unlock`, `/purge`, `/slowmode`, `/announce`
+  - **Admin**: `/role`, `/voice`, `/server`, `/set`
+  - **Utility**: `/about`, `/help`, `/stats`
 - **Automatic Owner Detection**: Automatically grants full Owner rights to Discord Application owners and team members upon Discord login.
 
 ---
@@ -198,8 +199,7 @@ Comprehensive guides, architecture breakdowns, configuration settings, and API s
 | [🤖 Reddit Feeds](../../wiki/Reddit-Feeds) | Pure Image vs Standard RSS modes, animated GIFs, sort filters, and presets. |
 | [📰 Feeds & Web Scraper](../../wiki/Feeds-and-Scrapers) | RSS/Atom parsing, CSS webpage scrapers, and the 700+ News Feeds catalog. |
 | [🤖 Discord Bot & Commands](../../wiki/Discord-Bot) | Developer Portal configuration, slash commands, direct channel delivery, and embed styling. |
-| [😂 Entertainment & GIF Commands (Deprecated)](../../wiki/Entertainment) | *(Broken & Deprecated — Discontinued in next update)* KLIPY GIF commands; disabled by default (`GIFS_ENABLED=false`). |
-| [🛡️ Guild Administration](../../wiki/Administration) | Moderation (`/admin warn`, `/kick`, `/ban`, `/lock`, `/purge`, `/slowmode`, `/announce`), role management, voice controls, permission guards. |
+| [🛡️ Guild Administration](../../wiki/Administration) | Moderation (`/warn`, `/kick`, `/ban`, `/lock`, `/purge`, `/slowmode`, `/announce`), role management, voice controls, permission guards. |
 | [🏗️ Architecture & Design](../../wiki/Architecture-and-Design) | SQLite schema, AppState in-memory caching, RedisCoordinator, and FeedWatcher engine. |
 | [⚙️ Configuration Guide](../../wiki/Configuration) | Exhaustive reference for all `.env` environment variables and settings. |
 | [🚀 Deployment & Hosting](../../wiki/Deployment-and-Hosting) | Docker, Docker Compose, Linux VPS/systemd, and manual Cloud PaaS (Railway, Render, Fly.io). |

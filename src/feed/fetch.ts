@@ -27,6 +27,7 @@ export interface HttpFetcherOptions {
   maxRedirects?: number;
   userAgent?: string;
   maxBytes?: number;
+  cookie?: string;
 }
 
 const defaultRepoUrl =
@@ -42,7 +43,13 @@ export const DEFAULT_USER_AGENT =
   (defaultRepoUrl ? `HELIX-Discord-Bot/0.5.0 (+${defaultRepoUrl})` : 'HELIX-Discord-Bot/0.5.0');
 
 export async function fetchRaw(url: string, options: HttpFetcherOptions = {}): Promise<FetchResult> {
-  const { timeoutMs = 15_000, maxRedirects = 5, userAgent = DEFAULT_USER_AGENT, maxBytes = 10 * 1024 * 1024 } = options;
+  const {
+    timeoutMs = 15_000,
+    maxRedirects = 5,
+    userAgent = DEFAULT_USER_AGENT,
+    maxBytes = 10 * 1024 * 1024,
+    cookie,
+  } = options;
 
   const start = performance.now();
   let currentUrl = url;
@@ -72,6 +79,7 @@ export async function fetchRaw(url: string, options: HttpFetcherOptions = {}): P
           'user-agent': userAgent,
           accept: 'application/rss+xml, application/atom+xml, application/xml, text/xml, */*;q=0.8',
           'accept-language': 'en-US,en;q=0.9',
+          ...(cookie ? { cookie } : {}),
         },
       });
 
