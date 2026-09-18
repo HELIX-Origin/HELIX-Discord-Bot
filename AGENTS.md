@@ -6,8 +6,8 @@ This document is the central entry point and operating manual for all AI agents,
 
 ## Project
 
-**HELIX Discord Bot** is a self-hosted, multi-user Discord bot built in TypeScript ESM — RSS/Atom/Reddit/Free-Games feed delivery, YouTube & Twitch live/upload alerts, external Lavalink v4 music playback, guild administration, and an integrated management dashboard.
-- **Runtime dependencies**: Minimal (uses native Node.js `http`, `node:sqlite`, and web standard APIs; in-memory `ioredis-mock` for coordination without external redis binaries; `ws` for external Lavalink v4 audio).
+**HELIX Discord Bot** is a self-hosted, multi-user Discord bot built in TypeScript ESM — RSS/Atom/Reddit/Free-Games feed delivery, YouTube & Twitch live/upload alerts, KLIPY GIF entertainment, guild administration, and an integrated management dashboard.
+- **Runtime dependencies**: Minimal (uses native Node.js `http`, `node:sqlite`, and web standard APIs; in-memory `ioredis-mock` for coordination without external redis binaries).
 - **Architecture**: In-memory write-through repository layer (`AppState`), native SQLite persistence, integrated dashboard UI with Light/Dark themes, Discord OAuth authentication, and direct message embed delivery to Discord channels/threads.
 - **Discord.js Standard**: Strict adherence to **discord.js v14** standards, self-contained commands with subcommands and options colocated directly in their command files (`src/bot/commands/<category>/<command>.ts`), modular shared libraries/modules/utilities in `src/bot/lib/`, builder patterns, and robust event handling.
 
@@ -86,19 +86,15 @@ This section documents active and recently resolved critical issues as required 
   - Channel/thread assignment is **per guild, per category** (`rss`, `reddit`, `freegames`, `streamalerts`), not per individual feed.
   - Manual polling endpoints/buttons removed entirely.
   - Free Games polls **daily** and posts only new giveaways.
-  - **Product expansion (tracked in [#21](https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues/21), Phases 11+):** dashboard **Feeds primary tab** with per-feed sub-pages, **Guild Admin** page + administration commands, **entertainment GIF commands (KLIPY API)**, and **music via NodeLink** with a **Queue Management** dashboard page.
+  - **Product expansion (tracked in [#21](https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues/21), Phases 11+):** dashboard **Feeds primary tab** with per-feed sub-pages, **Guild Admin** page + administration commands, and **entertainment GIF commands (KLIPY API)**.
   - The project/development name is **HELIX Discord Bot** (renamed from HELIX RSS); the dashboard and bot embeds keep using the live Discord application name + icon at runtime.
 
-### 11. External Lavalink v4 Integration & Embedded Node Retirement (Resolved / Retired)
-- **Problem**: Music playback using an embedded in-process Lavalink node required heavy local Java runtimes, bundle bloat, and maintenance fragility across diverse host platforms.
+### 11. Lavalink Music Features Retirement (Resolved / Retired)
+- **Problem**: Music playback using Lavalink required ongoing maintenance overhead, voice connection fragility, and unnecessary complexity.
 - **Resolution**:
-  - Embedded Lavalink server was retired and abandoned completely.
-  - HELIX Discord Bot exclusively connects to external Lavalink v4 servers as a standard WebSocket client.
-  - Native Lavalink v4 WebSocket protocol (`play`, `stop`, `pause`, `seek`, `volume`, `filters`, `destroy`, `voiceUpdate`).
-  - Client-side queue/history/shuffle/loop with `TrackEndEvent` auto-advance.
-  - `VoiceGateway` interface bridges Discord voice state updates → external Lavalink `voiceUpdate` op.
-  - All music config managed in `.env` (`LAVA_ENABLED`, `LAVA_HOST`, `LAVA_PORT`, `LAVA_PASS`, `LAVA_SECURE`).
-  - Documentation updated across `wiki/Music.md`, `wiki/Configuration.md`, `wiki/Deployment-and-Hosting.md`, and `README.md`.
+  - All music playback commands, modules, routes, dashboard views, Lavalink management, and `ws` dependencies were completely removed and retired.
+  - Removed DJ role configuration and music feature flags.
+  - Discord bot and dashboard remain streamlined on feed syndication, alerts, GIFs, and administration.
 
 ### 12. Entertainment GIF Commands — KLIPY Integration (Resolved)
 - **Problem**: No entertainment/reaction GIF commands.
@@ -132,7 +128,7 @@ This section documents active and recently resolved critical issues as required 
 - **Resolution**:
   - Entire agent ecosystem rebuilt (`AGENTS.md`, `.agents/rules/`, `.agents/agents/`, `.agents/skills/`, `.agents/templates/`).
   - Strict Rule 06: mandatory discord.js v14 standards, zero magic numbers. Subcommands and options stay colocated within their respective command files in `src/bot/commands/<category>/<command>.ts` for clear scoping.
-  - `src/bot/lib/` is exclusively dedicated to reusable libraries, modules, and utilities (e.g. `embeds/`, `music/`, `admin/`, `feeds/`).
+  - `src/bot/lib/` is exclusively dedicated to reusable libraries, modules, and utilities (e.g. `embeds/`, `admin/`, `feeds/`).
   - Standardized `EmbedHandler` enforcing strict title/description/field length limits.
 
 ### 16. Professional Modular Dashboard Rebuild (Resolved)
@@ -140,12 +136,11 @@ This section documents active and recently resolved critical issues as required 
 - **Resolution**:
   - Modularized dashboard view components into `src/dashboard/views/dashboard/`:
     - `styles.ts`: Theme-aware CSS stylesheet with modern Discord-style navigation, card borders, pills, badges, and responsive layouts.
-    - `sidebar.ts`: Professional categorized sidebar (**General**, **Feeds & Alerts**, **Bot Features**, **System**) with active server switcher banner and footer links.
+    - `sidebar.ts`: Professional categorized sidebar (**General**, **Feeds & Alerts**, **System**) with active server switcher banner and footer links.
     - `overview.ts`: Executive server overview tab with live stat metrics, delivery channel status, and recent activity logs.
     - `feeds.ts`: News feeds catalog presets, custom RSS/Atom/Scrape creator, topic groupings, and feed setup drawer.
     - `sources.ts`: Specialized views for Reddit streams, Free Games store drops, and Stream Alerts.
-    - `guildadmin.ts`: Guild administration tab for roles (DJ, Admin), feature toggles, and command prefix.
-    - `music.ts`: Music player and queue management tab powered by external Lavalink v4.
+    - `guildadmin.ts`: Guild administration tab for Admin role, feature toggles, and command prefix.
     - `settings.ts`: Host settings view for public/internal endpoints, active theme engine info, and registered team members.
     - `client-script.ts`: Browser client script for routing, feed CRUD, preset toggles, modal dialogs, and real-time updates.
     - `dashboard.ts`: High-level HTML orchestrator combining modular components.

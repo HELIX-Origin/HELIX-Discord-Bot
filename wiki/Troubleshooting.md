@@ -24,39 +24,6 @@ flowchart TD
 
 ---
 
-## 🎵 Lavalink / Music Playback Issues
-
-### 1. Lavalink Node Not Starting (Embedded Mode)
-
-**Symptoms**: `/play` commands fail, logs show `Lavalink connection refused` or WebSocket handshake failures.
-
-**Solutions**:
-1. **Verify Lavalink v4 server is running**: Ensure your external Lavalink v4 instance is reachable on the configured host and port.
-2. **Verify `.env` configuration**: Check that `LAVA_HOST`, `LAVA_PORT`, `LAVA_PASS`, and `LAVA_SECURE` match your server's configuration.
-3. **Firewall / Network access**: Ensure port 2333 (or your custom port) is accessible between the bot and the Lavalink server.
-4. **Password mismatch**: Ensure `LAVA_PASS` matches the password configured in the Lavalink server.
-5. **Secure WebSocket**: If the server uses TLS (`wss://`), ensure `LAVA_SECURE=true`.
-
-### 3. No Audio / Track Stuck
-
-**Symptoms**: Track shows as playing but no audio in voice channel.
-
-**Solutions**:
-1. **Voice gateway**: Ensure bot has `Connect`, `Speak`, `Use Voice Activity` permissions in the voice channel.
-2. **Lavalink version**: Embedded node uses Lavalink v4. External node must be v4 compatible.
-3. **Restart voice connection**: Use `/leave` then `/play` again to re-establish voice WebSocket.
-
-### 4. Java Missing / Wrong Version
-
-**Symptoms**: `java: command not found` or `UnsupportedClassVersionError`.
-
-**Solutions**:
-1. Install Java 21+ (not Java 17 or 8).
-2. Add Java to system PATH.
-3. Verify with `java --version` showing 21.x.
-
----
-
 ## ⚠️ Common Problems & Resolutions
 
 ### 1. Bot is Not Posting Feed Updates to Channel

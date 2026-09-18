@@ -23,7 +23,7 @@ flowchart TD
    - Implements slash commands where option definitions and subcommands are colocated in the command file (`src/bot/commands/<category>/<command>.ts`).
    - Ensures zero command definition exceeds Discord's 4,000 character total limit or 25 options limit.
    - Restricts option choices and autocomplete returns to a maximum of 25 items.
-   - Leverages `src/bot/lib/` for shared libraries, modules, and utilities (e.g. `embeds/`, `music/`, `admin/`, `feeds/`).
+   - Leverages `src/bot/lib/` for shared libraries, modules, and utilities (e.g. `embeds/`, `admin/`, `feeds/`).
 
 2. **Strict Discord.js v14 Conventions (Rule 06)**:
    - Uses `ApplicationCommandOptionType`, `InteractionResponseType`, and `PermissionsBitField`.

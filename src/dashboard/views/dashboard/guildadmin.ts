@@ -10,13 +10,9 @@ export function renderGuildAdminTab(): string {
       <div class="card">
         <div>
           <div class="card-title"><i class="fa-solid fa-user-tag" style="color: var(--primary);"></i> Roles</div>
-          <div class="card-desc">DJ role gates music commands. Admin role can manage feeds and bot configuration.</div>
+          <div class="card-desc">Admin role can manage feeds and bot configuration.</div>
         </div>
         <div class="form-grid" style="margin-top: 0.75rem;">
-          <div class="form-group">
-            <label class="form-label">DJ Role</label>
-            <select id="admin-dj-role"><option value="">-- No DJ role --</option></select>
-          </div>
           <div class="form-group">
             <label class="form-label">Admin Role</label>
             <select id="admin-admin-role"><option value="">-- No Admin role --</option></select>

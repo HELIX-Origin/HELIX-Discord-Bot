@@ -1,10 +1,9 @@
 export interface SidebarOptions {
   isHost: boolean;
-  lavaEnabled: boolean;
 }
 
 export function renderSidebar(options: SidebarOptions): string {
-  const { isHost, lavaEnabled } = options;
+  const { isHost } = options;
 
   return `
     <nav class="sidebar">
@@ -58,19 +57,7 @@ export function renderSidebar(options: SidebarOptions): string {
           </div>
         </div>
 
-        <!-- Section: Bot Features -->
-        ${
-          lavaEnabled
-            ? `<div class="nav-section">
-          <div class="nav-section-title"><i class="fa-solid fa-shapes"></i> Bot Features</div>
-          <div class="tab-list">
-            <button onclick="switchTab('music')" id="tab-btn-music" class="tab-btn">
-              <i class="fa-solid fa-music" style="color: #10b981;"></i> <span>Music Player</span>
-            </button>
-          </div>
-        </div>`
-            : ''
-        }
+
 
         <!-- Section: System -->
         ${

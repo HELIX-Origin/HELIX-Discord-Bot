@@ -2,8 +2,6 @@
 
 HELIX Discord Bot is optimized for self-hosted deployments on **Docker**, **Linux VPS**, and bare metal, with support for manual hosting on container-enabled cloud PaaS platforms (Railway, Render, Fly.io). One-click deployment buttons are intentionally not provided.
 
-> **Music Playback**: Connects to an external Lavalink v4 server. Configure `LAVA_HOST`, `LAVA_PORT`, `LAVA_PASS`, and `LAVA_SECURE` in `.env`.
-
 ---
 
 ## 🐳 Option 1: Docker & Docker Compose (Recommended)
@@ -54,9 +52,9 @@ docker compose logs -f
 For hosting directly on an Ubuntu, Debian, or Rocky Linux server with root or sudo access.
 
 > [!IMPORTANT]
-> **Recommended Directory: `/etc/servers/helix-discord-bot`**  
+> **Recommended Directory: `/opt/helix-discord-bot`**  
 > When self-hosting on a Linux VPS with root access, running the bot directly from `/root` (or a subfolder in `/root`) causes systemd to fail to find or enter the working directory (resulting in `CHDIR` errors / exit code 200) due to strict Linux directory permissions (`0700` on `/root`) and systemd filesystem isolation (`ProtectHome`).  
-> **Always clone and run the bot from a standard system directory such as `/etc/servers/helix-discord-bot`.**
+> **Always clone and run the bot from a standard system directory such as `/opt/helix-discord-bot`.**
 
 ### 1. Install Node.js 22+ & Git
 ```bash
@@ -65,15 +63,14 @@ curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
 sudo apt-get install -y nodejs git
 ```
 
-### 2. Clone to `/etc/servers/helix-discord-bot` and Build
+### 2. Clone to `/opt/helix-discord-bot` and Build
 ```bash
-# Create dedicated server directory
-sudo mkdir -p /etc/servers
-cd /etc/servers
+# Navigate to /opt
+cd /opt
 
 # Clone repository
 sudo git clone https://github.com/HELIX-Origin/HELIX-Discord-Bot.git helix-discord-bot
-cd /etc/servers/helix-discord-bot
+cd /opt/helix-discord-bot
 
 # Install dependencies and compile TypeScript
 npm install
@@ -94,7 +91,7 @@ sudo chmod +x ./scripts/install-service.sh
 sudo ./scripts/install-service.sh
 ```
 
-The installer configures `/etc/systemd/system/helix-discord-bot.service` targeting `/etc/servers/helix-discord-bot`:
+The installer configures `/etc/systemd/system/helix-discord-bot.service` targeting `/opt/helix-discord-bot`:
 
 ```ini
 [Unit]
@@ -107,7 +104,7 @@ Wants=network-online.target
 Type=simple
 User=root
 Group=root
-WorkingDirectory=/etc/servers/helix-discord-bot
+WorkingDirectory=/opt/helix-discord-bot
 ExecStart=/usr/bin/npm start
 Restart=always
 RestartSec=10
@@ -115,7 +112,7 @@ TimeoutStopSec=20
 
 # Environment & capabilities
 Environment=NODE_ENV=production
-EnvironmentFile=-/etc/servers/helix-discord-bot/.env
+EnvironmentFile=-/opt/helix-discord-bot/.env
 AmbientCapabilities=CAP_NET_BIND_SERVICE
 CapabilityBoundingSet=CAP_NET_BIND_SERVICE
 
@@ -123,7 +120,7 @@ CapabilityBoundingSet=CAP_NET_BIND_SERVICE
 NoNewPrivileges=true
 ProtectSystem=full
 ProtectHome=read-only
-ReadWritePaths=/etc/servers/helix-discord-bot/data
+ReadWritePaths=/opt/helix-discord-bot/data
 
 # Logging
 StandardOutput=journal
@@ -155,7 +152,7 @@ If you prefer PM2 for process monitoring:
 sudo npm install -g pm2
 
 # Start compiled application
-cd /etc/servers/helix-discord-bot
+cd /opt/helix-discord-bot
 pm2 start dist/index.js --name "helix-discord-bot"
 
 # Save PM2 process list and configure startup on boot
@@ -174,7 +171,7 @@ sudo apt-get install -y tmux
 tmux new -s helix-discord-bot
 
 # Inside the session, start the server
-cd /etc/servers/helix-discord-bot
+cd /opt/helix-discord-bot
 npm start
 
 # Detach and keep it running in the background:
@@ -268,16 +265,13 @@ C:\caddy\caddy.exe run --config C:\caddy\Caddyfile
 
 HELIX Discord Bot runs natively on Windows with Node.js.
 
-### 1. Install Node.js & Java
+### 1. Install Node.js
 Download and install the **Node.js 22.x LTS** (>=22.9.0 for native `node:sqlite`) from [nodejs.org](https://nodejs.org).
 
-Install **Java 21** (required for embedded Lavalink node) from [Oracle JDK](https://www.oracle.com/java/technologies/downloads/#java21) or [Eclipse Temurin](https://adoptium.net/temurin/releases/?version=21).
-
-Make sure `node`, `npm`, and `java` are available in a new terminal:
+Make sure `node` and `npm` are available in a new terminal:
 ```powershell
 node --version
 npm --version
-java --version
 ```
 
 ### 2. Clone and Build
@@ -338,8 +332,6 @@ For users who prefer managed container hosting instead of maintaining a VPS, HEL
    `https://<your-domain>/api/auth/callback/discord`
 4. **Dynamic Port Binding**:
    HELIX Discord Bot automatically reads `process.env.PORT` injected by cloud providers and binds to `0.0.0.0:$PORT`.
-5. **External Lavalink Music**:
-   For music playback, provide credentials for an external Lavalink v4 server (`LAVA_HOST`, `LAVA_PORT`, `LAVA_PASS`, `LAVA_SECURE=true`).
 
 ---
 

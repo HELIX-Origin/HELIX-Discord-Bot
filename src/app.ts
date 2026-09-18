@@ -6,7 +6,6 @@ import type { FeedWatcher } from './feed/watcher.js';
 import type { RedisCoordinator } from './state/redis.js';
 import type { WebhookRouter } from './dashboard/webhooks/router.js';
 import type { DiscordBot } from './bot/bot.js';
-import type { LavalinkManager } from './bot/music/lavalink.js';
 import type { Scheduler } from './scheduler/scheduler.js';
 
 export interface AppDeps {
@@ -19,7 +18,6 @@ export interface AppDeps {
   bot?: DiscordBot | null;
   scheduler?: Scheduler | null;
   webhookRouter?: WebhookRouter;
-  lavaManager?: LavalinkManager | null;
 }
 
 /**

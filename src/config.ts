@@ -8,16 +8,8 @@ export interface FeatureFlags {
   threadsEnabled: boolean;
   gifsEnabled: boolean;
   administrationEnabled: boolean;
-  lavaEnabled: boolean;
   dashboardEnabled: boolean;
   adminPanelEnabled: boolean;
-}
-
-export interface LavalinkConfig {
-  host: string;
-  port: number;
-  secure: boolean;
-  password: string;
 }
 
 export interface AppConfig {
@@ -53,7 +45,6 @@ export interface AppConfig {
   twitchClientId: string | null;
   twitchClientSecret: string | null;
   features: FeatureFlags;
-  lava: LavalinkConfig;
   klipyApiKey: string | null;
 }
 
@@ -164,7 +155,7 @@ export function defaultConfig(): AppConfig {
   const userAgent =
     process.env['USER_AGENT']?.trim() ||
     process.env['DISCORD_USER_AGENT']?.trim() ||
-    (repoUrl ? `DiscordBot (${repoUrl}, 0.4.1)` : 'DiscordBot (0.4.1)');
+    (repoUrl ? `DiscordBot (${repoUrl}, 0.5.0)` : 'DiscordBot (0.5.0)');
 
   const rawTheme =
     process.env['DASHBOARD_THEME']?.trim().toLowerCase() ||
@@ -204,18 +195,8 @@ export function defaultConfig(): AppConfig {
     threadsEnabled: parseEnvFlag(process.env['THREADS_ENABLED'], true),
     gifsEnabled: parseEnvFlag(process.env['GIFS_ENABLED'], true),
     administrationEnabled: parseEnvFlag(process.env['ADMINISTRATION_ENABLED'], true),
-    lavaEnabled: parseEnvFlag(process.env['LAVA_ENABLED'], true),
     dashboardEnabled: parseEnvFlag(process.env['DASHBOARD_ENABLED'], true),
     adminPanelEnabled: parseEnvFlag(process.env['ADMIN_PANEL_ENABLED'], true),
-  };
-
-  // Lavalink node. The bot always acts as a client and connects to your own
-  // external Lavalink v4 node via LAVA_HOST/PORT/SECURE/PASS.
-  const lava: LavalinkConfig = {
-    host: process.env['LAVA_HOST']?.trim() || '127.0.0.1',
-    port: parseOptionalInt(process.env['LAVA_PORT'], 2333),
-    secure: parseEnvFlag(process.env['LAVA_SECURE'], false),
-    password: process.env['LAVA_PASS']?.trim() || 'youshallnotpass',
   };
 
   return {
@@ -251,7 +232,6 @@ export function defaultConfig(): AppConfig {
     twitchClientId,
     twitchClientSecret,
     features,
-    lava,
     klipyApiKey: process.env['KLIPY_API_KEY']?.trim() || null,
   };
 }
@@ -273,15 +253,6 @@ function parseLogLevel(raw: string | undefined): LogLevel {
 
 function parsePositiveInt(raw: string | undefined, fallback: number): number {
   if (raw === undefined) return fallback;
-  const value = Number(raw);
-  if (!Number.isInteger(value) || value <= 0) {
-    throw new Error(`Invalid integer value: ${raw}`);
-  }
-  return value;
-}
-
-function parseOptionalInt(raw: string | undefined, fallback: number): number {
-  if (raw === undefined || raw === '') return fallback;
   const value = Number(raw);
   if (!Number.isInteger(value) || value <= 0) {
     throw new Error(`Invalid integer value: ${raw}`);

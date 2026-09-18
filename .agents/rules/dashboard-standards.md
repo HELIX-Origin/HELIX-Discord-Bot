@@ -8,7 +8,7 @@
 
 ## 1. Architectural Philosophy: Zero-Frontend-Dependency SSR
 
-The HELIX management dashboard provides an integrated, web-based management console for configuring feeds, alert targets, music queues, and guild administrative settings. To preserve portability, low memory footprint, and zero operational maintenance overhead:
+The HELIX management dashboard provides an integrated, web-based management console for configuring feeds, alert targets, and guild administrative settings. To preserve portability, low memory footprint, and zero operational maintenance overhead:
 
 1. **Zero External Frontend Dependencies**:
    - The dashboard is built strictly with **vanilla TypeScript ESM** running on native Node.js `node:http`.
@@ -49,7 +49,6 @@ src/dashboard/
 │   ├── discord.ts                  # Discord channel discovery & bot status
 │   ├── feeds.ts                    # Feed CRUD, preset enablement, and topic grouping
 │   ├── guilds.ts                   # Guild management & permission verification
-│   ├── music.ts                    # Music queue viewer & playback control
 │   ├── oauth.ts                    # Discord OAuth2 login, callback, and error routes
 │   ├── settings.ts                 # Server settings, feature toggles, and diagnostics
 │   ├── shared.ts                   # requireAuth, requireOwner, and validation helpers
@@ -65,7 +64,6 @@ src/dashboard/
 │   │   ├── feeds.ts                # News catalog & custom RSS/Atom/Scrape forms
 │   │   ├── sources.ts              # Reddit, Free Games, and Stream Alerts tab views
 │   │   ├── guildadmin.ts           # Roles, feature flags, and command prefix
-│   │   ├── music.ts                # External Lavalink v4 music player & queue viewer
 │   │   ├── settings.ts             # System endpoints & team member viewer
 │   │   └── client-script.ts        # Modular client-side browser logic & routing
 │   ├── footer.ts                   # Standardized footer component

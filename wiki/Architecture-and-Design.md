@@ -56,10 +56,10 @@ flowchart TB
 
 ### 1. Web Dashboard & API (`src/dashboard/`)
 - Built with **native Node.js `http`** and a zero-dependency router, serving a responsive, zero-frontend-dependency Vanilla CSS & JavaScript UI.
-- **Modular View Components**: Deconstructed into domain-focused view modules in `src/dashboard/views/dashboard/` (`sidebar.ts`, `overview.ts`, `feeds.ts`, `sources.ts`, `guildadmin.ts`, `music.ts`, `settings.ts`, `styles.ts`, `client-script.ts`).
-- **Discord-Style Categorized Navigation**: Section-grouped sidebar navigation (**General**, **Feeds & Alerts**, **Bot Features**, **System**) with an active server switcher banner.
+- **Modular View Components**: Deconstructed into domain-focused view modules in `src/dashboard/views/dashboard/` (`sidebar.ts`, `overview.ts`, `feeds.ts`, `sources.ts`, `guildadmin.ts`, `settings.ts`, `styles.ts`, `client-script.ts`).
+- **Discord-Style Categorized Navigation**: Section-grouped sidebar navigation (**General**, **Feeds & Alerts**, **System**) with an active server switcher banner.
 - **Theme System**: Env-driven themes (`glassmorphism`, `dark`, `light`, `cyberpunk`, `dracula`, `nord`, `emerald`) with 11 accent color schemes and a toggleable landing page.
-- **REST Endpoints**: CRUD operations for feeds, guild channel inspection, role listing, activity logs (Developer Tools), and music queue management.
+- **REST Endpoints**: CRUD operations for feeds, guild channel inspection, role listing, and activity logs (Developer Tools).
 
 ### 2. Background Feed Watcher (`src/feed/watcher.ts`)
 - Operates on a continuous polling loop with per-user configurable intervals (1, 10, 30 or 60 minutes) persisted in SQLite.

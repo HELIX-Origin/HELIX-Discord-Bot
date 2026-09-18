@@ -164,13 +164,13 @@ services:
 
 For 24/7 self-hosting on a Linux VPS, install HELIX Discord Bot as a managed background systemd service:
 
-> **Important for Root Users:** When running on a VPS with root access, do not host the bot directly inside `/root` (or a subfolder within `/root`). Systemd service sandboxing (`ProtectHome`) and restrictive root permissions (`0700`) will cause systemd to fail to find or enter the directory. Always clone to a standard directory such as `/etc/servers/helix-discord-bot`.
+> **Important for Root Users:** When running on a VPS with root access, do not host the bot directly inside `/root` (or a subfolder within `/root`). Systemd service sandboxing (`ProtectHome`) and restrictive root permissions (`0700`) will cause systemd to fail to find or enter the directory. Always clone to a standard directory such as `/opt/helix-discord-bot`.
 
 ```bash
 # Clone to recommended server location
-sudo mkdir -p /etc/servers && cd /etc/servers
+cd /opt
 sudo git clone https://github.com/HELIX-Origin/HELIX-Discord-Bot.git helix-discord-bot
-cd /etc/servers/helix-discord-bot
+cd /opt/helix-discord-bot
 
 # Build and configure
 npm install && npm run build

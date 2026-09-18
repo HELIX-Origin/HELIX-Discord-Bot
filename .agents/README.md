@@ -13,7 +13,7 @@ This directory contains the operational specifications, mandatory engineering ru
 |---|---|---|---|
 | [**`agents/`**](agents/) | **Agent Roles Catalog** | Specialized engineering agent personas, responsibilities, and workflows | [Browse Agents](agents/README.md) |
 | [**`rules/`**](rules/) | **Mandatory Rules** | Non-negotiable safety, architecture, discord.js v14, and code style rules (Rules 00–07) | [Browse Rules](rules/README.md) |
-| [**`skills/`**](skills/) | **Domain Skills** | In-depth technical guides for Discord.js, feeds, Lavalink music, and SQLite state | [Browse Skills](skills/README.md) |
+| [**`skills/`**](skills/) | **Domain Skills** | In-depth technical guides for Discord.js, feeds, and SQLite state | [Browse Skills](skills/README.md) |
 | [**`templates/`**](templates/) | **Code & Workflow Templates** | Production-ready blueprints for commands, subcommands, events, embeds, and GitHub roadmaps | [Browse Templates](templates/README.md) |
 
 ---

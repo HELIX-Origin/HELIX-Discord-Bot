@@ -70,30 +70,6 @@ export function renderAdminHtml(deps: AppDeps, userId: number | null): string {
       </div>
     </div>
 
-    <!-- Lavalink Status -->
-    <div class="card">
-      <div class="card-header">
-        <div class="card-title"><i class="fa-solid fa-music" style="color: var(--discord);"></i> Lavalink Status</div>
-        <button onclick="loadLavalinkStatus()" class="btn btn-ghost btn-sm"><i class="fa-solid fa-rotate-right"></i> Refresh</button>
-      </div>
-      <div id="lavalink-status" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-        <div class="stat-card"><div class="stat-label">Status</div><div class="stat-value" id="lavalink-status-val">Loading...</div></div>
-        <div class="stat-card"><div class="stat-label">Connected</div><div class="stat-value" id="lavalink-connected">-</div></div>
-        <div class="stat-card"><div class="stat-label">Players</div><div class="stat-value" id="lavalink-players">-</div></div>
-        <div class="stat-card"><div class="stat-label">Uptime</div><div class="stat-value" id="lavalink-uptime">-</div></div>
-      </div>
-      ${
-        features.lavaEnabled
-          ? `
-      <div style="margin-top: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
-        <button onclick="authorizeYouTube()" class="btn btn-primary"><i class="fa-brands fa-youtube"></i> Authorize YouTube</button>
-        <button onclick="loadLavalinkStatus()" class="btn btn-ghost btn-sm"><i class="fa-solid fa-rotate-right"></i> Refresh Status</button>
-      </div>
-      `
-          : '<p style="color: var(--text-muted); margin-top: 1rem;">Lavalink features disabled (LAVA_ENABLED=false)</p>'
-      }
-    </div>
-
     <!-- Developer Actions -->
     <div class="card">
       <div class="card-header">
@@ -155,37 +131,6 @@ export function renderAdminHtml(deps: AppDeps, userId: number | null): string {
       } catch {}
     }
 
-    async function loadLavalinkStatus() {
-      const container = document.getElementById('lavalink-status');
-      if (!container) return;
-      try {
-        const res = await fetch('/api/admin/lavalink/status');
-        if (!res.ok) { container.innerHTML = '<div class="stat-card"><div class="stat-label">Status</div><div class="stat-value">Unavailable</div></div>'; return; }
-        const stats = await res.json();
-        container.innerHTML = '<div class="stat-card"><div class="stat-label">Status</div><div class="stat-value" style="color:' + (stats.connected ? '#10b981' : '#ef4444') + ';">' + (stats.connected ? 'Connected' : 'Disconnected') + '</div></div>' +
-          '<div class="stat-card"><div class="stat-label">Players</div><div class="stat-value">' + (stats.players ?? '-') + '</div></div>' +
-          '<div class="stat-card"><div class="stat-label">Uptime</div><div class="stat-value">' + (stats.uptime ? formatUptime(stats.uptime) : '-') + '</div></div>';
-      } catch {
-        container.innerHTML = '<div class="stat-card"><div class="stat-label">Status</div><div class="stat-value">Error</div></div>';
-      }
-    }
-
-    async function authorizeYouTube() {
-      if (!confirm('This will open the YouTube OAuth device authorization flow. Continue?')) return;
-      try {
-        const res = await fetch('/api/admin/lavalink/authorize-youtube', { method: 'POST' });
-        const data = await res.json();
-        if (res.ok) {
-          alert('Authorization started! Check the console for the verification URL and user code.');
-          loadLavalinkStatus();
-        } else {
-          alert('Failed: ' + (data.error || 'Unknown error'));
-        }
-      } catch (err) {
-        alert('Error: ' + err.message);
-      }
-    }
-
     function formatUptime(ms) {
       const s = Math.floor(ms / 1000);
       const d = Math.floor(s / 86400);
@@ -243,7 +188,6 @@ export function renderAdminHtml(deps: AppDeps, userId: number | null): string {
     // Initialize
     loadStats();
     loadLogs();
-    if (document.getElementById('lavalink-status')) loadLavalinkStatus();
   </script>
 </body>
 </html>`;

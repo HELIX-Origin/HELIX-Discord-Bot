@@ -36,9 +36,8 @@ Guidelines for clear, human-readable commit messages and PR titles with fitting 
 
 Target the exact subsystem:
 
-- **Commands & Options**: `command`, `options`, `admin`, `music`, `feeds`, `entertainment`, `utility`, `events`
+- **Commands & Options**: `command`, `options`, `admin`, `feeds`, `entertainment`, `utility`, `events`
 - **Feed Syndication**: `feed`, `forum`, `threads`, `rss`, `reddit`, `freegames`, `streamalerts`
-- **Music Playback**: `lavalink`, `voice`, `queue`, `player`
 - **State & Database**: `db`, `schema`, `state`, `repo`, `sqlite`
 - **Dashboard & API**: `dashboard`, `auth`, `oauth`, `http`, `routes`
 - **Meta & Workflow**: `agents`, `rules`, `wiki`, `docs`, `config`, `deps`

@@ -5,7 +5,6 @@
 - [🎮 Free Games & Giveaways](Free-Games-Feeds.md)
 - [🤖 Reddit Feeds & Pure Image Mode](Reddit-Feeds.md)
 - [🤖 Discord Bot & Commands](Discord-Bot.md)
-- [🎵 Music & Lavalink](Music.md)
 - [😂 Entertainment & GIF Commands](Entertainment.md)
 - [🛡️ Guild Administration](Administration.md)
 - [🔌 REST API Reference](API-Reference.md)

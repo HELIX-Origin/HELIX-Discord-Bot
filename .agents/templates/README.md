@@ -43,11 +43,9 @@ src/bot/
 │   ├── entertainment/     # e.g., gif.ts, slap.ts, hug.ts
 │   ├── feeds/             # e.g., rss.ts, youtube.ts, twitch.ts, free-games.ts, reddit.ts
 │   ├── mod/               # e.g., kick.ts, ban.ts, warn.ts, purge.ts, lock.ts
-│   ├── music/             # e.g., play.ts, pause.ts, queue.ts, volume.ts
 │   └── utility/           # e.g., about.ts, help.ts, stats.ts, ping.ts
 └── lib/                   # Shared reusable libraries, modules, and utilities
     ├── embeds/            # EmbedHandler builder, limits, variants, responses
-    ├── music/             # Audio formatting, track progress, voice helpers
     ├── admin/             # Permission helpers, role hierarchy, modlog
     └── feeds/             # Feed formatting and delivery utilities
 ```

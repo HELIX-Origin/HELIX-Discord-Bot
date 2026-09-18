@@ -21,18 +21,7 @@ This guide covers local development workflows, debugging techniques, TypeScript 
 | `npm run check` | Executes `tsc --noEmit` to validate all TypeScript types and exports. |
 | `npm run lint` | Runs ESLint across the codebase for static code analysis. |
 | `npm run format` | Runs Prettier to automatically format code according to standards. |
-| `npm test` | No in-repo test suite. Integration tests are maintained in a dedicated Vitest repository. |
-
----
-
-## 🎵 Lavalink Verification (External Node)
-
-When developing with music playback enabled (`LAVA_ENABLED=true`):
-
-1. Start your external Lavalink v4 server instance.
-2. Verify connection settings in `.env` (`LAVA_HOST`, `LAVA_PORT`, `LAVA_PASS`, `LAVA_SECURE`).
-3. Run `npm start` (or `npm run dev`) — the bot connects to the Lavalink node via WebSocket using the `ws` client with authentication headers.
-4. Verify connection by observing log output: `Connected to Lavalink v4 node at <host>:<port>`.
+| `npm test` | Runs the Vitest test suite. |
 
 ---
 

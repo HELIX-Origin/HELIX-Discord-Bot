@@ -10,9 +10,9 @@ This skill provides deep operational reference for engineering Discord bots with
 ### Why Colocate Options in Command Files?
 - **Self-Contained & Understandable**: Keeping option definitions, choices, and subcommands in the command file (`src/bot/commands/<category>/<command>.ts`) provides instant visibility of the schema alongside the execution logic.
 - **Discord API Limits**: Max 25 options per command/subcommand, max 25 choices per option, 4,000 characters total command definition budget.
-- **Shared Libs in `src/bot/lib/`**: The `lib/` directory is reserved for reusable modules, helpers, and utilities (such as `embeds/`, `music/`, `admin/`, `feeds/`), rather than individual option files.
+- **Shared Libs in `src/bot/lib/`**: The `lib/` directory is reserved for reusable modules, helpers, and utilities (such as `embeds/`, `admin/`, `feeds/`), rather than individual option files.
 
-### Command Structure Example (`src/bot/commands/music/play.ts`):
+### Command Structure Example (`src/bot/commands/entertainment/gif.ts`):
 ```ts
 import {
   ApplicationCommandOptionType,
@@ -25,36 +25,36 @@ import type { DiscordRestClient } from '../../rest.js';
 import { EmbedHandler } from '../../lib/embeds/builder.js';
 import { registerCommandMetadata } from '../../handlers/registry.js';
 
-export const playCommandDef: ApplicationCommand = {
-  name: 'play',
-  description: 'Play a track or playlist from YouTube, Spotify, or SoundCloud',
-  dm_permission: false,
+export const gifCommandDef: ApplicationCommand = {
+  name: 'gif',
+  description: 'Search for and display an animated GIF from KLIPY',
+  dm_permission: true,
   options: [
     {
-      name: 'query',
-      description: 'Track title, URL, or playlist link',
+      name: 'category',
+      description: 'The reaction category or tag',
       type: ApplicationCommandOptionType.STRING,
-      required: true,
+      required: false,
       autocomplete: true,
     },
   ],
 };
 
-export async function handlePlayCommand(
+export async function handleGifCommand(
   interaction: DiscordInteraction,
   deps: AppDeps,
   _rest: DiscordRestClient,
 ): Promise<InteractionResponse> {
   // Command execution logic using deps and lib/ utilities...
-  return EmbedHandler.for(deps).success('Queued Track', 'Added to queue.').respond();
+  return EmbedHandler.for(deps).title('GIF Result').respond();
 }
 
 registerCommandMetadata({
-  name: 'play',
-  description: 'Play a track or playlist',
-  category: 'music',
-  emoji: '▶️',
-  usage: '/play <query>',
+  name: 'gif',
+  description: 'Search for and display an animated GIF',
+  category: 'entertainment',
+  emoji: '🎬',
+  usage: '/gif [category]',
 });
 ```
 
@@ -65,7 +65,6 @@ registerCommandMetadata({
 Libraries, modules, and utilities used across multiple commands and events reside in `src/bot/lib/`:
 
 - **`lib/embeds/`**: `EmbedHandler` fluent builder and limit clampers (used by commands, event notifications, and system alerts).
-- **`lib/music/`**: Audio formatting, progress bars, and voice state helpers (used by music commands and `voiceStateUpdate` events).
 - **`lib/admin/`**: Permission checks, role hierarchy validation, and mod logs (used by admin commands and guild member/role events).
 - **`lib/feeds/`**: Feed formatting, pagination, and syndication helpers (used by feed commands and scheduled watchers).
 
@@ -78,7 +77,7 @@ Libraries, modules, and utilities used across multiple commands and events resid
    - `type: 4` ➔ `InteractionResponseType.ChannelMessageWithSource`
 2. **Ephemeral vs Public Responses**:
    - Administrative errors, validation failures, and sensitive diagnostics must use `.respond(true)` (ephemeral).
-   - Public updates, music player cards, and syndication posts use `.respond()`.
+   - Public updates, entertainment responses, and syndication posts use `.respond()`.
 3. **Embed Construction**:
    - Always use `EmbedHandler.for(deps)` which automatically applies the bot's application branding, icon, and colors.
    - Text fields are auto-clamped by `limits.ts` to prevent Discord 400 Bad Request errors.

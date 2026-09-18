@@ -10,7 +10,7 @@
 
 To guarantee maximum readability, maintainability, and clean domain isolation:
 1. **Self-Contained Commands**: Subcommands and options MUST be colocated directly within their respective command files (`src/bot/commands/<category>/<command>.ts`). This keeps the schema, option choices, autocomplete definitions, and execution logic together.
-2. **Dedicated Lib Directory (`src/bot/lib/`)**: The `lib/` directory is reserved exclusively for reusable libraries, modules, and utilities (such as `embeds/`, `music/`, `admin/`, `feeds/`, and common helpers) used by **both commands and events**.
+2. **Dedicated Lib Directory (`src/bot/lib/`)**: The `lib/` directory is reserved exclusively for reusable libraries, modules, and utilities (such as `embeds/`, `admin/`, `feeds/`, and common helpers) used by **both commands and events**.
 3. **Dynamic Methods Over Hardcoding**: Prefer dynamic registration, automated discovery, dynamic option generation, and registry queries over rigid static mappings and hardcoded command lists.
 
 ### Discord API Limits (Hard Invariants)
@@ -43,22 +43,16 @@ Command execution code, event handlers, and shared libraries follow this strict 
 src/bot/
 ├── bot.ts                          # DiscordBot class (Client lifecycle, Gateway, voice state)
 ├── rest.ts                         # DiscordRestClient (REST API client, direct Discord HTTP)
-├── commands/                       # Slash commands with colocated options & subcommands
-│   ├── admin/                      # Moderation, roles, channels, tickets, welcome
-│   │   ├── set.ts                  # /set (options and subcommands defined in-file)
-│   │   ├── ticket.ts               # /ticket
+├── commands/                       # Self-contained command files (colocated options)
+│   ├── admin/                      # Guild administration commands
+│   │   ├── set.ts                  # /set (roles, prefix, feature toggles)
+│   │   ├── kick.ts                 # /kick
+│   │   ├── ban.ts                  # /ban
 │   │   └── welcome.ts              # /welcome
 │   ├── entertainment/              # Reaction GIFs and action commands
 │   │   └── gif.ts                  # /gif search & action commands
 │   ├── feeds/                      # RSS/Atom/Reddit/Free Games commands
 │   │   └── feed.ts                 # /feed (actions and options defined in-file)
-│   ├── music/                      # Music playback commands (one file per command)
-│   │   ├── play.ts                 # /play
-│   │   ├── pause.ts                # /pause
-│   │   ├── skip.ts                 # /skip
-│   │   ├── queue.ts                # /queue
-│   │   ├── volume.ts               # /volume
-│   │   └── ...                     # Individual music commands
 │   ├── utility/                    # System & informational commands
 │   │   ├── about.ts                # /about
 │   │   ├── help.ts                 # /help
@@ -70,7 +64,7 @@ src/bot/
 │   ├── interactionCreate.ts        # 'interactionCreate' (slash, autocomplete, buttons)
 │   ├── guildCreate.ts              # 'guildCreate' - uses lib/ for guild initialization
 │   ├── guildDelete.ts              # 'guildDelete'
-│   └── voiceStateUpdate.ts         # 'voiceStateUpdate' - uses lib/music for voice gateway
+│   └── voiceStateUpdate.ts         # 'voiceStateUpdate'
 ├── handlers/                       # Core routing and dispatch
 │   ├── commands.ts                 # Dynamic command router & dispatch
 │   ├── events.ts                   # Event registrar (binds client.on / client.once)
@@ -82,9 +76,6 @@ src/bot/
 │   │   ├── responses.ts            # EPHEMERAL, embedResponse, embedMessage
 │   │   ├── variants.ts             # EmbedVariant styles, colors, and emojis
 │   │   └── index.ts                # Barrel export for embeds
-│   ├── music/                      # Music libraries & formatting
-│   │   ├── format.ts               # Track duration & progress bar formatting
-│   │   └── voice.ts                # Voice channel validation & gateway helpers
 │   ├── admin/                      # Moderation & permission utilities
 │   │   ├── permissions.ts          # Native permission checks & role hierarchy
 │   │   └── modlog.ts               # Mod log embed dispatch
@@ -100,7 +91,7 @@ src/bot/
 ## 3. Command File Standard (`src/bot/commands/`)
 
 ### Rules for Command Files:
-1. **One command per file**: Grouped into domain categories (`admin/`, `entertainment/`, `feeds/`, `music/`, `utility/`).
+1. **One command per file**: Grouped into domain categories (`admin/`, `entertainment/`, `feeds/`, `utility/`).
 2. **Colocated Definition, Options, and Handlers**:
    - Subcommands and options are declared directly in the command file, ensuring complete visibility of options, choices, and types.
    - `export const <name>CommandDef: ApplicationCommand = { ... }`.
@@ -119,8 +110,7 @@ src/bot/
 The `src/bot/lib/` directory contains reusable modules, helpers, and utilities shared across **both commands and events**:
 
 1. **`lib/embeds/`**: The fluent `EmbedHandler` builder, response factories, and limits clamping (used by commands and event dispatchers).
-2. **`lib/music/`**: Audio formatting, progress bar generation, and voice channel validation (used by music commands and `voiceStateUpdate` events).
-3. **`lib/admin/`**: Permission bitfield utilities, role hierarchy comparison, and mod-log dispatch (used by moderation commands and guild audit events).
-4. **`lib/feeds/`**: Feed formatting and channel dispatch utilities (used by `/feed` commands and background feed watchers).
+2. **`lib/admin/`**: Permission bitfield utilities, role hierarchy comparison, and mod-log dispatch (used by moderation commands and guild audit events).
+3. **`lib/feeds/`**: Feed formatting and channel dispatch utilities (used by `/feed` commands and background feed watchers).
 
 Both commands and events import from `src/bot/lib/<module>/` to reuse logic without duplicating code.

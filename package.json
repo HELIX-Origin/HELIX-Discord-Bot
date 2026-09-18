@@ -1,7 +1,7 @@
 {
   "name": "helix-discord-bot",
-  "version": "0.4.2",
-  "description": "Self-hosted Discord bot for RSS/Atom/Reddit/Free Games feed syndication, YouTube/Twitch live alerts, Lavalink music playback, KLIPY GIF entertainment, and guild administration. Built entirely in TypeScript ESM with zero frontend dependencies (native http, node:sqlite, built-in web dashboard, Discord bot, and API). Posts directly to Discord channels via REST — no webhooks required.",
+  "version": "0.5.0",
+  "description": "Self-hosted Discord bot for RSS/Atom/Reddit/Free Games feed syndication, YouTube/Twitch live alerts, KLIPY GIF entertainment, and guild administration. Built entirely in TypeScript ESM with zero frontend dependencies (native http, node:sqlite, built-in web dashboard, Discord bot, and API). Posts directly to Discord channels via REST — no webhooks required.",
   "type": "module",
   "main": "dist/index.js",
   "license": "BSD-3-Clause",
@@ -21,15 +21,11 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "lavalink": "node scripts/lavalink.js start",
-    "lavalink:download": "node scripts/lavalink.js download",
-    "lavalink:start": "node scripts/lavalink.js start",
     "check": "npm run typecheck && npm run typecheck:test && npm run format:check && npm run lint && npm run test"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@types/node": "^26.5.0",
-    "@types/ws": "^8.18.1",
     "@vitest/coverage-v8": "^5.0.1",
     "eslint": "^10.10.0",
     "prettier": "^3.9.6",
@@ -39,7 +35,6 @@
   },
   "dependencies": {
     "discord.js": "^14.18.0",
-    "ioredis-mock": "^8.13.1",
-    "ws": "^8.18.0"
+    "ioredis-mock": "^8.13.1"
   }
 }

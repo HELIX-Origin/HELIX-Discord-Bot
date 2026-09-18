@@ -6,21 +6,8 @@ export async function handleVoiceStateUpdate(
   oldState: VoiceState,
   newState: VoiceState,
   bot: DiscordBot,
-  deps: AppDeps,
+  _deps: AppDeps,
 ): Promise<void> {
   const logger = bot['logger'];
   logger.debug('Voice state updated', { oldState, newState });
-
-  const manager = deps.lavaManager;
-  if (!manager) return;
-
-  // Lavalink expects the raw voice state payload:
-  // { guildId, channelId (nullable), sessionId, selfDeaf, selfMute }
-  manager.handleVoiceStateUpdate({
-    guildId: newState.guild.id,
-    channelId: newState.channelId,
-    sessionId: newState.sessionId ?? null,
-    selfDeaf: newState.selfDeaf,
-    selfMute: newState.selfMute,
-  });
 }

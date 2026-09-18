@@ -7,7 +7,6 @@ import { renderOverviewTab } from './dashboard/overview.js';
 import { renderFeedsTab } from './dashboard/feeds.js';
 import { renderSourcesTabs } from './dashboard/sources.js';
 import { renderGuildAdminTab } from './dashboard/guildadmin.js';
-import { renderMusicTab } from './dashboard/music.js';
 import { renderSettingsTab } from './dashboard/settings.js';
 import { renderClientScript } from './dashboard/client-script.js';
 
@@ -146,7 +145,7 @@ export function renderDashboardHtml(
     <div id="guild-selection-view" class="tab-pane active" style="width: 100%;">
       <div>
         <div class="section-title"><i class="fa-solid fa-server" style="color: var(--primary);"></i> Select a Discord Server</div>
-        <div class="section-desc">Choose a server to manage feeds, music playback, roles, and automated delivery targets.</div>
+        <div class="section-desc">Choose a server to manage feeds, roles, and automated delivery targets.</div>
       </div>
       <div id="guild-grid" class="guild-grid">
         <div class="empty-state">Loading servers...</div>
@@ -161,7 +160,7 @@ export function renderDashboardHtml(
     <!-- Active Server Dashboard View -->
     <div id="dashboard-view" class="tab-pane" style="width: 100%; flex-direction: row;">
       <!-- Categorized Sidebar Navigation -->
-      ${renderSidebar({ isHost, lavaEnabled: deps.config.features.lavaEnabled })}
+      ${renderSidebar({ isHost })}
 
       <!-- Main Content Tabs -->
       <main>
@@ -169,7 +168,6 @@ export function renderDashboardHtml(
         ${renderGuildAdminTab()}
         ${renderFeedsTab()}
         ${renderSourcesTabs()}
-        ${deps.config.features.lavaEnabled ? renderMusicTab() : ''}
         ${
           isHost
             ? renderSettingsTab({

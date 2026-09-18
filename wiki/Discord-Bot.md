@@ -15,19 +15,6 @@ All commands register through Discord's native interaction model and use ephemer
 | `/twitch` | `add`, `list`, `remove`, `toggle` | `Manage Channels` | Manage Twitch livestream alerts. |
 | `/free-games` | `enable`, `status`, `disable` | `Manage Channels` | Manage weekly free game notifications (Epic, Steam, GOG, etc.). |
 | `/reddit` | `add`, `list`, `remove`, `toggle` | `Manage Channels` | Manage Reddit subreddit image and news feeds. |
-| `/play` | `query: <string>` | Everyone | Play music from YouTube, Spotify, SoundCloud, Apple Music, Deezer. |
-| `/queue` | *None* | Everyone | Display the current music queue. |
-| `/skip` | *None* | Everyone | Skip the current track. |
-| `/previous` | *None* | Everyone | Play the previous track. |
-| `/shuffle` | *None* | Everyone | Shuffle the queue. |
-| `/loop` | `mode: off\|track\|queue` | Everyone | Set loop mode. |
-| `/volume` | `level: <number>` | Everyone | Set playback volume (0-100). |
-| `/seek` | `position: <string>` | Everyone | Seek to position (e.g., `1:30`). |
-| `/nowplaying` | *None* | Everyone | Show currently playing track. |
-| `/pause` | *None* | Everyone | Pause playback. |
-| `/resume` | *None* | Everyone | Resume playback. |
-| `/stop` | *None* | Everyone | Stop playback and clear queue. |
-| `/leave` | *None* | Everyone | Disconnect from voice channel. |
 | `/gif` | `category: <string?>` | Everyone | Get a random GIF (autocomplete: anime, jojo, waifu, slap, etc.). |
 | `/slap` | `user: <user?>` | Everyone | Slap a user (or random GIF). |
 | `/hug` | `user: <user?>` | Everyone | Hug a user. |

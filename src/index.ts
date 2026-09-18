@@ -9,7 +9,6 @@ import { createRedisCoordinator } from './state/redis.js';
 import { createLogger } from './util/logger.js';
 import { clearPorts } from './util/ports.js';
 import { DiscordBot } from './bot/bot.js';
-import { LavalinkManager } from './bot/music/lavalink.js';
 import { WebhookRouter } from './dashboard/webhooks/router.js';
 import { fileURLToPath } from 'node:url';
 import { resolve } from 'node:path';
@@ -40,30 +39,9 @@ export async function main(): Promise<void> {
     config.logLevel,
   );
 
-  // Lavalink music manager. Instantiated whenever the
-  // music feature is enabled so both slash commands and the dashboard queue
-  // page share the same in-memory player state. The bot connects to your own
-  // external Lavalink v4 node (LAVA_HOST/PORT/SECURE/PASS); if it is not yet
-  // reachable the manager keeps retrying in the background.
-  let lavaManager: LavalinkManager | null = null;
-
-  if (config.features.lavaEnabled) {
-    logger.info('Connecting to external Lavalink server', {
-      host: config.lava.host,
-      port: config.lava.port,
-      secure: config.lava.secure,
-    });
-
-    const manager = new LavalinkManager(config.lava, logger);
-    lavaManager = manager;
-    manager.connectWS().catch((err) => {
-      logger.error('Failed to connect to Lavalink server (will keep retrying)', { error: (err as Error).message });
-    });
-  }
-
   // 4. Create Discord Bot as primary application process
   const bot = new DiscordBot(
-    { config, db, repo, oauth, feeds, redis, scheduler, webhookRouter, lavaManager },
+    { config, db, repo, oauth, feeds, redis, scheduler, webhookRouter },
     {
       token: config.botToken || '',
       clientId: config.clientId,
@@ -76,13 +54,6 @@ export async function main(): Promise<void> {
   feeds.setBot(bot);
   webhookRouter.setBot(bot);
   webhookRouter.subscribeToAllFeeds();
-
-  if (lavaManager) {
-    lavaManager.setVoiceConnector({
-      joinChannel: (guildId, channelId, deaf, mute) => bot.joinVoiceChannel(guildId, channelId, deaf, mute),
-      leaveChannel: (guildId) => bot.leaveVoiceChannel(guildId),
-    });
-  }
 
   // 4b. Wire optional per-guild forum thread delivery (one thread per feed).
   const threads = new FeedThreadManager(repo, bot, config, config.logLevel);

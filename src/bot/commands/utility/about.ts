@@ -90,7 +90,7 @@ async function handleBotSubcommand(deps: AppDeps): Promise<InteractionResponse> 
   const h = EmbedHandler.for(deps).primary();
 
   h.title('About', '⚡').description(
-    `**${deps.bot?.getAppName() ?? 'HELIX Discord Bot'}** is a feature-rich, multipurpose Discord bot for RSS/Atom feeds, live stream alerts, free game notifications, music playback, and guild administration.`,
+    `**${deps.bot?.getAppName() ?? 'HELIX Discord Bot'}** is a feature-rich, multipurpose Discord bot for RSS/Atom feeds, live stream alerts, free game notifications, and guild administration.`,
   );
 
   const fields: Array<{ name: string; value: string; inline: boolean }> = [
@@ -105,11 +105,6 @@ async function handleBotSubcommand(deps: AppDeps): Promise<InteractionResponse> 
       inline: true,
     },
     { name: '🎮 Free Game Alerts', value: 'Daily Epic Games Store free game notifications', inline: true },
-    {
-      name: '🎵 Music (Lavalink v4)',
-      value: 'Queue, playlist, equalizer, loop, and now-playing controls',
-      inline: true,
-    },
     {
       name: '🛡️ Guild Administration',
       value: 'Moderation, tickets, welcome system, roles, and voice controls',

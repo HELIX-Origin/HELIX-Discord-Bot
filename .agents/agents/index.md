@@ -48,7 +48,7 @@ flowchart TD
 | Subsystem | Source Location | Responsibility |
 |---|---|---|
 | **Discord Bot** | `src/bot/` | Discord client, slash commands, event handlers, voice connector |
-| **Modular Lib** | `src/bot/lib/` | Command options, EmbedHandler, music formatting, admin permissions |
+| **Modular Lib** | `src/bot/lib/` | Command options, EmbedHandler, feed helpers, admin permissions |
 | **Dashboard** | `src/dashboard/` | Native HTTP server, Discord OAuth, REST API, SSR dashboard |
 | **Persistence** | `src/db/` | `node:sqlite` tables, schema migrations, write-through repository |
 | **State** | `src/state/` | In-memory `AppState`, entity definitions, `ioredis-mock` locks |

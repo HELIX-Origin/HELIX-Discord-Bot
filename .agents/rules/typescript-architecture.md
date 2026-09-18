@@ -20,7 +20,6 @@ src/
 │   │   ├── admin/                  # /admin, /set, /ticket, /welcome
 │   │   ├── entertainment/          # /gif, /slap, /hug, and action reaction commands
 │   │   ├── feeds/                  # /feed syndication commands
-│   │   ├── music/                  # /play, /skip, /queue, /volume, /filters, etc.
 │   │   └── utility/                # /about, /stats, /ping, /help
 │   ├── events/                     # Client event handlers (one file per event)
 │   ├── handlers/                   # Dynamic command, event & interaction dispatchers
@@ -30,9 +29,7 @@ src/
 │   ├── lib/                        # Shared reusable libraries, modules, and utilities
 │   │   ├── admin/                  # Permissions, role hierarchy, mod log channels
 │   │   ├── embeds/                 # EmbedHandler fluent builder, limits, responses, variants
-│   │   ├── feeds/                  # Feed entry embed formatting & delivery helpers
-│   │   └── music/                  # Audio formatting, track progress, voice state helpers
-│   ├── music/                      # External Lavalink v4 client & queue manager
+│   │   └── feeds/                  # Feed entry embed formatting & delivery helpers
 │   └── utils/                      # Discord API types & external client wrappers
 ├── dashboard/                      # Integrated Web Management Dashboard
 │   ├── server.ts                   # Native Node.js HTTP server lifecycle & middleware
@@ -40,9 +37,9 @@ src/
 │   ├── handlers/                   # Shared auth context & page container renderers
 │   ├── http/                       # Router, request helpers, static asset handlers
 │   ├── oauth/                      # Discord OAuth2 service, callback logic & permissions
-│   ├── routes/                     # REST API route controllers (admin, guilds, feeds, music, etc.)
+│   ├── routes/                     # REST API route controllers (admin, guilds, feeds, etc.)
 │   ├── views/                      # Zero-frontend-dep SSR view components (Theme-aware HTML)
-│   │   ├── dashboard/              # Modular dashboard view panes (overview, feeds, sources, admin, music, settings, styles)
+│   │   ├── dashboard/              # Modular dashboard view panes (overview, feeds, sources, admin, settings, styles)
 │   │   └── themes/                 # Environment-configured themes & shared CSS custom properties
 │   └── webhooks/                   # WebSub & stream alert webhook receivers
 ├── db/                             # Persistence layer

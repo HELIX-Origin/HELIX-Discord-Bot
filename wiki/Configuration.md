@@ -51,18 +51,6 @@ HELIX Discord Bot is configured entirely via environment variables defined in a 
 
 > SQLite is the only supported database engine; there is no PostgreSQL/MySQL support.
 
-### 🎵 Lavalink Music Configuration
-
-> All music configuration lives in the bot's global `.env`. HELIX Discord Bot connects directly to an external Lavalink v4 server.
-
-| Variable | Required | Default | Description |
-| :--- | :--- | :--- | :--- |
-| `LAVA_ENABLED` | No | `true` | Enable/disable music playback entirely. |
-| `LAVA_HOST` | No | `127.0.0.1` | External Lavalink REST/WebSocket host. |
-| `LAVA_PORT` | No | `2333` | External Lavalink port. |
-| `LAVA_PASS` | No | `youshallnotpass` | External Lavalink password. |
-| `LAVA_SECURE` | No | `false` | Use `wss://` for WebSocket (`true`) or `ws://` (`false`). |
-
 ---
 
 ### 🧵 Forum Thread Delivery (Optional)

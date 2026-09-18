@@ -14,7 +14,7 @@ import { registerCommandMetadata, type BotCommand } from '../../handlers/registr
 export const SET_ACTIONS = ['role', 'feature', 'prefix', 'view', 'reset'] as const;
 export type SetAction = (typeof SET_ACTIONS)[number];
 
-export const SET_FEATURE_NAMES = ['feeds', 'streamalerts', 'music', 'gifs'] as const;
+export const SET_FEATURE_NAMES = ['feeds', 'streamalerts', 'gifs'] as const;
 export const SET_RESET_TARGETS = ['roles', 'features', 'prefix', 'all'] as const;
 
 export const setOptions: ApplicationCommandOption[] = [
@@ -32,12 +32,6 @@ export const setOptions: ApplicationCommandOption[] = [
     ],
   },
   {
-    name: 'dj',
-    description: 'Set the DJ role for music commands (role)',
-    type: ApplicationCommandOptionType.ROLE,
-    required: false,
-  },
-  {
     name: 'admin',
     description: 'Set a role that can manage feeds and bot settings (role)',
     type: ApplicationCommandOptionType.ROLE,
@@ -48,10 +42,7 @@ export const setOptions: ApplicationCommandOption[] = [
     description: 'Remove a configured role (role)',
     type: ApplicationCommandOptionType.STRING,
     required: false,
-    choices: [
-      { name: 'DJ Role', value: 'dj' },
-      { name: 'Admin Role', value: 'admin' },
-    ],
+    choices: [{ name: 'Admin Role', value: 'admin' }],
   },
   {
     name: 'feature',
@@ -61,7 +52,6 @@ export const setOptions: ApplicationCommandOption[] = [
     choices: [
       { name: 'Feeds (RSS/Reddit/Free Games)', value: 'feeds' },
       { name: 'Stream Alerts (YouTube/Twitch)', value: 'streamalerts' },
-      { name: 'Music (Lavalink)', value: 'music' },
       { name: 'GIF Commands', value: 'gifs' },
     ],
   },
@@ -102,7 +92,6 @@ export const setCommandDef: ApplicationCommand = {
 const FEATURE_LABELS: Record<(typeof SET_FEATURE_NAMES)[number], string> = {
   feeds: 'Feeds (RSS/Reddit/Free Games)',
   streamalerts: 'Stream Alerts (YouTube/Twitch)',
-  music: 'Music (Lavalink)',
   gifs: 'GIF Commands',
 };
 
@@ -119,8 +108,8 @@ function usageEmbed(deps: AppDeps): InteractionResponse {
     .info()
     .title('Set Command Usage', '⚙️')
     .description('Use `/set` with one of the actions below.')
-    .field('🎭 role', '`/set action:role dj:@MusicRole` · `admin:@Staff` · `clear:dj`', false)
-    .field('⚙️ feature', '`/set action:feature feature:music enabled:True`', false)
+    .field('🎭 role', '`/set action:role admin:@Staff` · `clear:admin`', false)
+    .field('⚙️ feature', '`/set action:feature feature:gifs enabled:True`', false)
     .field('🔤 prefix', '`/set action:prefix value:!`', false)
     .field('👁️ view', '`/set action:view`', false)
     .field('♻️ reset', '`/set action:reset reset_target:roles`', false)
@@ -166,26 +155,14 @@ function handleSetRole(
   options: InteractionOption[],
   deps: AppDeps,
 ): InteractionResponse {
-  const djRole = optionValue(options, 'dj');
   const adminRole = optionValue(options, 'admin');
   const clear = optionValue(options, 'clear');
 
-  if (!djRole && !adminRole && !clear) {
+  if (!adminRole && !clear) {
     return usageEmbed(deps);
   }
 
   const changes: string[] = [];
-
-  if (clear === 'dj' || (!clear && !djRole)) {
-    const previous = deps.repo.getGuildSetting(guildId, 'dj_role_id');
-    if (previous) {
-      deps.repo.setGuildSetting(guildId, 'dj_role_id', '');
-      changes.push('Cleared DJ role.');
-    }
-  } else if (djRole) {
-    deps.repo.setGuildSetting(guildId, 'dj_role_id', djRole);
-    changes.push(`DJ role → <@&${djRole}>`);
-  }
 
   if (clear === 'admin' || (!clear && !adminRole)) {
     const previous = deps.repo.getGuildSetting(guildId, 'admin_role_id');
@@ -273,7 +250,6 @@ function handleSetPrefix(
 
 function handleSetView(userId: number, guildId: string, deps: AppDeps): InteractionResponse {
   const binding = deps.repo.getGuildBinding(guildId);
-  const djRole = deps.repo.getGuildSetting(guildId, 'dj_role_id');
   const adminRole = deps.repo.getGuildSetting(guildId, 'admin_role_id');
   const prefix = deps.repo.getGuildSetting(guildId, 'prefix');
   const guildName = (binding?.name || '').trim() || 'this server';
@@ -287,10 +263,7 @@ function handleSetView(userId: number, guildId: string, deps: AppDeps): Interact
   return EmbedHandler.for(deps)
     .info()
     .title(`${guildName} — Guild Configuration`, '⚙️')
-    .section(
-      '🎭 Roles',
-      `**DJ:** ${djRole ? `<@&${djRole}>` : 'Not set'}\n**Admin:** ${adminRole ? `<@&${adminRole}>` : 'Not set'}`,
-    )
+    .section('🎭 Roles', `**Admin:** ${adminRole ? `<@&${adminRole}>` : 'Not set'}`)
     .section('⚙️ Features', featureLines.join('\n'))
     .section('🔤 Command Prefix', prefix ? `\`${prefix}\`` : 'Slash commands only')
     .footer('Guild Configuration')
@@ -312,9 +285,8 @@ function handleSetReset(
   const details: string[] = [];
 
   if (rawTarget === 'roles' || rawTarget === 'all') {
-    deps.repo.setGuildSetting(guildId, 'dj_role_id', '');
     deps.repo.setGuildSetting(guildId, 'admin_role_id', '');
-    details.push('Cleared DJ and Admin roles.');
+    details.push('Cleared Admin role.');
   }
 
   if (rawTarget === 'features' || rawTarget === 'all') {
@@ -359,7 +331,6 @@ registerCommandMetadata({
         { name: 'Reset a setting', value: 'reset' },
       ],
     },
-    { name: 'dj', description: 'Set the DJ role for music commands (role)', type: 8, required: false },
     {
       name: 'admin',
       description: 'Set a role that can manage feeds and bot settings (role)',
@@ -371,10 +342,7 @@ registerCommandMetadata({
       description: 'Remove a configured role (role)',
       type: 3,
       required: false,
-      choices: [
-        { name: 'DJ Role', value: 'dj' },
-        { name: 'Admin Role', value: 'admin' },
-      ],
+      choices: [{ name: 'Admin Role', value: 'admin' }],
     },
     {
       name: 'feature',
@@ -384,7 +352,6 @@ registerCommandMetadata({
       choices: [
         { name: 'Feeds (RSS/Reddit/Free Games)', value: 'feeds' },
         { name: 'Stream Alerts (YouTube/Twitch)', value: 'streamalerts' },
-        { name: 'Music (Lavalink)', value: 'music' },
         { name: 'GIF Commands', value: 'gifs' },
       ],
     },
@@ -409,8 +376,8 @@ registerCommandMetadata({
     },
   ],
   examples: [
-    '/set action:role dj:@MusicRole',
-    '/set action:feature feature:music enabled:True',
+    '/set action:role admin:@Staff',
+    '/set action:feature feature:gifs enabled:True',
     '/set action:prefix value:!',
     '/set action:view',
     '/set action:reset reset_target:roles',

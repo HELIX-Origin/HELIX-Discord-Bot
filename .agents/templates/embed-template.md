@@ -2,7 +2,7 @@
 
 Standard Embed Handler template, formatting guide, and production blueprints for **HELIX Discord Bot**.
 
-All Discord embeds across slash commands, event notifications, moderation logs, music playback, feed deliveries, and dashboard previews must be constructed using the centralized **`EmbedHandler`** fluent builder (`src/bot/lib/embeds/builder.ts`).
+All Discord embeds across slash commands, event notifications, moderation logs, feed deliveries, and dashboard previews must be constructed using the centralized **`EmbedHandler`** fluent builder (`src/bot/lib/embeds/builder.ts`).
 
 ---
 
@@ -16,9 +16,8 @@ All Discord embeds across slash commands, event notifications, moderation logs, 
    - [Pattern 1: Slash Command Success / Acknowledgment](#pattern-1-slash-command-success--acknowledgment)
    - [Pattern 2: Ephemeral Error / Permission Rejection](#pattern-2-ephemeral-error--permission-rejection)
    - [Pattern 3: Moderation Action Log Case](#pattern-3-moderation-action-log-case)
-   - [Pattern 4: Music Player / Now Playing](#pattern-4-music-player--now-playing)
-   - [Pattern 5: Feed / Alert Syndication Delivery](#pattern-5-feed--alert-syndication-delivery)
-   - [Pattern 6: Detailed Information / Statistics Card](#pattern-6-detailed-information--statistics-card)
+   - [Pattern 4: Feed / Alert Syndication Delivery](#pattern-4-feed--alert-syndication-delivery)
+   - [Pattern 5: Detailed Information / Statistics Card](#pattern-5-detailed-information--statistics-card)
 7. [Design Do's and Don'ts](#-design-dos-and-donts)
 
 ---
@@ -245,29 +244,7 @@ await rest.sendChannelMessage(modLogChannelId, { embeds: [modEmbed] });
 
 ---
 
-### Pattern 4: Music Player / Now Playing
-Audio card with duration formatting, track progress, and playback controls.
-
-```typescript
-return EmbedHandler.for(deps)
-  .primary()
-  .title('Now Playing', '🎵')
-  .url(track.uri)
-  .description(`[**${track.title}**](${track.uri})`)
-  .thumbnail(track.artworkUrl)
-  .fields([
-    { name: 'Author', value: track.author || '*Unknown*', inline: true },
-    { name: 'Duration', value: `\`${formatDuration(track.length)}\``, inline: true },
-    { name: 'Requested By', value: `<@${track.requesterId}>`, inline: true },
-    { name: 'Progress', value: `${progressBar} \`${formatDuration(position)} / ${formatDuration(track.length)}\``, inline: false },
-  ])
-  .footer(`Volume: ${volume}% • Loop: ${loopMode}`)
-  .respond();
-```
-
----
-
-### Pattern 5: Feed / Alert Syndication Delivery
+### Pattern 4: Feed / Alert Syndication Delivery
 Syndicated article, YouTube video, or Reddit post delivered to a channel or thread.
 
 ```typescript
@@ -291,7 +268,7 @@ await rest.sendChannelMessage(targetChannelId, feedEmbed);
 
 ---
 
-### Pattern 6: Detailed Information / Statistics Card
+### Pattern 5: Detailed Information / Statistics Card
 Comprehensive metrics overview (`/about`, `/stats`).
 
 ```typescript

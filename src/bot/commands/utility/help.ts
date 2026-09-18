@@ -134,11 +134,6 @@ export async function handleHelpCommand(interaction: DiscordInteraction, deps: A
       commands: categorized.entertainment.map((c) => ({ name: c.name, description: c.description })),
     },
     {
-      name: 'Music',
-      emoji: '🎵',
-      commands: categorized.music.map((c) => ({ name: c.name, description: c.description })),
-    },
-    {
       name: 'Utility',
       emoji: '🔧',
       commands: categorized.utility.map((c) => ({ name: c.name, description: c.description })),

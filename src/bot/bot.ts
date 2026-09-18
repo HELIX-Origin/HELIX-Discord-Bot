@@ -390,28 +390,6 @@ export class DiscordBot {
     return state?.channelId ?? null;
   }
 
-  async joinVoiceChannel(guildId: string, channelId: string, deaf = true, mute = false): Promise<void> {
-    const guild = this.client.guilds.cache.get(guildId);
-    if (!guild) throw new Error('Guild not found');
-    const channel = guild.channels.cache.get(channelId) ?? (await guild.channels.fetch(channelId).catch(() => null));
-    if (!channel) throw new Error('Voice channel not found');
-    const me = guild.members.me ?? (await guild.members.fetch(this.client.user!.id).catch(() => null));
-    if (!me) throw new Error('Bot member not found');
-    await me.voice.setChannel(channel.id);
-    await me.voice.setDeaf(deaf);
-    if (mute) await me.voice.setMute(true);
-  }
-
-  async leaveVoiceChannel(guildId: string): Promise<void> {
-    const guild = this.client.guilds.cache.get(guildId);
-    if (!guild) return;
-    const me = guild.members.me ?? (await guild.members.fetch(this.client.user!.id).catch(() => null));
-    if (!me) return;
-    if (me.voice.channelId) {
-      await me.voice.setChannel(null);
-    }
-  }
-
   stop(): void {
     if (!this.isStarted) return;
     this.isStarted = false;

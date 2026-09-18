@@ -32,11 +32,9 @@ src/bot/
 │   ├── admin/             # e.g., set.ts, ticket.ts, welcome.ts
 │   ├── entertainment/     # e.g., gif.ts, slap.ts
 │   ├── feeds/             # e.g., feed.ts
-│   ├── music/             # e.g., play.ts, pause.ts, queue.ts, volume.ts
 │   └── utility/           # e.g., ping.ts, help.ts, stats.ts, info.ts
 └── lib/                   # Shared libraries, modules, and utilities
     ├── embeds/            # EmbedHandler builder, limits, variants
-    ├── music/             # Audio formatting, track progress, voice helpers
     ├── admin/             # Permission helpers, role hierarchy, modlog
     └── feeds/             # Feed formatting and delivery utilities
 ```

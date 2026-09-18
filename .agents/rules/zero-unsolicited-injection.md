@@ -18,8 +18,6 @@ Enforce strict dependency hygiene across **HELIX Discord Bot**. The codebase lev
 3. **Approved Runtime Stack**:
    - `discord.js` (`^14.18.0`): Mandatory Discord gateway and interaction client.
    - `ioredis-mock` (`^8.13.1`): In-memory coordination (feed locks and deduplication) without external Redis binaries.
-   - `ws` (`^8.18.0`): WebSocket client for external Lavalink v4 audio nodes.
-   - **External-Only Lavalink**: Music playback connects exclusively to external Lavalink v4 nodes. In-process embedded Lavalink server packages are abandoned/retired.
 
 4. **Native Node.js First**:
    - Native HTTP server via `node:http`.

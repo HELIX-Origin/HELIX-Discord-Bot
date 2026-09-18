@@ -199,16 +199,8 @@ export function registerBotEvents(client: Client, bot: DiscordBot, deps: AppDeps
     void handleRoleUpdate(oldRole, newRole, bot, deps);
   });
 
-  // Voice state events (Lavalink audio gateway)
+  // Voice state events
   client.on(Events.VoiceStateUpdate, (oldState: VoiceState, newState: VoiceState) => {
     void handleVoiceStateUpdate(oldState, newState, bot, deps);
-  });
-
-  client.on(Events.VoiceServerUpdate, (data: { token: string; guildId: string; endpoint?: string | null }) => {
-    deps.lavaManager?.handleVoiceServerUpdate({
-      token: data.token,
-      guild_id: data.guildId,
-      endpoint: data.endpoint ?? undefined,
-    });
   });
 }

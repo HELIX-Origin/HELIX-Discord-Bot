@@ -11,7 +11,7 @@ All version increments and release artifacts for **HELIX Discord Bot** must stri
 - **MAJOR (`X.0.0`)**: Incompatible API or architectural breaking changes.
   - Examples: Major discord.js upgrade requiring breaking command definition rewrites, backwards-incompatible SQLite schema migration without auto-migration, complete overhaul of configuration environment semantics.
 - **MINOR (`0.X.0`)**: New functionality, subsystems, or capabilities introduced in a backwards-compatible manner.
-  - Examples: New feature subsystem (e.g. Lavalink v4 music, KLIPY entertainment, guild administration commands), new dashboard tabs, new feed syndication types.
+  - Examples: New feature subsystem (e.g. KLIPY entertainment, guild administration commands), new dashboard tabs, new feed syndication types.
 - **PATCH (`0.0.X`)**: Backwards-compatible bug fixes, security hardening, documentation synchronizations, and internal refactorings.
   - Examples: Rate limit fixes, embed field truncation edge cases, policy updates, dependency patch security updates.
 

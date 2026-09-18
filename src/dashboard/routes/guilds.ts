@@ -5,7 +5,7 @@ import { canUserManageGuild, requireDashboardUser } from './shared.js';
 import { getAllCommands, isCommandDisabled } from '../../bot/handlers/registry.js';
 import { loadAllCommands } from '../../bot/handlers/loader.js';
 
-const FEATURE_NAMES = ['feeds', 'streamalerts', 'music', 'gifs'] as const;
+const FEATURE_NAMES = ['feeds', 'streamalerts', 'gifs'] as const;
 
 export function registerGuildRoutes(router: Router<AppDeps>): void {
   router.add('GET', '/api/guilds', async (req, res, _ctx, d) => {
@@ -81,7 +81,6 @@ export function registerGuildRoutes(router: Router<AppDeps>): void {
       if (!guild) return sendError(res, 404, 'Guild not found');
 
       const roles = {
-        djRoleId: d.repo.getGuildSetting(guildId, 'dj_role_id') || null,
         adminRoleId: d.repo.getGuildSetting(guildId, 'admin_role_id') || null,
       };
       const prefix = d.repo.getGuildSetting(guildId, 'prefix') || null;
@@ -137,7 +136,6 @@ export function registerGuildRoutes(router: Router<AppDeps>): void {
     }
 
     const body = (await readBodyJson(req)) as {
-      djRoleId?: string | null;
       adminRoleId?: string | null;
       prefix?: string | null;
       features?: Record<string, boolean>;
@@ -148,10 +146,6 @@ export function registerGuildRoutes(router: Router<AppDeps>): void {
       const guildRoles = await d.bot.getGuildRoles(guildId);
       const roleIds = new Set(guildRoles.map((r) => r.id));
 
-      if (body.djRoleId) {
-        const id = String(body.djRoleId).trim();
-        if (!roleIds.has(id)) return sendError(res, 400, 'DJ role is not a valid role in this server.');
-      }
       if (body.adminRoleId) {
         const id = String(body.adminRoleId).trim();
         if (!roleIds.has(id)) return sendError(res, 400, 'Admin role is not a valid role in this server.');
@@ -160,11 +154,6 @@ export function registerGuildRoutes(router: Router<AppDeps>): void {
       const validFeatureNames = FEATURE_NAMES as readonly string[];
       const changes: string[] = [];
 
-      if (body.djRoleId !== undefined) {
-        const value = body.djRoleId ? String(body.djRoleId).trim() : '';
-        d.repo.setGuildSetting(guildId, 'dj_role_id', value);
-        changes.push(`DJ role → ${value ? `<@&${value}>` : 'cleared'}`);
-      }
       if (body.adminRoleId !== undefined) {
         const value = body.adminRoleId ? String(body.adminRoleId).trim() : '';
         d.repo.setGuildSetting(guildId, 'admin_role_id', value);

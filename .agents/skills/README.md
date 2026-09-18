@@ -11,7 +11,6 @@ This directory contains technical skill definitions, subsystem architectural gui
 | **Discord.js v14 Engineering** | Discord Subsystem | Self-contained commands (`src/bot/commands/<cat>/<cmd>.ts`), modular `src/bot/lib/`, events, EmbedHandler, API limits | [discord-js.md](discord-js.md) |
 | **HELIX Development Workflow** | Bot Architecture | Command creation, event registration, persistence, verification checklist | [helix-discord-bot.md](helix-discord-bot.md) |
 | **Feed Syndication & Forums** | Feed & Content Delivery | RSS/Atom/Reddit ingestion, weekly Sunday Free Games schedule, forum single-thread delivery | [feed-syndication.md](feed-syndication.md) |
-| **Lavalink v4 Music & Voice** | Audio Subsystem | External Lavalink v4 WebSocket client, queue management, voice gateway | [lavalink-music.md](lavalink-music.md) |
 | **Guild Administration** | Moderation & Roles | Moderation commands, Discord native permissions, role hierarchy, mod log channels | [guild-administration.md](guild-administration.md) |
 | **Management Dashboard Engineering** | Dashboard & OAuth | Zero-frontend-dep SSR, Discord OAuth2, guild admin authorization, EmbedHandler preview parity | [dashboard-engineering.md](dashboard-engineering.md) |
 | **TypeScript ESM & Node.js** | Language & Runtime | ESM conventions, `.js` imports, `node:sqlite`, in-memory `AppState` write-through | [typescript.md](typescript.md) |
@@ -25,7 +24,6 @@ flowchart TD
     Helix[HELIX Discord Bot] --> Discord[discord-js.md]
     Helix --> Workflow[helix-discord-bot.md]
     Helix --> Feeds[feed-syndication.md]
-    Helix --> Music[lavalink-music.md]
     Helix --> Admin[guild-administration.md]
     Helix --> Dashboard[dashboard-engineering.md]
     Helix --> TS[typescript.md]

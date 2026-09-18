@@ -402,16 +402,6 @@ export function renderLandingHtml(deps: AppDeps, userId: number | null = null): 
         </div>
 
         <div class="feature-card">
-          <div class="feature-icon" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">
-            <i class="fa-solid fa-music"></i>
-          </div>
-          <h3 class="feature-title">Music Playback via Lavalink</h3>
-          <p class="feature-desc">
-            High-quality music playback from YouTube, Spotify, SoundCloud, and more. Queue management, volume control, shuffle/loop modes, and a real-time dashboard queue page.
-          </p>
-        </div>
-
-        <div class="feature-card">
           <div class="feature-icon" style="background: rgba(244, 63, 94, 0.15); color: #f43f5e;">
             <i class="fa-solid fa-gift"></i>
           </div>
@@ -442,20 +432,12 @@ export function renderLandingHtml(deps: AppDeps, userId: number | null = null): 
 
       <div class="code-preview">
         <div class="code-line">
-          <span class="code-cmd">/feed add url:<feed_url> channel:#announcements role:@NewsPings</span>
+          <span class="code-cmd">/feed add url:&lt;feed_url&gt; channel:#announcements role:@NewsPings</span>
           <span class="code-comment"># Subscribe channel to any RSS or Reddit feed</span>
         </div>
         <div class="code-line">
           <span class="code-cmd">/feed add url:freegames:all channel:#free-games</span>
           <span class="code-comment"># Subscribe to 100% free game promotions across all stores</span>
-        </div>
-        <div class="code-line">
-          <span class="code-cmd">/play <query></span>
-          <span class="code-comment"># Play music from YouTube, Spotify, SoundCloud</span>
-        </div>
-        <div class="code-line">
-          <span class="code-cmd">/queue</span>
-          <span class="code-comment"># View current music queue</span>
         </div>
         <div class="code-line">
           <span class="code-cmd">/gif anime</span>

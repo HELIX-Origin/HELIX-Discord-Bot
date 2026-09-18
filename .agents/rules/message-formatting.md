@@ -13,7 +13,6 @@
      - `warning()`: Alert / caution (`#f59e0b` Amber yellow)
      - `info()`: Diagnostics / status (`#3b82f6` Royal blue)
      - `feed()`: Feed syndicate item (`#6366f1` Indigo)
-     - `music()`: Track playback (`#8b5cf6` Purple)
    - Feed embeds (`src/bot/utils/embeds.ts`) format: `title`, `url`, `description`, `author`, `publishedAt`, `imageUrl`, and brand icons.
 
 3. **Discord Character Limit Clamping**:

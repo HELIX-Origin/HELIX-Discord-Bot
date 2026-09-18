@@ -54,7 +54,7 @@ export function renderClientScript(): string {
         if (route.page === 'feed' && route.feedId) {
           switchTab('rss');
           openFeedDetail(Number(route.feedId));
-        } else if (route.page && ['rss', 'reddit', 'freegames', 'streamalerts', 'overview', 'guildadmin', 'music', 'settings'].includes(route.page)) {
+        } else if (route.page && ['rss', 'reddit', 'freegames', 'streamalerts', 'overview', 'guildadmin', 'settings'].includes(route.page)) {
           switchTab(route.page);
         } else {
           switchTab('overview');
@@ -87,7 +87,6 @@ export function renderClientScript(): string {
       else if (tabId === 'streamalerts') loadSourceTab('streamalerts');
       else if (tabId === 'overview') loadOverviewTab();
       else if (tabId === 'guildadmin') loadGuildAdminTab();
-      else if (tabId === 'music') loadMusicTab();
       else if (tabId === 'settings') loadSettingsTab();
     }
 
@@ -689,7 +688,6 @@ export function renderClientScript(): string {
       else if (activeTabName === 'streamalerts') loadSourceTab('streamalerts');
       else if (activeTabName === 'overview') loadOverviewTab();
       else if (activeTabName === 'guildadmin') loadGuildAdminTab();
-      else if (activeTabName === 'music') loadMusicTab();
       else if (activeTabName === 'settings') loadSettingsTab();
     }
 
@@ -1044,7 +1042,6 @@ export function renderClientScript(): string {
     const GUILD_ADMIN_FEATURES = [
       { key: 'feeds', label: 'Feeds', desc: 'RSS, Reddit, and Free Games polling' },
       { key: 'streamalerts', label: 'Stream Alerts', desc: 'YouTube & Twitch live/upload alerts' },
-      { key: 'music', label: 'Music', desc: 'Lavalink voice playback' },
       { key: 'gifs', label: 'GIF Commands', desc: '/gif and action-style GIF commands' },
     ];
 
@@ -1072,7 +1069,6 @@ export function renderClientScript(): string {
         }
         const data = await res.json();
 
-        populateRoleSelect('admin-dj-role', data.guildRoles || [], data.roles && data.roles.djRoleId, '-- No DJ role --');
         populateRoleSelect('admin-admin-role', data.guildRoles || [], data.roles && data.roles.adminRoleId, '-- No Admin role --');
 
         const featuresEl = document.getElementById('admin-features-list');
@@ -1126,7 +1122,6 @@ export function renderClientScript(): string {
       const statusEl = document.getElementById('admin-save-status');
       if (statusEl) statusEl.style.display = 'none';
 
-      const djRoleId = document.getElementById('admin-dj-role') ? document.getElementById('admin-dj-role').value || null : null;
       const adminRoleId = document.getElementById('admin-admin-role') ? document.getElementById('admin-admin-role').value || null : null;
 
       const features = {};
@@ -1141,7 +1136,7 @@ export function renderClientScript(): string {
 
       const prefix = document.getElementById('admin-prefix') ? document.getElementById('admin-prefix').value.trim() : '';
 
-      const body = { djRoleId, adminRoleId, prefix, features, commands };
+      const body = { adminRoleId, prefix, features, commands };
       try {
         const res = await fetch('/api/guilds/' + encodeURIComponent(currentGuildId) + '/settings', {
           method: 'PUT',
@@ -1168,176 +1163,6 @@ export function renderClientScript(): string {
       } catch {
         alert('Failed to save settings.');
       }
-    }
-
-    // Music & Queue
-    function fmtDur(ms) {
-      if (ms === null || ms === undefined || ms < 0 || !isFinite(ms)) return '--:--';
-      const total = Math.floor(ms / 1000);
-      const h = Math.floor(total / 3600);
-      const m = Math.floor((total % 3600) / 60);
-      const s = total % 60;
-      return h > 0
-        ? h + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0')
-        : m + ':' + String(s).padStart(2, '0');
-    }
-
-    async function musicAction(action, extra) {
-      if (!currentGuildId) return false;
-      try {
-        const res = await fetch('/api/guilds/' + encodeURIComponent(currentGuildId) + '/music/' + action, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(extra || {}),
-          signal: AbortSignal.timeout(10000)
-        });
-        if (!checkAuth(res)) return false;
-        if (!res.ok) {
-          let msg = 'Failed to run action.';
-          try {
-            const j = await res.json();
-            if (j && j.error) msg = j.error;
-          } catch {}
-          alert(msg);
-        } else {
-          loadMusicTab();
-        }
-        return res.ok;
-      } catch {
-        alert('Failed to reach Lavalink.');
-        return false;
-      }
-    }
-
-    function musicControlBtn(action, icon, title, color) {
-      return '<button onclick="musicAction(\\'' + action + '\\')" class="btn btn-ghost btn-sm" title="' + title + '" style="color: ' + (color || 'var(--text-muted)') + ';"><i class="fa-solid ' + icon + '"></i></button>';
-    }
-
-    async function loadMusicTab() {
-      if (!currentGuildId) return;
-      const container = document.getElementById('music-queue-view');
-      if (!container) return;
-      container.innerHTML = '<div class="empty-state">Loading player state...</div>';
-
-      try {
-        const res = await fetch('/api/guilds/' + encodeURIComponent(currentGuildId) + '/music', {
-          signal: AbortSignal.timeout(6000)
-        });
-        if (!checkAuth(res)) return;
-        const data = await res.json();
-
-        container.innerHTML = renderMusicQueue(data);
-      } catch {
-        container.innerHTML = '<div class="empty-state">Could not reach Lavalink. Ensure LAVA_ENABLED and Lavalink credentials are configured.</div>';
-      }
-    }
-
-    function renderMusicQueue(data) {
-      if (data && data.active === false) {
-        return '<div class="empty-state"><i class="fa-solid fa-circle-info"></i> Nothing is playing in this server yet. Use <code style="color: #10b981;">/play</code> in a voice channel to start music.</div>';
-      }
-      if (!data || !data.active || !data.current) {
-        return '<div class="empty-state"><i class="fa-solid fa-music"></i> No active player session for this server.</div>';
-      }
-
-      const cur = data.current;
-      const track = cur.track || {};
-      const total = track.length || 0;
-      const pos = Math.min(data.position || 0, total || 0);
-      const pct = total > 0 ? Math.min(Math.round((pos / total) * 100), 100) : 0;
-
-      const transport = [
-        musicControlBtn('pause', 'fa-pause', 'Pause', '#f59e0b'),
-        musicControlBtn('resume', 'fa-play', 'Resume', '#10b981'),
-        musicControlBtn('skip', 'fa-forward-step', 'Skip', '#06b6d4'),
-        musicControlBtn('stop', 'fa-stop', 'Stop & clear queue', '#ef4444')
-      ].join('');
-
-      const nowPlaying =
-        '<div class="card">' +
-        '<div class="card-header">' +
-          '<div><div class="card-title"><i class="fa-solid fa-compact-disc" style="color: #10b981;"></i> Now Playing</div>' +
-          '<div class="card-desc">' + (data.paused ? '<span style="color: #f59e0b;">Paused</span>' : '<span style="color: #10b981;">Playing</span>') + ' &middot; channel ' + (data.channelId ? '<code style="color: var(--text-muted);">' + esc(data.channelId) + '</code>' : 'N/A') + '</div></div>' +
-          '<div style="display: flex; align-items: center; gap: 0.25rem;">' + transport + '</div>' +
-        '</div>' +
-        '<div style="display: flex; gap: 1rem; margin-top: 1rem; align-items: flex-start;">' +
-          (track.artworkUrl ? '<img src="' + esc(track.artworkUrl) + '" alt="" style="width: 96px; height: 96px; border-radius: 10px; object-fit: cover; flex-shrink: 0;">' : '<div style="width: 96px; height: 96px; border-radius: 10px; background: linear-gradient(135deg, rgba(16,185,129,0.2), rgba(6,182,212,0.2)); display: flex; align-items: center; justify-content: center; flex-shrink: 0;"><i class="fa-solid fa-music" style="font-size: 2rem; color: var(--text-dim);"></i></div>') +
-          '<div style="flex: 1; min-width: 0;">' +
-            '<div style="font-weight: 700; font-size: 1.0625rem; word-break: break-word;">' + esc(track.title || 'Unknown track') + '</div>' +
-            '<div style="color: var(--text-muted); font-size: 0.875rem; margin-top: 0.25rem;">' + esc(track.author || 'Unknown artist') + '</div>' +
-            '<div style="margin-top: 0.75rem;">' +
-              '<div style="display: flex; justify-content: space-between; font-size: 0.6875rem; color: var(--text-dim); margin-bottom: 0.25rem;"><span>' + fmtDur(pos) + '</span><span>' + fmtDur(total) + '</span></div>' +
-              '<div style="height: 6px; border-radius: 3px; background: var(--border); overflow: hidden;"><div style="height: 100%; width: ' + pct + '%; background: linear-gradient(90deg, #10b981, #06b6d4);"></div></div>' +
-            '</div>' +
-            '<div style="display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 0.75rem; align-items: center;">' +
-              '<span class="badge" style="background: rgba(16,185,129,0.15); color: #10b981; border: 1px solid rgba(16,185,129,0.3);"><i class="fa-solid fa-user"></i> ' + esc(cur.requester || 'unknown') + '</span>' +
-              '<span class="badge" style="background: rgba(6,182,212,0.15); color: #06b6d4; border: 1px solid rgba(6,182,212,0.3);">Volume ' + (data.volume || 100) + '%</span>' +
-              '<span class="badge" style="background: rgba(139,92,246,0.15); color: #a78bfa; border: 1px solid rgba(139,92,246,0.3);"><i class="fa-solid fa-repeat"></i> ' + esc(data.loop || 'none') + '</span>' +
-              '<span class="badge" style="background: rgba(245,158,11,0.15); color: #f59e0b; border: 1px solid rgba(245,158,11,0.3);"><i class="fa-solid fa-shuffle"></i> ' + (data.shuffled ? 'Shuffled' : 'In order') + '</span>' +
-              (track.uri ? '<a href="' + esc(track.uri) + '" target="_blank" rel="noopener noreferrer" style="font-size: 0.8125rem; color: var(--primary);"><i class="fa-solid fa-arrow-up-right-from-square"></i> Open source</a>' : '') +
-            '</div>' +
-          '</div>' +
-        '</div>' +
-        '<div style="display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1rem;">' +
-          '<div class="form-group" style="flex: 1; min-width: 120px;">' +
-            '<label class="form-label">Volume</label>' +
-            '<input type="range" min="0" max="200" value="' + (data.volume || 100) + '" oninput="this.nextElementSibling.textContent = this.value + \\'%\\'" onchange="musicAction(\\'volume\\', { level: Number(this.value) })">' +
-            '<span style="font-size: 0.6875rem; color: var(--text-dim);">' + (data.volume || 100) + '%</span>' +
-          '</div>' +
-          '<div class="form-group" style="flex: 1; min-width: 140px;">' +
-            '<label class="form-label">Loop Mode</label>' +
-            '<select onchange="musicAction(\\'loop\\', { mode: this.value })">' +
-              '<option value="none"' + (data.loop === 'none' ? ' selected' : '') + '>Off</option>' +
-              '<option value="track"' + (data.loop === 'track' ? ' selected' : '') + '>Track</option>' +
-              '<option value="queue"' + (data.loop === 'queue' ? ' selected' : '') + '>Queue</option>' +
-            '</select>' +
-          '</div>' +
-          '<div class="form-group" style="flex: 1; min-width: 140px;">' +
-            '<label class="form-label">Shuffle</label>' +
-            '<div style="display: flex; gap: 0.5rem;">' +
-              '<button onclick="musicAction(\\'shuffle\\')" class="btn btn-ghost btn-sm" style="color: #f59e0b;"><i class="fa-solid fa-shuffle"></i> On</button>' +
-              '<button onclick="musicAction(\\'unshuffle\\')" class="btn btn-ghost btn-sm" style="color: var(--text-muted);"><i class="fa-solid fa-shuffle"></i> Off</button>' +
-            '</div>' +
-          '</div>' +
-          '<div class="form-group" style="flex: 1; min-width: 120px;">' +
-            '<label class="form-label">Seek (minutes)</label>' +
-            '<div style="display: flex; gap: 0.5rem;">' +
-              '<input type="number" id="music-seek-min" min="0" step="0.1" value="0" style="max-width: 110px;">' +
-              '<button onclick="musicAction(\\'seek\\', { position: Math.round(Number(document.getElementById(\\'music-seek-min\\').value) * 60000) })" class="btn btn-ghost btn-sm" style="color: #06b6d4;"><i class="fa-solid fa-forward"></i> Seek</button>' +
-            '</div>' +
-          '</div>' +
-        '</div>' +
-      '</div>';
-
-      const queueEls = (data.queue || []).map(function (item, i) {
-        const t = item.track || {};
-        return '<div class="feed-pill">' +
-          '<div class="feed-details">' +
-            '<div class="feed-name-row"><span class="feed-name">' + (i + 1) + '. ' + esc(t.title || 'Unknown track') + '</span>' +
-            '<span class="badge" style="background: rgba(6,182,212,0.15); color: #06b6d4; border: 1px solid rgba(6,182,212,0.3);">' + fmtDur(t.length) + '</span></div>' +
-            '<div class="feed-url">' + esc(t.author || '') + (t.uri ? ' &middot; <a href="' + esc(t.uri) + '" target="_blank" rel="noopener noreferrer" style="color: var(--primary);">source</a>' : '') + '</div>' +
-            '<div class="feed-meta">Requested by ' + esc(item.requester || 'unknown') + '</div>' +
-          '</div>' +
-          '<div>' +
-            '<button onclick="musicAction(\\'remove\\', { position: ' + (i + 1) + ' })" class="btn btn-ghost btn-sm" title="Remove" style="color: #ef4444;"><i class="fa-solid fa-xmark"></i></button>' +
-            '<button onclick="musicAction(\\'skip\\' )" class="btn btn-ghost btn-sm" title="Play now" style="color: #10b981;"><i class="fa-solid fa-play"></i></button>' +
-          '</div>' +
-        '</div>';
-      }).join('');
-
-      const queueSection =
-        '<div class="card">' +
-        '<div class="card-header">' +
-          '<div><div class="card-title"><i class="fa-solid fa-list-ol" style="color: var(--primary);"></i> Up Next</div>' +
-          '<div class="card-desc">' + (data.queue || []).length + ' track(s) in queue</div></div>' +
-          '<button onclick="musicAction(\\'clear\\')" class="btn btn-ghost btn-sm" style="color: #ef4444;"><i class="fa-solid fa-broom"></i> Clear Queue</button>' +
-        '</div>' +
-        '<div id="music-queue-list" style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.75rem;">' +
-          (queueEls.length ? queueEls : '<div class="empty-state">Queue is empty.</div>') +
-        '</div>' +
-      '</div>';
-
-      return nowPlaying + queueSection;
     }
 
     // Initialize on page load

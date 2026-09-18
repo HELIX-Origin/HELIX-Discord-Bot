@@ -75,7 +75,7 @@ export class DiscordRestClient {
       userAgent ||
       process.env['USER_AGENT']?.trim() ||
       process.env['DISCORD_USER_AGENT']?.trim() ||
-      (repoUrl ? `DiscordBot (${repoUrl}, 0.4.1)` : 'DiscordBot (0.4.1)');
+      (repoUrl ? `DiscordBot (${repoUrl}, 0.5.0)` : 'DiscordBot (0.5.0)');
   }
 
   private headers(extra: Record<string, string> = {}): Record<string, string> {

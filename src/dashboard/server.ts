@@ -14,7 +14,6 @@ import { registerOAuthRoutes } from './routes/oauth.js';
 import { registerFeedsRoutes } from './routes/feeds.js';
 import { registerDiscordRoutes } from './routes/discord.js';
 import { registerGuildRoutes } from './routes/guilds.js';
-import { registerMusicRoutes } from './routes/music.js';
 import { registerSettingsRoutes } from './routes/settings.js';
 import { registerStatsRoutes } from './routes/stats.js';
 import { registerWebhookRoutes, initWebhookRouter } from './routes/webhooks.js';
@@ -239,7 +238,6 @@ export function createHelixRssServer(deps: AppDeps): Server {
   registerFeedsRoutes(router);
   registerDiscordRoutes(router);
   registerGuildRoutes(router);
-  registerMusicRoutes(router);
   registerSettingsRoutes(router);
   registerStatsRoutes(router);
   registerAdminRoutes(router);
