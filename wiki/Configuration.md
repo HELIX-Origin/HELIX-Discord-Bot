@@ -34,7 +34,7 @@ HELIX Discord Bot is configured entirely via environment variables defined in a 
 | Variable | Required | Default | Description |
 | :--- | :--- | :--- | :--- |
 | `REPO_URL` | No | — | Repository URL used in Discord REST requests, feed fetchers, and dashboard "GitHub" links. Aliases: `GITHUB_REPO`, `REPOSITORY_URL`, `PROJECT_URL`. |
-| `USER_AGENT` | No | `DiscordBot (<REPO_URL>, 0.1.0)` | Custom HTTP User-Agent sent with outgoing requests. Alias: `DISCORD_USER_AGENT`. |
+| `USER_AGENT` | No | `DiscordBot (<REPO_URL>, 0.5.0)` | Custom HTTP User-Agent sent with outgoing requests. Alias: `DISCORD_USER_AGENT`. |
 
 ### 🗂️ Logging & Timeouts
 
@@ -129,4 +129,25 @@ DISCORD_REDIRECT_URL=https://discord.com/oauth2/authorize?client_id=your_client_
 DASHBOARD_THEME=dark
 DASHBOARD_COLOR_SCHEME=default
 LANDING_PAGE_ENABLED=true
+
+# YouTube API credentials (for YouTube Stream Alerts)
+YOUTUBE_API_KEY=
+YOUTUBE_CLIENT_ID=
+YOUTUBE_CLIENT_SECRET=
+
+# Twitch API credentials (for Twitch Stream Alerts)
+TWITCH_CLIENT_ID=
+TWITCH_CLIENT_SECRET=
+
+# KLIPY API (Entertainment GIF commands)
+KLIPY_API_KEY=
+
+# Global Feature Flags (defaults to true)
+FEEDS_ENABLED=true
+STREAM_ALERTS_ENABLED=true
+THREADS_ENABLED=true
+GIFS_ENABLED=true
+ADMINISTRATION_ENABLED=true
+DASHBOARD_ENABLED=true
+ADMIN_PANEL_ENABLED=true
 ```
