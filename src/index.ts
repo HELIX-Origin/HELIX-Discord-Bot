@@ -22,7 +22,7 @@ export async function main(): Promise<void> {
   clearPorts([config.botPort, config.port], logger);
 
   const db = Database.open(config.dbPath);
-  const repo = new Repository(db);
+  const repo = new Repository(db, config.feedCategoryLimits);
   const oauth = new OAuthService(repo, config);
   const redis = await createRedisCoordinator(config.logLevel);
   const feeds = new FeedWatcher(repo, redis, config.logLevel);

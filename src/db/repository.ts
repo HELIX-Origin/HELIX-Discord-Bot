@@ -51,11 +51,14 @@ export class Repository {
   private readonly settings: SettingsRepository;
   private readonly guildCategories: GuildCategoryRepository;
 
-  constructor(private readonly db: Database) {
+  constructor(
+    private readonly db: Database,
+    feedCategoryLimits?: Readonly<Partial<Record<FeedCategory, number>>>,
+  ) {
     this.state = new AppState(db);
     this.users = new UserRepository(db, this.state);
     this.oauth = new OAuthRepository(db, this.state);
-    this.feeds = new FeedRepository(db, this.state);
+    this.feeds = new FeedRepository(db, this.state, feedCategoryLimits);
     this.settings = new SettingsRepository(db, this.state);
     this.guildCategories = new GuildCategoryRepository(db, this.state);
   }

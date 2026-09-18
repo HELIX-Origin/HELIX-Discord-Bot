@@ -1,6 +1,13 @@
 import type { Database } from '../database.js';
 import { AppState } from '../../state/app-state.js';
-import { nowIso, feedCategory, FEED_CATEGORY_LIMITS, type Feed, type FeedType } from '../../state/types.js';
+import {
+  nowIso,
+  feedCategory,
+  FEED_CATEGORY_LIMITS,
+  type Feed,
+  type FeedCategory,
+  type FeedType,
+} from '../../state/types.js';
 
 /**
  * Feed persistence.
@@ -9,6 +16,7 @@ export class FeedRepository {
   constructor(
     protected readonly db: Database,
     protected readonly state: AppState,
+    protected readonly categoryLimits: Readonly<Partial<Record<FeedCategory, number>>> = FEED_CATEGORY_LIMITS,
   ) {}
 
   listFeeds(userId: number): Feed[] {
@@ -39,8 +47,8 @@ export class FeedRepository {
     }
 
     const category = feedCategory(feedType);
-    const limit = category ? FEED_CATEGORY_LIMITS[category] : undefined;
-    if (limit !== undefined) {
+    const limit = category ? this.categoryLimits[category] : undefined;
+    if (limit !== undefined && limit > 0) {
       const currentCount = this.state.listFeeds(userId).filter((f) => feedCategory(f.feedType) === category).length;
       if (currentCount >= limit) {
         const label = category === 'rss' ? 'News & RSS' : category === 'reddit' ? 'Reddit' : category;

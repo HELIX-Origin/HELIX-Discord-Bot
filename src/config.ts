@@ -1,6 +1,8 @@
 import { resolve } from 'node:path';
 
 import type { LogLevel } from './util/logger.js';
+import type { FeedCategory } from './state/types.js';
+import { FEED_CATEGORY_LIMITS } from './state/types.js';
 
 export interface FeatureFlags {
   feedsEnabled: boolean;
@@ -44,6 +46,7 @@ export interface AppConfig {
   twitchClientId: string | null;
   twitchClientSecret: string | null;
   features: FeatureFlags;
+  feedCategoryLimits: Readonly<Partial<Record<FeedCategory, number>>>;
 }
 
 export function defaultConfig(): AppConfig {
@@ -196,6 +199,8 @@ export function defaultConfig(): AppConfig {
     adminPanelEnabled: parseEnvFlag(process.env['ADMIN_PANEL_ENABLED'], true),
   };
 
+  const feedCategoryLimits = parseFeedCategoryLimits(process.env['FEED_CATEGORY_LIMITS']);
+
   return {
     host,
     port,
@@ -229,6 +234,7 @@ export function defaultConfig(): AppConfig {
     twitchClientId,
     twitchClientSecret,
     features,
+    feedCategoryLimits,
   };
 }
 
@@ -260,4 +266,30 @@ function parseEnvFlag(raw: string | undefined, defaultEnabled: boolean): boolean
   if (raw === undefined) return defaultEnabled;
   const v = raw.trim().toLowerCase();
   return v === 'true' || v === '1' || v === 'yes' || v === 'on';
+}
+
+const FEED_CATEGORY_KEYS: ReadonlySet<string> = new Set(['rss', 'reddit', 'freegames', 'streamalerts']);
+
+/**
+ * Parse FEED_CATEGORY_LIMITS as a comma-separated `category=number` list, e.g.
+ * `rss=10,reddit=10`. Overrides the defaults in FEED_CATEGORY_LIMITS; a value
+ * of `0` removes the cap for that category (unlimited). Unknown categories or
+ * non-numeric values are ignored rather than fatal to keep start-up safe.
+ */
+function parseFeedCategoryLimits(raw: string | undefined): Readonly<Partial<Record<FeedCategory, number>>> {
+  if (raw === undefined || !raw.trim()) return FEED_CATEGORY_LIMITS;
+
+  const limits: Partial<Record<FeedCategory, number>> = { ...FEED_CATEGORY_LIMITS };
+  for (const part of raw.split(',')) {
+    const trimmed = part.trim();
+    if (!trimmed) continue;
+    const eq = trimmed.indexOf('=');
+    if (eq <= 0) continue;
+    const key = trimmed.slice(0, eq).trim();
+    if (!FEED_CATEGORY_KEYS.has(key)) continue;
+    const value = Number(trimmed.slice(eq + 1).trim());
+    if (!Number.isInteger(value) || value < 0) continue;
+    limits[key as FeedCategory] = value;
+  }
+  return limits;
 }

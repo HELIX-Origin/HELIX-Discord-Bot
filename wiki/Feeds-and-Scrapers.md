@@ -42,12 +42,14 @@ graph LR
 
 Each dashboard **tab** maps to a feed category. Feeds are counted per category, per server user.
 
-| Tab (category) | Feed types | Max feeds |
+| Tab (category) | Feed types | Default max feeds |
 | :--- | :--- | :--- |
-| **News & RSS** | `rss`, `scrape` | **5** |
-| **Reddit** | `reddit` | **5** |
+| **News & RSS** | `rss`, `scrape` | **10** |
+| **Reddit** | `reddit` | **10** |
 | **Free Games** | `free_games` (all stores) | Unlimited |
 | **Stream Alerts** | `youtube`, `twitch` | Unlimited |
+
+Hosts can customize the caps with the `FEED_CATEGORY_LIMITS` environment variable (a CSV of `category=number` pairs, e.g. `rss=15,reddit=20`). Setting a category to `0` removes the cap for that tab. See [wiki/Configuration.md](Configuration.md).
 
 Attempting to exceed a limit returns a clear `Subscription limit reached` error in the dashboard and via the slash commands.
 

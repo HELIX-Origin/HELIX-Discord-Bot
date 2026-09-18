@@ -270,8 +270,8 @@ export function feedCategory(feedType: FeedType): FeedCategory | null {
  * from this map are unlimited.
  */
 export const FEED_CATEGORY_LIMITS: Readonly<Partial<Record<FeedCategory, number>>> = {
-  rss: 5,
-  reddit: 5,
+  rss: 10,
+  reddit: 10,
 };
 
 export function feedTopic(feed: Feed): string {

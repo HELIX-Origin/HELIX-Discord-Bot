@@ -74,6 +74,7 @@ Thread delivery is a **per-server** feature — each feed delivers into its own 
 | `DASHBOARD_THEME` | No | `dark` | `glassmorphism` \| `dark` \| `light` \| `cyberpunk` \| `dracula` \| `nord` \| `emerald`. Aliases: `DEFAULT_THEME`, `THEME`. |
 | `DASHBOARD_COLOR_SCHEME` | No | `default` | Accent palette for any theme: `default` \| `cyan` \| `purple` \| `blue` \| `emerald` \| `rose` \| `amber` \| `indigo` \| `crimson` \| `teal` \| `sunset`. Aliases: `COLOR_SCHEME`, `ACCENT_COLOR`. |
 | `LANDING_PAGE_ENABLED` | No | `true` | Set to `false` to disable the landing page at `/` and redirect straight to `/dashboard`. Alias: `ENABLE_LANDING_PAGE`. |
+| `FEED_CATEGORY_LIMITS` | No | `rss=10,reddit=10` | Per-tab feed subscription caps as a CSV of `category=number` pairs (e.g. `rss=15,reddit=20`). Supported categories: `rss`, `reddit`, `freegames`, `streamalerts`. Set a category to `0` to make it unlimited. Categories not mentioned keep their defaults. |
 
 ### 🚩 Feature Flags
 
