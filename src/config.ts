@@ -193,7 +193,8 @@ export function defaultConfig(): AppConfig {
     feedsEnabled: parseEnvFlag(process.env['FEEDS_ENABLED'], true),
     streamAlertsEnabled: parseEnvFlag(process.env['STREAM_ALERTS_ENABLED'], true),
     threadsEnabled: parseEnvFlag(process.env['THREADS_ENABLED'], true),
-    gifsEnabled: parseEnvFlag(process.env['GIFS_ENABLED'], true),
+    // GIF feature is broken upstream (KLIPY) and deprecated; disabled by default pending removal in next update
+    gifsEnabled: parseEnvFlag(process.env['GIFS_ENABLED'], false),
     administrationEnabled: parseEnvFlag(process.env['ADMINISTRATION_ENABLED'], true),
     dashboardEnabled: parseEnvFlag(process.env['DASHBOARD_ENABLED'], true),
     adminPanelEnabled: parseEnvFlag(process.env['ADMIN_PANEL_ENABLED'], true),

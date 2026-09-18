@@ -76,6 +76,19 @@ export const redditCommandDef: ApplicationCommand = {
         },
       ],
     },
+    {
+      name: 'poll',
+      description: 'Check for new Reddit posts immediately',
+      type: ApplicationCommandOptionType.SUB_COMMAND,
+      options: [
+        {
+          name: 'id',
+          description: 'The numeric feed ID or subreddit name to poll (optional, polls all if omitted)',
+          type: ApplicationCommandOptionType.STRING,
+          required: false,
+        },
+      ],
+    },
   ],
 };
 
@@ -258,10 +271,83 @@ export async function handleRedditCommand(
       .respond();
   }
 
+  if (subName === 'poll') {
+    const rawId = opts.find((o) => o.name === 'id')?.value as string | undefined;
+    const allFeeds = deps.repo.listFeeds(user.id);
+
+    if (rawId) {
+      const identifier = rawId.trim().toLowerCase();
+      const feed = allFeeds.find(
+        (f) =>
+          f.feedType === 'reddit' &&
+          (String(f.id) === identifier ||
+            f.name.toLowerCase() === identifier ||
+            f.name.toLowerCase() === `r/${identifier}` ||
+            f.url.toLowerCase().includes(`/r/${identifier}/`)),
+      );
+      if (!feed) {
+        return EmbedHandler.for(deps)
+          .error()
+          .title('Feed Not Found')
+          .description(`Reddit feed "${identifier}" was not found in this server.`)
+          .respond(true);
+      }
+      try {
+        await deps.feeds?.pollFeed(user.id, feed.id, true);
+        deps.repo.logActivity(user.id, 'info', 'bot', `Manually polled Reddit feed "${feed.name}" via Discord bot`);
+        return EmbedHandler.for(deps)
+          .success()
+          .title('Reddit Check Complete', '👽')
+          .description(`Successfully triggered check for **${feed.name}** (\`#${feed.id}\`).`)
+          .footer(`${appDisplayName(deps)} • Reddit Watcher`)
+          .respond();
+      } catch (err) {
+        return EmbedHandler.for(deps)
+          .error()
+          .title('Poll Failed')
+          .description((err as Error).message)
+          .respond(true);
+      }
+    }
+
+    const redditFeeds = allFeeds.filter((f) => f.feedType === 'reddit');
+    if (!redditFeeds.length) {
+      return EmbedHandler.for(deps)
+        .info()
+        .title('No Reddit Feeds')
+        .description('No Reddit feeds configured in this server. Use `/reddit add` to add one.')
+        .respond(true);
+    }
+
+    try {
+      for (const feed of redditFeeds) {
+        await deps.feeds?.pollFeed(user.id, feed.id, true);
+      }
+      deps.repo.logActivity(
+        user.id,
+        'info',
+        'bot',
+        `Manually polled all ${redditFeeds.length} Reddit feeds via Discord bot`,
+      );
+      return EmbedHandler.for(deps)
+        .success()
+        .title('Reddit Check Triggered', '👽')
+        .description(`Triggered an immediate check for **${redditFeeds.length}** Reddit feed(s).`)
+        .footer(`${appDisplayName(deps)} • Reddit Watcher`)
+        .respond();
+    } catch (err) {
+      return EmbedHandler.for(deps)
+        .error()
+        .title('Poll Failed')
+        .description((err as Error).message)
+        .respond(true);
+    }
+  }
+
   return EmbedHandler.for(deps)
     .info()
     .title('Reddit Command Usage', '👽')
-    .description('Use `/reddit add`, `/reddit list`, `/reddit remove`, or `/reddit toggle`.')
+    .description('Use `/reddit add`, `/reddit list`, `/reddit remove`, `/reddit toggle`, or `/reddit poll`.')
     .respond();
 }
 
@@ -270,13 +356,14 @@ registerCommandMetadata({
   description: 'Manage Reddit subreddit feeds and image posts for this server',
   category: 'feeds',
   emoji: '👽',
-  usage: '/reddit <add|list|remove|toggle>',
+  usage: '/reddit <add|list|remove|toggle|poll>',
   options: redditCommandDef.options,
   examples: [
     '/reddit add subreddit:memes',
     '/reddit add subreddit:wallpapers channel:#wallpapers',
     '/reddit list',
     '/reddit toggle id:1 enabled:false',
+    '/reddit poll',
   ],
 });
 

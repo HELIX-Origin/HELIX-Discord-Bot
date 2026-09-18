@@ -81,9 +81,12 @@ export function renderFeedsTab(): string {
         <button onclick="submitAddRssFeed()" class="btn btn-primary btn-sm btn-block" style="margin-top: 0.75rem;"><i class="fa-solid fa-plus"></i> Add RSS Feed</button>
       </div>
 
-      <div>
-        <div class="section-title"><i class="fa-solid fa-rss" style="color: var(--primary);"></i> News &amp; RSS Feeds</div>
-        <div class="section-desc">All RSS and scrape feeds for this server, grouped by topic. Click a feed to open its setup page.</div>
+      <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
+        <div>
+          <div class="section-title"><i class="fa-solid fa-rss" style="color: var(--primary);"></i> News &amp; RSS Feeds</div>
+          <div class="section-desc">All RSS and scrape feeds for this server, grouped by topic. Click a feed to open its setup page.</div>
+        </div>
+        <button onclick="triggerGuildPoll()" class="btn btn-ghost btn-sm"><i class="fa-solid fa-bolt"></i> Check All Now</button>
       </div>
       <div id="feeds-topic-groups" style="display: flex; flex-direction: column; gap: 1.25rem;">
         <div class="empty-state">Loading feeds...</div>

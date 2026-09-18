@@ -70,6 +70,19 @@ export const twitchCommandDef: ApplicationCommand = {
         },
       ],
     },
+    {
+      name: 'check',
+      description: 'Check Twitch streamer live status immediately',
+      type: ApplicationCommandOptionType.SUB_COMMAND,
+      options: [
+        {
+          name: 'id',
+          description: 'The numeric feed ID or streamer username to check (optional, checks all if omitted)',
+          type: ApplicationCommandOptionType.STRING,
+          required: false,
+        },
+      ],
+    },
   ],
 };
 
@@ -252,10 +265,88 @@ export async function handleTwitchCommand(
       .respond();
   }
 
+  if (subName === 'check') {
+    const rawId = opts.find((o) => o.name === 'id')?.value as string | undefined;
+    const allFeeds = deps.repo.listFeeds(user.id);
+
+    if (rawId) {
+      const identifier = rawId.trim().toLowerCase();
+      const feed = allFeeds.find(
+        (f) =>
+          f.feedType === 'twitch' &&
+          (String(f.id) === identifier ||
+            f.name.toLowerCase() === identifier ||
+            f.name.toLowerCase().includes(identifier) ||
+            f.url.toLowerCase().includes(identifier)),
+      );
+      if (!feed) {
+        return EmbedHandler.for(deps)
+          .error()
+          .title('Streamer Not Found')
+          .description(`Twitch streamer "${identifier}" was not found in this server.`)
+          .respond(true);
+      }
+      try {
+        await deps.feeds?.pollFeed(user.id, feed.id, true);
+        deps.repo.logActivity(
+          user.id,
+          'info',
+          'bot',
+          `Manually checked Twitch streamer "${feed.name}" via Discord bot`,
+        );
+        return EmbedHandler.for(deps)
+          .success()
+          .title('Twitch Check Triggered', '🟣')
+          .description(`Successfully triggered check for **${feed.name}** (\`#${feed.id}\`).`)
+          .footer(`${appDisplayName(deps)} • Twitch Watcher`)
+          .respond();
+      } catch (err) {
+        return EmbedHandler.for(deps)
+          .error()
+          .title('Check Failed')
+          .description((err as Error).message)
+          .respond(true);
+      }
+    }
+
+    const twitchFeeds = allFeeds.filter((f) => f.feedType === 'twitch');
+    if (!twitchFeeds.length) {
+      return EmbedHandler.for(deps)
+        .info()
+        .title('No Twitch Streamers')
+        .description('No Twitch streamers subscribed in this server. Use `/twitch add` to add one.')
+        .respond(true);
+    }
+
+    try {
+      for (const feed of twitchFeeds) {
+        await deps.feeds?.pollFeed(user.id, feed.id, true);
+      }
+      deps.repo.logActivity(
+        user.id,
+        'info',
+        'bot',
+        `Manually checked all ${twitchFeeds.length} Twitch streamers via Discord bot`,
+      );
+      return EmbedHandler.for(deps)
+        .success()
+        .title('Twitch Check Complete', '🟣')
+        .description(`Triggered an immediate check for **${twitchFeeds.length}** Twitch streamer(s).`)
+        .footer(`${appDisplayName(deps)} • Twitch Watcher`)
+        .respond();
+    } catch (err) {
+      return EmbedHandler.for(deps)
+        .error()
+        .title('Check Failed')
+        .description((err as Error).message)
+        .respond(true);
+    }
+  }
+
   return EmbedHandler.for(deps)
     .info()
     .title('Twitch Command Usage', '🟣')
-    .description('Use `/twitch add`, `/twitch list`, `/twitch remove`, or `/twitch toggle`.')
+    .description('Use `/twitch add`, `/twitch list`, `/twitch remove`, `/twitch toggle`, or `/twitch check`.')
     .respond();
 }
 
@@ -264,13 +355,14 @@ registerCommandMetadata({
   description: 'Manage Twitch livestream alerts for this server',
   category: 'feeds',
   emoji: '🟣',
-  usage: '/twitch <add|list|remove|toggle>',
+  usage: '/twitch <add|list|remove|toggle|check>',
   options: twitchCommandDef.options,
   examples: [
     '/twitch add streamer:ninja',
     '/twitch add streamer:https://twitch.tv/shroud',
     '/twitch list',
     '/twitch toggle id:1 enabled:false',
+    '/twitch check',
   ],
 });
 

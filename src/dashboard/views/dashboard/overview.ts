@@ -57,7 +57,10 @@ export function renderOverviewTab(options: OverviewOptions): string {
             <div class="card-title"><i class="fa-solid fa-clock-rotate-left" style="color: var(--primary);"></i> Recent Activity &amp; Logs</div>
             <div class="card-desc">System logs, delivery notifications, and parser events</div>
           </div>
-          <button onclick="loadOverviewTab()" class="btn btn-ghost btn-sm"><i class="fa-solid fa-rotate-right"></i> Refresh</button>
+          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <button onclick="triggerGuildPoll()" class="btn btn-primary btn-sm"><i class="fa-solid fa-bolt"></i> Check Feeds &amp; Alerts Now</button>
+            <button onclick="loadOverviewTab()" class="btn btn-ghost btn-sm"><i class="fa-solid fa-rotate-right"></i> Refresh</button>
+          </div>
         </div>
         <div id="activity-list" style="display: flex; flex-direction: column; gap: 0.5rem; max-height: 340px; overflow-y: auto;">
           <div class="empty-state">Loading recent activity...</div>

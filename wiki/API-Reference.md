@@ -98,6 +98,43 @@ DELETE /api/feeds/:id
 
 ---
 
+### 5. Manually Poll Single Feed
+```http
+POST /api/feeds/:id/poll
+```
+**Auth**: Guild Manager / Owner.
+**Response**: `200 OK`
+```json
+{
+  "success": true,
+  "message": "Polled feed successfully",
+  "feedId": 1
+}
+```
+
+---
+
+### 6. Manually Poll All Feeds
+```http
+POST /api/feeds/poll-all
+Content-Type: application/json
+
+{
+  "guildId": "123456789012345678"
+}
+```
+**Auth**: Guild Manager / Owner.
+**Response**: `200 OK`
+```json
+{
+  "success": true,
+  "message": "Triggered poll for 5 feed(s)",
+  "polledCount": 5
+}
+```
+
+---
+
 ## 📚 News Feeds Presets Catalog
 
 ### 1. Fetch Verified Presets
@@ -240,9 +277,19 @@ Content-Type: application/json
   "forumChannelIds": ["111111111111111111"]
 }
 ```
+### 8. Manually Poll All Guild Feeds & Alerts
+```http
+POST /api/guilds/:guildId/poll
+```
 **Auth**: User must have `Manage Channels` (or Administrator) on the target guild.
-**Validation**: `threadsEnabled` boolean; `forumChannelIds` must all be IDs of **forum (type 15)** channels present in the guild.
-**Response**: the updated guild config object.
+**Response**: `200 OK`
+```json
+{
+  "success": true,
+  "message": "Triggered poll for 8 feed(s) in server",
+  "polledCount": 8
+}
+```
 
 ---
 
@@ -277,3 +324,22 @@ GET /api/logs?limit=50
   }
 ]
 ```
+
+---
+
+## 🔧 Developer & Host Admin Endpoints
+
+### 1. Force Poll All Feeds (Global)
+```http
+POST /api/admin/feeds/poll-all
+```
+**Auth**: Discord Bot Application Owner or Team Member.
+**Response**: `200 OK`
+```json
+{
+  "success": true,
+  "message": "Triggered poll for 42 feed(s)",
+  "polledCount": 42
+}
+```
+

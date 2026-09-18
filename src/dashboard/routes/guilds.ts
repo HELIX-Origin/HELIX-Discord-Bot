@@ -195,4 +195,28 @@ export function registerGuildRoutes(router: Router<AppDeps>): void {
       sendError(res, 500, err instanceof Error ? err.message : 'Failed to update guild settings');
     }
   });
+
+  router.add('POST', '/api/guilds/:guildId/poll', async (req, res, ctx, d) => {
+    const userId = await requireDashboardUser(req, res, d);
+    if (userId === null) return;
+    const guildId = ctx.params['guildId'];
+    if (!guildId) return sendError(res, 400, 'guildId is required');
+    if (!canUserManageGuild(userId, guildId, d)) {
+      return sendError(res, 403, 'Forbidden: You cannot manage feeds in this server.');
+    }
+
+    try {
+      const count = await d.feeds.pollGuildFeeds(guildId, true);
+      d.repo.logActivity(
+        userId,
+        'info',
+        'feeds',
+        `Manually triggered check for ${count} feeds/alerts in guild ${guildId}`,
+      );
+      sendJson(res, 200, { ok: true, polledCount: count, guildId });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      sendError(res, 500, `Failed to poll guild feeds: ${msg}`);
+    }
+  });
 }

@@ -53,6 +53,11 @@ export const freeGamesCommandDef: ApplicationCommand = {
       description: 'Disable free game notifications for this server',
       type: ApplicationCommandOptionType.SUB_COMMAND,
     },
+    {
+      name: 'check',
+      description: 'Trigger an immediate check for active free games and giveaways',
+      type: ApplicationCommandOptionType.SUB_COMMAND,
+    },
   ],
 };
 
@@ -206,10 +211,45 @@ export async function handleFreeGamesCommand(
       .respond();
   }
 
+  if (subName === 'check') {
+    const allFeeds = deps.repo.listFeeds(user.id);
+    const freeGamesFeeds = allFeeds.filter((f) => f.feedType === 'free_games' || f.feedType?.startsWith('free_games'));
+    if (!freeGamesFeeds.length) {
+      return EmbedHandler.for(deps)
+        .info()
+        .title('No Free Games Alerts Configured', '🎮')
+        .description('There are no active free game feeds configured for this server. Use `/free-games enable` first.')
+        .respond(true);
+    }
+
+    try {
+      for (const feed of freeGamesFeeds) {
+        await deps.feeds?.pollFeed(user.id, feed.id, true);
+      }
+      deps.repo.logActivity(user.id, 'info', 'bot', `Manual Free Games check triggered via Discord bot`);
+      return EmbedHandler.for(deps)
+        .success()
+        .title('Free Games Check Triggered', '🎮')
+        .description(
+          `Triggered an immediate check for **${freeGamesFeeds.length}** free game feed(s). Any new active giveaways will deliver to their configured channels.`,
+        )
+        .footer(`${appDisplayName(deps)} • Free Games Alert Engine`)
+        .respond();
+    } catch (err) {
+      return EmbedHandler.for(deps)
+        .error()
+        .title('Failed to Trigger Free Games Check')
+        .description((err as Error).message)
+        .respond(true);
+    }
+  }
+
   return EmbedHandler.for(deps)
     .info()
     .title('Free Games Command Usage', '🎮')
-    .description('Use `/free-games enable [channel]`, `/free-games status`, or `/free-games disable`.')
+    .description(
+      'Use `/free-games enable [channel]`, `/free-games status`, `/free-games check`, or `/free-games disable`.',
+    )
     .respond();
 }
 
@@ -218,12 +258,13 @@ registerCommandMetadata({
   description: 'Manage weekly free game notifications (Epic Games, Steam, GOG, etc.)',
   category: 'feeds',
   emoji: '🎮',
-  usage: '/free-games <enable|status|disable>',
+  usage: '/free-games <enable|status|disable|check>',
   options: freeGamesCommandDef.options,
   examples: [
     '/free-games enable channel:#giveaways',
     '/free-games enable platform:Epic Games Store channel:#freebies',
     '/free-games status',
+    '/free-games check',
     '/free-games disable',
   ],
 });

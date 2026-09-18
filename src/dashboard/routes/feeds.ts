@@ -233,6 +233,62 @@ export function registerFeedsRoutes(router: Router<AppDeps>): void {
     sendJson(res, 200, { ok: true });
   });
 
+  router.add('POST', '/api/feeds/:id/poll', async (req, res, ctx, d) => {
+    const userId = await requireDashboardUser(req, res, d);
+    if (userId === null) return;
+    const id = Number(ctx.params['id']);
+    let feed = d.repo.getFeed(userId, id);
+    if (!feed) {
+      feed = d.repo.listFeedsForAllUsers().find((f) => f.id === id) || null;
+    }
+    if (!feed) return sendError(res, 404, 'Feed not found');
+
+    if (feed.guildId && !canUserManageGuild(userId, feed.guildId, d)) {
+      return sendError(res, 403, 'Forbidden: You do not have permission to trigger feeds in this server.');
+    }
+
+    try {
+      await d.feeds.pollFeed(feed.userId, feed.id, true);
+      d.repo.logActivity(userId, 'info', 'feeds', `Manually triggered check for feed "${feed.name}"`);
+      sendJson(res, 200, { ok: true, feedId: feed.id, name: feed.name });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      d.repo.logActivity(userId, 'error', 'feeds', `Manual poll failed for feed "${feed.name}": ${msg}`);
+      sendError(res, 500, `Failed to poll feed: ${msg}`);
+    }
+  });
+
+  router.add('POST', '/api/feeds/poll-all', async (req, res, _ctx, d) => {
+    const userId = await requireDashboardUser(req, res, d);
+    if (userId === null) return;
+    const url = new URL(req.url ?? '/', `http://${req.headers.host ?? 'localhost'}`);
+    const guildId = url.searchParams.get('guildId');
+
+    try {
+      if (guildId) {
+        if (!canUserManageGuild(userId, guildId, d)) {
+          return sendError(res, 403, 'Forbidden: You cannot manage feeds in this server.');
+        }
+        const count = await d.feeds.pollGuildFeeds(guildId, true);
+        d.repo.logActivity(
+          userId,
+          'info',
+          'feeds',
+          `Manually triggered check for ${count} feeds/alerts in guild ${guildId}`,
+        );
+        sendJson(res, 200, { ok: true, polledCount: count, guildId });
+      } else {
+        const userFeeds = d.repo.listFeeds(userId);
+        await Promise.all(userFeeds.map((f) => d.feeds.pollFeed(userId, f.id, true)));
+        d.repo.logActivity(userId, 'info', 'feeds', `Manually triggered check for ${userFeeds.length} feeds/alerts`);
+        sendJson(res, 200, { ok: true, polledCount: userFeeds.length });
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      sendError(res, 500, `Failed to poll feeds: ${msg}`);
+    }
+  });
+
   // ---- Webhook endpoints for real-time feed updates ----
   // YouTube PubSubHubbub
   router.add('GET', '/api/feeds/webhooks/youtube', async (req, res, _ctx, _d) => {

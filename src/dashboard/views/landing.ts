@@ -405,9 +405,9 @@ export function renderLandingHtml(deps: AppDeps, userId: number | null = null): 
           <div class="feature-icon" style="background: rgba(244, 63, 94, 0.15); color: #f43f5e;">
             <i class="fa-solid fa-gift"></i>
           </div>
-          <h3 class="feature-title">Entertainment GIF Commands</h3>
+          <h3 class="feature-title">Entertainment GIF Commands <span style="font-size: 0.75rem; color: #f43f5e; font-weight: 500;">(Deprecated)</span></h3>
           <p class="feature-desc">
-            Fun GIF commands powered by KLIPY API — <code>/gif</code>, <code>/slap</code>, <code>/hug</code>, <code>/kiss</code>, <code>/pat</code>, <code>/bonk</code>, and more. Category autocomplete and random GIF support.
+            GIF commands powered by KLIPY API — <code>/gif</code>, <code>/slap</code>, <code>/hug</code>, etc. <em>Currently broken upstream and disabled by default; scheduled for complete removal in the next update.</em>
           </p>
         </div>
 
@@ -430,7 +430,7 @@ export function renderLandingHtml(deps: AppDeps, userId: number | null = null): 
         <p class="section-subtitle">Manage everything from inside Discord or through the web dashboard.</p>
       </div>
 
-      <div class="code-preview">
+      <div class="code-showcase">
         <div class="code-line">
           <span class="code-cmd">/feed add url:&lt;feed_url&gt; channel:#announcements role:@NewsPings</span>
           <span class="code-comment"># Subscribe channel to any RSS or Reddit feed</span>
@@ -441,7 +441,7 @@ export function renderLandingHtml(deps: AppDeps, userId: number | null = null): 
         </div>
         <div class="code-line">
           <span class="code-cmd">/gif anime</span>
-          <span class="code-comment"># Get an anime GIF (also /slap, /hug, /kiss, etc.)</span>
+          <span class="code-comment"># GIF commands (deprecated &amp; disabled by default)</span>
         </div>
         <div class="code-line">
           <span class="code-cmd">/admin warn @user reason:<reason></span>

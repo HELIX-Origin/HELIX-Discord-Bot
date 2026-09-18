@@ -52,17 +52,17 @@ export class FeedWatcher {
     this.threads = threads;
   }
 
-  async pollFeed(userId: number, feedId: number): Promise<void> {
+  async pollFeed(userId: number, feedId: number, force = false): Promise<void> {
     const feed = this.repo.getFeed(userId, feedId);
     if (!feed) return;
-    if (!feed.enabled) return;
+    if (!feed.enabled && !force) return;
 
     const lockKey = `feed:${feedId}`;
     if (this.redis && !(await this.redis.acquireLock(lockKey, 60_000))) {
       return; // another instance is polling this feed
     }
     try {
-      await this.pollFeedLocked(userId, feed);
+      await this.pollFeedLocked(userId, feed, force);
     } finally {
       await this.redis?.releaseLock(lockKey);
     }
@@ -82,9 +82,9 @@ export class FeedWatcher {
     return 3_600_000;
   }
 
-  private async pollFeedLocked(userId: number, feed: Feed): Promise<void> {
+  private async pollFeedLocked(userId: number, feed: Feed, force = false): Promise<void> {
     const minElapsed = this.getFeedPollIntervalMs(userId);
-    if (feed.lastCheckedAt) {
+    if (!force && feed.lastCheckedAt) {
       const lastCheck = new Date(feed.lastCheckedAt).getTime();
       if (!Number.isNaN(lastCheck) && Date.now() - lastCheck < minElapsed) {
         this.logger.debug('Skipping feed poll; feed was polled within the configured interval', {
@@ -111,25 +111,28 @@ export class FeedWatcher {
     const isTwitchFeed = feed.feedType === 'twitch';
 
     // For Free Games feeds: automated polling runs weekly at the start of every Sunday (UTC).
+    // Manual force trigger bypasses the Sunday schedule.
     if (isFreeGamesFeed) {
-      const now = new Date();
-      const isSunday = now.getUTCDay() === 0;
-      if (!isSunday) {
-        this.logger.debug('Skipping free games poll; free games feeds only poll on Sundays', {
-          feedId: feed.id,
-          feedName: feed.name,
-        });
-        return;
-      }
+      if (!force) {
+        const now = new Date();
+        const isSunday = now.getUTCDay() === 0;
+        if (!isSunday) {
+          this.logger.debug('Skipping free games poll; free games feeds only poll on Sundays', {
+            feedId: feed.id,
+            feedName: feed.name,
+          });
+          return;
+        }
 
-      const todayIso = now.toISOString().slice(0, 10);
-      if (feed.lastCheckedAt && feed.lastCheckedAt.slice(0, 10) === todayIso) {
-        this.logger.debug('Skipping free games poll; already polled this Sunday', {
-          feedId: feed.id,
-          feedName: feed.name,
-          lastCheckedAt: feed.lastCheckedAt,
-        });
-        return;
+        const todayIso = now.toISOString().slice(0, 10);
+        if (feed.lastCheckedAt && feed.lastCheckedAt.slice(0, 10) === todayIso) {
+          this.logger.debug('Skipping free games poll; already polled this Sunday', {
+            feedId: feed.id,
+            feedName: feed.name,
+            lastCheckedAt: feed.lastCheckedAt,
+          });
+          return;
+        }
       }
 
       await this.pollFreeGamesLocked(userId, feed);
@@ -578,14 +581,18 @@ export class FeedWatcher {
     }
   }
 
-  async pollAllFeeds(): Promise<void> {
-    const userIds = new Set<number>();
+  async pollAllFeeds(force = false): Promise<void> {
     const allFeeds: Array<{ userId: number; id: number }> = [];
     for (const feed of this.repo.listFeedsForAllUsers()) {
-      if (feed.enabled !== 1) continue;
-      userIds.add(feed.userId);
+      if (feed.enabled !== 1 && !force) continue;
       allFeeds.push({ userId: feed.userId, id: feed.id });
     }
-    await Promise.all(allFeeds.map((f) => this.pollFeed(f.userId, f.id)));
+    await Promise.all(allFeeds.map((f) => this.pollFeed(f.userId, f.id, force)));
+  }
+
+  async pollGuildFeeds(guildId: string, force = true): Promise<number> {
+    const feeds = this.repo.listFeedsForAllUsers().filter((f) => f.guildId === guildId && (force || f.enabled === 1));
+    await Promise.all(feeds.map((f) => this.pollFeed(f.userId, f.id, force)));
+    return feeds.length;
   }
 }

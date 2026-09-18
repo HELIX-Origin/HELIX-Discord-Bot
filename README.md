@@ -46,7 +46,7 @@ All major subsystems are gated by environment variables (default `true`):
 | `FEEDS_ENABLED` | RSS/Reddit/Free Games feed delivery |
 | `STREAM_ALERTS_ENABLED` | YouTube/Twitch live & upload alerts |
 | `THREADS_ENABLED` | Forum thread delivery |
-| `GIFS_ENABLED` | KLIPY `/gif` and action commands |
+| `GIFS_ENABLED` | KLIPY `/gif` and action commands (default: `false` — broken & slated for removal in next update) |
 | `ADMINISTRATION_ENABLED` | `/admin` moderation, roles, voice |
 | `LAVA_ENABLED` | Music playback (Lavalink) |
 | `DASHBOARD_ENABLED` | Web dashboard & REST API |
@@ -54,7 +54,10 @@ All major subsystems are gated by environment variables (default `true`):
 
 Disable any flag to completely remove its commands, dashboard pages, and internal wiring.
 
-### 😂 Entertainment GIF Commands
+### 😂 Entertainment GIF Commands (Deprecated)
+> [!WARNING]
+> **Broken & Deprecated**: Entertainment GIF commands are non-functional due to upstream provider failures (KLIPY API). They are **disabled by default** (`GIFS_ENABLED=false`) and **scheduled for complete removal in the next update**.
+
 - **KLIPY-Powered GIFs**: `/gif [category]` with autocomplete for popular tags (anime, jojo, waifu, slap, gintama, doggo, cat, etc.).
 - **Action Commands**: Convenience commands `/slap`, `/hug`, `/kiss`, `/pat`, `/bonk`, `/cuddle`, `/tickle`, `/pet`, `/poke`, `/baka`, `/smug`, `/cry`, `/angry`, `/meme` — each maps to its KLIPY tag internally.
 - **Random GIF Fallback**: `/gif` without arguments returns a random GIF from the general pool.
@@ -90,7 +93,7 @@ Disable any flag to completely remove its commands, dashboard pages, and interna
 - **Slash Commands**: Interactive commands grouped by category:
   - **Feeds**: `/feed` (add/remove/list/pause/resume), `/stats`
   - **Music**: `/play`, `/queue`, `/skip`, `/previous`, `/shuffle`, `/loop`, `/volume`, `/seek`, `/nowplaying`, `/pause`, `/resume`, `/stop`, `/leave`
-  - **Entertainment**: `/gif`, `/slap`, `/hug`, `/kiss`, `/pat`, `/bonk`, `/cuddle`, `/tickle`, `/pet`, `/poke`, `/baka`, `/smug`, `/cry`, `/angry`, `/meme`
+  - **Entertainment (Deprecated)**: `/gif`, `/slap`, `/hug`, `/kiss`, `/pat`, `/bonk`, `/cuddle`, `/tickle`, `/pet`, `/poke`, `/baka`, `/smug`, `/cry`, `/angry`, `/meme` *(broken & disabled by default; slated for removal in next update)*
   - **Admin**: `/admin warn`, `/admin kick`, `/admin ban`, `/admin lock`, `/admin purge`, `/admin slowmode`, `/admin announce`, `/admin role`
   - **Utility**: `/about`, `/help`
 - **Automatic Owner Detection**: Automatically grants full Owner rights to Discord Application owners and team members upon Discord login.
@@ -195,7 +198,7 @@ Comprehensive guides, architecture breakdowns, configuration settings, and API s
 | [🤖 Reddit Feeds](../../wiki/Reddit-Feeds) | Pure Image vs Standard RSS modes, animated GIFs, sort filters, and presets. |
 | [📰 Feeds & Web Scraper](../../wiki/Feeds-and-Scrapers) | RSS/Atom parsing, CSS webpage scrapers, and the 700+ News Feeds catalog. |
 | [🤖 Discord Bot & Commands](../../wiki/Discord-Bot) | Developer Portal configuration, slash commands, direct channel delivery, and embed styling. |
-| [😂 Entertainment & GIF Commands](../../wiki/Entertainment) | KLIPY-powered `/gif` with autocomplete, action commands (`/slap`, `/hug`, etc.), and random GIF fallback. |
+| [😂 Entertainment & GIF Commands (Deprecated)](../../wiki/Entertainment) | *(Broken & Deprecated — Discontinued in next update)* KLIPY GIF commands; disabled by default (`GIFS_ENABLED=false`). |
 | [🛡️ Guild Administration](../../wiki/Administration) | Moderation (`/admin warn`, `/kick`, `/ban`, `/lock`, `/purge`, `/slowmode`, `/announce`), role management, voice controls, permission guards. |
 | [🏗️ Architecture & Design](../../wiki/Architecture-and-Design) | SQLite schema, AppState in-memory caching, RedisCoordinator, and FeedWatcher engine. |
 | [⚙️ Configuration Guide](../../wiki/Configuration) | Exhaustive reference for all `.env` environment variables and settings. |

@@ -53,3 +53,28 @@ To eliminate duplicated notifications across server restarts, feed updates, or m
 - **Conditional HTTP GET**: Uses `If-None-Match` (ETag) and `If-Modified-Since` headers to prevent downloading uncompressed payloads if the remote feed has not changed (returns `304 Not Modified`).
 - **Concurrent Worker Pools**: Feeds are polled in balanced asynchronous batches with configurable concurrency, preventing I/O starvation.
 - **Custom User-Agent Engine**: Sends compliant User-Agent headers with contact info to prevent bot blocks from Cloudflare or Akamai edge nodes.
+
+---
+
+## ⚡ Manual Polling & Immediate Triggers
+
+While all feeds and alerts poll automatically according to background schedules, immediate checks can be triggered on demand without waiting for scheduled intervals:
+
+### 1. Dashboard UI Triggers
+- **Server Overview**: Click **Check Feeds & Alerts Now** at the top of the Overview tab to poll all active feeds and alerts for the selected guild.
+- **Category Tabs**: Click **Check All Now** on the **News & RSS Feeds**, **Reddit Streams**, **Free Games Drops**, or **Stream Alerts** tabs to poll that specific category.
+- **Individual Feeds**: Click the ⚡ (**Check Now**) icon next to any feed in the feed list or within the feed edit modal.
+
+### 2. Discord Slash Commands
+- `/rss poll [id]` — Immediately poll a specific RSS/scraper feed or all RSS feeds in the server.
+- `/free-games check` — Immediately check for new game giveaways and free store drops.
+- `/youtube check [id]` — Immediately check for new uploads or livestreams.
+- `/twitch check [id]` — Immediately check live stream status for Twitch streamers.
+- `/reddit poll [id]` — Immediately poll a specific subreddit feed or all Reddit feeds in the server.
+
+### 3. REST API Endpoints
+- `POST /api/feeds/:id/poll` — Manually poll a single feed (requires Guild Manager / Owner).
+- `POST /api/feeds/poll-all` — Manually poll all feeds for the authenticated user or guild.
+- `POST /api/guilds/:guildId/poll` — Manually poll all feeds & stream alerts for a guild.
+- `POST /api/admin/feeds/poll-all` — System-wide forced poll of all registered feeds (Bot Owner/Team only).
+

@@ -76,6 +76,19 @@ export const youtubeCommandDef: ApplicationCommand = {
         },
       ],
     },
+    {
+      name: 'check',
+      description: 'Check for new YouTube uploads or livestreams immediately',
+      type: ApplicationCommandOptionType.SUB_COMMAND,
+      options: [
+        {
+          name: 'id',
+          description: 'The numeric feed ID or channel name to check (optional, checks all if omitted)',
+          type: ApplicationCommandOptionType.STRING,
+          required: false,
+        },
+      ],
+    },
   ],
 };
 
@@ -260,10 +273,87 @@ export async function handleYouTubeCommand(
       .respond();
   }
 
+  if (subName === 'check') {
+    const rawId = opts.find((o) => o.name === 'id')?.value as string | undefined;
+    const allFeeds = deps.repo.listFeeds(user.id);
+
+    if (rawId) {
+      const identifier = rawId.trim();
+      const feed = allFeeds.find(
+        (f) =>
+          f.feedType === 'youtube' &&
+          (String(f.id) === identifier ||
+            f.name.toLowerCase() === identifier.toLowerCase() ||
+            f.url.toLowerCase().includes(identifier.toLowerCase())),
+      );
+      if (!feed) {
+        return EmbedHandler.for(deps)
+          .error()
+          .title('Channel Not Found')
+          .description(`YouTube channel "${identifier}" was not found in this server.`)
+          .respond(true);
+      }
+      try {
+        await deps.feeds?.pollFeed(user.id, feed.id, true);
+        deps.repo.logActivity(
+          user.id,
+          'info',
+          'bot',
+          `Manually checked YouTube channel "${feed.name}" via Discord bot`,
+        );
+        return EmbedHandler.for(deps)
+          .success()
+          .title('YouTube Check Triggered', '▶️')
+          .description(`Successfully triggered check for **${feed.name}** (\`#${feed.id}\`).`)
+          .footer(`${appDisplayName(deps)} • YouTube Watcher`)
+          .respond();
+      } catch (err) {
+        return EmbedHandler.for(deps)
+          .error()
+          .title('Check Failed')
+          .description((err as Error).message)
+          .respond(true);
+      }
+    }
+
+    const ytFeeds = allFeeds.filter((f) => f.feedType === 'youtube');
+    if (!ytFeeds.length) {
+      return EmbedHandler.for(deps)
+        .info()
+        .title('No YouTube Channels')
+        .description('No YouTube channels subscribed in this server. Use `/youtube add` to add one.')
+        .respond(true);
+    }
+
+    try {
+      for (const feed of ytFeeds) {
+        await deps.feeds?.pollFeed(user.id, feed.id, true);
+      }
+      deps.repo.logActivity(
+        user.id,
+        'info',
+        'bot',
+        `Manually checked all ${ytFeeds.length} YouTube channels via Discord bot`,
+      );
+      return EmbedHandler.for(deps)
+        .success()
+        .title('YouTube Check Complete', '▶️')
+        .description(`Triggered an immediate check for **${ytFeeds.length}** YouTube channel(s).`)
+        .footer(`${appDisplayName(deps)} • YouTube Watcher`)
+        .respond();
+    } catch (err) {
+      return EmbedHandler.for(deps)
+        .error()
+        .title('Check Failed')
+        .description((err as Error).message)
+        .respond(true);
+    }
+  }
+
   return EmbedHandler.for(deps)
     .info()
     .title('YouTube Command Usage', '▶️')
-    .description('Use `/youtube add`, `/youtube list`, `/youtube remove`, or `/youtube toggle`.')
+    .description('Use `/youtube add`, `/youtube list`, `/youtube remove`, `/youtube toggle`, or `/youtube check`.')
     .respond();
 }
 
@@ -272,13 +362,14 @@ registerCommandMetadata({
   description: 'Manage YouTube upload and livestream alerts for this server',
   category: 'feeds',
   emoji: '▶️',
-  usage: '/youtube <add|list|remove|toggle>',
+  usage: '/youtube <add|list|remove|toggle|check>',
   options: youtubeCommandDef.options,
   examples: [
     '/youtube add channel_id:@veritasium',
     '/youtube add channel_id:UCsXVk37bltHxD1rDPwtNM8Q name:"Kurzgesagt"',
     '/youtube list',
     '/youtube toggle id:1 enabled:false',
+    '/youtube check',
   ],
 });
 

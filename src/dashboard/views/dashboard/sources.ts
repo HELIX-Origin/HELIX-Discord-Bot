@@ -2,9 +2,12 @@ export function renderSourcesTabs(): string {
   return `
     <!-- TAB: REDDIT -->
     <section id="tab-reddit" class="tab-pane">
-      <div>
-        <div class="section-title"><i class="fa-brands fa-reddit" style="color: #ff4500;"></i> Reddit Feeds</div>
-        <div class="section-desc">Subreddit image and post streams delivered straight to channels or forum threads.</div>
+      <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
+        <div>
+          <div class="section-title"><i class="fa-brands fa-reddit" style="color: #ff4500;"></i> Reddit Feeds</div>
+          <div class="section-desc">Subreddit image and post streams delivered straight to channels or forum threads.</div>
+        </div>
+        <button onclick="triggerGuildPoll()" class="btn btn-ghost btn-sm"><i class="fa-solid fa-bolt"></i> Check Now</button>
       </div>
 
       <div class="card">
@@ -45,9 +48,12 @@ export function renderSourcesTabs(): string {
 
     <!-- TAB: FREE GAMES -->
     <section id="tab-freegames" class="tab-pane">
-      <div>
-        <div class="section-title"><i class="fa-solid fa-gift" style="color: #10b981;"></i> Free Games</div>
-        <div class="section-desc">Automated giveaway alerts from Epic Games Store, Steam, GOG, and more.</div>
+      <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
+        <div>
+          <div class="section-title"><i class="fa-solid fa-gift" style="color: #10b981;"></i> Free Games</div>
+          <div class="section-desc">Automated giveaway alerts from Epic Games Store, Steam, GOG, and more.</div>
+        </div>
+        <button onclick="triggerGuildPoll()" class="btn btn-ghost btn-sm"><i class="fa-solid fa-bolt"></i> Check Now</button>
       </div>
 
       <div class="card">
@@ -92,9 +98,12 @@ export function renderSourcesTabs(): string {
 
     <!-- TAB: STREAM ALERTS -->
     <section id="tab-streamalerts" class="tab-pane">
-      <div>
-        <div class="section-title"><i class="fa-solid fa-satellite-dish" style="color: #9146ff;"></i> Stream Alerts</div>
-        <div class="section-desc">YouTube uploads &amp; Twitch live stream notifications delivered to your community.</div>
+      <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
+        <div>
+          <div class="section-title"><i class="fa-solid fa-satellite-dish" style="color: #9146ff;"></i> Stream Alerts</div>
+          <div class="section-desc">YouTube uploads &amp; Twitch live stream notifications delivered to your community.</div>
+        </div>
+        <button onclick="triggerGuildPoll()" class="btn btn-ghost btn-sm"><i class="fa-solid fa-bolt"></i> Check Now</button>
       </div>
 
       <div class="card">

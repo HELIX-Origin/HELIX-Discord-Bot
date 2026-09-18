@@ -87,6 +87,19 @@ export const rssCommandDef: ApplicationCommand = {
         },
       ],
     },
+    {
+      name: 'poll',
+      description: 'Trigger an immediate check for new RSS/Atom feed entries',
+      type: ApplicationCommandOptionType.SUB_COMMAND,
+      options: [
+        {
+          name: 'id',
+          description: 'The numeric ID or exact name of the feed to poll (optional, defaults to all)',
+          type: ApplicationCommandOptionType.STRING,
+          required: false,
+        },
+      ],
+    },
   ],
 };
 
@@ -253,10 +266,72 @@ export async function handleRssCommand(
       .respond();
   }
 
+  if (subName === 'poll') {
+    const rawId = opts.find((o) => o.name === 'id')?.value as string | undefined;
+    const allFeeds = deps.repo.listFeeds(user.id);
+
+    if (rawId) {
+      const feed = allFeeds.find(
+        (f) => String(f.id) === rawId.trim() || f.name.toLowerCase() === rawId.trim().toLowerCase(),
+      );
+      if (!feed) {
+        return EmbedHandler.for(deps)
+          .error()
+          .title('Feed Not Found')
+          .description(`No feed found with ID or name matching "${rawId}".`)
+          .respond(true);
+      }
+      try {
+        await deps.feeds?.pollFeed(user.id, feed.id, true);
+        deps.repo.logActivity(user.id, 'info', 'bot', `Manually polled feed "${feed.name}" via Discord bot`);
+        return EmbedHandler.for(deps)
+          .success()
+          .title('Feed Check Complete', '📰')
+          .description(`Successfully triggered check for **${feed.name}** (\`#${feed.id}\`).`)
+          .footer(`${appDisplayName(deps)} • Feed Poller`)
+          .respond();
+      } catch (err) {
+        return EmbedHandler.for(deps)
+          .error()
+          .title('Poll Failed')
+          .description((err as Error).message)
+          .respond(true);
+      }
+    }
+
+    const rssFeeds = allFeeds.filter((f) => f.feedType === 'rss' || f.feedType === 'scrape');
+    if (!rssFeeds.length) {
+      return EmbedHandler.for(deps)
+        .info()
+        .title('No Feeds Found')
+        .description('There are no RSS/Atom feeds configured in this server. Use `/rss add` to add one.')
+        .respond(true);
+    }
+
+    try {
+      for (const feed of rssFeeds) {
+        await deps.feeds?.pollFeed(user.id, feed.id, true);
+      }
+      deps.repo.logActivity(user.id, 'info', 'bot', `Manually polled all ${rssFeeds.length} feeds via Discord bot`);
+      return EmbedHandler.for(deps)
+        .success()
+        .title('Feeds Check Triggered', '📰')
+        .description(`Triggered an immediate check for **${rssFeeds.length}** RSS/scraper feed(s).`)
+        .footer(`${appDisplayName(deps)} • Feed Poller`)
+        .respond();
+    } catch (err) {
+      return EmbedHandler.for(deps)
+        .error()
+        .title('Poll Failed')
+        .description((err as Error).message)
+        .respond(true);
+    }
+  }
+
   return EmbedHandler.for(deps)
     .info()
     .title('RSS Command Usage', '📰')
-    .description('Use `/rss add`, `/rss list`, `/rss remove`, or `/rss toggle`.')
+    .description('Use `/rss add`, `/rss list`, `/rss poll`, `/rss remove`, or `/rss toggle`.')
     .respond();
 }
 
@@ -265,11 +340,13 @@ registerCommandMetadata({
   description: 'Manage RSS, Atom, and web scraper feeds for this server',
   category: 'feeds',
   emoji: '📰',
-  usage: '/rss <add|list|remove|toggle>',
+  usage: '/rss <add|list|poll|remove|toggle>',
   options: rssCommandDef.options,
   examples: [
     '/rss add url:https://news.ycombinator.com/rss name:"Hacker News"',
     '/rss list',
+    '/rss poll',
+    '/rss poll id:1',
     '/rss toggle id:1 enabled:false',
     '/rss remove id:1',
   ],

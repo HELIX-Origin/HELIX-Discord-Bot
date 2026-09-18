@@ -143,8 +143,14 @@ This section documents active and recently resolved critical issues as required 
     - `guildadmin.ts`: Guild administration tab for Admin role, feature toggles, and command prefix.
     - `settings.ts`: Host settings view for public/internal endpoints, active theme engine info, and registered team members.
     - `client-script.ts`: Browser client script for routing, feed CRUD, preset toggles, modal dialogs, and real-time updates.
-    - `dashboard.ts`: High-level HTML orchestrator combining modular components.
   - Adheres strictly to Rule 07 (zero external frontend runtime dependencies, SSR HTML + CSS Custom Properties, Discord OAuth2).
+
+### 17. Entertainment GIF Commands Deprecation & Discontinuation (Broken / Disabled by Default)
+- **Problem**: GIF commands powered by the upstream KLIPY API are broken and non-functional. External entertainment APIs add maintenance overhead and runtime fragility.
+- **Resolution**:
+  - Marked all GIF commands as broken and deprecated across documentation (`wiki/Entertainment.md`, `wiki/Discord-Bot.md`, `wiki/HOME.md`, `README.md`).
+  - Disabled by default: `GIFS_ENABLED` flag changed to default to `false` in `src/config.ts` and `.env.example`.
+  - Documented scheduled complete retirement and removal of all entertainment commands (`/gif`, `/slap`, `/hug`, etc.) and the KLIPY client in the next update.
 
 ---
 

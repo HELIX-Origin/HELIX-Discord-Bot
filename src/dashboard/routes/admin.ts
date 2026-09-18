@@ -92,6 +92,26 @@ export function registerAdminRoutes(router: Router<AppDeps>): void {
     }
   });
 
+  router.add('POST', '/api/admin/feeds/poll-all', async (req, res, _ctx, deps) => {
+    const userId = await requireOwner(req, res, deps);
+    if (userId === null) return;
+
+    try {
+      await deps.feeds.pollAllFeeds(true);
+      deps.repo.logActivity(
+        userId,
+        'info',
+        'dev-tools',
+        'Manually triggered system-wide check for all feeds and alerts',
+      );
+      sendJson(res, 200, { ok: true });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      deps.repo.logActivity(userId, 'error', 'dev-tools', `Failed manual feeds check: ${msg}`);
+      sendError(res, 500, `Failed to poll feeds: ${msg}`);
+    }
+  });
+
   router.add('GET', '/api/admin/activity', async (req, res, _ctx, deps) => {
     if ((await requireOwner(req, res, deps)) === null) return;
     const url = new URL(req.url ?? '/', `http://${req.headers.host ?? 'localhost'}`);

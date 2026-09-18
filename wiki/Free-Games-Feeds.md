@@ -60,8 +60,19 @@ Each free game notification is formatted as a rich Discord embed:
 
 ### Via Slash Command
 ```
-/feed add url:freegames:all channel:#free-games role:@FreeGamePings
+/free-games enable [channel:#free-games]
+/free-games check
+/free-games status
+/free-games disable
 ```
+
+---
+
+## ⚡ Immediate / Manual Giveaway Checks
+
+You don't have to wait for the daily scheduled pass to discover new drops:
+- **Discord Bot**: Run `/free-games check` in your server to trigger an instant giveaway search.
+- **Dashboard**: Click **Check Now** in the Free Games Drops header or **Check Feeds & Alerts Now** on the Overview tab.
 
 ---
 

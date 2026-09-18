@@ -1,6 +1,9 @@
-# 😂 Entertainment & GIF Commands
+# 😂 Entertainment & GIF Commands (Deprecated)
 
-HELIX Discord Bot includes a suite of entertainment commands powered by the **KLIPY API** — a high-quality GIF service with extensive anime, meme, and reaction categories.
+> [!WARNING]
+> **Broken & Deprecated — Scheduled for Removal**: Entertainment GIF commands are currently non-functional due to upstream provider failures (KLIPY API). They are **disabled by default** (`GIFS_ENABLED=false`) and are **scheduled for complete discontinuation and removal in the next update**.
+
+HELIX Discord Bot previously included a suite of entertainment commands powered by the **KLIPY API** — a GIF service with anime, meme, and reaction categories.
 
 ---
 
@@ -53,20 +56,23 @@ Each action command maps to its corresponding KLIPY tag internally and optionall
 
 ## 🔧 Configuration
 
-Entertainment commands are gated by the `GIFS_ENABLED` feature flag (default: `true`).
+Entertainment commands are gated by the `GIFS_ENABLED` feature flag (**default: `false`** — disabled due to upstream failures, slated for complete removal).
 
 ```env
-# Disable all GIF/entertainment commands
+# GIF commands are disabled by default (slated for removal in next update)
 GIFS_ENABLED=false
 ```
 
 When disabled:
 - Commands are not registered with Discord.
-- Dashboard entertainment pages are hidden.
+- Dashboard entertainment settings are hidden or marked deprecated.
 
 ---
 
 ## 📡 KLIPY API Integration
+
+> [!CAUTION]
+> The KLIPY API integration is currently unstable/broken and will not be maintained. The entire entertainment command suite is being discontinued in the upcoming release.
 
 - **Endpoint**: `https://klipy-api.vercel.app/api/v1/gif`
 - **Authentication**: None required (public API).
@@ -101,9 +107,9 @@ GIF responses use a standardized Discord embed:
 
 | Issue | Solution |
 | :--- | :--- |
-| "GIF commands not showing" | Ensure `GIFS_ENABLED=true` in `.env` and re-invite bot (slash commands re-register on startup). |
-| "KLIPY API error" | Check Service Logs for upstream HTTP errors. KLIPY may have temporary downtime. |
-| "Autocomplete not working" | Discord caches autocomplete; wait up to 1 hour or re-invite bot. |
+| "GIF commands not showing" | Expected behavior: `GIFS_ENABLED` defaults to `false` because the feature is broken and discontinued. |
+| "KLIPY API error / not working" | Upstream KLIPY service failure. The feature is deprecated and will be removed in the next update. |
+| "Autocomplete not working" | Discord caches autocomplete; feature is discontinued. |
 | "GIF doesn't animate" | Discord may render as static if >10MB; KLIPY serves optimized sizes. |
 
 ---

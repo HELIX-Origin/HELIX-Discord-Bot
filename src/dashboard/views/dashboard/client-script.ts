@@ -320,6 +320,7 @@ export function renderClientScript(): string {
           '<div class="feed-meta">Checked: ' + lastPolled + '</div>' +
         '</div>' +
         '<div style="display: flex; gap: 0.375rem; flex-shrink: 0;" onclick="event.stopPropagation()">' +
+          '<button onclick="triggerFeedPoll(' + f.id + ')" class="btn btn-ghost btn-sm" title="Check / Poll Now"><i class="fa-solid fa-bolt"></i></button>' +
           '<button onclick="openFeedDetail(' + f.id + ')" class="btn btn-ghost btn-sm" title="Feed settings"><i class="fa-solid fa-gear"></i></button>' +
           '<button onclick="toggleFeed(' + f.id + ', ' + (f.enabled ? 'false' : 'true') + ')" class="btn btn-ghost btn-sm" title="' + (f.enabled ? 'Pause' : 'Resume') + '">' +
             '<i class="fa-solid ' + (f.enabled ? 'fa-pause' : 'fa-play') + '"></i>' +
@@ -503,6 +504,45 @@ export function renderClientScript(): string {
     }
 
     // Feed actions
+    async function triggerFeedPoll(id) {
+      try {
+        const res = await fetch('/api/feeds/' + id + '/poll', { method: 'POST' });
+        if (!checkAuth(res)) return;
+        if (res.ok) {
+          const detailStatus = document.getElementById('feed-detail-status');
+          if (detailStatus) {
+            detailStatus.textContent = 'Check triggered successfully. Results will deliver to configured target.';
+            detailStatus.style.display = 'block';
+            setTimeout(function() { detailStatus.style.display = 'none'; }, 4000);
+          } else {
+            alert('Feed check triggered successfully.');
+          }
+          refreshCurrentTab();
+        } else {
+          alert('Failed to trigger feed check.');
+        }
+      } catch (err) {
+        alert('Failed to trigger feed check.');
+      }
+    }
+
+    async function triggerGuildPoll() {
+      if (!currentGuildId) return;
+      try {
+        const res = await fetch('/api/guilds/' + currentGuildId + '/poll', { method: 'POST' });
+        if (!checkAuth(res)) return;
+        if (res.ok) {
+          const data = await res.json();
+          alert('Triggered check for ' + (data.polledCount || 'all') + ' feeds and alerts.');
+          refreshCurrentTab();
+        } else {
+          alert('Failed to trigger feeds and alerts check.');
+        }
+      } catch (err) {
+        alert('Failed to trigger feeds and alerts check.');
+      }
+    }
+
     async function toggleFeed(id, enabled) {
       try {
         const res = await fetch('/api/feeds/' + id, {
@@ -601,8 +641,9 @@ export function renderClientScript(): string {
           (f.lastCheckedAt ? ' &middot; Last checked: ' + new Date(f.lastCheckedAt).toLocaleString() : ' &middot; Never polled') +
           (f.threadChannelId ? ' &middot; Thread: <code>' + esc(f.threadChannelId) + '</code>' : '') +
         '</div>' +
-        '<div style="display: flex; gap: 0.5rem; margin-top: 1.25rem;">' +
+        '<div style="display: flex; gap: 0.5rem; margin-top: 1.25rem; flex-wrap: wrap;">' +
           '<button onclick="saveFeedDetail(' + f.id + ')" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button>' +
+          '<button onclick="triggerFeedPoll(' + f.id + ')" class="btn btn-secondary"><i class="fa-solid fa-bolt"></i> Check Now</button>' +
           '<button onclick="deleteFeed(' + f.id + ')" class="btn btn-danger"><i class="fa-solid fa-trash"></i> Delete Feed</button>' +
         '</div>' +
         '<div id="feed-detail-status" style="margin-top: 0.75rem; color: #10b981; display: none;">Saved successfully.</div>' +
@@ -1042,7 +1083,7 @@ export function renderClientScript(): string {
     const GUILD_ADMIN_FEATURES = [
       { key: 'feeds', label: 'Feeds', desc: 'RSS, Reddit, and Free Games polling' },
       { key: 'streamalerts', label: 'Stream Alerts', desc: 'YouTube & Twitch live/upload alerts' },
-      { key: 'gifs', label: 'GIF Commands', desc: '/gif and action-style GIF commands' },
+      { key: 'gifs', label: 'GIF Commands (Deprecated)', desc: 'Broken upstream; disabled by default & discontinued in next update' },
     ];
 
     function populateRoleSelect(selectId, roles, currentRoleId, placeholder) {
