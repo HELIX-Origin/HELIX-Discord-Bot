@@ -144,28 +144,33 @@ sudo systemctl restart helix-discord-bot
 sudo systemctl stop helix-discord-bot
 ```
 
-### 3b. Alternative: tmux (Session-Based)
-Prefer a lightweight no-daemon approach? Use `tmux` to keep the process alive inside a persistent terminal session — great for quick VPS setups that don't need process management.
+### 3b. Alternative: tmux (Detached Background Session)
+Prefer a lightweight no-daemon approach? Use `tmux` in detached mode (`-d`) to start the bot in the background without locking your current terminal session:
 
 ```bash
-# Install tmux if not already present
+# 1. Install tmux if not already present
 sudo apt-get install -y tmux
 
-# Start a new detachable session named "helix-discord-bot"
-tmux new -s helix-discord-bot
+# 2. Start a new detached session in the background
+tmux new-session -d -s helix-discord-bot
 
-# Inside the session, start the server
-cd /opt/helix-discord-bot
-npm start
-
-# Detach and keep it running in the background:
-# Press Ctrl+B, then D
+# 3. Send the startup command into the background session
+tmux send-keys -t helix-discord-bot "cd /opt/helix-discord-bot && npm start" C-m
 ```
 
-Reattach the session later to view logs or manage the process:
+**Managing the tmux Session:**
 ```bash
+# Check running tmux sessions
 tmux ls
+
+# View live output and reattach to the session
 tmux attach -t helix-discord-bot
+
+# Detach from another terminal or if shortcuts are blocked
+tmux detach -s helix-discord-bot
+
+# Stop / kill the session completely
+tmux kill-session -t helix-discord-bot
 ```
 
 ---
