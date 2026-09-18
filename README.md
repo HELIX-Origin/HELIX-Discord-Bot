@@ -195,7 +195,6 @@ Comprehensive guides, architecture breakdowns, configuration settings, and API s
 | [🤖 Reddit Feeds](../../wiki/Reddit-Feeds) | Pure Image vs Standard RSS modes, animated GIFs, sort filters, and presets. |
 | [📰 Feeds & Web Scraper](../../wiki/Feeds-and-Scrapers) | RSS/Atom parsing, CSS webpage scrapers, and the 700+ News Feeds catalog. |
 | [🤖 Discord Bot & Commands](../../wiki/Discord-Bot) | Developer Portal configuration, slash commands, direct channel delivery, and embed styling. |
-| [🎵 Music & Lavalink](../../wiki/Music) | Lavalink v4 playback (YouTube, Spotify, SoundCloud, Apple Music, Deezer), queue management, embedded node setup, and dashboard queue page. |
 | [😂 Entertainment & GIF Commands](../../wiki/Entertainment) | KLIPY-powered `/gif` with autocomplete, action commands (`/slap`, `/hug`, etc.), and random GIF fallback. |
 | [🛡️ Guild Administration](../../wiki/Administration) | Moderation (`/admin warn`, `/kick`, `/ban`, `/lock`, `/purge`, `/slowmode`, `/announce`), role management, voice controls, permission guards. |
 | [🏗️ Architecture & Design](../../wiki/Architecture-and-Design) | SQLite schema, AppState in-memory caching, RedisCoordinator, and FeedWatcher engine. |
