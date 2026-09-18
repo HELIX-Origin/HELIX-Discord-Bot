@@ -963,12 +963,15 @@ export function renderClientScript(): string {
       if (!container) return;
       container.innerHTML = '<div class="empty-state">Loading news feeds catalog...</div>';
       try {
-        const res = await fetch('/api/presets', { signal: AbortSignal.timeout(6000) });
-        if (!res.ok) {
+        const [presetsRes, feeds] = await Promise.all([
+          fetch('/api/presets', { signal: AbortSignal.timeout(6000) }),
+          loadGuildFeeds()
+        ]);
+        if (!presetsRes.ok) {
           container.innerHTML = '<div class="empty-state">Could not load news feeds catalog.</div>';
           return;
         }
-        const presets = await res.json();
+        const presets = await presetsRes.json();
         if (!Array.isArray(presets) || !presets.length) {
           container.innerHTML = '<div class="empty-state">No presets available.</div>';
           return;
@@ -986,18 +989,18 @@ export function renderClientScript(): string {
           const items = groups[cat] || [];
           let itemsHtml = '';
           for (const p of items) {
-            const addedBadge = p.alreadyAdded
-              ? '<span class="badge badge-green">Added</span>'
-              : '<span class="badge badge-amber">Preset</span>';
-            const btnHtml = p.alreadyAdded
-              ? '<button disabled class="btn btn-ghost btn-sm" style="opacity: 0.6; cursor: default;"><i class="fa-solid fa-check"></i> Added</button>'
-              : '<button data-preset-id="' + esc(p.id) + '" onclick="enablePreset(this.dataset.presetId)" class="btn btn-primary btn-sm"><i class="fa-solid fa-bolt"></i> Enable</button>';
+            const existing = (feeds || []).find(f => f.url === p.url);
+            if (existing) {
+              itemsHtml += renderFeedPill(existing);
+              continue;
+            }
+            const btnHtml = '<button data-preset-id="' + esc(p.id) + '" onclick="enablePreset(this.dataset.presetId)" class="btn btn-primary btn-sm"><i class="fa-solid fa-bolt"></i> Enable</button>';
 
             itemsHtml += '<div class="feed-pill">' +
               '<div class="feed-details">' +
                 '<div class="feed-name-row">' +
                   '<span class="feed-name">' + esc(p.name) + '</span>' +
-                  addedBadge +
+                  '<span class="badge badge-amber">Preset</span>' +
                 '</div>' +
                 '<div style="font-size: 0.8125rem; color: var(--text-muted);">' + esc(p.description) + '</div>' +
                 '<div class="feed-url">' + esc(p.url) + '</div>' +

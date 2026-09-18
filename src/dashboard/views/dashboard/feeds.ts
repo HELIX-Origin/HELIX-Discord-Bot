@@ -1,20 +1,18 @@
 export function renderFeedsTab(): string {
   return `
-    <!-- TAB: NEWS FEEDS (catalog + RSS/scrape feeds) -->
+    <!-- TAB: NEWS & RSS (add by URL + catalog + RSS/scrape feeds) -->
     <section id="tab-rss" class="tab-pane active">
-      <div class="card">
+      <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
         <div>
-          <div class="card-title"><i class="fa-solid fa-newspaper" style="color: var(--amber);"></i> News Feeds Catalog</div>
-          <div class="card-desc">One-click add top news, tech, gaming, science, and developer feeds. Configure each feed's delivery target from its setup page.</div>
+          <div class="section-title"><i class="fa-solid fa-rss" style="color: var(--primary);"></i> News &amp; RSS Feeds</div>
+          <div class="section-desc">Add an RSS/Atom feed by URL, enable a ready-made feed, or scrape a webpage — delivered to a channel or its own forum thread.</div>
         </div>
-        <div id="presets-list-container" style="display: flex; flex-direction: column; gap: 1.25rem;">
-          <div class="empty-state">Loading news feeds catalog...</div>
-        </div>
+        <button onclick="triggerGuildPoll()" class="btn btn-ghost btn-sm"><i class="fa-solid fa-bolt"></i> Check Now</button>
       </div>
 
       <div class="card">
         <div>
-          <div class="card-title"><i class="fa-solid fa-plus-circle" style="color: var(--primary);"></i> Add Custom RSS / Scrape Feed</div>
+          <div class="card-title"><i class="fa-solid fa-plus-circle" style="color: var(--primary);"></i> Add RSS / Scrape Feed by URL</div>
           <div class="card-desc">Deliver an RSS/Atom feed — or a scraped webpage — into a channel or its own forum thread.</div>
         </div>
         <div class="form-grid" style="margin-top: 0.75rem;">
@@ -81,15 +79,24 @@ export function renderFeedsTab(): string {
         <button onclick="submitAddRssFeed()" class="btn btn-primary btn-sm btn-block" style="margin-top: 0.75rem;"><i class="fa-solid fa-plus"></i> Add RSS Feed</button>
       </div>
 
-      <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
+      <div class="card">
         <div>
-          <div class="section-title"><i class="fa-solid fa-rss" style="color: var(--primary);"></i> News &amp; RSS Feeds</div>
-          <div class="section-desc">All RSS and scrape feeds for this server, grouped by topic. Click a feed to open its setup page.</div>
+          <div class="card-title"><i class="fa-solid fa-newspaper" style="color: var(--amber);"></i> News Feeds Catalog</div>
+          <div class="card-desc">One-click add top news, tech, gaming, science, and developer feeds. Configure each feed's delivery target from its setup page.</div>
         </div>
-        <button onclick="triggerGuildPoll()" class="btn btn-ghost btn-sm"><i class="fa-solid fa-bolt"></i> Check All Now</button>
+        <div id="presets-list-container" style="display: flex; flex-direction: column; gap: 1.25rem;">
+          <div class="empty-state">Loading news feeds catalog...</div>
+        </div>
       </div>
-      <div id="feeds-topic-groups" style="display: flex; flex-direction: column; gap: 1.25rem;">
-        <div class="empty-state">Loading feeds...</div>
+
+      <div class="card">
+        <div>
+          <div class="card-title"><i class="fa-solid fa-rss" style="color: var(--primary);"></i> News &amp; RSS Feeds</div>
+          <div class="card-desc">All RSS and scrape feeds for this server, grouped by topic. Click the settings cog to manage each feed.</div>
+        </div>
+        <div id="feeds-topic-groups" style="display: flex; flex-direction: column; gap: 1.25rem; margin-top: 0.75rem;">
+          <div class="empty-state">Loading feeds...</div>
+        </div>
       </div>
     </section>
 
