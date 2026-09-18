@@ -144,36 +144,7 @@ sudo systemctl restart helix-discord-bot
 sudo systemctl stop helix-discord-bot
 ```
 
-### 3b. Alternative: PM2 Process Manager
-If you prefer PM2 for process monitoring:
-
-```bash
-# Install PM2 globally
-sudo npm install -g pm2
-
-# Navigate to project directory
-cd /opt/helix-discord-bot
-
-# Install dependencies and build
-npm install
-npm run build
-
-# Start using the included ecosystem configuration file
-pm2 start ecosystem.config.cjs
-
-# View live real-time logs
-pm2 logs helix-discord-bot
-
-# Check status and resource metrics
-pm2 status
-pm2 monit
-
-# Save PM2 process list and configure startup on boot
-pm2 save
-pm2 startup
-```
-
-### 3c. Alternative: tmux (Session-Based)
+### 3b. Alternative: tmux (Session-Based)
 Prefer a lightweight no-daemon approach? Use `tmux` to keep the process alive inside a persistent terminal session — great for quick VPS setups that don't need process management.
 
 ```bash
