@@ -1,37 +1,48 @@
 # HELIX Discord Bot — Current Session Plan
 
-> 🏷️ **Tracking**: Session/roadmap planning companion to `TODO.md` (task checklist) and `BUGS.md` (bug & issue tracker).
+> 🏷️ **Tracking**: Session/roadmap planning companion to `TODO.md` (task checklist) and `BUGS.md` (bug & issue tracker). Roadmap issue: [#27](https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues/27).
 
 ---
 
 ## 🎯 Active Plan
 
-### Goal — Guild Admin Dashboard Sections + Thread-Based Ticket System
+### Goal — Guild Admin Sections, Dedicated Feature Tabs & Permission-Gated Dashboard
 
-Complete the Guild Admin dashboard tab with the missing server-administration sections, and redesign the ticket system to be button-based with text-channel threads.
+Split dashboard configuration into dedicated, permission-gated feature tabs (welcome, tickets, logs) while keeping Guild Admin for secure settings. Add a public Commands tab and a guilds page that lists every guild the user is in with invite/manage actions.
 
 **Locked user directives** (do not re-litigate):
 
-- Dashboard Guild Admin tab must gain configurable sections for: welcome channel + message, tickets channel + message, transcripts channel (outputs of closed tickets), ticket manager role (auto-added to every opened ticket), and log channels (audit log + mod log).
-- Audit log and mod log sections must let guild admins choose which events get sent to the channels (event CSV selection).
-- Welcome and ticket messages must support detailed markdown + placeholder handling (`{user}`, `{server}`, `{membercount}`, `{mention}`; ticket message placeholders as established).
+- Guild Admin tab is for specific configurations that benefit from being there; it is NOT a hiding place for features (m0584).
+- Existing tabs stay as they are — they just need a check so only guild admins can access them. New features go in their own dedicated tabs with the same check. Guild Admin page is for displaying detailed info or secure settings that don't belong in the feature tabs (m0587).
+- Users with Manage Channels permissions should have access to tabs that set things to channels (m0599).
+- The guilds page should display all guilds the user is in, but only allow inviting the bot to guilds the user has permission to invite to. Buttons: invite icon + cog icon for managing (m0605).
+- Guilds page uses pills: guild icon left, buttons right (m0609/m0612).
+- Privacy and ToS pages visible to all users regardless of login (m0616).
+- Commands page should not require login — it is read-only (m0617).
 - Ticket system redesign: "the ticket system should open a new thread for the issues. but it should us a text channel for the message. Users simply click a button on the ticket channel message to open a ticket."
 
 ### Implementation Plan
 
-1. **Logging libs**: `auditlog.ts` (new — `audit_log_channel_id` + `audit_log_events` CSV, event types settings/welcome/tickets/feeds) and `modlog.ts` (added `MOD_ACTIONS` + `mod_log_events` CSV filter). *Done.*
-2. **Guild settings API**: extend GET/PUT `/api/guilds/:guildId/settings` to read/write welcome, ticket, audit-log, and mod-log fields (with role/channel/event validation).
-3. **Audit dispatch wiring**: dispatch audit entries from `welcome`, `ticket`, `set`, and guild settings PUT handlers.
-4. **Guild Admin UI**: add Welcome, Tickets, Log Channels cards to `guildadmin.ts` (markdown + placeholder-aware textareas) and extend `loadGuildAdminTab` + `saveGuildAdmin` in `client-script.ts`.
-5. **Ticket redesign**: ticket channel (text) hosts a sticky button message; clicking creates a new thread in that channel per configured welcome message and adds the ticket manager role.
+1. **Access relaxation**: allow any Discord user to log in; persist full guild list (`discord_guilds` setting) incl. `{id,name,icon,owner,permissions}`; relax `canUserAccessDashboard` to require only Discord auth (keep `canUserManageGuild` for per-guild admin).
+2. **Permission helpers**: reuse `hasManageChannelsPermission`; add `hasInvitePermission` (owner || ADMINISTRATOR || MANAGE_GUILD || CREATE_INSTANT_INVITE).
+3. **Guilds API**: `GET /api/guilds` merges stored user guilds + bot guilds → per-guild `{id,name,icon,botIn,canManage,canInvite,inviteUrl}`; `GET /api/guilds/:guildId/channels` adds `canManage`.
+4. **Public Commands page**: `GET /commands` (no auth) + public Commands tab data (registry metadata: name, category, description, usage, examples); `robots.txt` allows `/commands`.
+5. **Guilds view**: standalone `/guilds` page + in-dashboard guild-selection rewritten to pill grid (icon left, name middle, invite icon btn + cog btn right).
+6. **Sidebar**: add Commands tab (always visible); gate feed/alerts/admin sections behind `canManage`; add Welcome, Tickets, Logs dedicated tabs (manage-gated).
+7. **Secure Guild Admin tab**: keep admin role, feature modules, command toggles, prefix. Move Welcome / Tickets / Logs into their own tabs with per-tab partial save (PUT already partial-tolerant).
+8. **Client-side**: pill grid render, sidebar gating, `loadCommandsTab`, `loadWelcomeTab`/`loadTicketsTab`/`loadLogsTab` with per-tab save, relaxed 403 handling for non-managers.
+9. **Ticket redesign**: sticky button message in text channel → new thread per ticket; manager role auto-added; config key moves to `ticket_channel_id` (legacy `ticket_category_id` fallback read).
+10. **Verify + sync**: `npm run check` + `pnpm build`; commit + push; sync PLAN/TODO/BUGS, `wiki/`, and roadmap issue #27 items.
 
 ### Files likely touched
 
+- `src/dashboard/routes/auth.ts`, `src/dashboard/routes/shared.ts`, `src/dashboard/routes/guilds.ts`
+- `src/dashboard/oauth/discord.ts`
+- `src/dashboard/server.ts`, `src/dashboard/views/guilds.ts`, `src/dashboard/views/dashboard.ts`
+- `src/dashboard/views/dashboard/sidebar.ts`, `guildadmin.ts`, `client-script.ts`, new `welcome.ts`, `tickets.ts`, `logs.ts`, `commands.ts`
+- `src/bot/rest.ts` (message components / thread start support)
+- `src/bot/commands/admin/ticket.ts`, `welcome.ts`, `set.ts`
 - `src/bot/lib/admin/auditlog.ts` (new), `src/bot/lib/admin/modlog.ts`
-- `src/dashboard/routes/guilds.ts`
-- `src/dashboard/views/dashboard/guildadmin.ts`, `src/dashboard/views/dashboard/client-script.ts`
-- `src/bot/commands/admin/ticket.ts`, `src/bot/commands/admin/welcome.ts`, `src/bot/commands/admin/set.ts`
-- `src/bot/rest.ts` (button/component + thread start support if needed)
 
 ---
 

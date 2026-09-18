@@ -6,38 +6,37 @@
 
 ## 🔥 Active Tasks
 
-### Workstream: Guild Admin Dashboard Sections + Thread-Based Ticket System
+### Workstream: Guild Admin Sections, Dedicated Feature Tabs & Permission-Gated Dashboard
 
 **Locked user directives:**
 
-- Add missing sections to the Guild Admin tab: welcome channel + message, tickets channel + message, transcripts channel (secure channel for closed-ticket outputs), ticket manager role (auto-added to every opened ticket), log channels (audit + mod).
-- Audit log and mod log sections let guild admins choose which events get sent to the channels.
-- Welcome and ticket messages support detailed markdown and argument/placeholder handling.
-- Ticket system redesign: "the ticket system should open a new thread for the issues. but it should us a text channel for the message. Users simply click a button on the ticket channel message to open a ticket."
-
-**Scratch:**
-
-| Files | Role |
-|---|---|
-| `src/bot/lib/admin/auditlog.ts` | NEW audit log dispatch (channel + event CSV) |
-| `src/bot/lib/admin/modlog.ts` | MOD_ACTIONS + `mod_log_events` CSV filter |
-| `src/dashboard/routes/guilds.ts` | GET/PUT settings read/write for welcome, ticket, logs |
-| `src/dashboard/views/dashboard/guildadmin.ts` | Welcome / Tickets / Log Channels cards |
-| `src/dashboard/views/dashboard/client-script.ts` | loadGuildAdminTab + saveGuildAdmin extensions |
-| `src/bot/commands/admin/ticket.ts` | Chat-button → thread redesign |
-| `src/bot/commands/admin/welcome.ts`, `set.ts` | audit dispatch wiring |
-| `src/bot/rest.ts` | message components / thread start support |
+- Guild Admin tab stays for specific/secure configurations; it is not a hiding place for features.
+- Existing tabs stay as they are but get a guild-admin access check. New features get their own dedicated tabs with the same check.
+- Users with Manage Channels permissions should have access to tabs that set things to channels.
+- Guilds page shows all guilds the user is in; invite allowed only with invite permission. Buttons: invite icon + cog icon.
+- Guilds page uses pill layout: guild icon left, buttons right.
+- Privacy / ToS pages visible without login.
+- Commands page requires no login (read-only).
+- Ticket system: text channel hosts a button; clicking opens a new thread.
 
 **Implementation checklist:**
 
-- [ ] Extend GET `/api/guilds/:guildId/settings` to return welcome, ticket, and log config
-- [ ] Extend PUT `/api/guilds/:guildId/settings` to save welcome/ticket/log fields + audit dispatch + event CSV validation
-- [ ] Add Welcome / Tickets / Log Channels cards to `guildadmin.ts` (markdown + placeholder textareas)
-- [ ] Extend `client-script.ts` `loadGuildAdminTab` + `saveGuildAdmin` for new fields
-- [ ] Wire `dispatchAuditLog` into `welcome.ts`, `ticket.ts`, `set.ts`, and guild settings PUT
-- [ ] Redesign ticket system: sticky text-channel button message → new thread per ticket, manager role auto-added
+- [ ] Relax Discord login (`auth.ts`): allow any Discord user; persist `discord_guilds` (full list w/ permissions)
+- [ ] Relax `canUserAccessDashboard` (`shared.ts`) to require only Discord auth; keep `canUserManageGuild`
+- [ ] `oauth/discord.ts`: add `hasInvitePermission` helper
+- [ ] Rewrite `GET /api/guilds`: merge user guilds + bot guilds → `{id,name,icon,botIn,canManage,canInvite,inviteUrl}`
+- [ ] Add `canManage` to `GET /api/guilds/:guildId/channels` response
+- [ ] Public `GET /commands` page (no auth) from registry metadata; `robots.txt` allow
+- [ ] Rewrite `/guilds` view + in-dashboard guild-selection to pill grid (invite btn + cog btn)
+- [ ] `sidebar.ts`: always-visible Commands tab; gate feed/admin sections by `canManage`; add Welcome/Tickets/Logs tabs
+- [ ] Split `guildadmin.ts`: keep Roles/Features/Commands/Prefix; new `welcome.ts`/`tickets.ts`/`logs.ts` tabs with per-tab save
+- [ ] `client-script.ts`: pill grid, sidebar gating, `loadCommandsTab`, per-tab load/save, relaxed 403 handling
+- [ ] `dashboard.ts`: render new tab panes; pass `canManage` to sidebar
+- [ ] Ticket redesign: sticky text-channel button message → thread per ticket, manager role auto-added (`ticket_channel_id` key)
 - [ ] `npm run check` + `pnpm build` green
-- [ ] Commit + push; sync wiki docs per Rule 05; roadmap issue per Rule 04
+- [ ] Commit + push; sync `PLAN.md`/`TODO.md`/`BUGS.md`, `wiki/`, roadmap issue #27 per Rule 04/05
+
+**Status:** server-side access relaxation, guilds API, public commands page, pill-grid views, sidebar/tab split, client scripting, ticket redesign — all pending. Progress mirrored on roadmap issue #27.
 
 ---
 
