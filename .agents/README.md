@@ -3,7 +3,7 @@
 This directory contains the operational specifications, mandatory engineering rules, domain skills, and code templates for AI agents, coding assistants, and contributors working on **HELIX Discord Bot**.
 
 > 📖 **Primary Operating Manual**: For high-level project status, architectural mandates, and current issue tracking, refer to the root entry point: [**`AGENTS.md`**](../AGENTS.md).  
-> 📝 **Local Tracking**: `PLAN.md`, `BUGS.md`, and `TODO.md` are local-only workspace scratchpads (gitignored) and must never be committed to the repository.
+> 📝 **Tracking Files**: `PLAN.md` (current session plan), `BUGS.md` (bug & issue tracker), and `TODO.md` (task checklist) are repository-tracked planning files that hold active workstream state.
 
 ---
 

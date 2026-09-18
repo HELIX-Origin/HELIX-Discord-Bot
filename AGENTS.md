@@ -2,9 +2,9 @@
 
 This document is the central entry point and operating manual for all AI agents, coding assistants, and automated agents working on this repository.
 
-> **Local Tracking Files**: `PLAN.md`, `BUGS.md`, and `TODO.md` are local-only workspace scratchpads and are gitignored. They must never be committed to the repository. All architecture rules, standards, and permanent documentation reside in `AGENTS.md`, `.agents/`, and `wiki/`.
+> **Tracking Files**: `PLAN.md` (current session plan), `TODO.md` (task checklist), and `BUGS.md` (bug & issue tracker) are repository-tracked planning files that hold active workstream state. All architecture rules, standards, and permanent documentation reside in `AGENTS.md`, `.agents/`, and `wiki/`.
 >
-> **Bug & Issue Tracking**: Active bug/problem tracking lives in the local `BUGS.md` tracker (resolved/retired issue history included). `AGENTS.md` is the agent ecosystem entry point, not a tracker.
+> **Bug & Issue Tracking**: Active bug/problem tracking lives in the `BUGS.md` tracker (resolved/retired issue history included). `AGENTS.md` is the agent ecosystem entry point, not a tracker.
 
 ## Project
 
@@ -17,7 +17,7 @@ This document is the central entry point and operating manual for all AI agents,
 
 ## Bug & Issue Tracking
 
-Bugs, resolved issues, and retired feature history are tracked in the local **`BUGS.md`** tracker (gitignored). This file is the agent ecosystem entry point and operating manual — it is not itself a tracker.
+Bugs, resolved issues, and retired feature history are tracked in the **`BUGS.md`** tracker. This file is the agent ecosystem entry point and operating manual — it is not itself a tracker.
 
 - **Active/public roadmap work** is tracked on GitHub as roadmap issues and sub-issues per **Rule 04** (`remote-issue-protocol.md`).
 - **Historical resolved/retired records** (Cloudflare OAuth retirement, dashboard rework, threads delivery, mod/admin commands, GIF retirement, etc.) are archived in `BUGS.md`.
