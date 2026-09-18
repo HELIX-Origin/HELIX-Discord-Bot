@@ -20,13 +20,15 @@
 ## Naming Standards
 
 ### Issues
-| Kind | Title Prefix | Example |
+Issue titles are **short, human-readable, general plan ideas** — never detailed changelogs or commit-style subjects. The emoji replaces the `[]` kind marker and signals the issue type. Roadmap (primary/plan) issues carry the **map emoji `🗺️`**. Detailed scope, phases, and progress live in the roadmap body.
+
+| Kind | Title Format | Example |
 |------|--------------|---------|
-| Rebuild / roadmap plan | `[PLAN] ` | `[PLAN] Multi-user Discord RSS rebuild` |
-| Bug report | `[BUG-XXX] ` | `[BUG-002] Feed parser fails on non-UTF-8 RSS` |
-| Feature request | `feat: ` | `feat: support scheduled status monitors` |
-| Sub-issue | `Sub-Issue N: ` with parent reference | `Sub-Issue 2: Core Implementation (#4)` |
-| Discovery / side-change | plain description; linked to parent in body | `fix: dashboard drop-down refresh on preset enable` |
+| Rebuild / roadmap plan | `🗺️ <general plan>` | `🗺️ Feed limits, posting cadence & Reddit NSFW gating` |
+| Feature request | `✨ <feature overview>` | `✨ Scheduled status monitors` |
+| Bug report | `🐛 <problem summary>` | `🐛 Feed parser fails on non-UTF-8 RSS` |
+| Sub-issue | `Sub-Issue N: <feature being implemented> (#parent)` | `Sub-Issue 2: Core Implementation (#4)` |
+| Discovery / side-change | `🔧 <plain description>`; linked to parent in body | `🔧 Drop-down refresh on preset enable` |
 
 ### Pull Requests
 - Subject mirrors the primary commit: `<emoji> <type>(<scope>): <subject>` (see `commit-message-guide.md`).

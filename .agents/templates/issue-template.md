@@ -2,6 +2,18 @@
 
 First post is the **complete roadmap** for the plan. It is edited as work progresses — never replaced by new posts.
 
+## Title
+
+Issue titles are **short, human-readable, general plan ideas** — never detailed changelogs or commit-style subjects. The emoji replaces the `[]` kind marker and signals the issue type. Roadmap (primary/plan) issues use the **map emoji `🗺️`**.
+
+| Kind | Example |
+|------|---------|
+| Rebuild / roadmap plan | `🗺️ Feed limits, posting cadence & Reddit NSFW gating` |
+| Feature request | `✨ Scheduled status monitors` |
+| Bug report | `🐛 Feed parser fails on non-UTF-8 RSS` |
+| Sub-issue | `Sub-Issue N: <feature being implemented> (#parent)` |
+| Discovery / side-change | `🔧 Drop-down refresh on preset enable` |
+
 ## Type
 - [ ] Feature / Rebuild Plan
 - [ ] Bug Report ([BUG-XXX])
