@@ -360,7 +360,10 @@ export class DiscordRestClient {
     }>;
   }
 
-  async sendChannelMessage(channelId: string, payload: { content?: string; embeds?: unknown[] }): Promise<void> {
+  async sendChannelMessage(
+    channelId: string,
+    payload: { content?: string; embeds?: unknown[]; components?: unknown[] },
+  ): Promise<void> {
     const res = await fetch(`${this.baseUrl}/channels/${channelId}/messages`, {
       method: 'POST',
       headers: this.headers(),

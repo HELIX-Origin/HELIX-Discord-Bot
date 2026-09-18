@@ -9,6 +9,7 @@ import {
 import { getEnabledCommands, getCommand, isCommandDisabled } from './registry.js';
 import { EmbedHandler } from '../lib/embeds/builder.js';
 import { loadAllCommands } from './loader.js';
+import { handleTicketButton } from '../commands/admin/ticket.js';
 
 export interface CommandHandler {
   readonly commands: ApplicationCommand[];
@@ -28,12 +29,26 @@ export async function dispatchInteraction(
   rest: DiscordRestClient,
 ): Promise<InteractionResponse> {
   await loadAllCommands();
+  const guildId = interaction.guild_id ?? (interaction as unknown as { guildId?: string }).guildId;
+
+  // Handle message component interactions (e.g. ticket open button)
+  if (interaction.type === 3) {
+    const customId = interaction.data?.custom_id?.toLowerCase() ?? '';
+    if (customId === 'ticket_open') {
+      return handleTicketButton(interaction, deps, rest);
+    }
+    return EmbedHandler.for(deps)
+      .error()
+      .title('Unknown Interaction')
+      .description(`Unknown button: \`${customId}\``)
+      .respond(true);
+  }
+
   const commandName = (
     interaction.data?.name ||
     (interaction as unknown as { commandName?: string }).commandName ||
     ''
   ).toLowerCase();
-  const guildId = interaction.guild_id ?? (interaction as unknown as { guildId?: string }).guildId;
 
   // Handle autocomplete interactions
   if (interaction.type === 4) {

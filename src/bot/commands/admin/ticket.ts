@@ -51,11 +51,11 @@ export const ticketOptions: ApplicationCommandOption[] = [
     required: false,
   },
   {
-    name: 'category',
-    description: 'Forum channel for tickets (setup)',
+    name: 'channel',
+    description: 'Text channel that hosts the Open Ticket button (setup)',
     type: ApplicationCommandOptionType.CHANNEL,
     required: false,
-    channel_types: [15],
+    channel_types: [0, 5],
   },
   {
     name: 'transcript_channel',
@@ -130,7 +130,7 @@ function errorResponse(title: string, description: string): InteractionResponse 
 }
 
 export interface TicketConfig {
-  categoryId: string | null;
+  channelId: string | null;
   managerRoleId: string | null;
   transcriptChannelId: string | null;
   logChannelId: string | null;
@@ -139,8 +139,13 @@ export interface TicketConfig {
 }
 
 export function getTicketConfig(deps: AppDeps, guildId: string): TicketConfig {
+  // Read the new text-channel key with fallback to the legacy forum key.
+  const channelId =
+    deps.repo.getGuildSetting(guildId, 'ticket_channel_id') ||
+    deps.repo.getGuildSetting(guildId, 'ticket_category_id') ||
+    null;
   return {
-    categoryId: deps.repo.getGuildSetting(guildId, 'ticket_category_id') || null,
+    channelId,
     managerRoleId: deps.repo.getGuildSetting(guildId, 'ticket_manager_role_id') || null,
     transcriptChannelId: deps.repo.getGuildSetting(guildId, 'ticket_transcript_channel_id') || null,
     logChannelId: deps.repo.getGuildSetting(guildId, 'ticket_log_channel_id') || null,
@@ -167,7 +172,7 @@ export async function handleTicketCommand(
 
   switch (optionValue(options, 'action')) {
     case 'setup':
-      return handleSetup(guildId, options, deps);
+      return handleSetup(guildId, options, deps, rest);
     case 'disable':
       return handleDisable(guildId, deps);
     case 'view':
@@ -196,7 +201,7 @@ function ticketUsage(): InteractionResponse {
       title: '🎫 Ticket Command Usage',
       description: 'Use `/ticket` with one of the actions below.',
       fields: [
-        { name: '⚙️ setup', value: '`/ticket action:setup manager_role:@Support category:#tickets`', inline: false },
+        { name: '⚙️ setup', value: '`/ticket action:setup manager_role:@Support channel:#tickets`', inline: false },
         { name: '🎟️ create', value: '`/ticket action:create reason:"Need help"`', inline: false },
         { name: '🔒 close', value: '`/ticket action:close reason:"Resolved"`', inline: false },
         { name: '➕ add / ➖ remove', value: '`/ticket action:add user:@user`', inline: false },
@@ -206,8 +211,15 @@ function ticketUsage(): InteractionResponse {
   );
 }
 
-function handleSetup(guildId: string, options: InteractionOption[], deps: AppDeps): InteractionResponse {
-  const categoryId = optionValue(options, 'category') || undefined;
+const TICKET_OPEN_BUTTON_ID = 'ticket_open';
+
+async function handleSetup(
+  guildId: string,
+  options: InteractionOption[],
+  deps: AppDeps,
+  rest: DiscordRestClient,
+): Promise<InteractionResponse> {
+  const channelId = optionValue(options, 'channel') || undefined;
   const managerRoleId = optionValue(options, 'manager_role');
   const transcriptChannelId = optionValue(options, 'transcript_channel') || undefined;
   const logChannelId = optionValue(options, 'log_channel') || undefined;
@@ -219,7 +231,10 @@ function handleSetup(guildId: string, options: InteractionOption[], deps: AppDep
 
   const config = getTicketConfig(deps, guildId);
 
-  if (categoryId) deps.repo.setGuildSetting(guildId, 'ticket_category_id', categoryId);
+  if (channelId) {
+    deps.repo.setGuildSetting(guildId, 'ticket_channel_id', channelId);
+    deps.repo.setGuildSetting(guildId, 'ticket_category_id', '');
+  }
   deps.repo.setGuildSetting(guildId, 'ticket_manager_role_id', managerRoleId);
   if (transcriptChannelId) deps.repo.setGuildSetting(guildId, 'ticket_transcript_channel_id', transcriptChannelId);
   if (logChannelId) deps.repo.setGuildSetting(guildId, 'ticket_log_channel_id', logChannelId);
@@ -240,10 +255,35 @@ function handleSetup(guildId: string, options: InteractionOption[], deps: AppDep
     deps,
   );
 
+  let buttonError: string | null = null;
+  if (channelId && channelId !== config.channelId) {
+    try {
+      await rest.sendChannelMessage(channelId, {
+        content: '🎫 Click the button below to open a support ticket.',
+        components: [
+          {
+            type: 1,
+            components: [
+              {
+                type: 2,
+                style: 1,
+                label: 'Open Ticket',
+                custom_id: TICKET_OPEN_BUTTON_ID,
+              },
+            ],
+          },
+        ],
+      });
+    } catch (err) {
+      buttonError = (err as Error).message;
+    }
+  }
+
+  const activeChannel = channelId || config.channelId;
   const fields = [
     {
-      name: 'Forum Channel',
-      value: categoryId ? `<#${categoryId}>` : config.categoryId ? `<#${config.categoryId}>` : 'Not set',
+      name: 'Ticket Channel',
+      value: activeChannel ? `<#${activeChannel}>` : 'Not set',
       inline: true,
     },
     { name: 'Manager Role', value: `<@&${managerRoleId}>`, inline: true },
@@ -263,6 +303,14 @@ function handleSetup(guildId: string, options: InteractionOption[], deps: AppDep
     },
   ];
 
+  if (buttonError) {
+    fields.push({
+      name: '⚠️ Button Message',
+      value: `Settings saved, but the button message could not be posted: ${buttonError.slice(0, 500)}`,
+      inline: false,
+    });
+  }
+
   return embedResponse(
     successEmbed('Ticket System Configured', 'Tickets are now **enabled** for this server.', fields),
   );
@@ -279,7 +327,7 @@ function handleDisable(guildId: string, deps: AppDeps): InteractionResponse {
   );
 
   return embedResponse(
-    successEmbed('Ticket System Disabled', 'No new tickets can be created as forum posts until re-enabled.'),
+    successEmbed('Ticket System Disabled', 'No new tickets can be opened as threads until re-enabled.'),
   );
 }
 
@@ -294,7 +342,7 @@ function handleView(guildId: string, deps: AppDeps): InteractionResponse {
       title: `🎫 ${guildName} — Ticket Configuration`,
       description: config.enabled ? 'Ticket system is **enabled**.' : 'Ticket system is **disabled**.',
       fields: [
-        { name: '📂 Forum Channel', value: config.categoryId ? `<#${config.categoryId}>` : 'Not set', inline: true },
+        { name: '📂 Ticket Channel', value: config.channelId ? `<#${config.channelId}>` : 'Not set', inline: true },
         {
           name: '👮 Manager Role',
           value: config.managerRoleId ? `<@&${config.managerRoleId}>` : 'Not set',
@@ -324,8 +372,8 @@ async function handleCreate(
   if (!config.enabled) {
     return errorResponse('Tickets Disabled', 'The ticket system is disabled on this server. Contact a server admin.');
   }
-  if (!config.categoryId) {
-    return errorResponse('No Ticket Forum', 'A forum channel is not configured. Run `/ticket action:setup` first.');
+  if (!config.channelId) {
+    return errorResponse('No Ticket Channel', 'A ticket channel is not configured. Run `/ticket action:setup` first.');
   }
 
   const reason = optionValue(options, 'reason');
@@ -342,19 +390,7 @@ async function handleCreate(
     .slice(0, MAX_TICKET_NAME);
 
   try {
-    const thread = await rest.createForumThread(config.categoryId, {
-      name: threadName,
-      message: {
-        content: `🎫 **Ticket #${threadName}**\n\n**Opened by:** <@${userId}>\n**Reason:** ${reason}`,
-      },
-      autoArchiveDuration: 4320,
-    });
-
-    if (config.managerRoleId) {
-      await rest.sendChannelMessage(thread.id, {
-        content: `${config.welcomeMessage}\n\n👮 <@&${config.managerRoleId}>`,
-      });
-    }
+    const thread = await openTicketThread(rest, config, guildId, config.channelId, threadName, userId, reason);
 
     if (config.logChannelId) {
       await rest.sendChannelMessage(config.logChannelId, {
@@ -384,6 +420,118 @@ async function handleCreate(
     return embedResponse(successEmbed('Ticket Created', `Your ticket is ready: <#${thread.id}>`));
   } catch (err) {
     return errorResponse('Ticket Creation Failed', (err as Error).message);
+  }
+}
+
+/** Opens a private ticket thread in the configured text channel and adds the opener + manager role. */
+async function openTicketThread(
+  rest: DiscordRestClient,
+  config: TicketConfig,
+  _guildId: string,
+  channelId: string,
+  threadName: string,
+  userId: string,
+  reason: string,
+): Promise<{ id: string; name: string; type: number }> {
+  const thread = await rest.createThread(channelId, {
+    name: threadName,
+    privateThread: true,
+    autoArchiveDuration: 4320,
+  });
+
+  await rest.addThreadMember(thread.id, userId);
+
+  if (config.managerRoleId) {
+    await rest.addThreadRole(thread.id, config.managerRoleId);
+  }
+
+  await rest.sendChannelMessage(thread.id, {
+    content: `🎫 **Ticket #${threadName}**\n\n**Opened by:** <@${userId}>${reason ? `\n**Reason:** ${reason}` : ''}`,
+  });
+
+  await rest.sendChannelMessage(thread.id, {
+    content: config.welcomeMessage,
+  });
+
+  return thread;
+}
+
+/** Handles the "Open Ticket" button in the configured ticket channel. */
+export async function handleTicketButton(
+  interaction: DiscordInteraction,
+  deps: AppDeps,
+  rest: DiscordRestClient,
+): Promise<InteractionResponse> {
+  const guildId = interaction.guild_id;
+  if (!guildId) {
+    return errorResponse('Server Settings Only', '`/ticket` can only be used inside a Discord server (guild).');
+  }
+
+  const config = getTicketConfig(deps, guildId);
+  if (!config.enabled) {
+    return errorResponse('Tickets Disabled', 'The ticket system is disabled on this server. Contact a server admin.');
+  }
+  if (!config.channelId) {
+    return errorResponse('No Ticket Channel', 'A ticket channel is not configured. Run `/ticket action:setup` first.');
+  }
+
+  const userId = interaction.member?.user?.id || interaction.user?.id || '0';
+  const username = interaction.member?.user?.global_name || interaction.member?.user?.username || 'User';
+
+  const threadName = `ticket-${username.replace(/[^a-zA-Z0-9-_]/g, '')}-${new Date().getTime().toString(36)}`.slice(
+    0,
+    MAX_TICKET_NAME,
+  );
+
+  try {
+    const thread = await openTicketThread(rest, config, guildId, config.channelId, threadName, userId, '');
+
+    if (config.logChannelId) {
+      await rest.sendChannelMessage(config.logChannelId, {
+        embeds: [
+          createEmbed({
+            color: EMBED_COLORS.SUCCESS,
+            title: '🎫 Ticket Created',
+            description: `**User:** <@${userId}>\n**Thread:** <#${thread.id}>`,
+            timestamp: new Date().toISOString(),
+          }),
+        ],
+      });
+    }
+
+    deps.repo.logActivity(null, 'info', 'bot', `Ticket created (${thread.id}) for guild ${guildId} via button`);
+    void dispatchAuditLog(
+      guildId,
+      {
+        event: 'tickets',
+        message: `Ticket created: <#${thread.id}>.`,
+        guildName: undefined,
+        actorId: userId,
+        actorTag: null,
+      },
+      deps,
+    );
+    return {
+      type: 4,
+      data: {
+        flags: 64,
+        embeds: [successEmbed('Ticket Created', `Your ticket is ready: <#${thread.id}>`)],
+      },
+    };
+  } catch (err) {
+    return {
+      type: 4,
+      data: {
+        flags: 64,
+        embeds: [
+          createEmbed({
+            color: EMBED_COLORS.ERROR,
+            title: '❌ Ticket Creation Failed',
+            description: (err as Error).message,
+          }),
+        ],
+      },
+    };
   }
 }
 
@@ -644,11 +792,11 @@ registerCommandMetadata({
     },
     { name: 'manager_role', description: 'Role that can manage tickets (setup)', type: 8, required: false },
     {
-      name: 'category',
-      description: 'Forum channel for tickets (setup)',
+      name: 'channel',
+      description: 'Text channel that hosts the Open Ticket button (setup)',
       type: 7,
       required: false,
-      channel_types: [15],
+      channel_types: [0, 5],
     },
     {
       name: 'transcript_channel',
@@ -679,7 +827,7 @@ registerCommandMetadata({
     { name: 'user', description: 'User to add or remove from the ticket (add / remove)', type: 6, required: false },
   ],
   examples: [
-    '/ticket action:setup manager_role:@Support category:#tickets',
+    '/ticket action:setup manager_role:@Support channel:#tickets',
     '/ticket action:create reason:"Need help with feeds"',
     '/ticket action:close reason:"Issue resolved"',
     '/ticket action:add user:@user',

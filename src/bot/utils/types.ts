@@ -110,6 +110,7 @@ export interface InteractionResponseData {
   embeds?: DiscordEmbed[];
   flags?: number; // 64 = EPHEMERAL
   choices?: ApplicationCommandOptionChoice[];
+  components?: unknown[];
 }
 
 export interface InteractionResponse {
@@ -131,6 +132,9 @@ export interface InteractionData {
   type: number;
   options?: InteractionOption[];
   guild_id?: string;
+  /** Present on message component (type 3) interactions. */
+  custom_id?: string;
+  component_type?: number;
 }
 
 export interface DiscordGuild {

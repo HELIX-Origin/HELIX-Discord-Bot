@@ -331,9 +331,11 @@ export function registerGuildRoutes(router: Router<AppDeps>): void {
         if (body.tickets.channelId) {
           const id = String(body.tickets.channelId).trim();
           if (!channelIds.has(id)) return sendError(res, 400, 'Ticket channel is not a valid channel in this server.');
-          d.repo.setGuildSetting(guildId, 'ticket_category_id', id);
+          d.repo.setGuildSetting(guildId, 'ticket_channel_id', id);
+          d.repo.setGuildSetting(guildId, 'ticket_category_id', '');
           changes.push(`Ticket channel → <#${id}>`);
         } else if (body.tickets.channelId === null || body.tickets.channelId === '') {
+          d.repo.setGuildSetting(guildId, 'ticket_channel_id', '');
           d.repo.setGuildSetting(guildId, 'ticket_category_id', '');
           changes.push('Ticket channel cleared');
         }

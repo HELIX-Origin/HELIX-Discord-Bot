@@ -1250,7 +1250,7 @@ export function renderClientScript(): string {
         if (!res.ok) return;
         const data = await res.json();
         const tickets = data.tickets || {};
-        populateChannelSelect('admin-ticket-channel', data.textChannels || [], tickets.categoryId, '-- Disabled --');
+        populateChannelSelect('admin-ticket-channel', data.textChannels || [], tickets.channelId, '-- Disabled --');
         populateRoleSelect('admin-ticket-manager-role', data.guildRoles || [], tickets.managerRoleId, '-- None --');
         populateChannelSelect('admin-ticket-transcript-channel', data.textChannels || [], tickets.transcriptChannelId, '-- None --');
         populateChannelSelect('admin-ticket-log-channel', data.textChannels || [], tickets.logChannelId, '-- None --');
