@@ -415,7 +415,7 @@ export function renderClientScript(): string {
       const container = document.getElementById('feeds-topic-groups');
       if (!container) return;
       container.innerHTML = '<div class="empty-state">Loading feeds...</div>';
-      const feeds = await loadGuildFeeds();
+      const feeds = (await loadGuildFeeds()).filter(f => categoryForFeed(f) === 'rss');
       const groups = {};
       feeds.forEach(feed => {
         const topic = feedTopicOf(feed);
@@ -423,7 +423,7 @@ export function renderClientScript(): string {
       });
       const topics = Object.keys(groups);
       if (!topics.length) {
-        container.innerHTML = '<div class="empty-state">No feeds for this server yet. Add a custom feed above, or enable ready-made feeds from the News catalog.</div>';
+        container.innerHTML = '<div class="empty-state">No News &amp; RSS feeds for this server yet. Add a custom feed above, or enable ready-made feeds from the catalog.</div>';
         return;
       }
       topics.sort((a, b) => {
