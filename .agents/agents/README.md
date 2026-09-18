@@ -1,59 +1,75 @@
-# 👥 Specialized Agent Roles (`.agents/agents/`)
+# 👥 Agent Ecosystem (`.agents/agents/`)
 
-This directory defines the specialized agent team specifications for **HELIX Discord Bot**. Each agent specification outlines target domains, responsibilities, operational boundaries, permitted tools, and testing commands.
+This directory defines the agent team specifications for **HELIX Discord Bot**, organized as **primary agents** with **sub-agents** grouped by focus area. Each spec outlines target domains, responsibilities, operational boundaries, permitted tools, and testing commands.
 
----
+## 🏗️ Structure
 
-## 🏗️ Multi-Agent Team Structure
+Agents are organized into focus-area folders:
+
+```
+.agents/agents/
+├── orchestrator/                    # Coordination (primary)
+├── engineering/                     # Project code (primary + sub-agents)
+│   └── sub-agents/
+├── quality/                         # Testing & security (primary + sub-agents)
+│   └── sub-agents/
+└── documentation/                   # wiki, md files, issues (primary + sub-agents)
+    └── sub-agents/
+```
+
+Each primary agent owns the lifecycle of its sub-agents and delegates focus-specific work to them. Rules (`.agents/rules/`) and templates (`.agents/templates/`) are referenced by the agents that enforce or use them.
+
+## 🔄 Focus-Area Team Structure
 
 ```mermaid
 flowchart TD
-    UserGoal([User Request / Issue]) --> Orchestrator[Orchestrator Agent]
-    
-    subgraph MultiAgentTeam [Specialized Engineering Team]
-        Orchestrator -->|Architecture & Core Backend| Architect[Code Architect Agent]
-        Orchestrator -->|Discord.js v14 & Bot Commands| DiscordSpec[Discord Specialist Agent]
-        Orchestrator -->|Feed Syndication & Forum Delivery| FeedWatch[Feed Watcher Agent]
-        Orchestrator -->|Testing & Quality Assurance| Tester[Test Automation Agent]
-        Orchestrator -->|Security & Lint Standards| Auditor[Security Auditor Agent]
-        Orchestrator -->|Web Dashboard & OAuth| DashboardSpec[Dashboard Specialist Agent]
-    end
-    
-    Architect --> ValidationGate{Validation Gate: npm run check}
-    DiscordSpec --> ValidationGate
-    FeedWatch --> ValidationGate
-    Tester --> ValidationGate
-    Auditor --> ValidationGate
-    DashboardSpec --> ValidationGate
-    
-    ValidationGate -->|Pass: 0 errors| Done([Commit / Push / Release])
+    UserGoal(["User Request / Issue"]) --> Orchestrator["Orchestrator (Primary)"]
+
+    Orchestrator --> Engineering["Code Architect (Primary)"]
+    Orchestrator --> Quality["Test Automation (Primary)"]
+    Orchestrator --> Documentation["Documentation Specialist (Primary)"]
+
+    Engineering --> DiscordSer["Discord Specialist (Sub)"]
+    Engineering --> FeedWatcher["Feed Watcher (Sub)"]
+    Engineering --> DashboardSer["Dashboard Specialist (Sub)"]
+    Quality --> Security["Security Auditor (Sub)"]
+    Documentation --> WikiSer["Wiki Specialist (Sub)"]
+    Documentation --> IssueMgr["Issue & Roadmap Manager (Sub)"]
 ```
 
----
+## 📋 Agent Catalog
 
-## 📋 Agent Roles Catalog
+### Primary Agents
 
-| Agent | Target Domain | Key Responsibilities | Specification File |
+| Agent | Focus Area | Key Responsibilities | Specification |
 |---|---|---|---|
-| **Orchestrator** | Project & Workflow Management | Task decomposition, roadmap execution, permission gates, rollback coordination | [orchestrator.md](orchestrator.md) |
-| **Code Architect** | Backend & System Design | TypeScript ESM architecture, SQLite write-through state, HTTP dashboard, zero-unsolicited runtime injection | [code-architect.md](code-architect.md) |
-| **Discord Specialist** | Discord.js v14 & Bot Engineering | Slash commands, self-contained command files, modular `src/bot/lib/`, events, EmbedHandler, voice gateway | [discord-specialist.md](discord-specialist.md) |
-| **Feed Watcher** | Feed Ingestion & Delivery | RSS/Atom/Reddit ingestion, weekly Sunday free games schedule, forum single-thread delivery | [feed-watcher.md](feed-watcher.md) |
-| **Dashboard Specialist** | Management Dashboard & OAuth | Zero-frontend-dep SSR, Discord OAuth2, guild admin authorization, EmbedHandler parity, theme engine | [dashboard-engineer.md](dashboard-engineer.md) |
-| **Test Automation** | Quality Assurance & Vitest | Modular test suites (`tests/unit/`), mock servers, verification gate (`npm run check`) | [test-automation.md](test-automation.md) |
-| **Security Auditor** | Security & Code Quality | Secrets protection, ESLint zero-warning policy, dependency audits, permission guards | [security-auditor.md](security-auditor.md) |
+| **Orchestrator** | Coordination | Task decomposition, roadmap execution, primary-agent coordination, rollback | [orchestrator/orchestrator.md](orchestrator/orchestrator.md) |
+| **Code Architect** | Engineering | TypeScript ESM, SQLite write-through, HTTP dashboard, sub-agent ownership | [engineering/code-architect.md](engineering/code-architect.md) |
+| **Test Automation** | Quality | Validation gate (`npm run check`), test harnesses, mock servers, sub-agent ownership | [quality/test-automation.md](quality/test-automation.md) |
+| **Documentation Specialist** | Documentation | wiki/, md files, issues, rule/skill/template sync, sub-agent ownership | [documentation/documentation-specialist.md](documentation/documentation-specialist.md) |
 
----
+### Sub-Agents
+
+| Agent | Primary | Key Responsibilities | Specification |
+|---|---|---|---|
+| **Discord Specialist** | Code Architect | discord.js v14 commands, events, EmbedHandler, `src/bot/lib/` | [engineering/sub-agents/discord-specialist.md](engineering/sub-agents/discord-specialist.md) |
+| **Feed Watcher** | Code Architect | RSS/Atom/Reddit ingestion, forum threads, stream alerts | [engineering/sub-agents/feed-watcher.md](engineering/sub-agents/feed-watcher.md) |
+| **Dashboard Specialist** | Code Architect | SSR dashboard, Discord OAuth2, theme engine | [engineering/sub-agents/dashboard-engineer.md](engineering/sub-agents/dashboard-engineer.md) |
+| **Security Auditor** | Test Automation | Secrets protection, ESLint, formatting, dependency audits | [quality/sub-agents/security-auditor.md](quality/sub-agents/security-auditor.md) |
+| **Wiki Specialist** | Documentation Specialist | `wiki/`, README, `.env.example`, `.agents/` catalogs | [documentation/sub-agents/wiki-specialist.md](documentation/sub-agents/wiki-specialist.md) |
+| **Issue & Roadmap Manager** | Documentation Specialist | GitHub issues, roadmaps, PRs, release notes | [documentation/sub-agents/issue-manager.md](documentation/sub-agents/issue-manager.md) |
 
 ## 📂 Subsystem Ownership Reference
 
-| Subsystem | Source Location | Primary Responsible Agent |
+| Subsystem | Source Location | Responsible Agent |
 |---|---|---|
-| **Discord Bot** | `src/bot/` | Discord Specialist |
+| **Discord Bot** | `src/bot/` | Discord Specialist (Engineering) |
 | **Modular Lib** | `src/bot/lib/` | Discord Specialist / Code Architect |
-| **Dashboard** | `src/dashboard/` | Dashboard Specialist |
+| **Dashboard** | `src/dashboard/` | Dashboard Specialist (Engineering) |
 | **Persistence** | `src/db/` | Code Architect |
 | **State Management** | `src/state/` | Code Architect |
-| **Feed Syndication** | `src/feed/` | Feed Watcher |
-| **Testing Harnesses** | `tests/` | Test Automation |
-| **Agent Rules** | `.agents/rules/` | Security Auditor / Orchestrator |
+| **Feed Syndication** | `src/feed/` | Feed Watcher (Engineering) |
+| **Testing Harnesses** | `tests/` | Test Automation (Quality) |
+| **Agent Rules** | `.agents/rules/` | Security Auditor (Quality) / Orchestrator |
+| **Documentation** | `wiki/`, README, `AGENTS.md` | Wiki Specialist (Documentation) |
+| **Issues & Roadmaps** | GitHub issues/PRs | Issue & Roadmap Manager (Documentation) |

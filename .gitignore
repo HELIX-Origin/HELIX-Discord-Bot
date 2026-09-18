@@ -20,6 +20,7 @@ data-cookies.txt
 # Local scratch / temporary work
 scratch/
 temp/
+backups/
 TODO.md
 PLAN.md
 BUGS.md

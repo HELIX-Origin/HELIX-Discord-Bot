@@ -162,46 +162,51 @@ The repository operates on a multi-agent team model where agents collaborate, de
 
 ```mermaid
 flowchart TD
-    UserGoal([User Request / Issue Goal]) --> Orchestrator[Orchestrator Agent]
-    
-    subgraph OrchestrationCycle [Agent Orchestration Framework]
-        Orchestrator -->|Task Decomposition| RoadmapPlan[Roadmap & Sub-Issues]
-        RoadmapPlan -->|Phase Assignment| DevTeam{Agent Assignment}
-        
-        DevTeam -->|Backend & Fullstack Architecture| Architect[Code Architect Agent]
-        DevTeam -->|Discord.js v14 Standards & Lib Options| DiscordAgent[Discord Specialist Agent]
-        DevTeam -->|Feed Ingestion & Delivery| FeedWatcher[Feed Watcher Agent]
-        DevTeam -->|Vitest / MSW Testing Suite| Tester[Test Automation Agent]
-        DevTeam -->|Security & Dependency Auditing| Auditor[Security Auditor Agent]
-        
-        Architect -->|Code Implementation| VerifyGate{Verification Gate}
-        DiscordAgent -->|Commands & Events| VerifyGate
-        FeedWatcher -->|Feed Logic| VerifyGate
-        Tester -->|Automated Tests| VerifyGate
-        Auditor -->|Lint, Types, Safety Rules| VerifyGate
-        
-        VerifyGate -->|Failure Detected| Rollback[Fix Loop / Rollback]
-        Rollback --> Architect
-        
-        VerifyGate -->|Pass: npm run check| DocsSync[Documentation & Wiki Sync]
-    end
-    
-    DocsSync --> Complete([PR / Commit / Plan Resolved])
+    UserGoal(["User Request / Issue Goal"]) --> Orchestrator["Orchestrator Agent (Primary)"]
+
+    Orchestrator -->|"Engineering"| Engineering["Code Architect (Primary)"]
+    Orchestrator -->|"Quality"| Quality["Test Automation (Primary)"]
+    Orchestrator -->|"Documentation"| Documentation["Documentation Specialist (Primary)"]
+
+    Engineering --> DiscordSer["Discord Specialist (Sub)"]
+    Engineering --> FeedWatcher["Feed Watcher (Sub)"]
+    Engineering --> DashboardSer["Dashboard Specialist (Sub)"]
+    Quality --> Auditor["Security Auditor (Sub)"]
+    Documentation --> WikiSer["Wiki Specialist (Sub)"]
+    Documentation --> IssueMgr["Issue & Roadmap Manager (Sub)"]
+
+    Engineering --> VerifyGate{"Verification Gate"}
+    Quality --> VerifyGate
+    DiscordSer --> VerifyGate
+    FeedWatcher --> VerifyGate
+    DashboardSer --> VerifyGate
+    Auditor --> VerifyGate
+
+    VerifyGate -->|"Failure Detected"| Rollback["Fix Loop / Rollback"]
+    Rollback --> Engineering
+
+    VerifyGate -->|"Pass: npm run check"| DocsSync["Documentation & Wiki Sync"]
+    DocsSync --> Complete(["PR / Commit / Plan Resolved"])
 ```
 
 ---
 
 ## Agent Team Catalog & Capabilities
 
-| Agent | Target Domain | Key Responsibilities | Specification File |
+Agents are organized as **primary agents with sub-agents** grouped by focus area under `.agents/agents/{focus}` (see [`.agents/agents/README.md`](.agents/agents/README.md)).
+
+| Agent | Focus Area | Key Responsibilities | Specification File |
 |---|---|---|---|
-| **Orchestrator** | Project Management & Workflow | Task decomposition, roadmap execution, permission handling, user approval gateways, rollback coordination | [orchestrator.md](.agents/agents/orchestrator.md) |
-| **Code Architect** | Backend & Fullstack Architecture | TypeScript ESM architecture, zero-unsolicited runtime injection, SQLite write-through state, HTTP routing | [code-architect.md](.agents/agents/code-architect.md) |
-| **Discord Specialist** | Discord API & Bot Runtime | discord.js v14 standards, categorized `lib/options/` architecture, command registry, event dispatch, permissions, EmbedHandler | [discord-specialist.md](.agents/agents/discord-specialist.md) |
-| **Feed Watcher** | RSS/Atom Ingestion & Delivery | Feed polling, HTML scraping, XML parsing, deduplication, forum single-thread delivery, Sunday weekly free games | [feed-watcher.md](.agents/agents/feed-watcher.md) |
-| **Dashboard Specialist** | Management Dashboard & OAuth | Zero-frontend-dep SSR, Discord OAuth2, guild admin authorization, theme engine, bot RPC | [dashboard-engineer.md](.agents/agents/dashboard-engineer.md) |
-| **Test Automation** | Quality Assurance | Test-driven development (TDD), Vitest suite, mock servers, MSW handlers, regression coverage | [test-automation.md](.agents/agents/test-automation.md) |
-| **Security Auditor** | Security & Code Quality | Vulnerability scanning, secrets protection, ESLint rule enforcement, Prettier formatting, dependency audits | [security-auditor.md](.agents/agents/security-auditor.md) |
+| **Orchestrator** | Coordination (Primary) | Task decomposition, roadmap execution, primary-agent coordination, permission handling, rollback | [orchestrator.md](.agents/agents/orchestrator/orchestrator.md) |
+| **Code Architect** | Engineering (Primary) | TypeScript ESM architecture, zero-unsolicited runtime injection, SQLite write-through, HTTP routing, engineering sub-agent ownership | [code-architect.md](.agents/agents/engineering/code-architect.md) |
+| **Discord Specialist** | Engineering (Sub) | discord.js v14 standards, command registry, event dispatch, permissions, EmbedHandler | [discord-specialist.md](.agents/agents/engineering/sub-agents/discord-specialist.md) |
+| **Feed Watcher** | Engineering (Sub) | Feed polling, HTML scraping, XML parsing, deduplication, forum single-thread delivery, Sunday free games | [feed-watcher.md](.agents/agents/engineering/sub-agents/feed-watcher.md) |
+| **Dashboard Specialist** | Engineering (Sub) | Zero-frontend-dep SSR, Discord OAuth2, guild admin authorization, theme engine | [dashboard-engineer.md](.agents/agents/engineering/sub-agents/dashboard-engineer.md) |
+| **Test Automation** | Quality (Primary) | Test-driven development (TDD), Vitest suite, mock servers, regression coverage, quality sub-agent ownership | [test-automation.md](.agents/agents/quality/test-automation.md) |
+| **Security Auditor** | Quality (Sub) | Vulnerability scanning, secrets protection, ESLint rule enforcement, formatting, dependency audits | [security-auditor.md](.agents/agents/quality/sub-agents/security-auditor.md) |
+| **Documentation Specialist** | Documentation (Primary) | wiki/, md files, README, issues, rule/skill/template catalogs, documentation sub-agent ownership | [documentation-specialist.md](.agents/agents/documentation/documentation-specialist.md) |
+| **Wiki Specialist** | Documentation (Sub) | `wiki/*.md`, README, `AGENTS.md`, `.env.example`, `.agents/` catalog sync | [wiki-specialist.md](.agents/agents/documentation/sub-agents/wiki-specialist.md) |
+| **Issue & Roadmap Manager** | Documentation (Sub) | GitHub issues, living roadmaps, PRs, release notes, issue title standard | [issue-manager.md](.agents/agents/documentation/sub-agents/issue-manager.md) |
 
 ---
 

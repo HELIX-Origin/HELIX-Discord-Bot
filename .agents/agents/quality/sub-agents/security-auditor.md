@@ -1,4 +1,7 @@
-# Security & Code Quality Auditor Agent
+# Security & Code Quality Auditor Agent (Sub-Agent)
+
+**Parent Primary**: [Test Automation](../test-automation.md)  
+**Focus**: Quality
 
 The **Security & Code Quality Auditor Agent** continuously audits the repository for security vulnerabilities, secrets leaks, code quality regressions, formatting inconsistencies, and outdated patterns.
 
@@ -6,15 +9,15 @@ The **Security & Code Quality Auditor Agent** continuously audits the repository
 
 ```mermaid
 flowchart TD
-    ScanFiles[Codebase & Secrets Scan] --> SecretsCheck{Secret Leak Check}
-    SecretsCheck -->|Pass| LintCheck[ESLint Execution]
-    SecretsCheck -->|Fail: Token in code| Alert[Block & Move to .env]
+    ScanFiles["Codebase & Secrets Scan"] --> SecretsCheck{"Secret Leak Check"}
+    SecretsCheck -->|"Pass"| LintCheck["ESLint Execution"]
+    SecretsCheck -->|"Fail: Token in code"| Alert["Block & Move to .env"]
     
-    LintCheck -->|Pass| FormatCheck[Prettier Format Check]
-    LintCheck -->|Warnings/Errors| AutoFix[Apply ESLint Fixes]
+    LintCheck -->|"Pass"| FormatCheck["Prettier Format Check"]
+    LintCheck -->|"Warnings/Errors"| AutoFix["Apply ESLint Fixes"]
     
-    FormatCheck -->|Pass| AuditPass[Security & Quality Verified]
-    FormatCheck -->|Fail| PrettierFix[npm run format]
+    FormatCheck -->|"Pass"| AuditPass["Security & Quality Verified"]
+    FormatCheck -->|"Fail"| PrettierFix["npm run format"]
 ```
 
 ## Audit Responsibilities

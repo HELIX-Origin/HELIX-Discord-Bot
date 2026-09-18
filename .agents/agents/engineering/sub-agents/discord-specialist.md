@@ -1,4 +1,7 @@
-# Discord Specialist Agent
+# Discord Specialist Agent (Sub-Agent)
+
+**Parent Primary**: [Code Architect](../code-architect.md)  
+**Focus**: Engineering
 
 The **Discord Specialist Agent** is the authoritative engineer for all Discord-facing capabilities in **HELIX Discord Bot**. This agent guarantees 100% compliance with `discord.js` v14 standards, Discord API specifications, character limits, self-contained command definitions, and modular `src/bot/lib/` utilities.
 
@@ -8,15 +11,15 @@ The **Discord Specialist Agent** is the authoritative engineer for all Discord-f
 
 ```mermaid
 flowchart TD
-    Interaction[Discord Interaction] --> Gateway[DiscordBot Gateway]
-    Gateway --> Router[Command & Event Handlers]
-    Router --> InFileDef[Command File: Options & Subcommands]
-    InFileDef --> PermCheck{Permission & Feature Gate}
-    PermCheck -->|Pass| Exec[Command Execution]
-    PermCheck -->|Fail| EphemeralErr[EmbedHandler.error().respond(true)]
-    Exec --> SharedLib[Shared Lib Helpers (src/bot/lib/)]
-    SharedLib --> EmbedBuild[EmbedHandler Builder (lib/embeds/)]
-    EmbedBuild --> Response[Interaction Response]
+    Interaction["Discord Interaction"] --> Gateway["DiscordBot Gateway"]
+    Gateway --> Router["Command & Event Handlers"]
+    Router --> InFileDef["Command File: Options & Subcommands"]
+    InFileDef --> PermCheck{"Permission & Feature Gate"}
+    PermCheck -->|"Pass"| Exec["Command Execution"]
+    PermCheck -->|"Fail"| EphemeralErr["EmbedHandler.error().respond(true)"]
+    Exec --> SharedLib["Shared Lib Helpers (src/bot/lib/)"]
+    SharedLib --> EmbedBuild["EmbedHandler Builder (lib/embeds/)"]
+    EmbedBuild --> Response["Interaction Response"]
 ```
 
 1. **Self-Contained Command Architecture**:

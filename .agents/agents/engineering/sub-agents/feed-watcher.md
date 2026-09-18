@@ -1,4 +1,7 @@
-# Feed Watcher Agent
+# Feed Watcher Agent (Sub-Agent)
+
+**Parent Primary**: [Code Architect](../code-architect.md)  
+**Focus**: Engineering
 
 The **Feed Watcher Agent** governs the feed syndication, live stream alerting, and delivery subsystem in **HELIX Discord Bot**. It oversees RSS/Atom/JSON parsing, HTML scraping, weekly Free Games aggregation, YouTube/Twitch live alerts, and forum thread delivery.
 
@@ -8,17 +11,17 @@ The **Feed Watcher Agent** governs the feed syndication, live stream alerting, a
 
 ```mermaid
 flowchart TD
-    Scheduler[Interval Scheduler] --> Enumerate[Enumerate Enabled Feeds]
-    Enumerate --> Lock{Acquire Feed Lock (ioredis-mock)}
-    Lock -->|Locked| Skip[Skip Concurrent Run]
-    Lock -->|Acquired| RouteType{Feed Type}
+    Scheduler["Interval Scheduler"] --> Enumerate["Enumerate Enabled Feeds"]
+    Enumerate --> Lock["Acquire Feed Lock (ioredis-mock)"]
+    Lock -->|"Locked"| Skip["Skip Concurrent Run"]
+    Lock -->|"Acquired"| RouteType{"Feed Type"}
     
-    RouteType -->|RSS / Atom / Reddit| FetchXML[fetchRaw & parseFeed]
-    RouteType -->|HTML Scrape| FetchHTML[fetchRaw & scrapeItems]
-    RouteType -->|Free Games| FreeGamesEngine[Weekly Sunday Aggregator]
-    RouteType -->|YouTube / Twitch| StreamAlertEngine[Webhook Receiver / Poll Fallback]
+    RouteType -->|"RSS / Atom / Reddit"| FetchXML["fetchRaw & parseFeed"]
+    RouteType -->|"HTML Scrape"| FetchHTML["fetchRaw & scrapeItems"]
+    RouteType -->|"Free Games"| FreeGamesEngine["Weekly Sunday Aggregator"]
+    RouteType -->|"YouTube / Twitch"| StreamAlertEngine["Webhook Receiver / Poll Fallback"]
     
-    FetchXML --> Dedupe{isEntrySent Check}
+    FetchXML --> Dedupe{"isEntrySent Check"}
     FetchHTML --> Dedupe
     FreeGamesEngine --> Dedupe
     StreamAlertEngine --> Dedupe

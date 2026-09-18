@@ -11,8 +11,8 @@ This directory contains the operational specifications, mandatory engineering ru
 
 | Directory | Purpose | Primary Focus | Link |
 |---|---|---|---|
-| [**`agents/`**](agents/) | **Agent Roles Catalog** | Specialized engineering agent personas, responsibilities, and workflows | [Browse Agents](agents/README.md) |
-| [**`rules/`**](rules/) | **Mandatory Rules** | Non-negotiable safety, architecture, discord.js v14, and code style rules (Rules 00–07) | [Browse Rules](rules/README.md) |
+| [**`agents/`**](agents/) | **Agent Roles Catalog** | Focus-area agent teams: primary agents with sub-agents (coordination, engineering, quality, documentation) | [Browse Agents](agents/README.md) |
+| [**`rules/`**](rules/) | **Mandatory Rules** | Non-negotiable safety, architecture, discord.js v14, documentation, and code style rules (Rules 00–09) | [Browse Rules](rules/README.md) |
 | [**`skills/`**](skills/) | **Domain Skills** | In-depth technical guides for Discord.js, feeds, and SQLite state | [Browse Skills](skills/README.md) |
 | [**`templates/`**](templates/) | **Code & Workflow Templates** | Production-ready blueprints for commands, subcommands, events, embeds, and GitHub roadmaps | [Browse Templates](templates/README.md) |
 
@@ -22,23 +22,27 @@ This directory contains the operational specifications, mandatory engineering ru
 
 ```mermaid
 flowchart TD
-    UserGoal([User Request / Issue Goal]) --> Orchestrator[Orchestrator Agent]
-    
-    subgraph MultiAgentTeam [Multi-Agent Collaboration]
-        Orchestrator -->|Backend & Core Architecture| Architect[Code Architect]
-        Orchestrator -->|Discord.js v14 & Bot Commands| DiscordSpec[Discord Specialist]
-        Orchestrator -->|Feed Syndication & Forum Delivery| FeedWatch[Feed Watcher]
-        Orchestrator -->|Quality Assurance & Vitest Suite| Tester[Test Automation]
-        Orchestrator -->|Security, Dependencies & Linting| Auditor[Security Auditor]
-    end
-    
-    Architect --> VerifyGate{Validation Gate: npm run check}
-    DiscordSpec --> VerifyGate
+    UserGoal(["User Request / Issue Goal"]) --> Orchestrator["Orchestrator Agent (Primary)"]
+
+    Orchestrator --> Engineering["Code Architect (Primary)"]
+    Orchestrator --> Quality["Test Automation (Primary)"]
+    Orchestrator --> Documentation["Documentation Specialist (Primary)"]
+
+    Engineering --> DiscordSer["Discord Specialist (Sub)"]
+    Engineering --> FeedWatch["Feed Watcher (Sub)"]
+    Engineering --> DashboardSer["Dashboard Specialist (Sub)"]
+    Quality --> Auditor["Security Auditor (Sub)"]
+    Documentation --> WikiSer["Wiki Specialist (Sub)"]
+    Documentation --> IssueMgr["Issue & Roadmap Manager (Sub)"]
+
+    Engineering --> VerifyGate{"Validation Gate: npm run check"}
+    Quality --> VerifyGate
+    DiscordSer --> VerifyGate
     FeedWatch --> VerifyGate
-    Tester --> VerifyGate
+    DashboardSer --> VerifyGate
     Auditor --> VerifyGate
-    
-    VerifyGate -->|Pass: 0 errors, 0 warnings| Done([Commit & Push to Remote])
+
+    VerifyGate -->|"Pass: 0 errors, 0 warnings"| Done(["Commit & Push to Remote"])
 ```
 
 ---
