@@ -19,85 +19,25 @@
 
 ## 📖 Overview
 
-**HELIX Discord Bot** is a lightweight, multi-user feed syndication engine and Discord bot built natively in TypeScript ESM. It automatically monitors RSS/Atom feeds, custom CSS webpage scrapers, curated subreddit streams, and weekly 100% OFF free game promotions—delivering clean, rich Discord embeds straight to your server channels without any webhook management overhead.
+**HELIX Discord Bot** is a lightweight, multi-user feed syndication engine and Discord bot built natively in TypeScript ESM. It monitors RSS/Atom feeds, custom CSS webpage scrapers, curated subreddit streams, and free game promotions — delivering clean, rich Discord embeds straight to your server channels with zero webhook setup.
 
-Featuring a built-in web dashboard, Discord OAuth2 authentication, zero frontend npm dependencies, SQLite persistent storage, and optional Redis clustering, HELIX Discord Bot provides everything you need to keep your Discord community informed in real time.
+It ships with a built-in web dashboard, Discord OAuth2 authentication, no frontend npm dependencies, SQLite persistence, and optional Redis clustering. For detailed information, see the [**Project Wiki**](../../wiki/HOME).
 
 ---
 
-## ✨ Core Features
+## ✨ Features
 
-### 🎮 Free Games Giveaway Alerts
-- **Multi-Platform Support**: Official support for **Epic Games Store**, **Steam**, **GOG.com**, **IndieGala**, **Humble Bundle**, **Itch.io**, **Ubisoft Store**, **EA App / Origin**, **Prime Gaming**, and **Battle.net**.
-- **Automated Daily Drops**: Runs on an automated daily schedule with deduplication so limited-time giveaways are never missed.
-- **Rich Store Embeds**: Standardized Discord embeds with official store branding, high-contrast badges, pricing worth, expiration timers, and direct claim links.
+| Feature | Details |
+|:---|:---|
+| 🎮 **Free Games Alerts** | Automated free-game giveaways from Epic Games, Steam, GOG, Humble, Itch.io, and more — with rich store embeds and deduplication. → [Wiki](../../wiki/Free-Games-Feeds) |
+| 🤖 **Reddit Feeds** | Subreddit/user feeds with Pure Image & Standard RSS modes, animated GIF support, and NSFW age-restriction enforcement. Needs a Reddit session cookie (`cookies.json`/`cookies.txt`). → [Wiki](../../wiki/Reddit-Feeds) |
+| 📰 **RSS, Web Scrapers & News Catalog** | RSS/Atom/JSON feeds, CSS-selector scrapers for sites without RSS, and a 700+ preset news catalog. → [Wiki](../../wiki/Feeds-and-Scrapers) |
+| 📢 **Stream Alerts** | YouTube & Twitch live/upload alerts delivered via webhooks with polling fallback. → [Wiki](../../wiki/Feeds-and-Scrapers) |
+| 🛡️ **Guild Administration** | Moderation (`/warn`, `/kick`, `/ban`, `/purge`, ...), role management, and voice controls. → [Wiki](../../wiki/Administration) |
+| 🧵 **Thread Delivery** | Deliver each feed into its own dedicated thread inside a forum channel. → [Wiki](../../wiki/Discord-Bot) |
+| 🖥️ **Web Dashboard** | Built-in management dashboard with Discord OAuth2, Light/Dark themes, and per-guild feed configuration. → [Wiki](../../wiki/Architecture-and-Design) |
 
-### 🎵 Music Playback via External Lavalink v4
-- **Multi-Source Support**: Native playback from **YouTube**, **Spotify**, **SoundCloud**, **Apple Music**, **Deezer**, and more via an external Lavalink v4 server.
-- **Queue Management**: Full queue control with `/play`, `/queue`, `/skip`, `/previous`, `/shuffle`, `/loop`, `/volume`, `/seek`, `/nowplaying`, `/pause`, `/resume`, `/stop`, `/leave`.
-- **External Lavalink v4 Architecture**: Connects directly to any external Lavalink v4 server via standard WebSocket with resilient auto-reconnect and client-side queue synchronization.
-- **Single Global `.env`**: Clean music configuration in `.env` — `LAVA_ENABLED`, `LAVA_HOST`, `LAVA_PORT`, `LAVA_PASS`, `LAVA_SECURE` (`LAVA_SECURE=true` for `wss://`).
-
-### ⚙️ Feature Flags
-All major subsystems are gated by environment variables (default `true`):
-
-| Flag | Controls |
-| :--- | :--- |
-| `FEEDS_ENABLED` | RSS/Reddit/Free Games feed delivery |
-| `STREAM_ALERTS_ENABLED` | YouTube/Twitch live & upload alerts |
-| `THREADS_ENABLED` | Forum thread delivery |
-| `ADMINISTRATION_ENABLED` | Moderation, roles, voice commands |
-| `DASHBOARD_ENABLED` | Web dashboard & REST API |
-| `ADMIN_PANEL_ENABLED` | Dashboard admin page |
-
-Disable any flag to completely remove its commands, dashboard pages, and internal wiring.
-
-### 🛡️ Guild Administration
-- **Moderation Commands**: `/admin warn`, `/admin kick`, `/admin ban`, `/admin lock`, `/admin purge`, `/admin slowmode`, `/admin announce`.
-- **Role Management**: Assign/remove roles, create role menus.
-- **Voice Controls**: Mute, deafen, move, disconnect members.
-- **Per-Guild Permissions**: All commands respect Discord's native permission system.
-
-### 🤖 Custom Reddit Feeds
-- **Subreddit & User Feeds**: Subscribe to any subreddit (e.g. `r/technology`, `r/wallpapers`, `r/EarthPorn`), user stream, or custom `.rss` URL.
-- **Dual Display Modes**:
-  - 🖼️ **Pure Image Mode**: Extracts full-resolution images and animated GIFs while stripping out message text bodies.
-  - 📰 **Standard RSS Mode**: Formats complete message prose, author badges, and dedicated discussion link fields.
-- **Animated GIF Prioritization**: Automatically resolves and displays direct `.gif` animations and Imgur `.gifv` media.
-- **Interactive Mode Switcher**: Toggle any active Reddit feed between Image and RSS mode in one click.
-- **Session-Cookie Required**: Reddit feeds need a `cookies.json` (preferred) or `cookies.txt` file in the repo root (or `REDDIT_COOKIES_FILE`). Without it the Reddit tab and `/reddit` commands are disabled. Use a dedicated alt Reddit account for the cookie file. See [wiki/Reddit-Feeds.md](wiki/Reddit-Feeds.md).
-- **NSFW Enforcement**: NSFW or unverifiable subreddits can only be delivered to **age-restricted (NSFW) Discord channels** (or threads in age-restricted forums).
-
-### 📖 Subscription Limits
-| Dashboard tab | Category | Max feeds |
-| :--- | :--- | :--- |
-| **News & RSS** | `rss`, `scrape` | 5 |
-| **Reddit** | `reddit` | 5 |
-| **Free Games** | `free_games` | Unlimited |
-| **Stream Alerts** | `youtube`, `twitch` | Unlimited |
-
-RSS/Atom/scrape sources publish **once per day, one post per source** (6-hour minimum floor); Free Games polls daily; Stream Alerts deliver immediately.
-
-### 📰 Curated News Feeds Catalog
-- **700+ Verified Presets**: One-click subscription to top publications across Technology, Artificial Intelligence, Gaming, Science, Cybersecurity, Hardware, Apple, Linux, Programming, Finance, and Entertainment.
-- **Organized Categories**: Clean category grouping with automated Discord channel routing.
-
-### 🕷️ Custom CSS Webpage Scraper
-- **Scrape Any Site Without RSS**: Turn any website, blog, or forum into an automated Discord feed using standard CSS selectors (`itemSelector`, `titleSelector`, `linkSelector`, `descriptionSelector`).
-- **Relative URL Resolution**: Automatically expands relative links (`/posts/123`) to full canonical HTTP addresses.
-
-### 🎨 Uniform Standardized Embeds
-- **Single Shared Width**: Uniform card layout across all feeds and platforms.
-- **Structured Fields**: Links, source attribution, and metadata are cleanly placed in dedicated embed fields rather than cluttered inline text.
-
-### 🤖 Discord Bot Integration
-- **Flexible Delivery Targets**: Each feed independently targets either a text channel or a dedicated thread inside a forum channel (auto-created and managed per feed).
-- **Slash Commands**: Interactive commands grouped by category:
-  - **Feeds**: `/rss`, `/youtube`, `/twitch`, `/free-games`, `/reddit`
-  - **Moderation**: `/warn`, `/kick`, `/ban`, `/lock`, `/unlock`, `/purge`, `/slowmode`, `/announce`
-  - **Admin**: `/role`, `/voice`, `/server`, `/set`
-  - **Utility**: `/about`, `/help`, `/stats`
-- **Automatic Owner Detection**: Automatically grants full Owner rights to Discord Application owners and team members upon Discord login.
+Feature flags (`FEEDS_ENABLED`, `STREAM_ALERTS_ENABLED`, `DASHBOARD_ENABLED`, etc.) toggle each subsystem. → [Wiki: Configuration](../../wiki/Configuration)
 
 ---
 
@@ -110,17 +50,14 @@ RSS/Atom/scrape sources publish **once per day, one post per source** (6-hour mi
 ### 1. Clone & Setup
 
 ```bash
-# Clone the repository
 git clone https://github.com/HELIX-Origin/HELIX-Discord-Bot.git
 cd HELIX-Discord-Bot
-
-# Copy environment template
 cp .env.example .env
 ```
 
 ### 2. Configure Environment (`.env`)
 
-Edit `.env` and enter your Discord Application credentials:
+Enter your Discord Application credentials:
 
 ```env
 DISCORD_TOKEN=your_discord_bot_token_here
@@ -142,71 +79,29 @@ npm start
 
 Open **`http://localhost:3131`** in your browser and click **Log In with Discord**!
 
----
-
-## 🐳 Docker & VPS Deployment
-
-### Docker Compose
-
-```yaml
-services:
-  helix-discord-bot:
-    image: node:22-alpine
-    working_dir: /app
-    volumes:
-      - .:/app
-      - ./data:/app/data
-    ports:
-      - "3131:3131"
-    environment:
-      - NODE_ENV=production
-    command: sh -c "npm install && npm run build && npm start"
-    restart: unless-stopped
-```
-
-### Linux systemd Service (VPS with Root Access)
-
-For 24/7 self-hosting on a Linux VPS, install HELIX Discord Bot as a managed background systemd service:
-
-> **Important for Root Users:** When running on a VPS with root access, do not host the bot directly inside `/root` (or a subfolder within `/root`). Systemd service sandboxing (`ProtectHome`) and restrictive root permissions (`0700`) will cause systemd to fail to find or enter the directory. Always clone to a standard directory such as `/opt/helix-discord-bot`.
-
-```bash
-# Clone to recommended server location
-cd /opt
-sudo git clone https://github.com/HELIX-Origin/HELIX-Discord-Bot.git helix-discord-bot
-cd /opt/helix-discord-bot
-
-# Build and configure
-npm install && npm run build
-cp .env.example .env
-nano .env
-
-# Run automated systemd service installer
-sudo chmod +x ./scripts/install-service.sh
-sudo ./scripts/install-service.sh
-```
+For Docker Compose, Linux systemd/VPS, or Cloud PaaS deployment, see [🚀 Deployment & Hosting](../../wiki/Deployment-and-Hosting).
 
 ---
 
 ## 📚 Extensive Wiki & Documentation
 
-Comprehensive guides, architecture breakdowns, configuration settings, and API specifications are maintained in the project wiki:
+Comprehensive guides, configuration references, architecture breakdowns, and API documentation live in the [project wiki](../../wiki/HOME):
 
 | Wiki Page | Description |
 |---|---|
 | [🏠 Wiki Home](../../wiki/HOME) | Central documentation index and quick reference. |
-| [🎁 Free Games Feeds](../../wiki/Free-Games-Feeds) | Supported platforms, weekly Monday cron, manual poll triggers, and embed schemas. |
-| [🤖 Reddit Feeds](../../wiki/Reddit-Feeds) | Pure Image vs Standard RSS modes, animated GIFs, sort filters, and presets. |
-| [📰 Feeds & Web Scraper](../../wiki/Feeds-and-Scrapers) | RSS/Atom parsing, CSS webpage scrapers, and the 700+ News Feeds catalog. |
-| [🤖 Discord Bot & Commands](../../wiki/Discord-Bot) | Developer Portal configuration, slash commands, direct channel delivery, and embed styling. |
-| [🛡️ Guild Administration](../../wiki/Administration) | Moderation (`/warn`, `/kick`, `/ban`, `/lock`, `/purge`, `/slowmode`, `/announce`), role management, voice controls, permission guards. |
-| [🏗️ Architecture & Design](../../wiki/Architecture-and-Design) | SQLite schema, AppState in-memory caching, RedisCoordinator, and FeedWatcher engine. |
-| [⚙️ Configuration Guide](../../wiki/Configuration) | Exhaustive reference for all `.env` environment variables and settings. |
-| [🚀 Deployment & Hosting](../../wiki/Deployment-and-Hosting) | Docker, Docker Compose, Linux VPS/systemd, and manual Cloud PaaS (Railway, Render, Fly.io). |
-| [💻 Development & Testing](../../wiki/Development-and-Testing) | Developer environment setup, test runner commands, TypeScript checking, and code style standards. |
-| [🔒 Integrations & Security](../../wiki/Integrations-and-Security) | Discord OAuth2, session cookies, RBAC permissions, and anti-bot challenge detection. |
-| [📡 REST API Reference](../../wiki/API-Reference) | Complete documentation of all dashboard, feed, and management REST endpoints. |
-| [🔧 Troubleshooting Playbook](../../wiki/Troubleshooting) | Step-by-step diagnostic guide for common configuration and network errors. |
+| [🎁 Free Games Feeds](../../wiki/Free-Games-Feeds) | Supported platforms, polling schedule, and embed schemas. |
+| [🤖 Reddit Feeds](../../wiki/Reddit-Feeds) | Image vs RSS modes, animated GIFs, session cookies, NSFW enforcement. |
+| [📰 Feeds & Web Scraper](../../wiki/Feeds-and-Scrapers) | RSS/Atom parsing, CSS scrapers, and the news catalog. |
+| [🤖 Discord Bot & Commands](../../wiki/Discord-Bot) | Developer Portal setup, slash commands, delivery, embed styling. |
+| [🛡️ Guild Administration](../../wiki/Administration) | Moderation, roles, voice controls, permission guards. |
+| [🏗️ Architecture & Design](../../wiki/Architecture-and-Design) | SQLite schema, AppState caching, RedisCoordinator, FeedWatcher. |
+| [⚙️ Configuration Guide](../../wiki/Configuration) | Exhaustive reference for all `.env` variables. |
+| [🚀 Deployment & Hosting](../../wiki/Deployment-and-Hosting) | Docker, VPS/systemd, and manual Cloud PaaS. |
+| [💻 Development & Testing](../../wiki/Development-and-Testing) | Developer setup, test runner, TypeScript checks, code style. |
+| [🔒 Integrations & Security](../../wiki/Integrations-and-Security) | Discord OAuth2, session cookies, RBAC permissions. |
+| [📡 REST API Reference](../../wiki/API-Reference) | Complete dashboard & feed REST endpoint documentation. |
+| [🔧 Troubleshooting Playbook](../../wiki/Troubleshooting) | Diagnostic guide for common configuration/network errors. |
 
 ---
 
@@ -215,7 +110,7 @@ Comprehensive guides, architecture breakdowns, configuration settings, and API s
 Contributions, feature suggestions, and bug reports are welcome!
 - Review [CONTRIBUTING.md](CONTRIBUTING.md) for code quality standards and git commit conventions.
 - Report issues and request features on our [GitHub Issue Tracker](https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues).
-- Review our [Security Policy](SECURITY.md) for vulnerability reporting and security principles.
+- Review our [Security Policy](SECURITY.md) for vulnerability reporting.
 - Review our [Privacy Policy](PRIVACY.md) and [Terms of Service](TOS.md).
 
 ---
