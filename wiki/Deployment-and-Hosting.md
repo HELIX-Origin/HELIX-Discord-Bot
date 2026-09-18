@@ -145,21 +145,21 @@ sudo systemctl stop helix-discord-bot
 ```
 
 ### 3b. Alternative: PM2 Process Manager
-If you prefer PM2 for process monitoring with `pnpm` and watch mode:
+If you prefer PM2 for process monitoring:
 
 ```bash
-# Install pnpm and PM2 globally
-sudo npm install -g pnpm pm2
+# Install PM2 globally
+sudo npm install -g pm2
 
 # Navigate to project directory
 cd /opt/helix-discord-bot
 
-# Install dependencies and initial build with pnpm
-pnpm install
-pnpm run build
+# Install dependencies and build
+npm install
+npm run build
 
-# Start the bot under PM2 via bash with watch mode enabled
-pm2 start "pnpm start" --name "helix-discord-bot" --watch dist --ignore-watch="data node_modules .git logs"
+# Start the compiled bot directly with PM2
+pm2 start dist/index.js --name "helix-discord-bot" --watch dist --ignore-watch="data node_modules .git logs"
 
 # View live real-time logs
 pm2 logs helix-discord-bot
