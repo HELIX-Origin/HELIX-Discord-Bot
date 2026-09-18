@@ -281,15 +281,11 @@ export class DiscordBot {
     return this.rest.getChannel(threadId);
   }
 
-  async createForumThread(
-    forumChannelId: string,
-    payload: {
-      name: string;
-      message?: { content?: string; embeds?: unknown[] } | null;
-      autoArchiveDuration?: number;
-    },
+  async createThread(
+    channelId: string,
+    payload: { name: string; autoArchiveDuration?: number },
   ): Promise<{ id: string; name: string; type: number }> {
-    return this.rest.createForumThread(forumChannelId, payload);
+    return this.rest.createThread(channelId, payload);
   }
 
   async archiveThread(threadId: string): Promise<void> {

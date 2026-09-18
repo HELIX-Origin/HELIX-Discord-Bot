@@ -269,7 +269,7 @@ export class WebhookRouter {
   private async deliverToTargets(feed: Feed, embed: unknown): Promise<boolean> {
     const payload = { embeds: [embed] };
 
-    if (this.threads && (feed.forumChannelId || feed.threadChannelId)) {
+    if (this.threads && feed.channelId) {
       const outcome = await this.threads.deliver(feed, payload);
       if (outcome.mode === 'thread') {
         if (outcome.delivered && outcome.threadId) {

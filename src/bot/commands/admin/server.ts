@@ -100,7 +100,6 @@ export async function handleServerCommand(
         url: f.url,
         name: f.name,
         channelId: f.channelId,
-        forumChannelId: f.forumChannelId,
         feedType: f.feedType,
       })),
     };

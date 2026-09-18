@@ -61,7 +61,6 @@ export function registerFeedsRoutes(router: Router<AppDeps>): void {
       url?: string;
       topic?: string;
       channelId?: string | null;
-      forumChannelId?: string | null;
       guildId?: string | null;
       feedType?: FeedType;
       scrape?: { item?: string; title?: string; link?: string; description?: string } | null;
@@ -80,19 +79,13 @@ export function registerFeedsRoutes(router: Router<AppDeps>): void {
     }
 
     const channelId = body.channelId === undefined ? null : body.channelId ? String(body.channelId).trim() : null;
-    const forumChannelId =
-      body.forumChannelId === undefined ? null : body.forumChannelId ? String(body.forumChannelId).trim() : null;
     const providedGuildId = body.guildId === undefined ? null : body.guildId ? String(body.guildId).trim() : null;
 
-    if (channelId && forumChannelId) {
-      return sendError(res, 400, 'A feed can target either a channel or a forum channel — not both.');
+    if (!channelId && !providedGuildId) {
+      return sendError(res, 400, 'Either channelId or guildId is required');
     }
 
-    if (!channelId && !forumChannelId && !providedGuildId) {
-      return sendError(res, 400, 'Either channelId, forumChannelId, or guildId is required');
-    }
-
-    const targetChannelId = channelId ?? forumChannelId;
+    const targetChannelId = channelId;
     let guildId: string | null = providedGuildId;
     if (targetChannelId && d.bot) {
       const guilds = await d.bot.getGuildsWithChannels();
@@ -168,17 +161,7 @@ export function registerFeedsRoutes(router: Router<AppDeps>): void {
         }
       }
 
-      const feed = d.repo.addFeed(
-        userId,
-        name,
-        url,
-        channelId,
-        feedType,
-        scrape,
-        guildId,
-        body.topic?.trim() || null,
-        forumChannelId,
-      );
+      const feed = d.repo.addFeed(userId, name, url, channelId, feedType, scrape, guildId, body.topic?.trim() || null);
       const typeLabel =
         feedType === 'reddit'
           ? 'Reddit image '
@@ -204,17 +187,12 @@ export function registerFeedsRoutes(router: Router<AppDeps>): void {
       topic?: string;
       feedType?: FeedType;
       channelId?: string | null;
-      forumChannelId?: string | null;
       enabled?: boolean;
     };
-    const targetChanged = body.channelId !== undefined || body.forumChannelId !== undefined;
-    let channelField: string | null | undefined =
+    const targetChanged = body.channelId !== undefined;
+    const channelField: string | null | undefined =
       body.channelId !== undefined ? body.channelId?.trim() || null : undefined;
-    let forumField: string | null | undefined =
-      body.forumChannelId !== undefined ? body.forumChannelId?.trim() || null : undefined;
-    if (channelField) forumField = null;
-    if (forumField) channelField = null;
-    const newTarget = channelField ?? forumField ?? null;
+    const newTarget = channelField ?? null;
 
     let guildId: string | null | undefined = undefined;
     if (targetChanged) {
@@ -274,7 +252,6 @@ export function registerFeedsRoutes(router: Router<AppDeps>): void {
       topic: body.topic !== undefined ? body.topic.trim() || null : undefined,
       feedType: body.feedType,
       channelId: channelField,
-      forumChannelId: forumField,
       guildId,
       enabled: body.enabled === undefined ? undefined : body.enabled ? 1 : 0,
       threadChannelId: targetChanged ? null : undefined,

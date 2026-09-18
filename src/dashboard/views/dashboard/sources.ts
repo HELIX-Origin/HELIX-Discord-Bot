@@ -16,7 +16,7 @@ export function renderSourcesTabs(redditAvailable: boolean): string {
             <select id="add-reddit-target" class="form-input">
               <option value="">(none)</option>
             </select>
-            <span style="font-size: 0.6875rem; color: var(--text-dim); margin-top: 0.25rem; display: block;">Pick a channel, or a forum to auto-create one thread per feed. NSFW subreddits can only target age-restricted (NSFW) channels.</span>
+            <span style="font-size: 0.6875rem; color: var(--text-dim); margin-top: 0.25rem; display: block;">Pick a text channel. NSFW subreddits can only target age-restricted (NSFW) channels.</span>
           </div>
         </div>
         <div class="form-group" style="margin-top: 0.5rem;">
@@ -41,7 +41,7 @@ export function renderSourcesTabs(redditAvailable: boolean): string {
       <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
         <div>
           <div class="section-title"><i class="fa-brands fa-reddit" style="color: #ff4500;"></i> Reddit Feeds</div>
-          <div class="section-desc">Subreddit image and post streams delivered straight to channels or forum threads.</div>
+          <div class="section-desc">Subreddit image and post streams delivered straight to your chosen text channel.</div>
         </div>
         <button onclick="triggerGuildPoll()" class="btn btn-ghost btn-sm"><i class="fa-solid fa-bolt"></i> Check Now</button>
       </div>
@@ -92,7 +92,7 @@ export function renderSourcesTabs(redditAvailable: boolean): string {
             <select id="add-freegames-target" class="form-input">
               <option value="">(none)</option>
             </select>
-            <span style="font-size: 0.6875rem; color: var(--text-dim); margin-top: 0.25rem; display: block;">Pick a channel, or a forum to auto-create one thread per feed.</span>
+            <span style="font-size: 0.6875rem; color: var(--text-dim); margin-top: 0.25rem; display: block;">Pick a text channel.</span>
           </div>
         </div>
         <button onclick="submitAddFreeGamesFeed()" class="btn btn-primary btn-sm btn-block" style="margin-top: 0.75rem; background: #10b981; border-color: #10b981;"><i class="fa-solid fa-gift"></i> Add Free Games Feed</button>
@@ -139,7 +139,7 @@ export function renderSourcesTabs(redditAvailable: boolean): string {
             <select id="add-streamalerts-target" class="form-input">
               <option value="">(none)</option>
             </select>
-            <span style="font-size: 0.6875rem; color: var(--text-dim); margin-top: 0.25rem; display: block;">Pick a channel, or a forum to auto-create one thread per feed.</span>
+            <span style="font-size: 0.6875rem; color: var(--text-dim); margin-top: 0.25rem; display: block;">Pick a text channel.</span>
           </div>
         </div>
         <button onclick="submitAddStreamAlertFeed()" class="btn btn-primary btn-sm btn-block" style="margin-top: 0.75rem; background: #9146ff; border-color: #9146ff;"><i class="fa-solid fa-video"></i> Add Stream Alert</button>

@@ -280,7 +280,7 @@ export function renderClientScript(): string {
     }
 
     async function ensureChannels() {
-      if (cachedCategories && (cachedCategories.textChannels || cachedCategories.forumChannels)) return;
+      if (cachedCategories && cachedCategories.textChannels) return;
       if (!currentGuildId) return;
       try {
         const res = await fetch('/api/guilds/' + encodeURIComponent(currentGuildId) + '/channels', { signal: AbortSignal.timeout(6000) });
@@ -303,15 +303,8 @@ export function renderClientScript(): string {
       });
     }
 
-    function isForumChannelId(id) {
-      if (!id) return false;
-      const forums = (cachedCategories && cachedCategories.forumChannels) || [];
-      return forums.some(function(ch) { return ch.id === id; });
-    }
-
     function targetFieldsFromValue(value) {
-      const isForum = isForumChannelId(value);
-      return { channelId: value && !isForum ? value : null, forumChannelId: value && isForum ? value : null };
+      return { channelId: value || null };
     }
 
     function categoryForFeed(feed) {
@@ -614,14 +607,10 @@ export function renderClientScript(): string {
 
     function channelOptionsForSelect(selectedId, includeNone) {
       var text = (cachedCategories && cachedCategories.textChannels) || [];
-      var forum = (cachedCategories && cachedCategories.forumChannels) || [];
       var opts = '';
       if (includeNone) opts += '<option value="">(none)</option>';
       text.forEach(function(ch) {
         opts += '<option value="' + esc(ch.id) + '"' + (ch.id === selectedId ? ' selected' : '') + '>#' + esc(ch.name) + '</option>';
-      });
-      forum.forEach(function(ch) {
-        opts += '<option value="' + esc(ch.id) + '"' + (ch.id === selectedId ? ' selected' : '') + '>&#128172; ' + esc(ch.name) + ' (Forum)</option>';
       });
       return opts;
     }
@@ -664,8 +653,8 @@ export function renderClientScript(): string {
           '</div>' +
           '<div class="form-group">' +
             '<label class="form-label" for="edit-feed-target">Delivery Target</label>' +
-            '<select id="edit-feed-target" class="form-input">' + channelOptionsForSelect(f.forumChannelId || f.channelId, true) + '</select>' +
-            '<span style="font-size: 0.6875rem; color: var(--text-dim); margin-top: 0.25rem; display: block;">Pick a text channel to post directly, or a forum to auto-create one thread per feed.</span>' +
+            '<select id="edit-feed-target" class="form-input">' + channelOptionsForSelect(f.channelId, true) + '</select>' +
+            '<span style="font-size: 0.6875rem; color: var(--text-dim); margin-top: 0.25rem; display: block;">Posts are delivered to this channel. When Thread delivery is enabled for the server, a dedicated thread is auto-created and used instead.</span>' +
           '</div>' +
           '<div class="form-group">' +
             '<label class="form-label" for="edit-feed-enable">Status</label>' +
@@ -702,7 +691,7 @@ export function renderClientScript(): string {
         document.querySelectorAll('.tab-btn').forEach(function(btn) { btn.classList.remove('active'); });
         detail.classList.add('active');
         window.history.pushState({}, '', '/dashboard/' + currentGuildId + '/feed/' + feedId);
-        populateFeedTargetSelect(feed.forumChannelId || feed.channelId || '');
+        populateFeedTargetSelect(feed.channelId || '');
       });
     }
 
@@ -728,12 +717,10 @@ export function renderClientScript(): string {
       var enableEl = document.getElementById('edit-feed-enable');
       if (!nameEl || !targetEl || !enableEl) return;
       var targetValue = targetEl.value || null;
-      var isForum = isForumChannelId(targetValue);
       var payload = {
         name: nameEl.value.trim() || null,
         topic: topicEl ? topicEl.value.trim() || null : null,
-        channelId: targetValue && !isForum ? targetValue : null,
-        forumChannelId: targetValue && isForum ? targetValue : null,
+        channelId: targetValue,
         enabled: enableEl.checked
       };
       if (urlEl && !urlEl.disabled && urlEl.value.trim()) {
@@ -818,7 +805,7 @@ export function renderClientScript(): string {
         const res = await fetch('/api/feeds', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, url, topic, feedType, scrape, guildId: currentGuildId, channelId: target.channelId, forumChannelId: target.forumChannelId })
+          body: JSON.stringify({ name, url, topic, feedType, scrape, guildId: currentGuildId, channelId: target.channelId })
         });
         if (!checkAuth(res)) return;
         const data = await res.json();
@@ -876,7 +863,7 @@ export function renderClientScript(): string {
         const res = await fetch('/api/feeds', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, url, feedType, guildId: currentGuildId, channelId: target.channelId, forumChannelId: target.forumChannelId })
+          body: JSON.stringify({ name, url, feedType, guildId: currentGuildId, channelId: target.channelId })
         });
         if (!checkAuth(res)) return;
         const data = await res.json();
@@ -933,7 +920,7 @@ export function renderClientScript(): string {
         const res = await fetch('/api/feeds', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, url, feedType, guildId: currentGuildId, channelId: target.channelId, forumChannelId: target.forumChannelId })
+          body: JSON.stringify({ name, url, feedType, guildId: currentGuildId, channelId: target.channelId })
         });
         if (!checkAuth(res)) return;
         const data = await res.json();
@@ -984,7 +971,7 @@ export function renderClientScript(): string {
         const res = await fetch('/api/feeds', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, url, feedType: platform, guildId: currentGuildId, channelId: target.channelId, forumChannelId: target.forumChannelId })
+          body: JSON.stringify({ name, url, feedType: platform, guildId: currentGuildId, channelId: target.channelId })
         });
         if (!checkAuth(res)) return;
         const data = await res.json();
@@ -1218,6 +1205,8 @@ export function renderClientScript(): string {
 
         const prefixEl = document.getElementById('admin-prefix');
         if (prefixEl) prefixEl.value = data.prefix || '';
+        const threadsEl = document.getElementById('admin-threads-enabled');
+        if (threadsEl) threadsEl.checked = !!data.threadsEnabled;
       } catch {
         const featuresEl = document.getElementById('admin-features-list');
         if (featuresEl) featuresEl.innerHTML = '<div class="empty-state">Failed to load guild settings.</div>';
@@ -1292,8 +1281,9 @@ export function renderClientScript(): string {
       });
 
       const prefix = document.getElementById('admin-prefix') ? document.getElementById('admin-prefix').value.trim() : '';
+      const threadsEnabled = document.getElementById('admin-threads-enabled') ? document.getElementById('admin-threads-enabled').checked : undefined;
 
-      const body = { adminRoleId, prefix, features, commands };
+      const body = { adminRoleId, prefix, features, commands, threadsEnabled };
       try {
         const res = await fetch('/api/guilds/' + encodeURIComponent(currentGuildId) + '/settings', {
           method: 'PUT',

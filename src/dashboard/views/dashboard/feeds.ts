@@ -5,7 +5,7 @@ export function renderFeedsTab(): string {
       <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
         <div>
           <div class="section-title"><i class="fa-solid fa-rss" style="color: var(--primary);"></i> News &amp; RSS Feeds</div>
-          <div class="section-desc">Add an RSS/Atom feed by URL, enable a ready-made feed, or scrape a webpage — delivered to a channel or its own forum thread.</div>
+          <div class="section-desc">Add an RSS/Atom feed by URL, enable a ready-made feed, or scrape a webpage — delivered to a channel (or its own dedicated thread when Thread delivery is enabled).</div>
         </div>
         <button onclick="triggerGuildPoll()" class="btn btn-ghost btn-sm"><i class="fa-solid fa-bolt"></i> Check Now</button>
       </div>
@@ -13,7 +13,7 @@ export function renderFeedsTab(): string {
       <div class="card">
         <div>
           <div class="card-title"><i class="fa-solid fa-plus-circle" style="color: var(--primary);"></i> Add RSS / Scrape Feed by URL</div>
-          <div class="card-desc">Deliver an RSS/Atom feed — or a scraped webpage — into a channel or its own forum thread.</div>
+          <div class="card-desc">Deliver an RSS/Atom feed — or a scraped webpage — into a channel (or its own dedicated thread when Thread delivery is enabled).</div>
         </div>
         <div class="form-grid" style="margin-top: 0.75rem;">
           <div class="form-group">

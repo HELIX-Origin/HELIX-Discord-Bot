@@ -57,7 +57,7 @@ export async function main(): Promise<void> {
   webhookRouter.setBot(bot);
   webhookRouter.subscribeToAllFeeds();
 
-  // 4b. Wire optional per-guild forum thread delivery (one thread per feed).
+  // 4b. Wire optional per-guild thread delivery (dedicated thread per feed).
   const threads = new FeedThreadManager(repo, bot, config, config.logLevel);
   feeds.setThreads(threads);
   webhookRouter.setThreads(threads);

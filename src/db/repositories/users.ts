@@ -90,35 +90,29 @@ export class UserRepository {
       name,
       createdAt: existing?.createdAt ?? nowIso(),
       threadsEnabled: existing?.threadsEnabled ?? 0,
-      forumChannelIds: existing?.forumChannelIds ?? [],
     };
     this.state.putDiscordGuild(guild);
     return guild;
   }
 
-  setGuildThreadConfig(
-    guildId: string,
-    config: { threadsEnabled: boolean; forumChannelIds: string[] },
-  ): DiscordGuild | null {
+  setGuildThreadConfig(guildId: string, config: { threadsEnabled: boolean }): DiscordGuild | null {
     const existing = this.state.getDiscordGuild(guildId);
     const userId = existing?.userId ?? 0;
     const name = existing?.name ?? '';
     const threadsEnabled = config.threadsEnabled ? 1 : 0;
-    const forumChannelIds = JSON.stringify(config.forumChannelIds);
     this.db.raw
       .prepare(
-        `INSERT INTO discord_guilds (guild_id, user_id, name, created_at, threads_enabled, forum_channel_ids)
-         VALUES (?, ?, ?, ?, ?, ?)
-         ON CONFLICT(guild_id) DO UPDATE SET threads_enabled = excluded.threads_enabled, forum_channel_ids = excluded.forum_channel_ids`,
+        `INSERT INTO discord_guilds (guild_id, user_id, name, created_at, threads_enabled)
+         VALUES (?, ?, ?, ?, ?)
+         ON CONFLICT(guild_id) DO UPDATE SET threads_enabled = excluded.threads_enabled`,
       )
-      .run(guildId, userId, name, existing?.createdAt ?? nowIso(), threadsEnabled, forumChannelIds);
+      .run(guildId, userId, name, existing?.createdAt ?? nowIso(), threadsEnabled);
     const guild: DiscordGuild = {
       guildId,
       userId,
       name,
       createdAt: existing?.createdAt ?? nowIso(),
       threadsEnabled,
-      forumChannelIds: config.forumChannelIds,
     };
     this.state.putDiscordGuild(guild);
     return guild;

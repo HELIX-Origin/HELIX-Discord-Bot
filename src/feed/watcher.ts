@@ -99,8 +99,8 @@ export class FeedWatcher {
       }
     }
 
-    const { channelId: targetChannelId, forumChannelId: targetForumChannelId } = resolveFeedTargets(feed);
-    if (!targetChannelId && !targetForumChannelId) {
+    const { channelId: targetChannelId } = resolveFeedTargets(feed);
+    if (!targetChannelId) {
       this.logger.warn('Feed has no configured Discord delivery target; skipping poll', {
         feedId: feed.id,
         feedName: feed.name,
@@ -286,7 +286,7 @@ export class FeedWatcher {
   }
 
   private async deliverEntry(feed: Feed, payload: { content?: string; embeds?: unknown[] }): Promise<boolean> {
-    if (this.threads && (feed.forumChannelId || feed.threadChannelId)) {
+    if (this.threads && feed.channelId) {
       const outcome = await this.threads.deliver(feed, payload);
       if (outcome.mode === 'thread') {
         if (outcome.delivered && outcome.threadId) {
@@ -387,8 +387,8 @@ export class FeedWatcher {
   private async pollStreamAlertFeed(userId: number, feed: Feed): Promise<void> {
     this.logger.debug('Polling stream alert feed (fallback)', { feedId: feed.id, feedType: feed.feedType });
 
-    const { channelId, forumChannelId } = resolveFeedTargets(feed);
-    if (!channelId && !forumChannelId) {
+    const { channelId } = resolveFeedTargets(feed);
+    if (!channelId) {
       this.logger.warn('Stream alert feed has no configured Discord delivery target; skipping poll', {
         feedId: feed.id,
         feedName: feed.name,

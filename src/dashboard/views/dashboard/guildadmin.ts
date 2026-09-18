@@ -50,6 +50,18 @@ export function renderGuildAdminTab(): string {
         </div>
       </div>
 
+      <div class="card">
+        <div>
+          <div class="card-title"><i class="fa-solid fa-life-ring" style="color: var(--primary);"></i> Feed Delivery</div>
+          <div class="card-desc">Feeds deliver into a dedicated thread auto-created in their channel instead of posting directly.</div>
+        </div>
+        <div class="form-group" style="margin-top: 0.75rem;">
+          <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+            <input type="checkbox" id="admin-threads-enabled"> Enable Thread delivery
+          </label>
+        </div>
+      </div>
+
       <div style="display: flex; justify-content: flex-end; align-items: center; gap: 0.75rem;">
         <span id="admin-save-status" style="font-size: 0.8125rem; color: #10b981; display: none;"></span>
         <button onclick="saveGuildAdmin()" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> Save Settings</button>

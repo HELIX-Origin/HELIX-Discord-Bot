@@ -90,9 +90,6 @@ export function registerGuildRoutes(router: Router<AppDeps>): void {
       const textChannels = allChannels
         .filter((ch) => ch.type === 0 || ch.type === 5)
         .map((ch) => ({ id: ch.id, name: ch.name, type: ch.type, nsfw: ch.nsfw ?? false }));
-      const forumChannels = allChannels
-        .filter((ch) => ch.type === 15)
-        .map((ch) => ({ id: ch.id, name: ch.name, type: ch.type, nsfw: ch.nsfw ?? false }));
 
       sendJson(res, 200, {
         guildId,
@@ -100,7 +97,6 @@ export function registerGuildRoutes(router: Router<AppDeps>): void {
         icon: guild.icon,
         canManage,
         textChannels,
-        forumChannels,
       });
     } catch (err) {
       sendError(res, 500, err instanceof Error ? err.message : 'Failed to fetch guild channels');
@@ -146,9 +142,7 @@ export function registerGuildRoutes(router: Router<AppDeps>): void {
       const textChannels = allChannels
         .filter((ch) => ch.type === 0 || ch.type === 5)
         .map((ch) => ({ id: ch.id, name: ch.name, type: ch.type, nsfw: ch.nsfw ?? false }));
-      const forumChannels = allChannels
-        .filter((ch) => ch.type === 15)
-        .map((ch) => ({ id: ch.id, name: ch.name, type: ch.type, nsfw: ch.nsfw ?? false }));
+      const threadsEnabled = d.repo.getGuildBinding(guildId)?.threadsEnabled === 1;
 
       await loadAllCommands();
       const allCommands = getAllCommands();
@@ -172,7 +166,7 @@ export function registerGuildRoutes(router: Router<AppDeps>): void {
         commands,
         guildRoles,
         textChannels,
-        forumChannels,
+        threadsEnabled,
       });
     } catch (err) {
       sendError(res, 500, err instanceof Error ? err.message : 'Failed to fetch guild settings');
@@ -216,6 +210,7 @@ export function registerGuildRoutes(router: Router<AppDeps>): void {
         modLogChannelId?: string | null;
         modLogEvents?: string[];
       };
+      threadsEnabled?: boolean;
     };
 
     try {
@@ -384,6 +379,12 @@ export function registerGuildRoutes(router: Router<AppDeps>): void {
           d.repo.setGuildSetting(guildId, 'mod_log_channel_id', id);
           changes.push(id ? `Mod log channel → <#${id}>` : 'Mod log channel cleared');
         }
+      }
+
+      if (body.threadsEnabled !== undefined) {
+        const enabled = Boolean(body.threadsEnabled);
+        d.repo.setGuildThreadConfig(guildId, { threadsEnabled: enabled });
+        changes.push(`Thread delivery ${enabled ? 'enabled' : 'disabled'}`);
       }
 
       d.repo.logActivity(

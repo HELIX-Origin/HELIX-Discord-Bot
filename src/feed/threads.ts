@@ -7,13 +7,9 @@ import { createLogger, type LogLevel } from '../util/logger.js';
 export interface ThreadSender {
   sendChannelMessage(channelId: string, payload: { content?: string; embeds?: unknown[] }): Promise<void>;
   getChannel(channelId: string): Promise<DiscordChannelSnapshot>;
-  createForumThread(
-    forumChannelId: string,
-    payload: {
-      name: string;
-      message?: { content?: string; embeds?: unknown[] } | null;
-      autoArchiveDuration?: number;
-    },
+  createThread(
+    channelId: string,
+    payload: { name: string; autoArchiveDuration?: number },
   ): Promise<{ id: string; name: string; type: number }>;
   archiveThread(threadId: string): Promise<void>;
   unarchiveThread?(threadId: string): Promise<void>;
@@ -38,20 +34,20 @@ export interface ThreadDeliveryOutcome {
 const MAX_AUTO_ARCHIVE_MINUTES = 10080;
 
 /**
- * Coordinates per-feed forum thread delivery.
+ * Coordinates per-feed thread delivery.
  *
- * - One dedicated thread per feed, created as a post inside a forum channel.
+ * - One dedicated thread per feed, auto-created in the feed's own delivery
+ *   channel (`feeds.channel_id`) when thread delivery is enabled for the guild.
  * - Threads are polled periodically and "kept open" with keepalive messages
  *   right before Discord would auto-archive them.
  * - When a feed thread reaches `threadMaxMessages` entries it is archived and
  *   a fresh thread is opened in its place.
- * - Applies only to feeds that explicitly select a forum channel as their
- *   delivery target (`feeds.forum_channel_id`). Otherwise feeds keep delivering
- *   to their regular channel.
+ * - Applies only to feeds whose guild has thread delivery enabled
+ *   (`discord_guilds.threads_enabled`). Otherwise feeds keep delivering
+ *   directly to their channel.
  */
 export class FeedThreadManager {
   private readonly logger;
-  private forumGuildCache: Map<string, string> | null = null;
 
   constructor(
     private readonly repo: Repository,
@@ -62,39 +58,12 @@ export class FeedThreadManager {
     this.logger = createLogger('threads', logLevel);
   }
 
-  /** Forum channel ids available for a guild (per-guild config first, env defaults second). */
-  async forumChannelsForGuild(guildId: string | null | undefined): Promise<string[]> {
-    if (!guildId) return [];
+  /** Whether thread delivery is enabled for the guild a feed belongs to. */
+  private async guildThreadsEnabled(feed: Feed): Promise<boolean> {
+    const guildId = feed.guildId ?? (await this.resolveFeedGuild(feed));
+    if (!guildId) return false;
     const binding = this.repo.getGuildBinding(guildId);
-    if (binding && binding.forumChannelIds.length > 0) {
-      return binding.forumChannelIds;
-    }
-    return this.envChannelsForGuild(guildId);
-  }
-
-  private async envChannelsForGuild(guildId: string): Promise<string[]> {
-    if (this.config.forumChannelIds.length === 0) return [];
-    const guildMap = await this.resolveForumGuilds();
-    return this.config.forumChannelIds.filter((id) => guildMap.get(id) === guildId);
-  }
-
-  private async resolveForumGuilds(): Promise<Map<string, string>> {
-    if (this.forumGuildCache) return this.forumGuildCache;
-    const guildMap = new Map<string, string>();
-    if (this.bot) {
-      await Promise.all(
-        this.config.forumChannelIds.map(async (id) => {
-          try {
-            const channel = await this.bot!.getChannel(id);
-            if (channel.guild_id) guildMap.set(id, channel.guild_id);
-          } catch {
-            // Unknown/unreachable forum channel; skip
-          }
-        }),
-      );
-    }
-    this.forumGuildCache = guildMap;
-    return guildMap;
+    return Boolean(binding && binding.threadsEnabled === 1);
   }
 
   /** Resolves the guild a feed belongs to (persisted guildId or the guild of its channel). */
@@ -113,37 +82,21 @@ export class FeedThreadManager {
     return null;
   }
 
-  /** Picks a forum channel for a feed, stable across deliveries. */
-  async forumChannelForFeed(feed: Feed): Promise<string | null> {
-    if (feed.forumChannelId) return feed.forumChannelId;
-
-    const guildId = await this.resolveFeedGuild(feed);
-    if (!guildId) return null;
-
-    const channels = await this.forumChannelsForGuild(guildId);
-    if (channels.length === 0) return null;
-    return channels[Math.abs(feed.id) % channels.length];
-  }
-
   /**
-   * Delivers an entry into the feed's dedicated forum thread, or falls back to
-   * the feed's regular channel when thread delivery is not configured.
+   * Delivers an entry into the feed's dedicated thread, or falls back to the
+   * feed's regular channel when thread delivery is not configured/enabled.
    */
   async deliver(feed: Feed, payload: { content?: string; embeds?: unknown[] }): Promise<ThreadDeliveryOutcome> {
-    const forumChannelId = await this.forumChannelForFeed(feed);
-    if (!forumChannelId) {
-      if (feed.threadChannelId) {
-        // No forum target anymore; release the stale thread binding.
-        this.repo.setFeedThread(feed.userId, feed.id, null, 0);
-      }
-      if (!this.bot) {
-        this.logger.warn('Discord bot is offline; skipping thread delivery', {
-          feedId: feed.id,
-          feedName: feed.name,
-        });
-        return { delivered: false, mode: 'channel', fallbackReason: 'bot offline' };
-      }
-      return { delivered: false, mode: 'channel', fallbackReason: 'no forum target configured for feed' };
+    if (!feed.channelId) {
+      this.logger.warn('Feed has no delivery channel; skipping thread delivery', {
+        feedId: feed.id,
+        feedName: feed.name,
+      });
+      return { delivered: false, mode: 'channel', fallbackReason: 'feed has no delivery channel' };
+    }
+
+    if (!(await this.guildThreadsEnabled(feed))) {
+      return { delivered: false, mode: 'channel', fallbackReason: 'thread delivery disabled for guild' };
     }
 
     if (!this.bot) {
@@ -157,7 +110,7 @@ export class FeedThreadManager {
     try {
       const currentThreadId = feed.threadChannelId || this.repo.getFeed(feed.userId, feed.id)?.threadChannelId || null;
       if (!currentThreadId) {
-        const threadId = await this.createThread(feed, forumChannelId, payload);
+        const threadId = await this.createThread(feed, feed.channelId, payload);
         return { delivered: true, mode: 'thread', threadId };
       }
 
@@ -174,7 +127,7 @@ export class FeedThreadManager {
             feedName: feed.name,
             threadId: currentThreadId,
           });
-          const threadId = await this.createThread(feed, forumChannelId, payload);
+          const threadId = await this.createThread(feed, feed.channelId, payload);
           return { delivered: true, mode: 'thread', threadId, fallbackReason: 'previous thread deleted' };
         }
         throw channelErr;
@@ -203,7 +156,7 @@ export class FeedThreadManager {
       feed.threadChannelId = currentThreadId;
       feed.threadEntryCount = entryCount;
       if (entryCount >= this.config.threadMaxMessages) {
-        await this.rotate(feed, currentThreadId, forumChannelId, entryCount);
+        await this.rotate(feed, currentThreadId, feed.channelId, entryCount);
         return {
           delivered: true,
           mode: 'thread',
@@ -225,39 +178,37 @@ export class FeedThreadManager {
 
   private async createThread(
     feed: Feed,
-    forumChannelId: string,
+    channelId: string,
     payload: { content?: string; embeds?: unknown[] },
   ): Promise<string> {
     const name = feed.name.trim().slice(0, 100) || 'Feed updates';
     try {
-      const thread = await this.bot!.createForumThread(forumChannelId, {
+      const thread = await this.bot!.createThread(channelId, {
         name,
-        message: payload,
         autoArchiveDuration: MAX_AUTO_ARCHIVE_MINUTES,
       });
+      await this.bot!.sendChannelMessage(thread.id, payload);
       feed.threadChannelId = thread.id;
       feed.threadEntryCount = 1;
       this.repo.setFeedThread(feed.userId, feed.id, thread.id, 1);
-      this.repo.logActivity(feed.userId, 'info', 'threads', `Opened forum thread "${name}" for feed "${feed.name}".`);
+      this.repo.logActivity(feed.userId, 'info', 'threads', `Opened thread "${name}" for feed "${feed.name}".`);
       return thread.id;
     } catch (err) {
-      this.logger.warn('Forum thread creation failed; retrying without archive override', {
+      this.logger.warn('Thread creation failed; retrying without archive override', {
         feedId: feed.id,
         error: err instanceof Error ? err.message : String(err),
       });
-      const thread = await this.bot!.createForumThread(forumChannelId, {
-        name,
-        message: payload,
-      });
+      const thread = await this.bot!.createThread(channelId, { name });
+      await this.bot!.sendChannelMessage(thread.id, payload);
       feed.threadChannelId = thread.id;
       feed.threadEntryCount = 1;
       this.repo.setFeedThread(feed.userId, feed.id, thread.id, 1);
-      this.repo.logActivity(feed.userId, 'info', 'threads', `Opened forum thread "${name}" for feed "${feed.name}".`);
+      this.repo.logActivity(feed.userId, 'info', 'threads', `Opened thread "${name}" for feed "${feed.name}".`);
       return thread.id;
     }
   }
 
-  private async rotate(feed: Feed, oldThreadId: string, forumChannelId: string, entryCount: number): Promise<void> {
+  private async rotate(feed: Feed, oldThreadId: string, channelId: string, entryCount: number): Promise<void> {
     try {
       await this.bot!.archiveThread(oldThreadId);
       this.logger.info('Archived large feed thread; opening a replacement', {
@@ -283,11 +234,11 @@ export class FeedThreadManager {
       content: `🗂️ **New thread started.** Previous thread for **${feed.name}** was archived after ${entryCount} posts.`,
     };
     try {
-      const thread = await this.bot!.createForumThread(forumChannelId, {
+      const thread = await this.bot!.createThread(channelId, {
         name: (feed.name.trim() || 'Feed updates').slice(0, 100),
-        message: intro,
         autoArchiveDuration: MAX_AUTO_ARCHIVE_MINUTES,
       });
+      await this.bot!.sendChannelMessage(thread.id, intro);
       feed.threadChannelId = thread.id;
       feed.threadEntryCount = 0;
       this.repo.setFeedThread(feed.userId, feed.id, thread.id, 0);

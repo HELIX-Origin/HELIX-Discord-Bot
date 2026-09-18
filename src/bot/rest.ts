@@ -198,40 +198,6 @@ export class DiscordRestClient {
   }
 
   /**
-   * Creates a thread (post) inside a forum channel. When `message` carries embeds
-   * they become the very first message of the thread.
-   */
-  async createForumThread(
-    forumChannelId: string,
-    payload: {
-      name: string;
-      message?: { content?: string; embeds?: unknown[] } | null;
-      autoArchiveDuration?: number;
-    },
-  ): Promise<{ id: string; name: string; type: number }> {
-    const res = await fetch(`${this.baseUrl}/channels/${forumChannelId}/threads`, {
-      method: 'POST',
-      headers: this.headers(),
-      body: JSON.stringify({
-        name: payload.name.slice(0, 100),
-        type: 11,
-        auto_archive_duration: payload.autoArchiveDuration,
-        message: payload.message ?? undefined,
-      }),
-      signal: AbortSignal.timeout(DISCORD_API_TIMEOUT_MS),
-    });
-
-    if (!res.ok) {
-      const text = await res.text();
-      throw new Error(
-        `Failed to create forum thread in channel ${forumChannelId}: ${formatErrorText(res.status, text)}`,
-      );
-    }
-
-    return (await res.json()) as { id: string; name: string; type: number };
-  }
-
-  /**
    * Creates a thread on a TEXT channel (public type 12 or private type 11).
    * Used by the ticket system: a button in a text channel opens a ticket thread.
    * Note: text-channel threads accept a start message via a follow-up send,

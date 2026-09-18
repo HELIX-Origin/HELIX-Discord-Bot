@@ -67,7 +67,6 @@ function makeDeps(): { deps: AppDeps; feeds: Feed[]; polledIds: number[] } {
           url,
           topic: null,
           channelId,
-          forumChannelId: null,
           guildId: guildId || null,
           enabled: 1,
           feedType,

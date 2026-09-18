@@ -174,9 +174,8 @@ export class Repository {
     scrape: Feed['scrape'],
     guildId?: string | null,
     topic?: string | null,
-    forumChannelId?: string | null,
   ): Feed {
-    return this.feeds.addFeed(userId, name, url, channelId, feedType, scrape, guildId, topic, forumChannelId);
+    return this.feeds.addFeed(userId, name, url, channelId, feedType, scrape, guildId, topic);
   }
 
   updateFeed(
@@ -188,7 +187,6 @@ export class Repository {
       topic?: string | null;
       feedType?: FeedType;
       channelId?: string | null;
-      forumChannelId?: string | null;
       guildId?: string | null;
       enabled?: number;
       threadChannelId?: string | null;
@@ -202,7 +200,7 @@ export class Repository {
     this.feeds.setFeedThread(userId, id, threadChannelId, threadEntryCount);
   }
 
-  setGuildThreadConfig(guildId: string, config: { threadsEnabled: boolean; forumChannelIds: string[] }): DiscordGuild {
+  setGuildThreadConfig(guildId: string, config: { threadsEnabled: boolean }): DiscordGuild {
     const updated = this.users.setGuildThreadConfig(guildId, config);
     if (!updated) throw new Error(`Guild ${guildId} thread config could not be saved`);
     return updated;
