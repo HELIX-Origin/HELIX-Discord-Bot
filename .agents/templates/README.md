@@ -29,6 +29,7 @@ All templates adhere strictly to:
 |---|---|---|
 | [**`issue-roadmap-template.md`**](issue-roadmap-template.md) | GitHub Issues | Living roadmap template for GitHub issues with Mermaid diagrams and progress tracking |
 | [**`issue-template.md`**](issue-template.md) | Issue Body | Standard issue reporting blueprint |
+| [**`mermaid-diagram-template.md`**](mermaid-diagram-template.md) | Mermaid Diagrams | GitHub-flavored Mermaid diagram template following Rule 09 with legibility checklist |
 | [**`commit-message-guide.md`**](commit-message-guide.md) | Git Commits | Conventional commit standard with emojis and subsystem scopes |
 | [**`release-notes-template.md`**](release-notes-template.md) | GitHub Releases | Structured release notes blueprint with emoji markers and upgrade steps |
 

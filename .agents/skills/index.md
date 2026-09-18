@@ -14,6 +14,7 @@ Index of technical skills, subsystem domain guides, and engineering references f
 | **Guild Administration** | Moderation & Roles | Moderation actions, permissions, role hierarchy, mod log channels | [guild-administration.md](guild-administration.md) |
 | **Management Dashboard Engineering** | Dashboard & OAuth | Zero-frontend-dep SSR, Discord OAuth2, guild admin authorization, EmbedHandler parity | [dashboard-engineering.md](dashboard-engineering.md) |
 | **TypeScript ESM & Node.js** | Language & Runtime | ESM conventions, `.js` imports, `node:sqlite`, in-memory `AppState` | [typescript.md](typescript.md) |
+| **GitHub-Flavored Mermaid Diagrams** | Documentation & Diagrams | GitHub-compatible Mermaid syntax, one concern per diagram, legibility | [mermaid-diagrams.md](mermaid-diagrams.md) |
 
 ---
 

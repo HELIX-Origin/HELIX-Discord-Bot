@@ -4,11 +4,11 @@ First post is the **single living source of truth** for this issue/feature/epic.
 
 ```mermaid
 flowchart TD
-    Phase1[Phase 1: Architecture & Options Lib] --> Phase2[Phase 2: Core Command Logic]
-    Phase2 --> Phase3[Phase 3: Event Handlers & Sub-commands]
-    Phase3 --> Phase4[Phase 4: Test Suite & Vitest]
-    Phase4 --> Phase5[Phase 5: Full Validation Gate npm run check]
-    Phase5 --> Phase6[Phase 6: Wiki & Documentation Sync]
+    Phase1["Phase 1: Architecture & Options Lib"] --> Phase2["Phase 2: Core Command Logic"]
+    Phase2 --> Phase3["Phase 3: Event Handlers & Sub-commands"]
+    Phase3 --> Phase4["Phase 4: Test Suite & Vitest"]
+    Phase4 --> Phase5["Phase 5: Full Validation Gate npm run check"]
+    Phase5 --> Phase6["Phase 6: Wiki & Documentation Sync"]
 ```
 
 ---

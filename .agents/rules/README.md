@@ -25,6 +25,7 @@ This directory contains the permanent, non-negotiable architectural, security, a
 | **Rule 06** | Discord.js Standards & Modular Architecture | Self-contained commands (`commands/<cat>/<cmd>.ts`), dynamic loader, modular `lib/` | [discord-js-standards.md](discord-js-standards.md) |
 | **Rule 07** | Management Dashboard & Discord Integration Standards | Zero-frontend-dep SSR, Discord OAuth2, guild admin authorization, EmbedHandler parity | [dashboard-standards.md](dashboard-standards.md) |
 | **Rule 08** | Semantic Versioning & Release Management Standards | SemVer (`X.Y.Z`), Version Sync & Structured GitHub Releases | [release-standards.md](release-standards.md) |
+| **Rule 09** | GitHub-Flavored Mermaid & Diagram Standards | GitHub-compatible Mermaid syntax, one concern per diagram, legibility | [mermaid-standards.md](mermaid-standards.md) |
 
 ---
 
