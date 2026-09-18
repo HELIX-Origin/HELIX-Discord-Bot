@@ -158,8 +158,8 @@ cd /opt/helix-discord-bot
 npm install
 npm run build
 
-# Start the compiled bot directly with PM2
-pm2 start dist/index.js --name "helix-discord-bot" --watch dist --ignore-watch="data node_modules .git logs"
+# Start the compiled bot directly with PM2 (loading the .env file)
+pm2 start dist/index.js --name "helix-discord-bot" --node-args="--env-file-if-exists=.env" --watch dist --ignore-watch="data node_modules .git logs"
 
 # View live real-time logs
 pm2 logs helix-discord-bot
