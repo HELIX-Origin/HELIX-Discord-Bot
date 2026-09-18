@@ -1,5 +1,5 @@
 import { appDisplayName, type AppDeps } from '../../app.js';
-import { isOwnerUser, isAdminOrOwner, canUserAccessDashboard } from '../routes/shared.js';
+import { isOwnerUser, isAdminOrOwner, canUserAccessDashboard, canUserManageGuild } from '../routes/shared.js';
 import { getThemeInfo, getColorSchemeInfo } from './theme.js';
 import { renderDashboardStyles } from './dashboard/styles.js';
 import { renderSidebar } from './dashboard/sidebar.js';
@@ -8,6 +8,10 @@ import { renderFeedsTab } from './dashboard/feeds.js';
 import { renderSourcesTabs } from './dashboard/sources.js';
 import { renderGuildAdminTab } from './dashboard/guildadmin.js';
 import { renderSettingsTab } from './dashboard/settings.js';
+import { renderWelcomeTab } from './dashboard/welcome.js';
+import { renderTicketsTab } from './dashboard/tickets.js';
+import { renderLogsTab } from './dashboard/logs.js';
+import { renderCommandsTab } from './dashboard/commands.js';
 import { renderClientScript } from './dashboard/client-script.js';
 import { createRedditFeeds } from '../../feed/reddit.js';
 
@@ -73,6 +77,10 @@ export function renderDashboardHtml(
   const isOwner = isOwnerUser(userId, deps);
   const isAdmin = !isOwner && isAdminOrOwner(userId, deps);
   const isHost = isOwner || isAdmin;
+  const canManage =
+    _route.view === 'dashboard' && _route.guildId && userId !== null
+      ? canUserManageGuild(userId, _route.guildId, deps)
+      : false;
   const dbStats = deps.db.stats();
   const redditAvailable = (deps.reddit ?? createRedditFeeds()).available();
 
@@ -162,7 +170,7 @@ export function renderDashboardHtml(
     <!-- Active Server Dashboard View -->
     <div id="dashboard-view" class="tab-pane" style="width: 100%; flex-direction: row;">
       <!-- Categorized Sidebar Navigation -->
-      ${renderSidebar({ isHost, redditAvailable })}
+      ${renderSidebar({ isHost, redditAvailable, canManage })}
 
       <!-- Main Content Tabs -->
       <main>
@@ -170,6 +178,10 @@ export function renderDashboardHtml(
         ${renderGuildAdminTab()}
         ${renderFeedsTab()}
         ${renderSourcesTabs(redditAvailable)}
+        ${renderWelcomeTab()}
+        ${renderTicketsTab()}
+        ${renderLogsTab()}
+        ${renderCommandsTab()}
         ${
           isHost
             ? renderSettingsTab({

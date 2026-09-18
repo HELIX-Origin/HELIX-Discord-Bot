@@ -231,6 +231,53 @@ export class DiscordRestClient {
     return (await res.json()) as { id: string; name: string; type: number };
   }
 
+  /**
+   * Creates a thread on a TEXT channel (public type 12 or private type 11).
+   * Used by the ticket system: a button in a text channel opens a ticket thread.
+   * Note: text-channel threads accept a start message via a follow-up send,
+   * unlike forum threads which embed the message in the creation payload.
+   */
+  async createThread(
+    channelId: string,
+    payload: {
+      name: string;
+      privateThread?: boolean;
+      autoArchiveDuration?: number;
+    },
+  ): Promise<{ id: string; name: string; type: number }> {
+    const res = await fetch(`${this.baseUrl}/channels/${channelId}/threads`, {
+      method: 'POST',
+      headers: this.headers(),
+      body: JSON.stringify({
+        name: payload.name.slice(0, 100),
+        type: payload.privateThread ? 11 : 12,
+        auto_archive_duration: payload.autoArchiveDuration,
+      }),
+      signal: AbortSignal.timeout(DISCORD_API_TIMEOUT_MS),
+    });
+
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(`Failed to create thread in channel ${channelId}: ${formatErrorText(res.status, text)}`);
+    }
+
+    return (await res.json()) as { id: string; name: string; type: number };
+  }
+
+  /** Adds a role to a private thread so its members can see and manage it. */
+  async addThreadRole(threadId: string, roleId: string): Promise<void> {
+    const res = await fetch(`${this.baseUrl}/channels/${threadId}/thread-members/${roleId}`, {
+      method: 'PUT',
+      headers: this.headers(),
+      signal: AbortSignal.timeout(DISCORD_API_TIMEOUT_MS),
+    });
+
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(`Failed to add role ${roleId} to thread ${threadId}: ${formatErrorText(res.status, text)}`);
+    }
+  }
+
   /** Closes a thread: archives it and locks it so no further messages can be sent. */
   async archiveThread(threadId: string): Promise<void> {
     const res = await fetch(`${this.baseUrl}/channels/${threadId}`, {

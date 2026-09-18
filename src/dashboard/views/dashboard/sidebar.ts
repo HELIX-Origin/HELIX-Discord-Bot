@@ -1,10 +1,12 @@
 export interface SidebarOptions {
   isHost: boolean;
   redditAvailable: boolean;
+  canManage: boolean;
 }
 
 export function renderSidebar(options: SidebarOptions): string {
-  const { isHost, redditAvailable } = options;
+  const { isHost, redditAvailable, canManage } = options;
+  const manageHidden = canManage ? '' : 'hidden';
 
   return `
     <nav class="sidebar">
@@ -30,17 +32,20 @@ export function renderSidebar(options: SidebarOptions): string {
         <div class="nav-section">
           <div class="nav-section-title"><i class="fa-solid fa-compass"></i> General</div>
           <div class="tab-list">
-            <button onclick="switchTab('overview')" id="tab-btn-overview" class="tab-btn">
+            <button onclick="switchTab('commands')" id="tab-btn-commands" class="tab-btn">
+              <i class="fa-solid fa-terminal" style="color: var(--primary);"></i> <span>Commands</span>
+            </button>
+            <button onclick="switchTab('overview')" id="tab-btn-overview" class="tab-btn manage-gated" ${manageHidden}>
               <i class="fa-solid fa-chart-pie" style="color: var(--primary);"></i> <span>Overview</span>
             </button>
-            <button onclick="switchTab('guildadmin')" id="tab-btn-guildadmin" class="tab-btn">
+            <button onclick="switchTab('guildadmin')" id="tab-btn-guildadmin" class="tab-btn manage-gated" ${manageHidden}>
               <i class="fa-solid fa-shield-halved" style="color: #6366f1;"></i> <span>Server Admin</span>
             </button>
           </div>
         </div>
 
         <!-- Section: Feed Subscriptions -->
-        <div class="nav-section">
+        <div class="nav-section manage-gated" ${manageHidden}>
           <div class="nav-section-title"><i class="fa-solid fa-rss"></i> Feeds &amp; Alerts</div>
           <div class="tab-list">
             <button onclick="switchTab('rss')" id="tab-btn-rss" class="tab-btn active">
@@ -64,12 +69,26 @@ export function renderSidebar(options: SidebarOptions): string {
           </div>
         </div>
 
-
+        <!-- Section: Feature Settings -->
+        <div class="nav-section manage-gated" ${manageHidden}>
+          <div class="nav-section-title"><i class="fa-solid fa-sliders"></i> Feature Settings</div>
+          <div class="tab-list">
+            <button onclick="switchTab('welcome')" id="tab-btn-welcome" class="tab-btn">
+              <i class="fa-solid fa-hand-sparkles" style="color: #10b981;"></i> <span>Welcome</span>
+            </button>
+            <button onclick="switchTab('tickets')" id="tab-btn-tickets" class="tab-btn">
+              <i class="fa-solid fa-ticket" style="color: #6366f1;"></i> <span>Tickets</span>
+            </button>
+            <button onclick="switchTab('logs')" id="tab-btn-logs" class="tab-btn">
+              <i class="fa-solid fa-scroll" style="color: var(--amber);"></i> <span>Logs</span>
+            </button>
+          </div>
+        </div>
 
         <!-- Section: System -->
         ${
           isHost
-            ? `<div class="nav-section">
+            ? `<div class="nav-section manage-gated" ${manageHidden}>
           <div class="nav-section-title"><i class="fa-solid fa-sliders"></i> System</div>
           <div class="tab-list">
             <button onclick="switchTab('settings')" id="tab-btn-settings" class="tab-btn">
@@ -83,6 +102,8 @@ export function renderSidebar(options: SidebarOptions): string {
 
       <div class="sidebar-footer">
         <a href="/dashboard" onclick="clearGuild(event)" id="change-server-link"><i class="fa-solid fa-server"></i> Servers</a>
+        <span>&middot;</span>
+        <a href="/commands">Commands</a>
         <span>&middot;</span>
         <a href="/privacy">Privacy</a>
         <span>&middot;</span>

@@ -7,6 +7,9 @@ import { renderGuildsHtml } from './views/guilds.js';
 import { renderLandingHtml } from './views/landing.js';
 import { renderLoginHtml } from './views/login.js';
 import { renderLegalHtml } from './views/legal.js';
+import { renderCommandsHtml } from './views/commands.js';
+import { getAllCommandMetadata, getCategorizedCommands } from '../bot/handlers/registry.js';
+import { loadAllCommands } from '../bot/handlers/loader.js';
 import { renderAdminHtml } from './views/admin.js';
 import { registerAdminRoutes } from './routes/admin.js';
 import { registerAuthRoutes } from './routes/auth.js';
@@ -89,6 +92,39 @@ export function createHelixRssServer(deps: AppDeps): Server {
     const appName = appDisplayName(d);
     const appIconUrl = d.bot?.getAppIconUrl() || null;
     sendHtml(res, 200, renderLegalHtml('Terms of Service', 'TOS.md', appName, appIconUrl, d.config.defaultTheme));
+  });
+
+  // Public read-only command reference (no login required)
+  router.add('GET', '/commands', async (_req, res, _ctx, d) => {
+    const appName = appDisplayName(d);
+    const appIconUrl = d.bot?.getAppIconUrl() || null;
+    sendHtml(res, 200, await renderCommandsHtml(appName, appIconUrl, d.config.defaultTheme));
+  });
+
+  // Public read-only command catalog (used by the dashboard Commands tab)
+  router.add('GET', '/api/commands', async (_req, res) => {
+    await loadAllCommands();
+    const categorized = getCategorizedCommands();
+    const order: Array<keyof typeof categorized> = ['feeds', 'admin', 'mod', 'utility'];
+    const sections = order
+      .map((cat) => ({
+        category: cat,
+        commands: (categorized[cat] ?? []).map((meta) => ({
+          name: meta.name,
+          description: meta.description,
+          usage: meta.usage ?? null,
+          emoji: meta.emoji,
+          examples: meta.examples ?? [],
+          options: (meta.options ?? []).map((o) => ({
+            name: o.name,
+            description: o.description,
+            required: o.required,
+          })),
+          subcommands: (meta.subcommands ?? []).map((s) => ({ name: s.name, description: s.description })),
+        })),
+      }))
+      .filter((section) => section.commands.length > 0);
+    sendJson(res, 200, { total: getAllCommandMetadata().length, sections });
   });
 
   // Bot invite redirects
@@ -198,6 +234,7 @@ export function createHelixRssServer(deps: AppDeps): Server {
       'Allow: /',
       'Allow: /home',
       'Allow: /landing',
+      'Allow: /commands',
       'Allow: /privacy',
       'Allow: /security',
       'Allow: /tos',

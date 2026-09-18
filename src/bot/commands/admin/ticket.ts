@@ -11,6 +11,7 @@ import {
 } from '../../utils/types.js';
 import { createEmbed, EMBED_COLORS, successEmbed } from '../../utils/embeds.js';
 import { registerCommandMetadata, type BotCommand } from '../../handlers/registry.js';
+import { dispatchAuditLog } from '../../lib/admin/auditlog.js';
 
 export const TICKET_ACTIONS = [
   'setup',
@@ -227,6 +228,18 @@ function handleSetup(guildId: string, options: InteractionOption[], deps: AppDep
 
   deps.repo.logActivity(null, 'info', 'bot', `Configured ticket system for guild ${guildId} via /ticket`);
 
+  void dispatchAuditLog(
+    guildId,
+    {
+      event: 'tickets',
+      message: 'Ticket system configured and enabled.',
+      guildName: undefined,
+      actorId: null,
+      actorTag: null,
+    },
+    deps,
+  );
+
   const fields = [
     {
       name: 'Forum Channel',
@@ -258,6 +271,12 @@ function handleSetup(guildId: string, options: InteractionOption[], deps: AppDep
 function handleDisable(guildId: string, deps: AppDeps): InteractionResponse {
   deps.repo.setGuildSetting(guildId, 'ticket_enabled', '0');
   deps.repo.logActivity(null, 'info', 'bot', `Disabled ticket system for guild ${guildId} via /ticket`);
+
+  void dispatchAuditLog(
+    guildId,
+    { event: 'tickets', message: 'Ticket system disabled.', guildName: undefined, actorId: null, actorTag: null },
+    deps,
+  );
 
   return embedResponse(
     successEmbed('Ticket System Disabled', 'No new tickets can be created as forum posts until re-enabled.'),
@@ -351,6 +370,17 @@ async function handleCreate(
     }
 
     deps.repo.logActivity(null, 'info', 'bot', `Ticket created (${thread.id}) for guild ${guildId} via /ticket`);
+    void dispatchAuditLog(
+      guildId,
+      {
+        event: 'tickets',
+        message: `Ticket created: <#${thread.id}>.`,
+        guildName: undefined,
+        actorId: userId,
+        actorTag: null,
+      },
+      deps,
+    );
     return embedResponse(successEmbed('Ticket Created', `Your ticket is ready: <#${thread.id}>`));
   } catch (err) {
     return errorResponse('Ticket Creation Failed', (err as Error).message);
@@ -408,6 +438,18 @@ async function handleClose(
     }
 
     deps.repo.logActivity(null, 'info', 'bot', `Ticket closed (${channelId}) for guild ${guildId} via /ticket`);
+    const userId = interaction.member?.user?.id || interaction.user?.id || '0';
+    void dispatchAuditLog(
+      guildId,
+      {
+        event: 'tickets',
+        message: `Ticket closed and archived: <#${channelId}>.`,
+        guildName: undefined,
+        actorId: userId,
+        actorTag: null,
+      },
+      deps,
+    );
     return embedResponse(successEmbed('Ticket Closed', `Ticket <#${channelId}> has been archived and locked.`));
   } catch (err) {
     return errorResponse('Close Failed', (err as Error).message);
@@ -431,6 +473,17 @@ async function handleAdd(
   try {
     await rest.addThreadMember(channelId, targetUserId);
     deps.repo.logActivity(null, 'info', 'bot', `Added ${targetUserId} to ticket ${channelId} via /ticket`);
+    void dispatchAuditLog(
+      guildId,
+      {
+        event: 'tickets',
+        message: `User <@${targetUserId}> added to ticket <#${channelId}>.`,
+        guildName: undefined,
+        actorId: null,
+        actorTag: null,
+      },
+      deps,
+    );
     return embedResponse(successEmbed('Member Added', `<@${targetUserId}> was added to this ticket.`));
   } catch (err) {
     return errorResponse('Add Failed', (err as Error).message);
@@ -454,6 +507,17 @@ async function handleRemove(
   try {
     await rest.removeThreadMember(channelId, targetUserId);
     deps.repo.logActivity(null, 'info', 'bot', `Removed ${targetUserId} from ticket ${channelId} via /ticket`);
+    void dispatchAuditLog(
+      guildId,
+      {
+        event: 'tickets',
+        message: `User <@${targetUserId}> removed from ticket <#${channelId}>.`,
+        guildName: undefined,
+        actorId: null,
+        actorTag: null,
+      },
+      deps,
+    );
     return embedResponse(successEmbed('Member Removed', `<@${targetUserId}> was removed from this ticket.`));
   } catch (err) {
     return errorResponse('Remove Failed', (err as Error).message);
@@ -478,6 +542,17 @@ async function handleClaim(
       content: `👮 <@${userId}> claimed this ticket.`,
     });
     deps.repo.logActivity(null, 'info', 'bot', `Ticket ${channelId} claimed by ${userId} via /ticket`);
+    void dispatchAuditLog(
+      guildId,
+      {
+        event: 'tickets',
+        message: `Ticket <#${channelId}> claimed by <@${userId}>.`,
+        guildName: undefined,
+        actorId: userId,
+        actorTag: null,
+      },
+      deps,
+    );
     return embedResponse(successEmbed('Ticket Claimed', 'This ticket has been claimed.'));
   } catch (err) {
     return errorResponse('Claim Failed', (err as Error).message);

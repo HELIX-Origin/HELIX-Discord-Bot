@@ -11,6 +11,7 @@ import {
 } from '../../utils/types.js';
 import { createEmbed, EMBED_COLORS, successEmbed } from '../../utils/embeds.js';
 import { registerCommandMetadata, type BotCommand } from '../../handlers/registry.js';
+import { dispatchAuditLog } from '../../lib/admin/auditlog.js';
 
 export const WELCOME_ACTIONS = ['channel', 'message', 'disable', 'view', 'test'] as const;
 export type WelcomeAction = (typeof WELCOME_ACTIONS)[number];
@@ -243,6 +244,18 @@ function handleSetChannel(guildId: string, options: InteractionOption[], deps: A
   deps.repo.setGuildSetting(guildId, 'welcome_channel_id', channelId);
   deps.repo.logActivity(null, 'info', 'bot', `Set welcome channel to ${channelId} for guild ${guildId} via /welcome`);
 
+  void dispatchAuditLog(
+    guildId,
+    {
+      event: 'welcome',
+      message: `Welcome channel set to <#${channelId}>.`,
+      guildName: undefined,
+      actorId: null,
+      actorTag: null,
+    },
+    deps,
+  );
+
   return embedResponse(
     successEmbed(
       'Welcome Channel Set',
@@ -278,6 +291,18 @@ function handleSetMessage(guildId: string, options: InteractionOption[], deps: A
 
   deps.repo.logActivity(null, 'info', 'bot', `Updated welcome message for guild ${guildId} via /welcome`);
 
+  void dispatchAuditLog(
+    guildId,
+    {
+      event: 'welcome',
+      message: `Welcome message updated (format: ${embed ? 'embed' : 'plain text'}).`,
+      guildName: undefined,
+      actorId: null,
+      actorTag: null,
+    },
+    deps,
+  );
+
   const fields = [
     { name: 'Message', value: content.slice(0, 256), inline: false },
     { name: 'Format', value: embed ? 'Embed' : 'Plain text', inline: true },
@@ -291,6 +316,18 @@ function handleSetMessage(guildId: string, options: InteractionOption[], deps: A
 function handleDisable(guildId: string, deps: AppDeps): InteractionResponse {
   deps.repo.setGuildSetting(guildId, 'welcome_channel_id', '');
   deps.repo.logActivity(null, 'info', 'bot', `Disabled welcome system for guild ${guildId} via /welcome`);
+
+  void dispatchAuditLog(
+    guildId,
+    {
+      event: 'welcome',
+      message: 'Welcome system disabled (channel cleared).',
+      guildName: undefined,
+      actorId: null,
+      actorTag: null,
+    },
+    deps,
+  );
 
   return embedResponse(
     successEmbed('Welcome System Disabled', 'New member welcome messages have been turned off for this server.'),

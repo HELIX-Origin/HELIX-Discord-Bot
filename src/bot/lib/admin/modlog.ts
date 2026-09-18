@@ -2,8 +2,32 @@ import type { AppDeps } from '../../../app.js';
 import { EmbedHandler } from '../embeds/builder.js';
 import type { DiscordEmbed } from '../../utils/types.js';
 
-export type ModAction =
-  'warn' | 'kick' | 'ban' | 'unban' | 'mute' | 'unmute' | 'purge' | 'slowmode' | 'lock' | 'unlock';
+export const MOD_ACTIONS = [
+  'warn',
+  'kick',
+  'ban',
+  'unban',
+  'mute',
+  'unmute',
+  'purge',
+  'slowmode',
+  'lock',
+  'unlock',
+] as const;
+
+export type ModAction = (typeof MOD_ACTIONS)[number];
+
+export function parseModLogEvents(raw: string | null): Set<ModAction> {
+  if (!raw || raw.trim() === '') return new Set(MOD_ACTIONS);
+  const selected = new Set<ModAction>();
+  for (const part of raw.split(',')) {
+    const key = part.trim();
+    if ((MOD_ACTIONS as readonly string[]).includes(key)) {
+      selected.add(key as ModAction);
+    }
+  }
+  return selected;
+}
 
 export interface ModLogEntry {
   action: ModAction;
@@ -52,6 +76,10 @@ export function buildModLogEmbed(entry: ModLogEntry, deps: AppDeps): DiscordEmbe
 export async function dispatchModLog(guildId: string, entry: ModLogEntry, deps: AppDeps): Promise<void> {
   const modLogChannelId = deps.repo.getGuildSetting(guildId, 'mod_log_channel_id');
   if (!modLogChannelId || !deps.bot) return;
+
+  const modLogEvents = deps.repo.getGuildSetting(guildId, 'mod_log_events');
+  const selected = parseModLogEvents(modLogEvents);
+  if (!selected.has(entry.action)) return;
 
   try {
     const embed = buildModLogEmbed(entry, deps);

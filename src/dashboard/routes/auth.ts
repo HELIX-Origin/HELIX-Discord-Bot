@@ -167,11 +167,20 @@ export function registerAuthRoutes(router: Router<AppDeps>, deps: AppDeps): void
       };
 
       let managedGuildIds: string[] = [];
+      let discordGuilds: Array<{ id: string; name: string; icon: string | null; owner: boolean; permissions: string }> =
+        [];
       if (p instanceof DiscordProvider) {
         try {
           profile = await p.fetchUserProfile(tokens.accessToken);
           const guilds = await p.fetchUserGuilds(tokens.accessToken);
           managedGuildIds = guilds.filter((g) => hasManageChannelsPermission(g)).map((g) => g.id);
+          discordGuilds = guilds.map((g) => ({
+            id: g.id,
+            name: g.name,
+            icon: g.icon,
+            owner: g.owner,
+            permissions: g.permissions,
+          }));
         } catch {
           /* use token-derived fallback profile */
         }
@@ -221,19 +230,6 @@ export function registerAuthRoutes(router: Router<AppDeps>, deps: AppDeps): void
       }
 
       const isFirstUser = allUsers.length === 0;
-      const isAllowed =
-        isAppTeam || isFirstUser || user?.role === 'owner' || user?.role === 'admin' || managedGuildIds.length > 0;
-
-      if (!isAllowed) {
-        res.writeHead(403, { 'Content-Type': 'text/html; charset=utf-8' });
-        res.end(
-          renderAuthErrorPage(
-            `Access Denied: You must be a server owner or have Manage Channels permissions in a Discord server to access ${appDisplayName(d)}.`,
-            appDisplayName(d),
-          ),
-        );
-        return;
-      }
 
       // If user still does not exist, create new account
       if (!user) {
@@ -244,8 +240,9 @@ export function registerAuthRoutes(router: Router<AppDeps>, deps: AppDeps): void
         user = d.repo.getUserById(user.id) ?? user;
       }
 
-      // Persist managed guild IDs for the user
+      // Persist managed guild IDs and the full guild list for the user
       d.repo.setUserSetting(user.id, 'managed_guild_ids', JSON.stringify(managedGuildIds));
+      d.repo.setUserSetting(user.id, 'discord_guilds', JSON.stringify(discordGuilds));
 
       // Create session for user
       const sessionToken = randomBytes(32).toString('hex');

@@ -164,3 +164,18 @@ export function hasManageChannelsPermission(guild: { owner?: boolean; permission
     return false;
   }
 }
+
+/** Whether the user may invite the bot to a guild (owner, admin, manage guild, or create instant invite). */
+export function hasInvitePermission(guild: { owner?: boolean; permissions?: string | number }): boolean {
+  if (guild.owner) return true;
+  if (!guild.permissions) return false;
+  try {
+    const perms = BigInt(guild.permissions);
+    const CREATE_INSTANT_INVITE = 1n << 0n;
+    const ADMINISTRATOR = 1n << 3n;
+    const MANAGE_GUILD = 1n << 5n;
+    return (perms & ADMINISTRATOR) !== 0n || (perms & MANAGE_GUILD) !== 0n || (perms & CREATE_INSTANT_INVITE) !== 0n;
+  } catch {
+    return false;
+  }
+}

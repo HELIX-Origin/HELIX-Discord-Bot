@@ -393,13 +393,14 @@ export function renderDashboardStyles(_theme: ThemeInfo, _colorScheme: ColorSche
     .card-desc { font-size: 0.8125rem; color: var(--text-muted); }
 
     /* Guild Selection */
-    .guild-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; }
-    @media (max-width: 480px) { .guild-grid { grid-template-columns: 1fr; } }
-    @media (min-width: 481px) and (max-width: 860px) { .guild-grid { grid-template-columns: repeat(2, 1fr); } }
-    .guild-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 1.25rem; padding: 1.25rem; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 1rem; transition: border-color 0.15s, transform 0.15s; }
-    .guild-card:hover { border-color: var(--primary); transform: translateY(-2px); }
-    .guild-icon { width: 4.5rem; height: 4.5rem; border-radius: 1rem; object-fit: cover; background: var(--card-inner); display: flex; align-items: center; justify-content: center; font-size: 2rem; color: var(--text-muted); }
-    .guild-name { font-size: 1.125rem; font-weight: 700; color: var(--text); }
+    .guild-grid { display: grid; grid-template-columns: 1fr; gap: 0.625rem; }
+    .guild-pill { background: var(--card-bg); border: 1px solid var(--border); border-radius: 0.875rem; padding: 0.875rem 1rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; transition: border-color 0.15s; }
+    .guild-pill:hover { border-color: var(--primary); }
+    .guild-pill-left { display: flex; align-items: center; gap: 0.875rem; min-width: 0; }
+    .guild-pill-actions { display: flex; gap: 0.5rem; flex-shrink: 0; }
+    .guild-icon { width: 2.75rem; height: 2.75rem; border-radius: 0.625rem; object-fit: cover; background: var(--card-inner); display: flex; align-items: center; justify-content: center; font-size: 1.25rem; color: var(--text-muted); flex-shrink: 0; }
+    .guild-name { font-size: 1rem; font-weight: 700; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .guild-sub { font-size: 0.8125rem; color: var(--text-muted); }
 
     /* Stats Grid */
     .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; }

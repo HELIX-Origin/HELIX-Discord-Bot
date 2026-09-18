@@ -54,7 +54,7 @@ export function renderClientScript(): string {
         if (route.page === 'feed' && route.feedId) {
           switchTab('rss');
           openFeedDetail(Number(route.feedId));
-        } else if (route.page && ['rss', 'reddit', 'freegames', 'streamalerts', 'overview', 'guildadmin', 'settings'].includes(route.page)) {
+        } else if (route.page && ['rss', 'reddit', 'freegames', 'streamalerts', 'overview', 'guildadmin', 'settings', 'welcome', 'tickets', 'logs', 'commands'].includes(route.page)) {
           switchTab(route.page);
         } else {
           switchTab('overview');
@@ -88,6 +88,20 @@ export function renderClientScript(): string {
       else if (tabId === 'overview') loadOverviewTab();
       else if (tabId === 'guildadmin') loadGuildAdminTab();
       else if (tabId === 'settings') loadSettingsTab();
+      else if (tabId === 'commands') loadCommandsTab();
+      else if (tabId === 'welcome') loadWelcomeTab();
+      else if (tabId === 'tickets') loadTicketsTab();
+      else if (tabId === 'logs') loadLogsTab();
+    }
+
+    function setSidebarManage(canManage) {
+      document.querySelectorAll('.manage-gated').forEach(el => {
+        if (canManage) el.removeAttribute('hidden');
+        else el.setAttribute('hidden', '');
+      });
+      if (!canManage && activeTabName !== 'commands' && activeTabName !== '') {
+        switchTab('commands');
+      }
     }
 
     function clearGuild(event) {
@@ -146,10 +160,23 @@ export function renderClientScript(): string {
         empty.classList.add('hidden');
         grid.innerHTML = cachedGuilds.map(g => {
           const icon = guildIconUrl(g.id, g.icon);
-          return '<div class="guild-card">' +
-            (icon ? '<img class="guild-icon" src="' + icon + '" alt="' + esc(g.name) + '">' : '<div class="guild-icon"><i class="fa-solid fa-server"></i></div>') +
-            '<div class="guild-name">' + esc(g.name) + '</div>' +
-            '<button onclick="selectGuild(&quot;' + esc(g.id) + '&quot;)" class="btn btn-primary"><i class="fa-solid fa-gear"></i> Manage Server</button>' +
+          const iconHtml = icon ? '<img class="guild-icon" src="' + icon + '" alt="' + esc(g.name) + '">' : '<div class="guild-icon"><i class="fa-solid fa-server"></i></div>';
+          const badges = [];
+          if (g.botIn) badges.push('<span class="guild-sub">Bot in server</span>');
+          if (g.canManage) badges.push('<span class="guild-sub">Manage</span>');
+          const manageBtn = g.canManage && g.botIn
+            ? '<button onclick="selectGuild(&quot;' + esc(g.id) + '&quot;)" class="btn btn-primary btn-sm" title="Manage server"><i class="fa-solid fa-gear"></i> Manage</button>'
+            : '<span class="btn btn-sm" title="You do not have permission to manage this server" style="opacity: 0.45; cursor: not-allowed;"><i class="fa-solid fa-gear"></i> Manage</span>';
+          const inviteBtn = g.canInvite && g.inviteUrl
+            ? '<a href="' + esc(g.inviteUrl) + '" target="_blank" rel="noopener noreferrer" class="btn btn-discord btn-sm" title="Invite bot to this server"><i class="fa-brands fa-discord"></i> Invite</a>'
+            : '<span class="btn btn-sm" title="No permission to invite the bot here" style="opacity: 0.45; cursor: not-allowed;"><i class="fa-brands fa-discord"></i> Invite</span>';
+          return '<div class="guild-pill">' +
+            '<div class="guild-pill-left">' +
+            iconHtml +
+            '<div style="min-width:0;"><div class="guild-name">' + esc(g.name) + '</div>' +
+            (badges.length ? '<div style="display:flex; gap:0.75rem;">' + badges.join('') + '</div>' : '') +
+            '</div></div>' +
+            '<div class="guild-pill-actions">' + manageBtn + inviteBtn + '</div>' +
           '</div>';
         }).join('');
       } catch {
@@ -211,11 +238,22 @@ export function renderClientScript(): string {
       if (selectionView) selectionView.classList.remove('active');
       if (dashboardView) dashboardView.classList.add('active');
 
+      const cached = cachedGuilds.find(g => g.id === currentGuildId);
+      const canManage = !!(cached && cached.canManage);
+
+      if (!canManage) {
+        currentGuild = cached ? { guildId: cached.id, name: cached.name, icon: cached.icon } : { guildId: currentGuildId };
+        cachedCategories = null;
+        setupGuildHeader();
+        setSidebarManage(false);
+        switchTab('commands');
+        return;
+      }
+
       try {
         const res = await fetch('/api/guilds/' + encodeURIComponent(currentGuildId) + '/channels', { signal: AbortSignal.timeout(6000) });
-        if (res.status === 403 || res.status === 401) {
-          alert('You do not have permission to manage this server.');
-          clearGuild();
+        if (res.status === 401) {
+          checkAuth(res);
           return;
         }
         if (!res.ok) {
@@ -226,6 +264,7 @@ export function renderClientScript(): string {
         cachedCategories = await res.json();
         currentGuild = { guildId: cachedCategories.guildId, name: cachedCategories.name, icon: cachedCategories.icon };
         setupGuildHeader();
+        setSidebarManage(true);
         populateAddTargetSelects();
         loadOverviewTab();
       } catch {
@@ -730,6 +769,10 @@ export function renderClientScript(): string {
       else if (activeTabName === 'overview') loadOverviewTab();
       else if (activeTabName === 'guildadmin') loadGuildAdminTab();
       else if (activeTabName === 'settings') loadSettingsTab();
+      else if (activeTabName === 'commands') loadCommandsTab();
+      else if (activeTabName === 'welcome') loadWelcomeTab();
+      else if (activeTabName === 'tickets') loadTicketsTab();
+      else if (activeTabName === 'logs') loadLogsTab();
     }
 
     // Custom RSS / Scrape
@@ -1100,6 +1143,29 @@ export function renderClientScript(): string {
       sel.innerHTML = html;
     }
 
+    function populateChannelSelect(selectId, channels, currentId, placeholder) {
+      const sel = document.getElementById(selectId);
+      if (!sel) return;
+      let html = '<option value="">' + esc(placeholder) + '</option>';
+      (channels || []).forEach(ch => {
+        const selected = ch.id === currentId ? 'selected' : '';
+        html += '<option value="' + esc(ch.id) + '" ' + selected + '>#' + esc(ch.name) + '</option>';
+      });
+      sel.innerHTML = html;
+    }
+
+    function renderAdminEvents(containerId, keys, enabledList) {
+      const box = document.getElementById(containerId);
+      if (!box) return;
+      if (!Array.isArray(enabledList)) enabledList = [];
+      box.innerHTML = keys.map(key => {
+        const on = enabledList.indexOf(key) !== -1;
+        return '<label style="flex: 1; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; padding: 0.25rem 0;">' +
+          '<input type="checkbox" data-event="' + esc(key) + '"' + (on ? ' checked' : '') + '> ' + esc(key) +
+        '</label>';
+      }).join('');
+    }
+
     async function loadGuildAdminTab() {
       if (!currentGuildId) return;
       try {
@@ -1160,6 +1226,54 @@ export function renderClientScript(): string {
       }
     }
 
+    async function loadWelcomeTab() {
+      if (!currentGuildId) return;
+      try {
+        const res = await fetch('/api/guilds/' + encodeURIComponent(currentGuildId) + '/settings', { signal: AbortSignal.timeout(6000) });
+        if (!checkAuth(res)) return;
+        if (!res.ok) return;
+        const data = await res.json();
+        const welcome = data.welcome || {};
+        populateChannelSelect('admin-welcome-channel', data.textChannels || [], welcome.channelId, '-- Disabled --');
+        const welcomeEmbedEl = document.getElementById('admin-welcome-embed');
+        if (welcomeEmbedEl) welcomeEmbedEl.value = welcome.embed ? '1' : '0';
+        const welcomeMsgEl = document.getElementById('admin-welcome-message');
+        if (welcomeMsgEl) welcomeMsgEl.value = welcome.message || '';
+      } catch {}
+    }
+
+    async function loadTicketsTab() {
+      if (!currentGuildId) return;
+      try {
+        const res = await fetch('/api/guilds/' + encodeURIComponent(currentGuildId) + '/settings', { signal: AbortSignal.timeout(6000) });
+        if (!checkAuth(res)) return;
+        if (!res.ok) return;
+        const data = await res.json();
+        const tickets = data.tickets || {};
+        populateChannelSelect('admin-ticket-channel', data.textChannels || [], tickets.categoryId, '-- Disabled --');
+        populateRoleSelect('admin-ticket-manager-role', data.guildRoles || [], tickets.managerRoleId, '-- None --');
+        populateChannelSelect('admin-ticket-transcript-channel', data.textChannels || [], tickets.transcriptChannelId, '-- None --');
+        populateChannelSelect('admin-ticket-log-channel', data.textChannels || [], tickets.logChannelId, '-- None --');
+        const ticketMsgEl = document.getElementById('admin-ticket-message');
+        if (ticketMsgEl) ticketMsgEl.value = tickets.welcomeMessage || '';
+      } catch {}
+    }
+
+    async function loadLogsTab() {
+      if (!currentGuildId) return;
+      try {
+        const res = await fetch('/api/guilds/' + encodeURIComponent(currentGuildId) + '/settings', { signal: AbortSignal.timeout(6000) });
+        if (!checkAuth(res)) return;
+        if (!res.ok) return;
+        const data = await res.json();
+        const logs = data.logs || {};
+        populateChannelSelect('admin-audit-channel', data.textChannels || [], logs.auditLogChannelId, '-- None --');
+        populateChannelSelect('admin-modlog-channel', data.textChannels || [], logs.modLogChannelId, '-- None --');
+        renderAdminEvents('admin-audit-events', ['settings', 'welcome', 'tickets', 'feeds'], logs.auditLogEvents);
+        renderAdminEvents('admin-modlog-events', ['warn', 'kick', 'ban', 'unban', 'mute', 'unmute', 'purge', 'slowmode', 'lock', 'unlock'], logs.modLogEvents);
+      } catch {}
+    }
+
     async function saveGuildAdmin() {
       if (!currentGuildId) return;
       const statusEl = document.getElementById('admin-save-status');
@@ -1205,6 +1319,172 @@ export function renderClientScript(): string {
         }
       } catch {
         alert('Failed to save settings.');
+      }
+    }
+
+    async function saveWelcomeTab() {
+      if (!currentGuildId) return;
+      const statusEl = document.getElementById('welcome-save-status');
+      if (statusEl) statusEl.style.display = 'none';
+      const welcome = {
+        channelId: document.getElementById('admin-welcome-channel') ? document.getElementById('admin-welcome-channel').value || null : null,
+        message: document.getElementById('admin-welcome-message') ? document.getElementById('admin-welcome-message').value : '',
+        embed: document.getElementById('admin-welcome-embed') ? document.getElementById('admin-welcome-embed').value === '1' : false,
+      };
+      try {
+        const res = await fetch('/api/guilds/' + encodeURIComponent(currentGuildId) + '/settings', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ welcome }),
+          signal: AbortSignal.timeout(10000)
+        });
+        if (!checkAuth(res)) return;
+        if (res.ok) {
+          if (statusEl) {
+            statusEl.style.display = 'inline';
+            statusEl.textContent = 'Welcome settings saved successfully.';
+            setTimeout(() => { statusEl.style.display = 'none'; }, 4000);
+          }
+        } else {
+          let msg = 'Failed to save welcome settings.';
+          try {
+            const j = await res.json();
+            if (j && j.error) msg = j.error;
+          } catch {}
+          alert(msg);
+        }
+      } catch {
+        alert('Failed to save welcome settings.');
+      }
+    }
+
+    async function saveTicketsTab() {
+      if (!currentGuildId) return;
+      const statusEl = document.getElementById('tickets-save-status');
+      if (statusEl) statusEl.style.display = 'none';
+      const tickets = {
+        channelId: document.getElementById('admin-ticket-channel') ? document.getElementById('admin-ticket-channel').value || null : null,
+        managerRoleId: document.getElementById('admin-ticket-manager-role') ? document.getElementById('admin-ticket-manager-role').value || null : null,
+        transcriptChannelId: document.getElementById('admin-ticket-transcript-channel') ? document.getElementById('admin-ticket-transcript-channel').value || null : null,
+        logChannelId: document.getElementById('admin-ticket-log-channel') ? document.getElementById('admin-ticket-log-channel').value || null : null,
+        welcomeMessage: document.getElementById('admin-ticket-message') ? document.getElementById('admin-ticket-message').value : '',
+      };
+      try {
+        const res = await fetch('/api/guilds/' + encodeURIComponent(currentGuildId) + '/settings', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tickets }),
+          signal: AbortSignal.timeout(10000)
+        });
+        if (!checkAuth(res)) return;
+        if (res.ok) {
+          if (statusEl) {
+            statusEl.style.display = 'inline';
+            statusEl.textContent = 'Ticket settings saved successfully.';
+            setTimeout(() => { statusEl.style.display = 'none'; }, 4000);
+          }
+        } else {
+          let msg = 'Failed to save ticket settings.';
+          try {
+            const j = await res.json();
+            if (j && j.error) msg = j.error;
+          } catch {}
+          alert(msg);
+        }
+      } catch {
+        alert('Failed to save ticket settings.');
+      }
+    }
+
+    async function saveLogsTab() {
+      if (!currentGuildId) return;
+      const statusEl = document.getElementById('logs-save-status');
+      if (statusEl) statusEl.style.display = 'none';
+      const collectEvents = (containerId) => {
+        const names = [];
+        document.querySelectorAll('#' + containerId + ' input[data-event]').forEach(chk => {
+          if (chk.checked) names.push(chk.getAttribute('data-event'));
+        });
+        return names;
+      };
+      const logs = {
+        auditLogChannelId: document.getElementById('admin-audit-channel') ? document.getElementById('admin-audit-channel').value || null : null,
+        auditLogEvents: collectEvents('admin-audit-events'),
+        modLogChannelId: document.getElementById('admin-modlog-channel') ? document.getElementById('admin-modlog-channel').value || null : null,
+        modLogEvents: collectEvents('admin-modlog-events'),
+      };
+      try {
+        const res = await fetch('/api/guilds/' + encodeURIComponent(currentGuildId) + '/settings', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ logs }),
+          signal: AbortSignal.timeout(10000)
+        });
+        if (!checkAuth(res)) return;
+        if (res.ok) {
+          if (statusEl) {
+            statusEl.style.display = 'inline';
+            statusEl.textContent = 'Log settings saved successfully.';
+            setTimeout(() => { statusEl.style.display = 'none'; }, 4000);
+          }
+        } else {
+          let msg = 'Failed to save log settings.';
+          try {
+            const j = await res.json();
+            if (j && j.error) msg = j.error;
+          } catch {}
+          alert(msg);
+        }
+      } catch {
+        alert('Failed to save log settings.');
+      }
+    }
+
+    async function loadCommandsTab() {
+      const box = document.getElementById('commands-catalog');
+      if (!box) return;
+      const CATEGORY_LABELS = { feeds: 'Feeds & Alerts', admin: 'Administration', mod: 'Moderation', utility: 'Utility' };
+      const CATEGORY_EMOJIS = { feeds: '📰', admin: '🛡️', mod: '⚖️', utility: '🔧' };
+      try {
+        const res = await fetch('/api/commands', { signal: AbortSignal.timeout(6000) });
+        if (!res.ok) {
+          box.innerHTML = '<div class="empty-state">Could not load commands.</div>';
+          return;
+        }
+        const data = await res.json();
+        if (!data.sections || !data.sections.length) {
+          box.innerHTML = '<div class="empty-state">No commands available.</div>';
+          return;
+        }
+        const escCmd = (s) => esc(s || '');
+        box.innerHTML = data.sections.map(section => {
+          const label = CATEGORY_LABELS[section.category] || section.category;
+          const emoji = CATEGORY_EMOJIS[section.category] || '💡';
+          const cards = section.commands.map(cmd => {
+            const usage = cmd.usage && cmd.usage !== '/' + cmd.name
+              ? '<p style="margin: 0 0 0.5rem;"><code style="background: rgba(0,0,0,0.4); padding: 0.15rem 0.4rem; border-radius: 0.25rem; font-family: monospace; color: var(--text);">' + escCmd(cmd.usage) + '</code></p>'
+              : '';
+            const optionsHtml = (Array.isArray(cmd.options) && cmd.options.length)
+              ? '<ul style="margin: 0.5rem 0 0 1.25rem; padding-left: 1rem; font-size: 0.8125rem; color: var(--text-muted);">' + cmd.options.map(o => '<li style="margin-bottom: 0.25rem;"><code style="background: rgba(0,0,0,0.4); padding: 0.15rem 0.35rem; border-radius: 0.25rem; font-family: monospace; color: var(--primary);">' + escCmd(o.name) + (o.required ? '*' : '') + '</code> — ' + escCmd(o.description) + '</li>').join('') + '</ul>' : '';
+            const examplesHtml = (Array.isArray(cmd.examples) && cmd.examples.length)
+              ? '<p style="margin: 0.75rem 0 0.25rem; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted);">Examples</p><ul style="margin: 0.5rem 0 0 1.25rem; padding-left: 1rem; font-size: 0.8125rem;">' + cmd.examples.map(ex => '<li style="margin-bottom: 0.25rem;"><code style="background: rgba(0,0,0,0.4); padding: 0.15rem 0.35rem; border-radius: 0.25rem; font-family: monospace; color: var(--text);">' + escCmd(ex) + '</code></li>').join('') + '</ul>' : '';
+            return '<div style="background: var(--card-inner); border: 1px solid var(--border); border-radius: 1rem; padding: 1.25rem; margin-bottom: 1rem;">' +
+              '<div style="display: flex; align-items: center; gap: 0.625rem; margin-bottom: 0.5rem;">' +
+                '<span style="font-size: 1rem;">' + emoji + '</span>' +
+                '<h3 style="font-size: 1.05rem; font-weight: 800; color: var(--text); margin: 0;"><code style="background: rgba(0,0,0,0.4); padding: 0.25rem 0.5rem; border-radius: 0.375rem; font-family: monospace; color: var(--primary);">/' + escCmd(cmd.name) + '</code></h3>' +
+              '</div>' +
+              usage +
+              '<p style="color: var(--text-muted); line-height: 1.55; margin-bottom: 0.5rem;">' + escCmd(cmd.description) + '</p>' +
+              optionsHtml + examplesHtml +
+            '</div>';
+          }).join('');
+          return '<div style="margin-bottom: 2rem;">' +
+            '<h2 style="font-size: 1.25rem; font-weight: 800; color: var(--text); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">' + emoji + ' ' + label + ' <span style="font-size: 0.8125rem; font-weight: 600; color: var(--text-muted); background: var(--card-inner); border: 1px solid var(--border); padding: 0.2rem 0.6rem; border-radius: 9999px;">' + section.commands.length + '</span></h2>' +
+            cards +
+          '</div>';
+        }).join('');
+      } catch {
+        box.innerHTML = '<div class="empty-state">Failed to load commands.</div>';
       }
     }
 

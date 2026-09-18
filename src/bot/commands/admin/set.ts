@@ -10,6 +10,7 @@ import {
 } from '../../utils/types.js';
 import { EmbedHandler } from '../../lib/embeds/builder.js';
 import { registerCommandMetadata, type BotCommand } from '../../handlers/registry.js';
+import { dispatchAuditLog } from '../../lib/admin/auditlog.js';
 
 export const SET_ACTIONS = ['role', 'feature', 'prefix', 'view', 'reset'] as const;
 export type SetAction = (typeof SET_ACTIONS)[number];
@@ -182,6 +183,17 @@ function handleSetRole(
   }
 
   deps.repo.logActivity(userId, 'info', 'bot', `Updated guild roles for ${guildId} via /set role`);
+  void dispatchAuditLog(
+    guildId,
+    {
+      event: 'settings',
+      message: `Roles updated: ${changes.join('; ')}`,
+      guildName: undefined,
+      actorId: String(userId),
+      actorTag: null,
+    },
+    deps,
+  );
   return EmbedHandler.for(deps).success().title('Roles Updated').section('Changes', changes.join('\n')).respond();
 }
 
@@ -208,6 +220,17 @@ function handleSetFeature(
     'bot',
     `${enabled ? 'Enabled' : 'Disabled'} feature "${name}" for guild ${guildId} via /set`,
   );
+  void dispatchAuditLog(
+    guildId,
+    {
+      event: 'settings',
+      message: `Feature "${name}" ${enabled ? 'enabled' : 'disabled'}.`,
+      guildName: undefined,
+      actorId: String(userId),
+      actorTag: null,
+    },
+    deps,
+  );
 
   return EmbedHandler.for(deps)
     .success()
@@ -227,6 +250,17 @@ function handleSetPrefix(
   if (!value) {
     deps.repo.setGuildSetting(guildId, 'prefix', '');
     deps.repo.logActivity(userId, 'info', 'bot', `Cleared command prefix for guild ${guildId} via /set`);
+    void dispatchAuditLog(
+      guildId,
+      {
+        event: 'settings',
+        message: 'Command prefix cleared.',
+        guildName: undefined,
+        actorId: String(userId),
+        actorTag: null,
+      },
+      deps,
+    );
     return EmbedHandler.for(deps)
       .success()
       .title('Prefix Cleared')
@@ -236,6 +270,17 @@ function handleSetPrefix(
 
   deps.repo.setGuildSetting(guildId, 'prefix', value);
   deps.repo.logActivity(userId, 'info', 'bot', `Set command prefix to "${value}" for guild ${guildId} via /set`);
+  void dispatchAuditLog(
+    guildId,
+    {
+      event: 'settings',
+      message: `Command prefix set to "${value}".`,
+      guildName: undefined,
+      actorId: String(userId),
+      actorTag: null,
+    },
+    deps,
+  );
 
   return EmbedHandler.for(deps)
     .success()
@@ -300,6 +345,17 @@ function handleSetReset(
   }
 
   deps.repo.logActivity(userId, 'info', 'bot', `Reset "${rawTarget}" settings for guild ${guildId} via /set`);
+  void dispatchAuditLog(
+    guildId,
+    {
+      event: 'settings',
+      message: `Settings reset (scope: ${rawTarget}).`,
+      guildName: undefined,
+      actorId: String(userId),
+      actorTag: null,
+    },
+    deps,
+  );
 
   return EmbedHandler.for(deps)
     .success()

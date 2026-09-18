@@ -78,11 +78,32 @@ export function getUserManagedGuildIds(userId: number, deps: AppDeps): string[] 
   }
 }
 
+export interface StoredUserGuild {
+  id: string;
+  name: string;
+  icon: string | null;
+  owner: boolean;
+  permissions: string;
+}
+
+/** Full Discord guild list captured at login (id, name, icon, owner, permissions). */
+export function getUserGuilds(userId: number, deps: AppDeps): StoredUserGuild[] {
+  const raw = deps.repo.getUserSetting(userId, 'discord_guilds');
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? (parsed as StoredUserGuild[]) : [];
+  } catch {
+    return [];
+  }
+}
+
 export function canUserAccessDashboard(userId: number | null, deps: AppDeps): boolean {
   if (userId === null) return false;
   if (isAdminOrOwner(userId, deps)) return true;
-  const managed = getUserManagedGuildIds(userId, deps);
-  return managed !== null && managed.length > 0;
+  // Any Discord-connected user can access the dashboard (Commands tab visible to all;
+  // guild-managing tabs are gated per-guild by canUserManageGuild).
+  return deps.oauth.connectionsFor(userId).some((c) => c.provider === 'discord');
 }
 
 export function canUserManageGuild(userId: number, guildId: string, deps: AppDeps): boolean {
@@ -102,11 +123,7 @@ export async function requireDashboardUser(
     return null;
   }
   if (!canUserAccessDashboard(userId, deps)) {
-    sendError(
-      res,
-      403,
-      'Forbidden: Access restricted to server owners and administrators with Manage Channels permissions.',
-    );
+    sendError(res, 403, 'Forbidden: Access restricted to Discord-connected users.');
     return null;
   }
   return userId;
