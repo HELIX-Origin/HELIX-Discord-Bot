@@ -154,12 +154,12 @@ sudo npm install -g pnpm pm2
 # Navigate to project directory
 cd /opt/helix-discord-bot
 
-# Install dependencies and build with pnpm
+# Install dependencies and initial build with pnpm
 pnpm install
 pnpm run build
 
-# Start the bot under PM2 with watch mode enabled
-pm2 start pnpm --name "helix-discord-bot" --watch --ignore-watch="data node_modules .git logs" -- start
+# Start the bot under PM2 via bash with watch mode enabled
+pm2 start "pnpm start" --name "helix-discord-bot" --watch dist --ignore-watch="data node_modules .git logs"
 
 # View live real-time logs
 pm2 logs helix-discord-bot
