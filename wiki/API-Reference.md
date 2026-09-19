@@ -63,6 +63,7 @@ POST /api/feeds
   "enabled": true
 }
 ```
+**Notes**: `roleId` (optional) is auto-subscribed to the feed's dedicated thread whenever thread delivery is enabled for the server (applied on thread creation/rotation). A short confirmation message (`📡 **name** configured — updates will be posted here.`) is posted into `channelId` after creation (best-effort).
 **Response**: `201 Created` with created feed object.
 
 ---

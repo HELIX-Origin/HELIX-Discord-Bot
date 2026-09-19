@@ -21,10 +21,11 @@ Split dashboard configuration into dedicated, permission-gated feature tabs (wel
 - Commands page should not require login — it is read-only (m0617).
 - Ticket system redesign: "the ticket system should open a new thread for the issues. but it should us a text channel for the message. Users simply click a button on the ticket channel message to open a ticket."
 - Drop forum-channel feed delivery: "Let's also replace forum support with simply using threads instead. this way if threads are enabled the feeds simply post to threads in the configured text channel. The foums seem to be a bit wonky for our usage." (m0755). Resolved: a feed's dedicated thread is auto-created in the feed's own delivery `channel_id` (m0759) — the separate `forum_channel_id` target is removed.
+- Feed thread role subscription + add notification: "make the threads public... also add a message to the channels that a feed is set up in to notify of a feed being added to the channel." (m0116). Resolved: feed threads are already public (type 12); feeds now carry an optional per-feed role (`role_id`) auto-subscribed to the feed's thread on creation/rotation (m0963 — per-feed role at add time), and adding a feed posts a short confirmation message into its target channel (dashboard + slash commands).
 
 ### Implementation Plan
 
-> Status: steps 1-9 complete and committed (`627d783` dashboard, `cf6c6c3` ticket redesign, `21a4734` forum→thread refactor — all pushed). Step 10 done; step 11 (verify + final docs/issue sync) reruns now after the refactor.
+> Status: steps 1-10 complete and committed (`627d783` dashboard, `cf6c6c3` ticket redesign, `21a4734` forum→thread refactor, `536e992` docs sync + THREADS_ENABLED gate — all pushed). Step 12 (feed role subscription + add notification) done in `779e4bb`; final docs/wiki/issue sync reruns now.
 
 1. **Access relaxation**: allow any Discord user to log in; persist full guild list (`discord_guilds` setting) incl. `{id,name,icon,owner,permissions}`; relax `canUserAccessDashboard` to require only Discord auth (keep `canUserManageGuild` for per-guild admin). ✅
 2. **Permission helpers**: reuse `hasManageChannelsPermission`; add `hasInvitePermission` (owner || ADMINISTRATOR || MANAGE_GUILD || CREATE_INSTANT_INVITE). ✅
@@ -36,7 +37,8 @@ Split dashboard configuration into dedicated, permission-gated feature tabs (wel
 8. **Client-side**: pill grid render, sidebar gating, `loadCommandsTab`, `loadWelcomeTab`/`loadTicketsTab`/`loadLogsTab` with per-tab save, relaxed 403 handling for non-managers. ✅
 9. **Ticket redesign**: sticky button message in text channel → new thread per ticket; manager role auto-added; config key moves to `ticket_channel_id` (legacy `ticket_category_id` fallback read). ✅
 10. **Forum→thread feed delivery**: remove the forum-channel feed target; thread-enabled feeds deliver into a dedicated thread auto-created in the feed's own `channel_id`; drop `forum_channel_id`/`forum_channel_ids`/`FORUM_CHANNEL_IDS` usage end-to-end (state types, repos, `FeedThreadManager`, targets, watcher, webhooks, bot, config, dashboard UI). ✅
-11. **Verify + sync**: `npm run check` + `pnpm build`; commit + push; sync PLAN/TODO/BUGS, `wiki/`, and roadmap issue #27 items. ⏳
+11. **Role subscription + add notification**: feeds store an optional `role_id` (schema `role_id` column, migration tolerant); `FeedThreadManager` auto-subscribes the role to the feed thread on create/rotate (`addThreadRole`); `role` option on `/rss add`, `/reddit add`, `/youtube add`, `/twitch add`, `/free-games enable` + dashboard add/detail role selects; adding a feed posts `📡 **…** configured — updates will be posted here.` into the feed's target channel via `src/bot/lib/feeds/notify.ts`. ✅
+12. **Verify + sync**: `npm run check` + `pnpm build`; commit + push; sync PLAN/TODO/BUGS, `wiki/`, and roadmap issue #27 items. ⏳
 
 ### Files likely touched
 
@@ -50,6 +52,7 @@ Split dashboard configuration into dedicated, permission-gated feature tabs (wel
 - `src/feed/threads.ts`, `targets.ts`, `watcher.ts`, `src/bot/bot.ts`, `src/feed/index.ts`, `src/config.ts`
 - `src/state/types.ts`, `src/db/repository.ts`, `src/db/repositories/feeds.ts`, `src/db/repositories/users.ts`, `src/db/schema.ts`, `src/db/database.ts`
 - `src/dashboard/webhooks/router.ts`, `src/dashboard/routes/guilds.ts`, `src/dashboard/views/dashboard/feeds.ts`, `client-script.ts` (thread-delivery toggle)
+- `src/bot/lib/feeds/notify.ts` (new), `src/bot/commands/feeds/{rss,reddit,youtube,twitch,free-games}.ts`, `src/dashboard/routes/feeds.ts`, `src/feed/threads.ts`, `src/db/schema.ts`, `src/db/database.ts`, `src/db/repositories/feeds.ts`, `src/state/types.ts` (per-feed `role_id` subscription + channel-added notification)
 
 ---
 

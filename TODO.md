@@ -19,6 +19,7 @@
 - Commands page requires no login (read-only).
 - Ticket system: text channel hosts a button; clicking opens a new thread.
 - Replace forum feed delivery with threads: "if threads are enabled the feeds simply post to threads in the configured text channel. The foums seem to be a bit wonky for our usage." (m0755). Dedicated thread is auto-created in the feed's own delivery `channel_id` (m0759); the separate forum target is removed.
+- Feed threads public + role subscription + add notification: "make the threads public... also add a message to the channels that a feed is set up in to notify of a feed being added to the channel." (m0116). Feed threads are already public (type 12); each feed gets an optional role auto-subscribed to its thread (per-feed role at add time, m0963) and a confirmation message is posted into the feed's channel on add.
 
 **Implementation checklist:**
 
@@ -37,8 +38,11 @@
 - [x] `npm run check` + `pnpm build` green
 - [ ] Commit + push; sync `PLAN.md`/`TODO.md`/`BUGS.md`, `wiki/`, roadmap issue #27 per Rule 04/05
 - [x] Forum→thread feed delivery: remove forum target end-to-end; thread-enabled feeds post to a dedicated thread in their own `channel_id` (state types, repos, `FeedThreadManager`, targets, watcher, webhooks, bot, config, dashboard UI)
+- [x] Feed role subscription: per-feed `roleId` stored (`role_id` column + migration); `role` option on all feed-add slash commands + dashboard add/detail role selects; ThreadSender subscribes the role to the feed thread on create/rotate (`addThreadRole`)
+- [x] Feed-add channel notification: `notifyFeedAdded` (`src/bot/lib/feeds/notify.ts`) posts a confirmation into the feed's target channel on slash-command adds and dashboard POST /api/feeds
+- [x] `npm run check` + `pnpm build` green (779e4bb)
 
-**Status:** dashboard phase (`627d783`), ticket redesign (`cf6c6c3`), and forum→thread refactor (`21a4734`) committed + pushed — each ran green `npm run check` + `pnpm build`. Remaining: final docs/wiki/issue sync (retired legend `forum`→`thread` wording across wiki/, .agents/, README/PRIVACY, and roadmap issue #27 Phase 9/10 checkboxes). Progress mirrored on roadmap issue #27.
+**Status:** dashboard phase (`627d783`), ticket redesign (`cf6c6c3`), forum→thread refactor (`21a4734`), docs sync + THREADS_ENABLED gate (`536e992`), and role-subscription + add-notification (`779e4bb`) committed + pushed — each ran green `npm run check` + `pnpm build`. Remaining: final docs/wiki/issue sync (roadmap issue #27 Phase 9/10 checkboxes + new Phase 11 role/notification row). Progress mirrored on roadmap issue #27.
 
 ---
 
