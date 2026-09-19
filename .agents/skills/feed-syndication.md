@@ -1,7 +1,7 @@
-# Skill: Feed Syndication & Single-Thread Forum Delivery
+# Skill: Feed Syndication & Dedicated Thread Delivery
 
 ## Overview
-This skill details the feed syndication engine in **HELIX Discord Bot**, covering XML/Atom parsing, HTML scraping, weekly Free Games aggregation, YouTube/Twitch live alerts, target resolution, and single-thread forum delivery.
+This skill details the feed syndication engine in **HELIX Discord Bot**, covering XML/Atom parsing, HTML scraping, weekly Free Games aggregation, YouTube/Twitch live alerts, target resolution, and dedicated thread delivery.
 
 ---
 
@@ -18,15 +18,15 @@ This skill details the feed syndication engine in **HELIX Discord Bot**, coverin
 
 ---
 
-## 2. Forum Delivery Architecture: Single Thread Per Source
+## 2. Thread Delivery Architecture: Single Thread Per Source
 
-When a guild or category targets a Discord Forum channel, **each feed source delivers into its own dedicated thread inside that forum**:
+For thread-enabled guilds, **each feed source delivers into its own dedicated thread auto-created in the feed's configured text channel**:
 
 ```mermaid
 flowchart TD
     FeedPoll[Feed Polled: New Entries] --> CheckThread{feed.threadChannelId exists?}
     
-    CheckThread -->|No| Create[bot.createForumThread: first entry is opening post]
+    CheckThread -->|No| Create[bot.createThread: open thread in feed.channelId, then send first entry]
     Create --> SaveThread[repo.setFeedThread: store thread ID in SQLite & AppState]
     SaveThread --> Propagate[Update feed.threadChannelId in memory for batch]
     
@@ -42,10 +42,11 @@ flowchart TD
     Rotate --> MarkSent
 ```
 
-### Invariants for Forum Delivery:
+### Invariants for Thread Delivery:
 1. **Thread ID Propagation**: In-memory `feed.threadChannelId` must be immediately updated upon thread creation so that subsequent entries in the same poll batch deliver to the same thread.
-2. **Unarchive Sleeping Threads**: Discord auto-archives inactive threads after 24h. HELIX unarchives them (`unarchiveThread`) instead of creating a replacement thread.
+2. **Unarchive Sleeping Threads**: Discord auto-archives inactive threads after a configurable window. HELIX unarchives them (`unarchiveThread`) instead of creating a replacement thread.
 3. **Only Replace on HTTP 404**: Replacement threads are opened ONLY if Discord returns 404 (Unknown Channel / deleted) or when message rotation is reached (`threadMaxMessages`).
+4. **Threads Enabled Gate**: Thread delivery applies only when the global `THREADS_ENABLED` flag is on AND the feed's guild has thread delivery enabled (`discord_guilds.threads_enabled`); otherwise entries fall back to direct channel delivery.
 
 ---
 

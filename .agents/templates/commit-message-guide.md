@@ -21,7 +21,7 @@ Guidelines for clear, human-readable commit messages and PR titles with fitting 
 | Emoji | Type | Purpose | Example |
 |---|---|---|---|
 | ✨ | feat | New features or commands | ✨ feat(command): add modular kick command with lib options |
-| 🐛 | fix | Bug fixes and patches | 🐛 fix(thread): enforce single thread per feed in forums |
+| 🐛 | fix | Bug fixes and patches | 🐛 fix(thread): enforce single thread per feed in threads |
 | 📝 | docs | Documentation and wiki updates | 📝 docs(wiki): update music command reference |
 | 🧪 | test | Adding or updating tests | 🧪 test(bot): add unit tests for admin options lib |
 | ♻️ | refactor | Code refactoring without behavioral change | ♻️ refactor(options): categorize command options by domain |
@@ -37,7 +37,7 @@ Guidelines for clear, human-readable commit messages and PR titles with fitting 
 Target the exact subsystem:
 
 - **Commands & Options**: `command`, `options`, `admin`, `feeds`, `entertainment`, `utility`, `events`
-- **Feed Syndication**: `feed`, `forum`, `threads`, `rss`, `reddit`, `freegames`, `streamalerts`
+- **Feed Syndication**: `feed`, `threads`, `rss`, `reddit`, `freegames`, `streamalerts`
 - **State & Database**: `db`, `schema`, `state`, `repo`, `sqlite`
 - **Dashboard & API**: `dashboard`, `auth`, `oauth`, `http`, `routes`
 - **Meta & Workflow**: `agents`, `rules`, `wiki`, `docs`, `config`, `deps`

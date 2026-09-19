@@ -53,13 +53,13 @@ HELIX Discord Bot is configured entirely via environment variables defined in a 
 
 ---
 
-### 🧵 Forum Thread Delivery (Optional)
+### 🧵 Thread Delivery (Optional)
 
-Thread delivery is a **per-server** feature — each feed delivers into its own dedicated thread inside a **forum channel** (one thread per feed). Enable it per server from the dashboard **Feeds tab**, or provide a global default set of forums via env:
+Thread delivery is a **per-server** feature — when enabled, each feed delivers into its own dedicated thread **auto-created in the feed's configured text channel** (one thread per feed, named after the feed). Toggle it per server from the dashboard **Guild Admin tab → Feed Delivery**, or via `PUT /api/guilds/:guildId/settings` with `body.threadsEnabled`. A global master switch backs it up:
 
 | Variable | Required | Default | Description |
 | :--- | :--- | :--- | :--- |
-| `FORUM_CHANNEL_IDS` | No | — | Comma-separated list of Discord **forum channel** IDs used as a global default. When set, servers that contain one of these forums get thread delivery automatically unless overridden per server in the dashboard. Alias: `THREAD_FORUM_CHANNEL_IDS`. Leave empty to keep thread delivery disabled everywhere by default. |
+| `THREADS_ENABLED` | No | `true` | Global master switch for thread delivery. When `false`, feeds always deliver directly to their channel even if a server enables the per-server toggle. |
 | `THREAD_KEEPALIVE_ENABLED` | No | `true` | Set to `false` to stop polling feed threads to keep them open. Alias: `KEEP_THREADS_OPEN=false`. |
 | `THREAD_KEEPALIVE_INTERVAL_MS` | No | `21600000` | How often the keepalive pass checks open feed threads (default 6 hours). |
 | `THREAD_KEEPALIVE_GRACE_MS` | No | `86400000` | Post a keep-alive message once a thread is within this window of its auto-archive time (default 24 hours ≈ once/week per thread). |
@@ -82,7 +82,7 @@ Thread delivery is a **per-server** feature — each feed delivers into its own 
 | :--- | :--- | :--- | :--- |
 | `FEEDS_ENABLED` | No | `true` | RSS/Reddit/Free Games feed delivery. |
 | `STREAM_ALERTS_ENABLED` | No | `true` | YouTube/Twitch live & upload alerts. |
-| `THREADS_ENABLED` | No | `true` | Forum thread delivery support. |
+| `THREADS_ENABLED` | No | `true` | Thread delivery support (global master switch; per-guild toggle decides per server). |
 | `ADMINISTRATION_ENABLED` | No | `true` | Moderation, roles, and voice administration commands. |
 | `DASHBOARD_ENABLED` | No | `true` | Web dashboard & REST API. |
 | `ADMIN_PANEL_ENABLED` | No | `true` | Developer tools / admin panel. |
@@ -130,8 +130,8 @@ DISCORD_CLIENT_SECRET=
 # Bot Invite / Authorization URL
 DISCORD_REDIRECT_URL=https://discord.com/oauth2/authorize?client_id=your_client_id&permissions=8&integration_type=0&scope=bot+applications.commands
 
-# Optional: Forum Thread Delivery (per-server, dashboard configurable)
-# FORUM_CHANNEL_IDS=123456789012345678,987654321098765432
+# Optional: Thread Delivery (per-server toggle, dashboard configurable)
+# THREADS_ENABLED=true
 # THREAD_KEEPALIVE_ENABLED=true
 # THREAD_KEEPALIVE_INTERVAL_MS=21600000
 # THREAD_KEEPALIVE_GRACE_MS=86400000

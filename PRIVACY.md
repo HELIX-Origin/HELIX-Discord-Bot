@@ -27,7 +27,7 @@ When operating an instance of HELIX Discord Bot, the software stores and process
 ### B. Feed & Source Configurations
 - **Feed URLs & Subscriptions**: Target RSS/Atom feeds, Reddit subreddit feeds, and free-game store monitors configured by server administrators.
 - **Stream Alerts**: Twitch channels and YouTube channels monitored for upload and live status notifications.
-- **Delivery Preferences**: Designated guild delivery channels, forum thread targets, ping role IDs, and filter options.
+- **Delivery Preferences**: Designated guild delivery channels, per-guild thread-delivery toggle, ping role IDs, and filter options.
 - **Sent Entry Cache**: Unique post GUIDs, article IDs, and URLs stored locally to deduplicate entries and prevent repeat notifications.
 
 ### C. Guild Administration & Moderation Logs
@@ -43,7 +43,7 @@ When operating an instance of HELIX Discord Bot, the software stores and process
 
 To deliver its core capabilities, an active HELIX Discord Bot instance communicates directly with:
 1. **Discord Gateway & REST API (`discord.com`)**:
-   - Deliver rich embeds, forum thread updates, and announcements to designated guild channels.
+   - Deliver rich embeds, dedicated feed-thread updates, and announcements to designated guild channels.
    - Register and dispatch discrete slash commands (e.g., `/rss`, `/reddit`, `/free-games`, `/youtube`, `/twitch`, `/admin`, `/role`, `/voice`, `/about`, `/help`).
    - Authenticate users via Discord OAuth2.
 2. **Configured Content Providers**:

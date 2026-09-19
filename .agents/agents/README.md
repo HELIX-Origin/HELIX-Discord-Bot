@@ -53,7 +53,7 @@ flowchart TD
 | Agent | Primary | Key Responsibilities | Specification |
 |---|---|---|---|
 | **Discord Specialist** | Code Architect | discord.js v14 commands, events, EmbedHandler, `src/bot/lib/` | [engineering/sub-agents/discord-specialist.md](engineering/sub-agents/discord-specialist.md) |
-| **Feed Watcher** | Code Architect | RSS/Atom/Reddit ingestion, forum threads, stream alerts | [engineering/sub-agents/feed-watcher.md](engineering/sub-agents/feed-watcher.md) |
+| **Feed Watcher** | Code Architect | RSS/Atom/Reddit ingestion, dedicated threads, stream alerts | [engineering/sub-agents/feed-watcher.md](engineering/sub-agents/feed-watcher.md) |
 | **Dashboard Specialist** | Code Architect | SSR dashboard, Discord OAuth2, theme engine | [engineering/sub-agents/dashboard-engineer.md](engineering/sub-agents/dashboard-engineer.md) |
 | **Security Auditor** | Test Automation | Secrets protection, ESLint, formatting, dependency audits | [quality/sub-agents/security-auditor.md](quality/sub-agents/security-auditor.md) |
 | **Wiki Specialist** | Documentation Specialist | `wiki/`, README, `.env.example`, `.agents/` catalogs | [documentation/sub-agents/wiki-specialist.md](documentation/sub-agents/wiki-specialist.md) |

@@ -2,8 +2,8 @@
 
 ## Mandatory Invariants
 
-1. **Direct Bot Channel & Forum Delivery (No Webhooks)**:
-   - HELIX delivers all feed items, stream alerts, and bot responses directly via the Discord Bot client (`bot.sendChannelMessage`, `bot.createForumThread`, or slash command interaction replies).
+1. **Direct Bot Channel & Thread Delivery (No Webhooks)**:
+   - HELIX delivers all feed items, stream alerts, and bot responses directly via the Discord Bot client (`bot.sendChannelMessage`, `bot.createThread`, or slash command interaction replies).
    - Webhook URL delivery is deprecated and retired.
 
 2. **Single Source of Truth for Embed Construction**:
@@ -27,9 +27,9 @@
 4. **Category-Based Delivery Routing**:
    - Feed target resolution follows `resolveFeedTargets(repo, feed)`:
      1. Per-guild category binding (`rss`, `reddit`, `freegames`, `streamalerts`).
-     2. Guild forum thread target (delivering into dedicated single thread).
-     3. Feed-level channel fallback.
+     2. Feed-level channel fallback.
+     3. Thread delivery (one dedicated thread per feed, gated on the per-guild toggle) builds on top of the feed's channel.
 
-5. **Single-Thread Forum Delivery**:
-   - Feeds configured for forum delivery stick strictly to one thread per feed source.
+5. **Dedicated Thread Delivery**:
+   - Thread delivery applies strictly one thread per feed source (created in the feed's own channel) when the guild enables it.
    - Sleeping threads are unarchived automatically before posting.

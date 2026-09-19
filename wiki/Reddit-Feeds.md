@@ -122,10 +122,10 @@ HELIX verifies each subreddit's rating via the authenticated `about.json` endpoi
 
 | Subreddit rating | Allowed delivery targets |
 | :--- | :--- |
-| Verified **SFW** | Any text channel, forum thread, or announcement channel |
-| **NSFW** (`over18: true`) | Only **age-restricted (NSFW)** Discord channels, or threads inside an age-restricted forum |
+| Verified **SFW** | Any text channel or announcement channel |
+| **NSFW** (`over18: true`) | Only **age-restricted (NSFW)** Discord channels |
 | **Unverifiable** (probe failed / no session) | Denied for normal channels — only age-restricted targets (fails closed) |
 
-- A thread inherits the age-restriction state of its parent **forum channel**.
+- A feed thread inherits the age-restriction state of its parent **channel** (threads are auto-created inside the feed's configured text channel).
 - If the selected channel is not age-restricted, adding or moving an NSFW/unverifiable subreddit is rejected with a clear error message both in the dashboard and via `/reddit add`.
 - This keeps NSFW content locked to channels explicitly marked as **NSFW** in Discord's age-restricted channel settings.

@@ -20,7 +20,7 @@ flowchart TD
 | Sub-Agent | Target Domain | Specification |
 |---|---|---|
 | **Discord Specialist** | Discord.js v14 commands, events, embeds | [sub-agents/discord-specialist.md](sub-agents/discord-specialist.md) |
-| **Feed Watcher** | Feed syndication, scraping, forum delivery, stream alerts | [sub-agents/feed-watcher.md](sub-agents/feed-watcher.md) |
+| **Feed Watcher** | Feed syndication, scraping, thread delivery, stream alerts | [sub-agents/feed-watcher.md](sub-agents/feed-watcher.md) |
 | **Dashboard Specialist** | SSR dashboard, Discord OAuth, REST API, theme engine | [sub-agents/dashboard-engineer.md](sub-agents/dashboard-engineer.md) |
 
 ## Standards & Constraints

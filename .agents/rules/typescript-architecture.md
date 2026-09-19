@@ -52,8 +52,8 @@ src/
 │   ├── parser.ts                   # RSS/Atom XML feed parsing & normalization
 │   ├── freegames.ts                # Weekly free games aggregator (Epic + GamerPower)
 │   ├── scraper.ts                  # Selector-based HTML scraping
-│   ├── targets.ts                  # Channel/forum target resolution
-│   ├── threads.ts                  # Forum thread manager (single thread per feed)
+│   ├── targets.ts                  # Feed target resolution (channel)
+│   ├── threads.ts                  # Thread delivery manager (one thread per feed)
 │   └── watcher.ts                  # FeedWatcher polling engine
 ├── scheduler/
 │   └── scheduler.ts                # Non-overlapping interval timer scheduler

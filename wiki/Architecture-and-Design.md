@@ -65,7 +65,7 @@ flowchart TB
 - Operates on a continuous polling loop with per-user configurable intervals (1, 10, 30 or 60 minutes) persisted in SQLite.
 - Runs balanced asynchronous worker pools.
 - Features a weekly Monday cron scheduler for Free Games promotions.
-- **Forum Thread Delivery**: routes entries through `FeedThreadManager` (`src/feed/threads.ts`), creating/rotating per-feed threads inside forum channels for thread-enabled guilds, with a keepalive pass (`THREAD_KEEPALIVE_*`) scheduled alongside the watcher loop.
+- **Thread Delivery**: routes entries through `FeedThreadManager` (`src/feed/threads.ts`), auto-creating/rotating a dedicated thread per feed in the feed's own delivery channel for thread-enabled guilds, with a keepalive pass (`THREAD_KEEPALIVE_*`) scheduled alongside the watcher loop.
 
 ### 3. Parser & Scrapers Engine (`src/feed/`)
 - Unified parser handling XML (RSS/Atom), JSON Feed, Reddit, and Free Games storefronts.
@@ -91,7 +91,6 @@ erDiagram
         string icon "Icon Hash"
         timestamp joined_at "Join Timestamp"
         boolean threads_enabled "Thread delivery on"
-        string forum_channel_ids "JSON array of forum IDs"
     }
 
     FEEDS {

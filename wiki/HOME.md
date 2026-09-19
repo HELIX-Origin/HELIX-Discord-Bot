@@ -11,7 +11,7 @@ Welcome to the comprehensive technical and operational wiki for **HELIX Discord 
 | [**📡 Feeds & Scrapers Engine**](Feeds-and-Scrapers.md) | Deep dive into XML/RSS/Atom parsing, Reddit, Free Games, and custom scrapers. |
 | [**🎮 Free Games & Giveaways**](Free-Games-Feeds.md) | Multi-store aggregation (Epic Games, Steam, GOG, Humble, etc.), Monday cron scheduler, and store branding. |
 | [**🤖 Reddit Feeds & Pure Image Mode**](Reddit-Feeds.md) | Reddit scraping, Pure Image Mode vs Standard RSS Mode, animated GIF/gifv banners, and subreddit filtering. |
-| [**🤖 Discord Bot & Commands**](Discord-Bot.md) | Slash commands (`/rss`, `/youtube`, `/twitch`, `/free-games`, `/reddit`, `/stats`, `/about`, `/help`), direct channel + forum thread delivery, embed formatting, and Discord permissions. |
+| [**🤖 Discord Bot & Commands**](Discord-Bot.md) | Slash commands (`/rss`, `/youtube`, `/twitch`, `/free-games`, `/reddit`, `/stats`, `/about`, `/help`), direct channel + dedicated thread delivery, embed formatting, and Discord permissions. |
 | [**🛡️ Guild Administration**](Administration.md) | Moderation (`/warn`, `/kick`, `/ban`, `/lock`, `/purge`, `/slowmode`, `/announce`), role management, voice controls, permission guards. |
 | [**🔌 REST API Reference**](API-Reference.md) | Complete documentation of all REST endpoints, request/response schemas, and query params. |
 | [**🏗️ Architecture & Design**](Architecture-and-Design.md) | System components, data flow diagrams, background polling engine, caching, and state management. |
@@ -48,7 +48,7 @@ flowchart TD
 
     subgraph Discord["Discord Platform"]
         Channels["Target Server Guild Channels"]
-        Threads["Forum Threads"]
+        Threads["Feed Threads (auto-created in feed channels)"]
         SlashCmd["User Slash Commands (Feeds, Alerts, Admin)"]
     end
 
@@ -71,6 +71,6 @@ flowchart TD
 3. **Dedicated Reddit Engine**: Switch seamlessly between **Pure Image Mode** (fullscreen meme & photo banners) and **Standard RSS Mode** (discussion excerpts and link cards).
 4. **News Feeds Catalog**: Instant 1-click subscription to 700+ verified feeds across 15 popular news categories.
 5. **No Webhook Hassle**: Messages are dispatched directly to guild channels using Discord REST API endpoints with granular role/user pings and embed color customization.
-6. **Forum Thread Delivery**: Optional per-server delivery of each feed into its own dedicated thread inside a forum channel — kept open via keepalive polling, auto-rotated into a fresh thread when large (configurable from the dashboard Feeds tab).
+6. **Thread Delivery**: Optional per-server delivery of each feed into its own dedicated thread auto-created in the feed's text channel — kept open via keepalive polling, auto-rotated into a fresh thread when large (configurable from the dashboard Guild Admin → Feed Delivery).
 7. **Glassmorphism Web Dashboard**: Real-time management interface with Discord OAuth2 login, feed analytics, log streaming, and preset browsing.
 8. **Guild Administration**: Moderation (`/warn`, `/kick`, `/ban`, `/lock`, `/purge`, `/slowmode`, `/announce`), role management, voice controls (mute/deafen/move/disconnect), all with Discord permission guards.

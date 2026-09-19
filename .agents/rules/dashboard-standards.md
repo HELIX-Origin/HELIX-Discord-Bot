@@ -22,7 +22,7 @@ The HELIX management dashboard provides an integrated, web-based management cons
    - Access to guild configuration requires Discord **Administrator** (`0x8`) or **Manage Server** (`0x20`) permissions on the target guild.
    - Developer Tools and system-level operations (`/api/admin/*`) require application **Owner** or **Team Admin** status verified during OAuth2 exchange.
 4. **Live Discord Bot Synchronization**:
-   - The dashboard does not maintain duplicate Discord channel or guild state. It queries the live `DiscordBot` instance (`deps.bot`) for guild discovery, voice state, channel listings, and forum thread creation.
+   - The dashboard does not maintain duplicate Discord channel or guild state. It queries the live `DiscordBot` instance (`deps.bot`) for guild discovery, voice state, channel listings, and thread creation.
 5. **EmbedHandler Parity**:
    - Any embed preview or formatted card rendered in the dashboard UI MUST mirror the exact layout, color accents, and text clamping standards of `EmbedHandler` (`src/bot/lib/embeds/`).
 

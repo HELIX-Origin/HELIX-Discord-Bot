@@ -95,6 +95,10 @@ export class FeedThreadManager {
       return { delivered: false, mode: 'channel', fallbackReason: 'feed has no delivery channel' };
     }
 
+    if (!this.config.features.threadsEnabled) {
+      return { delivered: false, mode: 'channel', fallbackReason: 'thread delivery disabled globally' };
+    }
+
     if (!(await this.guildThreadsEnabled(feed))) {
       return { delivered: false, mode: 'channel', fallbackReason: 'thread delivery disabled for guild' };
     }

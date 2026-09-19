@@ -40,8 +40,8 @@ flowchart TD
    - Handles autocomplete interactions with responsive search and `.slice(0, 25)`.
    - Handles button interactions and modal submissions with error isolation.
 
-4. **Forum Thread & Channel Delivery**:
-   - Manages single-thread forum syndication via `FeedThreadManager`.
+4. **Thread & Channel Delivery**:
+   - Manages dedicated per-feed thread delivery via `FeedThreadManager`.
    - Unarchives sleeping threads (`bot.unarchiveThread`) instead of creating replacement threads.
    - Detects deleted threads (`HTTP 404`) and rotates upon reaching `threadMaxMessages`.
 

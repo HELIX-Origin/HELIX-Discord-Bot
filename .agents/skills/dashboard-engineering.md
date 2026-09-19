@@ -11,7 +11,7 @@ Activate this skill when:
 - Creating or modifying dashboard HTTP routes in `src/dashboard/routes/`.
 - Building or modifying SSR HTML views in `src/dashboard/views/`.
 - Implementing Discord OAuth2 authentication, permission verification, or session management.
-- Integrating UI controls with live `DiscordBot` state (channel pickers, forum thread setup, music queue control).
+- Integrating UI controls with live `DiscordBot` state (channel pickers, thread-delivery toggle, music queue control).
 - Adding or styling theme components with CSS custom properties.
 
 ---

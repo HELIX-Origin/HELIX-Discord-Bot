@@ -34,7 +34,7 @@ It ships with a built-in web dashboard, Discord OAuth2 authentication, no fronte
 | 📰 **RSS, Web Scrapers & News Catalog** | RSS/Atom/JSON feeds, CSS-selector scrapers for sites without RSS, and a 700+ preset news catalog. → [Wiki](../../wiki/Feeds-and-Scrapers) |
 | 📢 **Stream Alerts** | YouTube & Twitch live/upload alerts delivered via webhooks with polling fallback. → [Wiki](../../wiki/Feeds-and-Scrapers) |
 | 🛡️ **Guild Administration** | Moderation (`/warn`, `/kick`, `/ban`, `/purge`, ...), role management, and voice controls. → [Wiki](../../wiki/Administration) |
-| 🧵 **Thread Delivery** | Deliver each feed into its own dedicated thread inside a forum channel. → [Wiki](../../wiki/Discord-Bot) |
+| 🧵 **Thread Delivery** | Deliver each feed into its own dedicated thread auto-created in the feed's channel. → [Wiki](../../wiki/Discord-Bot) |
 | 🖥️ **Web Dashboard** | Built-in management dashboard with Discord OAuth2, Light/Dark themes, and per-guild feed configuration. → [Wiki](../../wiki/Architecture-and-Design) |
 
 Feature flags (`FEEDS_ENABLED`, `STREAM_ALERTS_ENABLED`, `DASHBOARD_ENABLED`, etc.) toggle each subsystem. → [Wiki: Configuration](../../wiki/Configuration)

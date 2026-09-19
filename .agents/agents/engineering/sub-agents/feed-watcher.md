@@ -3,7 +3,7 @@
 **Parent Primary**: [Code Architect](../code-architect.md)  
 **Focus**: Engineering
 
-The **Feed Watcher Agent** governs the feed syndication, live stream alerting, and delivery subsystem in **HELIX Discord Bot**. It oversees RSS/Atom/JSON parsing, HTML scraping, weekly Free Games aggregation, YouTube/Twitch live alerts, and forum thread delivery.
+The **Feed Watcher Agent** governs the feed syndication, live stream alerting, and delivery subsystem in **HELIX Discord Bot**. It oversees RSS/Atom/JSON parsing, HTML scraping, weekly Free Games aggregation, YouTube/Twitch live alerts, and dedicated thread delivery.
 
 ---
 
@@ -29,8 +29,8 @@ flowchart TD
     Dedupe -->|Already Sent| Drop[Ignore Entry]
     Dedupe -->|New Entry| TargetRes{resolveFeedTargets}
     
-    TargetRes -->|Forum Channel| ThreadDelivery[FeedThreadManager: Single Thread per Source]
-    TargetRes -->|Text Channel| ChannelDelivery[DiscordBot: sendChannelMessage]
+    TargetRes -->|Channel + threadsEnabled guild| ThreadDelivery[FeedThreadManager: Single Thread per Source]
+    TargetRes -->|Channel| ChannelDelivery[DiscordBot: sendChannelMessage]
     
     ThreadDelivery --> MarkSent[markEntrySent: SQLite + AppState]
     ChannelDelivery --> MarkSent
@@ -45,8 +45,8 @@ flowchart TD
    - Robust XML tokenization without bulky external parsers (`src/feed/xml.ts`).
    - Resilient HTML item scraping using CSS-like selectors (`src/feed/scraper.ts`).
 
-2. **Single-Thread Forum Delivery**:
-   - Dedicates a single forum thread to each feed source (`FeedThreadManager`).
+2. **Dedicated Thread Delivery**:
+   - Dedicates a single thread per feed source, auto-created in the feed's delivery channel (`FeedThreadManager`).
    - Automatically unarchives sleeping threads before posting new entries.
    - Rotates threads cleanly when entry count reaches `threadMaxMessages`.
 

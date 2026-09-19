@@ -38,7 +38,7 @@ This is the foundational safety rule for all AI agents working on **HELIX Discor
 ## 2. Strict Instruction Following & Anti-Regression
 
 1. **Unconditional Obedience to Explicit User Directives**:
-   - When the user directs an architectural standard (e.g. "strictly adhere to discord.js requirements", "forum thread delivery per feed", "weekly Sunday free games"), agents MUST implement it cleanly across all affected modules.
+   - When the user directs an architectural standard (e.g. "strictly adhere to discord.js requirements", "dedicated thread delivery per feed", "weekly Sunday free games"), agents MUST implement it cleanly across all affected modules.
    - Never reintroduce retired, deprecated, or forbidden patterns (e.g. Cloudflare OAuth, PaaS/cloud deploy scripts, status monitors).
 
 2. **Zero Unsolicited Framework Injection (Rule 01)**:

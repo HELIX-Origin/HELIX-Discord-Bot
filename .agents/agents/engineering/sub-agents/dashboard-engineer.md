@@ -24,8 +24,8 @@ The **Dashboard Specialist** designs, implements, and maintains the self-hosted 
    - Enforce guild administrative permission checks (`ADMINISTRATOR` `0x8` or `MANAGE_GUILD` `0x20`) on server routes.
    - Restrict developer tools and host controls (`/api/admin/*`) exclusively to application owners and team members.
 3. **Live Bot Synchronization**:
-   - Query live bot state (`deps.bot`) for channels, forums, threads, voice states, and application information.
-   - Ensure the UI channel and forum selectors reflect live Discord permissions and active bot guild memberships.
+   - Query live bot state (`deps.bot`) for channels, threads, voice states, and application information.
+   - Ensure the UI channel and thread selectors reflect live Discord permissions and active bot guild memberships.
 4. **Theme Engine & Appearance**:
    - Maintain full compatibility with `.env` theme settings (`DASHBOARD_THEME`, `DASHBOARD_COLOR_SCHEME`, `LANDING_PAGE_ENABLED`).
    - Ensure all UI views adhere to CSS custom property styling across Light and Dark modes.

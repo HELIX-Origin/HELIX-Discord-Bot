@@ -178,25 +178,45 @@ GET /api/presets
 
 ## 🏰 Guilds & Channels Endpoints
 
-### 1. List User's Managed Guilds
+### 1. List User's Guilds
 ```http
 GET /api/guilds
 ```
+**Auth**: Any logged-in Discord user (relaxed — no role gate).
+**Response**:
+```json
+{
+  "botEnabled": true,
+  "guilds": [
+    {
+      "id": "987654321098765432",
+      "name": "My Server",
+      "icon": "a_iconhash",
+      "botIn": true,
+      "canManage": true,
+      "canInvite": true,
+      "inviteUrl": "https://discord.com/oauth2/authorize?client_id=..."
+    }
+  ]
+}
+```
 
-### 2. List Text Channels for a Guild
+### 2. List Delivery Channels for a Guild
 ```http
 GET /api/guilds/:guildId/channels
 ```
+**Auth**: User must be able to manage the target guild.
 **Response**:
 ```json
-[
-  {
-    "id": "987654321098765432",
-    "name": "news-feed",
-    "type": 0,
-    "position": 3
-  }
-]
+{
+  "guildId": "987654321098765432",
+  "name": "My Server",
+  "icon": "a_iconhash",
+  "canManage": true,
+  "textChannels": [
+    { "id": "987654321098765432", "name": "news-feed", "type": 0, "nsfw": false }
+  ]
+}
 ```
 
 ### 3. List Mentionable Roles for a Guild
@@ -214,9 +234,9 @@ GET /api/guilds/:guildId/roles
 ]
 ```
 
-### 4. Get Guild Category Targets
+### 4. Get Guild Settings
 ```http
-GET /api/guilds/:guildId/categories
+GET /api/guilds/:guildId/settings
 ```
 **Auth**: User must be able to manage the target guild.
 **Response**:
@@ -224,60 +244,43 @@ GET /api/guilds/:guildId/categories
 {
   "guildId": "987654321098765432",
   "name": "My Server",
-  "categories": [
-    { "category": "rss", "channelId": "123456789012345678", "threadChannelId": null },
-    { "category": "reddit", "channelId": null, "threadChannelId": null },
-    { "category": "freegames", "channelId": "987654321098765432", "threadChannelId": null }
+  "icon": "a_iconhash",
+  "roles": { "adminRoleId": null },
+  "prefix": null,
+  "features": { "welcome": true, "tickets": false, "logs": true },
+  "welcome": { "enabled": false, "channelId": null },
+  "tickets": { "channelId": null, "categoryId": null },
+  "logs": {
+    "auditLogChannelId": null,
+    "auditLogEvents": ["guildBanAdd", "memberRoleUpdate", "channelCreate"],
+    "modLogChannelId": null,
+    "modLogEvents": ["warn", "kick", "ban"]
+  },
+  "commands": [],
+  "guildRoles": [],
+  "textChannels": [
+    { "id": "987654321098765432", "name": "news-feed", "type": 0, "nsfw": false }
   ],
-  "textChannels": [{ "id": "123456789012345678", "name": "rss-feeds", "type": 0 }],
-  "forumChannels": [{ "id": "111111111111111111", "name": "feed-threads", "type": 15 }]
+  "threadsEnabled": true
 }
 ```
 
-### 5. Update Guild Category Target
+### 5. Update Guild Settings
 ```http
-PUT /api/guilds/:guildId/categories/:category
+PUT /api/guilds/:guildId/settings
 Content-Type: application/json
-
-{
-  "channelId": "123456789012345678",
-  "threadChannelId": null
-}
 ```
-**Auth**: User must have `Manage Channels` (or Administrator) on the target guild.
-**Validation**: `category` must be `rss`, `reddit`, or `freegames`. `channelId` must be a text/announcement channel in the guild; `threadChannelId` must be a forum channel in the guild.
-**Response**: the updated category target object.
-
-### 6. Get Forum Thread Delivery Config for Managed Guilds
-```http
-GET /api/discord/thread-config
-```
-**Auth**: Any logged-in dashboard user (only guilds they can manage are included).
-**Response**:
+**Auth**: User must be able to manage the target guild.
+**Accepted body fields**: `adminRoleId`, `prefix`, `features`, `ticketChannelId`/`ticketCategoryId` (or `ticketChannelId ""` to clear), `logs` fields, `welcome` fields, `commands`, and `threadsEnabled` (boolean — master thread-delivery toggle for the server).
+**Example**:
 ```json
-[
-  {
-    "guildId": "987654321098765432",
-    "name": "My Server",
-    "threadsEnabled": true,
-    "forumChannelIds": ["111111111111111111"],
-    "forumChannels": [{ "id": "111111111111111111", "name": "feed-threads", "type": 15 }]
-  }
-]
-```
-
-### 7. Update Forum Thread Delivery Config for a Guild
-```http
-PUT /api/discord/thread-config
-Content-Type: application/json
-
 {
-  "guildId": "987654321098765432",
-  "threadsEnabled": true,
-  "forumChannelIds": ["111111111111111111"]
+  "threadsEnabled": true
 }
 ```
-### 8. Manually Poll All Guild Feeds & Alerts
+**Response**: `200 OK` with `{ "success": true, "changes": ["Thread delivery enabled"] }`.
+
+### 6. Manually Poll All Guild Feeds & Alerts
 ```http
 POST /api/guilds/:guildId/poll
 ```

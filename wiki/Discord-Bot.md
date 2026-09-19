@@ -1,6 +1,6 @@
 # 🤖 Discord Bot & Commands
 
-HELIX Discord Bot operates as a Discord application adhering strictly to **discord.js v14** standards. It delivers notifications directly to channels or dedicated forum threads, eliminating the need to manage external webhooks.
+HELIX Discord Bot operates as a Discord application adhering strictly to **discord.js v14** standards. It delivers notifications directly to channels or dedicated threads, eliminating the need to manage external webhooks.
 
 ---
 
@@ -45,24 +45,24 @@ When inviting the bot to your Discord server, ensure it is granted the following
 | **Mention Everyone / Roles** | `MentionEveryone` | Ping configured notification roles (`@role`) |
 | **Use External Emojis** | `UseExternalEmojis` | Display custom source platform icons |
 | **Send Messages in Threads** | `SendMessagesInThreads` | Post feed entries inside feed threads |
-| **Create Public Threads** | `CreatePublicThreads` | Open per-feed threads inside forum channels |
+| **Create Public Threads** | `CreatePublicThreads` | Open per-feed threads in the feed's delivery channel |
 | **Manage Threads** | `ManageThreads` | Archive/rotate large feed threads, keepalive polling |
 
 > The invite URLs rendered across the dashboard include these thread bits on top of the base permission set.
 
 ---
 
-## 🧵 Forum Thread Delivery (Optional)
+## 🧵 Thread Delivery (Optional)
 
-Instead of delivering into a regular channel, a server can opt each feed subscription into **its own dedicated thread inside a forum channel** (one thread per feed, named after the feed). The feature is entirely optional and **per server**:
+Instead of delivering into a regular channel, a server can enable **thread delivery**: each feed subscription gets **its own dedicated thread**, auto-created in the feed's configured text channel (one thread per feed, named after the feed). The feature is entirely optional and **per server**:
 
-- Enabled from the dashboard **Feeds tab** (per-server "Forum Thread Delivery" card — any guild manager can configure it) or via the global `FORUM_CHANNEL_IDS` env default.
-- The first feed entry becomes the thread's **opening post**; subsequent entries land as messages inside the same thread.
+- Enabled from the dashboard **Guild Admin tab → Feed Delivery** ("Enable Thread delivery" checkbox — any guild manager can configure it) or via `PUT /api/guilds/:guildId/settings` with `threadsEnabled`.
+- The first feed entry becomes the thread's **first post**; subsequent entries land as messages inside the same thread.
 - Threads are **kept open** by a keepalive pass that posts a tiny message whenever a thread is within ~24h of Discord's auto-archive. (Disabled with `THREAD_KEEPALIVE_ENABLED=false`.)
 - When a thread reaches `THREAD_MAX_MESSAGES` (default `100`) entries, the large thread is **archived + locked** and a **fresh thread** opens automatically in its place.
 - Servers without thread delivery enabled behave exactly as before (direct channel delivery).
 
-See [Configuration → Forum Thread Delivery](Configuration.md) for the full variable reference.
+See [Configuration → Thread Delivery](Configuration.md) for the full variable reference.
 
 ---
 

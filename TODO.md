@@ -33,12 +33,12 @@
 - [x] Split `guildadmin.ts`: keep Roles/Features/Commands/Prefix; new `welcome.ts`/`tickets.ts`/`logs.ts` tabs with per-tab save
 - [x] `client-script.ts`: pill grid, sidebar gating, `loadCommandsTab`, per-tab load/save, relaxed 403 handling
 - [x] `dashboard.ts`: render new tab panes; pass `canManage` to sidebar
-- [ ] Ticket redesign: sticky text-channel button message → thread per ticket, manager role auto-added (`ticket_channel_id` key)
+- [x] Ticket redesign: sticky text-channel button message → thread per ticket, manager role auto-added (`ticket_channel_id` key)
 - [x] `npm run check` + `pnpm build` green
 - [ ] Commit + push; sync `PLAN.md`/`TODO.md`/`BUGS.md`, `wiki/`, roadmap issue #27 per Rule 04/05
-- [ ] Forum→thread feed delivery: remove forum target end-to-end; thread-enabled feeds post to a dedicated thread in their own `channel_id` (state types, repos, `FeedThreadManager`, targets, watcher, webhooks, bot, config, dashboard UI)
+- [x] Forum→thread feed delivery: remove forum target end-to-end; thread-enabled feeds post to a dedicated thread in their own `channel_id` (state types, repos, `FeedThreadManager`, targets, watcher, webhooks, bot, config, dashboard UI)
 
-**Status:** dashboard phase (access relaxation, guilds API, public commands page, pill-grid views, sidebar gating, feature-tab split) committed as `627d783` and pushed; `npm run check` + `pnpm build` green. Remaining: ticket redesign (text-channel button → thread), forum→thread feed delivery refactor, and final doc/wiki/issue sync. Progress mirrored on roadmap issue #27.
+**Status:** dashboard phase (`627d783`), ticket redesign (`cf6c6c3`), and forum→thread refactor (`21a4734`) committed + pushed — each ran green `npm run check` + `pnpm build`. Remaining: final docs/wiki/issue sync (retired legend `forum`→`thread` wording across wiki/, .agents/, README/PRIVACY, and roadmap issue #27 Phase 9/10 checkboxes). Progress mirrored on roadmap issue #27.
 
 ---
 
