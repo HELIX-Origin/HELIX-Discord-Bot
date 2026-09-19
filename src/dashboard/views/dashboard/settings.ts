@@ -1,4 +1,4 @@
-export interface SettingsOptions {
+interface SettingsOptions {
   publicBaseUrl: string | null;
   internalUrl: string;
   themeName: string;

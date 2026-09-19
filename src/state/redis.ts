@@ -18,7 +18,7 @@ export interface RedisCoordinator {
 /**
  * Minimal Redis command surface shared by ioredis-mock.
  */
-export interface RedisClientLike {
+interface RedisClientLike {
   sismember(key: string, member: string): Promise<number>;
   sadd(key: string, ...members: string[]): Promise<number>;
   set(key: string, value: string, mode: string, ttlSeconds: number, flag: string): Promise<unknown>;
@@ -26,7 +26,7 @@ export interface RedisClientLike {
   quit(): Promise<'OK'>;
 }
 
-export class RedisCoordinatorImpl implements RedisCoordinator {
+class RedisCoordinatorImpl implements RedisCoordinator {
   readonly enabled = true;
   readonly instanceId: string;
   private degradedLogged = false;

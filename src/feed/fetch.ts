@@ -1,6 +1,6 @@
 import { performance } from 'node:perf_hooks';
 
-export class FetchError extends Error {
+class FetchError extends Error {
   readonly status: number | null;
   readonly retryable: boolean;
 
@@ -12,7 +12,7 @@ export class FetchError extends Error {
   }
 }
 
-export interface FetchResult {
+interface FetchResult {
   url: string;
   status: number;
   contentType: string | null;
@@ -22,7 +22,7 @@ export interface FetchResult {
   challenged: boolean;
 }
 
-export interface HttpFetcherOptions {
+interface HttpFetcherOptions {
   timeoutMs?: number;
   maxRedirects?: number;
   userAgent?: string;
@@ -37,7 +37,7 @@ const defaultRepoUrl =
   process.env['PROJECT_URL']?.trim() ||
   '';
 
-export const DEFAULT_USER_AGENT =
+const DEFAULT_USER_AGENT =
   process.env['FEED_USER_AGENT']?.trim() ||
   process.env['USER_AGENT']?.trim() ||
   (defaultRepoUrl ? `HELIX-Discord-Bot/0.5.0 (+${defaultRepoUrl})` : 'HELIX-Discord-Bot/0.5.0');

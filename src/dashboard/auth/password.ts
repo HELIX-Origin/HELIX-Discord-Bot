@@ -16,7 +16,7 @@ function verifyPassword(password: string, stored: string): boolean {
   return derived.length === expected.length && timingSafeEqual(derived, expected);
 }
 
-export interface PasswordService {
+interface PasswordService {
   hash(password: string): string;
   verify(password: string, stored: string): boolean;
 }
@@ -28,7 +28,7 @@ export const passwordService: PasswordService = {
 
 const SESSION_DAYS = 30;
 
-export interface SessionService {
+interface SessionService {
   sessionExpiry(): Date;
 }
 

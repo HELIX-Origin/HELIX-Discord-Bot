@@ -1,27 +1,10 @@
 import type { AppDeps } from '../../app.js';
 import type { DiscordRestClient } from '../rest.js';
-import {
-  InteractionResponseType,
-  type ApplicationCommand,
-  type DiscordInteraction,
-  type InteractionResponse,
-} from '../utils/types.js';
-import { getEnabledCommands, getCommand, isCommandDisabled } from './registry.js';
+import { InteractionResponseType, type DiscordInteraction, type InteractionResponse } from '../utils/types.js';
+import { getCommand, isCommandDisabled } from './registry.js';
 import { EmbedHandler } from '../lib/embeds/builder.js';
 import { loadAllCommands } from './loader.js';
 import { handleTicketButton } from '../commands/admin/ticket.js';
-
-export interface CommandHandler {
-  readonly commands: ApplicationCommand[];
-  readonly autocompleteHandlers: Map<
-    string,
-    (interaction: DiscordInteraction, deps: AppDeps) => Promise<InteractionResponse>
-  >;
-}
-
-export function createCommandHandler(deps: AppDeps): CommandHandler {
-  return { commands: getEnabledCommands(deps), autocompleteHandlers: new Map() };
-}
 
 export async function dispatchInteraction(
   interaction: DiscordInteraction,

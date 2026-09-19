@@ -3,11 +3,10 @@ import type { Router } from '../http/router.js';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { readBodyJson, sendError, sendJson } from '../http/helpers.js';
 import { WebhookRouter } from '../webhooks/router.js';
-import type { Feed } from '../../state/types.js';
 
 let webhookRouter: WebhookRouter | null = null;
 
-export function getWebhookRouter(): WebhookRouter | null {
+function getWebhookRouter(): WebhookRouter | null {
   return webhookRouter;
 }
 
@@ -98,11 +97,4 @@ export function registerWebhookRoutes(router: Router<AppDeps>): void {
       await routerInstance.handleNotification(req, res);
     },
   );
-}
-
-export async function subscribeFeedToWebhook(deps: AppDeps, feed: Feed): Promise<boolean> {
-  const routerInstance = deps.webhookRouter ?? getWebhookRouter();
-  if (!routerInstance) return false;
-
-  return routerInstance.subscribeToFeed(feed);
 }

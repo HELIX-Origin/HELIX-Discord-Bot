@@ -1,6 +1,6 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
 
-export interface HandlerContext {
+interface HandlerContext {
   params: Record<string, string>;
   query: URLSearchParams;
 }

@@ -1,8 +1,8 @@
 import { createLogger, type LogLevel } from '../util/logger.js';
 
-export type JobFn = () => Promise<void>;
+type JobFn = () => Promise<void>;
 
-export interface ScheduledJob {
+interface ScheduledJob {
   id: string;
   intervalMs: number;
   runNow(): Promise<void>;

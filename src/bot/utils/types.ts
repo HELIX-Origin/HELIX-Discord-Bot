@@ -2,23 +2,7 @@
  * Discord API v10 types for Gateway, REST, and Interactions.
  */
 
-export const GatewayOpcode = {
-  DISPATCH: 0,
-  HEARTBEAT: 1,
-  IDENTIFY: 2,
-  PRESENCE_UPDATE: 3,
-  VOICE_STATE_UPDATE: 4,
-  RESUME: 6,
-  RECONNECT: 7,
-  REQUEST_GUILD_MEMBERS: 8,
-  INVALID_SESSION: 9,
-  HELLO: 10,
-  HEARTBEAT_ACK: 11,
-} as const;
-
-export type GatewayOpcode = (typeof GatewayOpcode)[keyof typeof GatewayOpcode];
-
-export const InteractionType = {
+const InteractionType = {
   PING: 1,
   APPLICATION_COMMAND: 2,
   MESSAGE_COMPONENT: 3,
@@ -26,7 +10,7 @@ export const InteractionType = {
   MODAL_SUBMIT: 5,
 } as const;
 
-export type InteractionType = (typeof InteractionType)[keyof typeof InteractionType];
+type InteractionType = (typeof InteractionType)[keyof typeof InteractionType];
 
 export const InteractionResponseType = {
   PONG: 1,
@@ -57,7 +41,7 @@ export const ApplicationCommandOptionType = {
 export type ApplicationCommandOptionType =
   (typeof ApplicationCommandOptionType)[keyof typeof ApplicationCommandOptionType];
 
-export interface ApplicationCommandOptionChoice {
+interface ApplicationCommandOptionChoice {
   name: string;
   value: string | number;
 }
@@ -104,7 +88,7 @@ export interface DiscordEmbed {
   fields?: DiscordEmbedField[];
 }
 
-export interface InteractionResponseData {
+interface InteractionResponseData {
   tts?: boolean;
   content?: string;
   embeds?: DiscordEmbed[];
@@ -126,7 +110,7 @@ export interface InteractionOption {
   options?: InteractionOption[];
 }
 
-export interface InteractionData {
+interface InteractionData {
   id: string;
   name: string;
   type: number;
@@ -146,39 +130,6 @@ export interface DiscordGuild {
   features?: string[];
   approximate_member_count?: number;
   approximate_presence_count?: number;
-}
-
-export interface DiscordChannel {
-  id: string;
-  type: number;
-  name?: string;
-  guild_id?: string;
-  position?: number;
-  parent_id?: string;
-  topic?: string;
-  nsfw?: boolean;
-  last_message_id?: string;
-  bitrate?: number;
-  user_limit?: number;
-  rate_limit_per_user?: number;
-  permission_overwrites?: Array<{
-    id: string;
-    type: number;
-    allow: string;
-    deny: string;
-  }>;
-}
-
-export interface DiscordRole {
-  id: string;
-  name: string;
-  color: number;
-  hoist: boolean;
-  position: number;
-  permissions: string;
-  managed: boolean;
-  mentionable: boolean;
-  tags?: { bot_id?: string; integration_id?: string; premium_subscriber?: boolean };
 }
 
 export interface DiscordInteraction {

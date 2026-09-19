@@ -6,9 +6,9 @@ import { cyberpunkTheme } from './themes/cyberpunk.js';
 import { draculaTheme } from './themes/dracula.js';
 import { nordTheme } from './themes/nord.js';
 import { emeraldTheme } from './themes/emerald.js';
-import { baseStyles, colorSchemeMode } from './themes/shared.js';
+import { colorSchemeMode } from './themes/shared.js';
 
-export interface ThemeInfo {
+interface ThemeInfo {
   id: string;
   name: string;
   icon: string;
@@ -53,8 +53,4 @@ export function getThemeCss(): string {
     ${emeraldTheme}
     ${colorSchemeMode}
   `;
-}
-
-export function getBaseStyles(): string {
-  return baseStyles;
 }

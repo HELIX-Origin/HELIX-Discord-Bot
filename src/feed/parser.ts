@@ -158,7 +158,7 @@ export function extractImageFromHtml(html: string | null): string | null {
   return null;
 }
 
-export function findEntryImage(element: XmlElement, descriptionHtml?: string | null): string | null {
+function findEntryImage(element: XmlElement, descriptionHtml?: string | null): string | null {
   // 0. If the description HTML has a direct animated GIF link, prioritize that over static thumbnails
   if (descriptionHtml) {
     const directGif = extractImageFromHtml(descriptionHtml);
@@ -316,7 +316,7 @@ export function stripHtml(text: string | null): string | null {
   return decodeHtmlEntities(stripped);
 }
 
-export interface FeedEntryWithGuid extends FeedEntry {
+interface FeedEntryWithGuid extends FeedEntry {
   guid: string;
 }
 

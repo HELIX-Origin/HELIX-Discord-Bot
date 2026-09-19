@@ -1,4 +1,4 @@
-export interface FeedPreset {
+interface FeedPreset {
   id: string;
   name: string;
   category: string;
@@ -759,13 +759,3 @@ export const FEED_PRESETS: FeedPreset[] = [
     url: 'https://www.reddit.com/r/artificial/.rss',
   },
 ];
-
-export function presetsGroupedByCategory(): Map<string, FeedPreset[]> {
-  const groups = new Map<string, FeedPreset[]>();
-  for (const preset of FEED_PRESETS) {
-    const list = groups.get(preset.category) ?? [];
-    list.push(preset);
-    groups.set(preset.category, list);
-  }
-  return groups;
-}

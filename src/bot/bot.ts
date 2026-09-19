@@ -9,7 +9,7 @@ import { DiscordRestClient } from './rest.js';
 import { BOT_DEFAULT_INTENTS } from './config.js';
 import { createHelixRssServer } from '../dashboard/server.js';
 
-export interface DiscordBotOptions {
+interface DiscordBotOptions {
   token: string;
   clientId: string | null;
   redirectUrl: string | null;

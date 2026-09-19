@@ -23,5 +23,3 @@ export interface OAuthProvider {
   buildAuthorizeUrl(redirectUri: string, state: string, config: OAuthProviderConfig): string;
   exchangeCode(code: string, redirectUri: string, config: OAuthProviderConfig): Promise<OAuthTokenResponse>;
 }
-
-export class ConfiguredOAuthError extends Error {}

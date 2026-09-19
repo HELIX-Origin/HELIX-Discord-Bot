@@ -1,9 +1,5 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
 
-export interface JsonResponse {
-  status: number;
-}
-
 export function sendJson(res: ServerResponse, status: number, body: unknown): void {
   const payload = JSON.stringify(body);
   res.writeHead(status, { 'content-type': 'application/json; charset=utf-8' });
@@ -60,7 +56,7 @@ export function parseCookies(req: IncomingMessage): Record<string, string> {
   return out;
 }
 
-export function getRequestProtocol(req: IncomingMessage, defaultProto: 'http' | 'https' = 'http'): 'http' | 'https' {
+function getRequestProtocol(req: IncomingMessage, defaultProto: 'http' | 'https' = 'http'): 'http' | 'https' {
   // Check TLS socket (direct HTTPS)
   if ('encrypted' in req.socket && Boolean((req.socket as { encrypted?: boolean }).encrypted)) {
     return 'https';
@@ -82,7 +78,7 @@ export function getRequestProtocol(req: IncomingMessage, defaultProto: 'http' | 
   return defaultProto;
 }
 
-export function getRequestHost(req: IncomingMessage, fallbackHost = '127.0.0.1:3131'): string {
+function getRequestHost(req: IncomingMessage, fallbackHost = '127.0.0.1:3131'): string {
   const forwardedHost = req.headers['x-forwarded-host'];
   if (typeof forwardedHost === 'string') {
     return forwardedHost.split(',')[0]?.trim() || fallbackHost;
@@ -106,7 +102,7 @@ export function getRequestBaseUrl(
   return `${proto}://${host}`;
 }
 
-export function isSecureConnection(req: IncomingMessage, publicBaseUrl?: string | null): boolean {
+function isSecureConnection(req: IncomingMessage, publicBaseUrl?: string | null): boolean {
   if (publicBaseUrl && publicBaseUrl.startsWith('https://')) return true;
   return getRequestProtocol(req) === 'https';
 }

@@ -1,4 +1,4 @@
-export interface FeedNotifier {
+interface FeedNotifier {
   sendChannelMessage(channelId: string, payload: { content?: string; embeds?: unknown[] }): Promise<void>;
 }
 

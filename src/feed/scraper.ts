@@ -1,13 +1,13 @@
 import type { HtmlElement } from './html.js';
 
-export interface ScrapeSelectors {
+interface ScrapeSelectors {
   itemSelector: string;
   titleSelector: string;
   linkSelector: string;
   descriptionSelector?: string;
 }
 
-export interface ScrapedItem {
+interface ScrapedItem {
   title: string;
   url: string;
   description: string | null;
@@ -128,15 +128,4 @@ export function absoluteUrl(base: string, href: string): string {
   } catch {
     return href;
   }
-}
-
-export function discoverFeedLinks(root: HtmlElement, pageUrl: string): string[] {
-  const links = selectAll(root, 'link');
-  return links
-    .filter((l) => {
-      const type = l.attributes['type'];
-      return type === 'application/rss+xml' || type === 'application/atom+xml' || type === 'application/rdf+xml';
-    })
-    .map((l) => absoluteUrl(pageUrl, l.attributes['href'] ?? ''))
-    .filter((u) => u !== pageUrl);
 }

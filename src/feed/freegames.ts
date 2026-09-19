@@ -104,7 +104,7 @@ export const PLATFORM_BRANDING: Record<string, { name: string; color: number; ic
 /**
  * Fetch official free game promotions from Epic Games Store
  */
-export async function fetchEpicGamesPromotions(): Promise<FreeGameItem[]> {
+async function fetchEpicGamesPromotions(): Promise<FreeGameItem[]> {
   const url =
     'https://store-site-backend-static.ak.epicgames.com/freeGamesPromotions?locale=en-US&country=US&allowCountries=US';
   try {
@@ -211,7 +211,7 @@ export async function fetchEpicGamesPromotions(): Promise<FreeGameItem[]> {
 /**
  * Fetch giveaways from GamerPower API covering Steam, GOG, and Epic Games Store
  */
-export async function fetchGamerPowerGiveaways(platformKey: FreeGamePlatformKey = 'all'): Promise<FreeGameItem[]> {
+async function fetchGamerPowerGiveaways(platformKey: FreeGamePlatformKey = 'all'): Promise<FreeGameItem[]> {
   const platformParam =
     platformKey === 'epic'
       ? 'epic-games-store'
@@ -342,7 +342,7 @@ export async function fetchGamerPowerGiveaways(platformKey: FreeGamePlatformKey 
 /**
  * Normalizes game titles by stripping store tags, parenthetical platforms, and giveaway suffixes.
  */
-export function normalizeGameTitle(title: string): string {
+function normalizeGameTitle(title: string): string {
   let cleaned = decodeHtmlEntities(title);
   cleaned = cleaned.replace(/\s*[-–—]\s*(?:Steam|Epic|GOG|Ubisoft|PC).*$/i, '');
   cleaned = cleaned.replace(

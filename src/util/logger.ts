@@ -13,7 +13,7 @@ function defaultLevel(): LogLevel {
   return 'info';
 }
 
-export interface LogContext {
+interface LogContext {
   [key: string]: unknown;
 }
 

@@ -1,4 +1,4 @@
-export interface SidebarOptions {
+interface SidebarOptions {
   isHost: boolean;
   redditAvailable: boolean;
   canManage: boolean;

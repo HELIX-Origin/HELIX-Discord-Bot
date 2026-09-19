@@ -15,7 +15,7 @@ export const MOD_ACTIONS = [
   'unlock',
 ] as const;
 
-export type ModAction = (typeof MOD_ACTIONS)[number];
+type ModAction = (typeof MOD_ACTIONS)[number];
 
 export function parseModLogEvents(raw: string | null): Set<ModAction> {
   if (!raw || raw.trim() === '') return new Set(MOD_ACTIONS);
@@ -29,7 +29,7 @@ export function parseModLogEvents(raw: string | null): Set<ModAction> {
   return selected;
 }
 
-export interface ModLogEntry {
+interface ModLogEntry {
   action: ModAction;
   moderatorId: string;
   moderatorTag: string;
@@ -53,7 +53,7 @@ const ACTION_EMOJIS: Record<ModAction, string> = {
   unlock: '🔓',
 };
 
-export function buildModLogEmbed(entry: ModLogEntry, deps: AppDeps): DiscordEmbed {
+function buildModLogEmbed(entry: ModLogEntry, deps: AppDeps): DiscordEmbed {
   const emoji = ACTION_EMOJIS[entry.action] ?? '🛡️';
   const actionTitle = `${emoji} Case ${entry.caseNumber ? `#${entry.caseNumber}` : ''} | ${entry.action.toUpperCase()}`;
 

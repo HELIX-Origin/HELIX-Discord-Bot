@@ -28,7 +28,7 @@ function getHeader(req: Request | IncomingMessage, name: string): string | null 
   return Array.isArray(value) ? value[0] : (value ?? null);
 }
 
-export interface WebhookEvent {
+interface WebhookEvent {
   source: 'youtube' | 'twitch' | 'rss' | 'webSub';
   feedId: number;
   guildId: string;
@@ -36,12 +36,12 @@ export interface WebhookEvent {
   receivedAt: Date;
 }
 
-export interface WebhookVerification {
+interface WebhookVerification {
   success: boolean;
   challenge: string;
 }
 
-export interface ListenerConfig {
+interface ListenerConfig {
   youtubeHubCallback?: string;
   twitchEventSubCallback?: string;
   webSubHubCallback?: string;

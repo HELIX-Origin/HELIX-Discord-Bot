@@ -18,7 +18,7 @@ interface DiscordUserResponse {
   verified?: boolean;
 }
 
-export interface DiscordProfile {
+interface DiscordProfile {
   id: string;
   username: string;
   displayName: string;
@@ -144,7 +144,7 @@ export class DiscordProvider implements OAuthProvider {
   }
 }
 
-export interface DiscordUserGuild {
+interface DiscordUserGuild {
   id: string;
   name: string;
   icon: string | null;

@@ -276,7 +276,7 @@ export function registerAuthRoutes(router: Router<AppDeps>, deps: AppDeps): void
   });
 }
 
-export function renderAuthErrorPage(message: string, appName = 'HELIX Discord Bot'): string {
+function renderAuthErrorPage(message: string, appName = 'HELIX Discord Bot'): string {
   return `<!DOCTYPE html>
 <html lang="en">
 <head>

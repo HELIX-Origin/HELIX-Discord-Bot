@@ -310,5 +310,3 @@ export function createHelixRssServer(deps: AppDeps): Server {
   const server = createHttpServer(requestHandler);
   return server;
 }
-
-export const createDiscordRssServer = createHelixRssServer;

@@ -2,7 +2,7 @@ import { existsSync, promises as fs } from 'node:fs';
 import { resolve } from 'node:path';
 import { fetchRaw } from './fetch.js';
 
-export type RedditNsfwStatus = 'nsfw' | 'sfw' | 'unverifiable';
+type RedditNsfwStatus = 'nsfw' | 'sfw' | 'unverifiable';
 
 export interface RedditFeedsService {
   available(): boolean;
@@ -166,7 +166,7 @@ export function clearRedditCookieCache(): void {
  * `about.json` endpoint. Returns 'unverifiable' when no session cookie exists
  * or the probe fails, so callers can fail closed.
  */
-export async function detectSubredditNsfw(subreddit: string): Promise<RedditNsfwStatus> {
+async function detectSubredditNsfw(subreddit: string): Promise<RedditNsfwStatus> {
   const sub = subreddit.replace(/^r\//i, '').trim();
   if (!sub) return 'unverifiable';
   const hit = nsfwCache.get(sub);

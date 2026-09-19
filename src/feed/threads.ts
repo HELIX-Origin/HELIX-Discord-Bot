@@ -4,7 +4,7 @@ import type { DiscordChannelSnapshot } from '../bot/rest.js';
 import { type Feed } from '../state/types.js';
 import { createLogger, type LogLevel } from '../util/logger.js';
 
-export interface ThreadSender {
+interface ThreadSender {
   sendChannelMessage(channelId: string, payload: { content?: string; embeds?: unknown[] }): Promise<void>;
   getChannel(channelId: string): Promise<DiscordChannelSnapshot>;
   createThread(
@@ -24,7 +24,7 @@ export interface ThreadSender {
   >;
 }
 
-export interface ThreadDeliveryOutcome {
+interface ThreadDeliveryOutcome {
   delivered: boolean;
   mode: 'thread' | 'channel';
   threadId?: string;

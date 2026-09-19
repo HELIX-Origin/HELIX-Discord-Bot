@@ -2,11 +2,10 @@ import { appDisplayName, type AppDeps } from '../../app.js';
 import { decodeHtmlEntities, extractImageFromHtml, isTrackingPixel, normalizeImageUrl } from '../../feed/parser.js';
 import { PLATFORM_BRANDING, type FreeGameItem } from '../../feed/freegames.js';
 import type { DiscordEmbed, DiscordEmbedField } from './types.js';
-import { InteractionResponseType, type InteractionResponse } from './types.js';
 
 export type Embed = DiscordEmbed;
 
-export interface EmbedColors {
+interface EmbedColors {
   readonly PRIMARY: number;
   readonly SUCCESS: number;
   readonly WARNING: number;
@@ -24,11 +23,8 @@ export const EMBED_COLORS: EmbedColors = {
   DISCORD: 0x5865f2,
 };
 
-export const STANDARD_EMBED_COLOR = EMBED_COLORS.PRIMARY;
-export const SUCCESS_EMBED_COLOR = EMBED_COLORS.SUCCESS;
-export const ERROR_EMBED_COLOR = EMBED_COLORS.ERROR;
-export const WARN_EMBED_COLOR = EMBED_COLORS.WARNING;
-export const REDDIT_EMBED_COLOR = 0xff4500;
+const STANDARD_EMBED_COLOR = EMBED_COLORS.PRIMARY;
+const REDDIT_EMBED_COLOR = 0xff4500;
 
 export function createEmbed(overrides: Partial<DiscordEmbed> = {}): DiscordEmbed {
   return {
@@ -49,140 +45,6 @@ export function successEmbed(title: string, description?: string, fields?: Disco
     description,
     fields,
   });
-}
-
-export function errorEmbed(title: string, description?: string, fields?: DiscordEmbedField[]): DiscordEmbed {
-  return createEmbed({
-    color: EMBED_COLORS.ERROR,
-    title: `❌ ${title}`,
-    description,
-    fields,
-  });
-}
-
-export function warningEmbed(title: string, description?: string, fields?: DiscordEmbedField[]): DiscordEmbed {
-  return createEmbed({
-    color: EMBED_COLORS.WARNING,
-    title: `⚠️ ${title}`,
-    description,
-    fields,
-  });
-}
-
-export function infoEmbed(title: string, description?: string, fields?: DiscordEmbedField[]): DiscordEmbed {
-  return createEmbed({
-    color: EMBED_COLORS.INFO,
-    title: `ℹ️ ${title}`,
-    description,
-    fields,
-  });
-}
-
-export function queueEmbed(title: string, description: string, fields?: DiscordEmbedField[]): DiscordEmbed {
-  return createEmbed({
-    color: EMBED_COLORS.PRIMARY,
-    title,
-    description,
-    fields,
-  });
-}
-
-export function musicEmbed(
-  title: string,
-  description?: string,
-  thumbnail?: string,
-  fields?: DiscordEmbedField[],
-): DiscordEmbed {
-  return createEmbed({
-    color: EMBED_COLORS.PRIMARY,
-    title: `🎵 ${title}`,
-    description,
-    thumbnail: thumbnail ? { url: thumbnail } : undefined,
-    fields,
-  });
-}
-
-export function helpEmbed(
-  commandGroups: Array<{ name: string; commands: Array<{ name: string; description: string }> }>,
-): DiscordEmbed {
-  const fields: DiscordEmbedField[] = commandGroups.flatMap((group) => [
-    { name: `**${group.name}**`, value: '\u200b', inline: false },
-    ...group.commands.map((cmd) => ({
-      name: `/${cmd.name}`,
-      value: cmd.description,
-      inline: true,
-    })),
-  ]);
-
-  return createEmbed({
-    color: EMBED_COLORS.INFO,
-    title: '📚 HELIX Discord Bot — Command Reference',
-    description: 'All available slash commands grouped by category.',
-    fields,
-  });
-}
-
-export function commandHelpEmbed(command: {
-  name: string;
-  description: string;
-  usage?: string;
-  subcommands?: Array<{
-    name: string;
-    description: string;
-    options?: Array<{ name: string; description: string; required?: boolean; type?: string }>;
-  }>;
-  examples?: string[];
-}): DiscordEmbed {
-  const fields: DiscordEmbedField[] = [];
-
-  if (command.usage) {
-    fields.push({ name: 'Usage', value: `\`/${command.name} ${command.usage}\``, inline: false });
-  }
-
-  if (command.subcommands && command.subcommands.length > 0) {
-    const subList = command.subcommands
-      .map((sc) => {
-        const opts =
-          sc.options
-            ?.map((o) => `\`${o.name}${o.required ? '' : '?'}\` (${o.type ?? 'string'}) — ${o.description}`)
-            .join('\n') || 'No options';
-        return `**/${command.name} ${sc.name}** — ${sc.description}\n${opts}`;
-      })
-      .join('\n\n');
-    fields.push({ name: 'Subcommands', value: subList, inline: false });
-  }
-
-  if (command.examples && command.examples.length > 0) {
-    fields.push({ name: 'Examples', value: command.examples.map((e) => `\`${e}\``).join('\n'), inline: false });
-  }
-
-  return createEmbed({
-    color: EMBED_COLORS.INFO,
-    title: `📖 Help: /${command.name}`,
-    description: command.description,
-    fields,
-  });
-}
-
-export function commandHelpResponse(command: {
-  name: string;
-  description: string;
-  usage?: string;
-  subcommands?: Array<{
-    name: string;
-    description: string;
-    options?: Array<{ name: string; description: string; required?: boolean; type?: string }>;
-  }>;
-  examples?: string[];
-}): InteractionResponse {
-  return {
-    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-    data: { embeds: [commandHelpEmbed(command)] },
-  };
-}
-
-export function buildCommandOptions<T extends Record<string, unknown>>(options: T): T {
-  return options;
 }
 
 export function formatDuration(ms: number): string {
@@ -221,9 +83,8 @@ export function brandAuthor(branding: AppBranding): { name: string; icon_url?: s
   return author;
 }
 
-export const MAX_TITLE_LENGTH = 200;
-export const STANDARD_DESC_LENGTH = 400;
-export const MAX_DESC_LENGTH = 600;
+const MAX_TITLE_LENGTH = 200;
+const STANDARD_DESC_LENGTH = 400;
 
 export function formatReadableUrlLabel(rawUrl: string): string {
   try {
@@ -277,7 +138,7 @@ export function isValidEmbedImageUrl(url: string | null | undefined): boolean {
   return true;
 }
 
-export interface ExtractedLink {
+interface ExtractedLink {
   label: string;
   url: string;
 }
@@ -379,10 +240,6 @@ export function extractDescriptionAndLinks(
   }
 
   return { description: text || null, links };
-}
-
-export function formatMessageDescription(raw: string | null, targetLength = STANDARD_DESC_LENGTH): string | null {
-  return extractDescriptionAndLinks(raw, targetLength).description;
 }
 
 export function feedEmbed(args: {

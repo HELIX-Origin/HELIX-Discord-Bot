@@ -7,7 +7,7 @@ import type {
   InteractionResponse,
 } from '../utils/types.js';
 
-export type CommandCategory = 'feeds' | 'admin' | 'mod' | 'utility';
+type CommandCategory = 'feeds' | 'admin' | 'mod' | 'utility';
 
 export interface CommandHelpMetadata {
   name: string;
@@ -134,11 +134,7 @@ export function getAllCommandMetadata(): CommandHelpMetadata[] {
   return [...metadataRegistry.values()];
 }
 
-export function getCommandsByCategory(category: CommandCategory): CommandHelpMetadata[] {
-  return [...metadataRegistry.values()].filter((meta) => meta.category === category);
-}
-
-export interface CategorizedCommands {
+interface CategorizedCommands {
   feeds: CommandHelpMetadata[];
   admin: CommandHelpMetadata[];
   mod: CommandHelpMetadata[];
@@ -158,14 +154,6 @@ export function getCategorizedCommands(): CategorizedCommands {
     }
   }
   return cats;
-}
-
-export function getAllCommandNames(): string[] {
-  return [...commandRegistry.keys()];
-}
-
-export function getCommandForHelp(name: string): CommandHelpMetadata | undefined {
-  return metadataRegistry.get(name.toLowerCase());
 }
 
 /**

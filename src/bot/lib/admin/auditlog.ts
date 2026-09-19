@@ -3,16 +3,16 @@ import { EmbedHandler } from '../embeds/builder.js';
 import type { DiscordEmbed } from '../../utils/types.js';
 
 export const AUDIT_EVENTS = ['settings', 'welcome', 'tickets', 'feeds'] as const;
-export type AuditEvent = (typeof AUDIT_EVENTS)[number];
+type AuditEvent = (typeof AUDIT_EVENTS)[number];
 
-export const AUDIT_EVENT_LABELS: Record<AuditEvent, string> = {
+const AUDIT_EVENT_LABELS: Record<AuditEvent, string> = {
   settings: 'Server settings',
   welcome: 'Welcome messages',
   tickets: 'Ticket system & lifecycle',
   feeds: 'Feed & alert changes',
 };
 
-export interface AuditLogEntry {
+interface AuditLogEntry {
   event: AuditEvent;
   message: string;
   guildName?: string | null;
@@ -39,7 +39,7 @@ function eventAllowed(guildId: string, event: AuditEvent, deps: AppDeps): boolea
   return selected.has(event);
 }
 
-export function buildAuditLogEmbed(entry: AuditLogEntry, deps: AppDeps): DiscordEmbed {
+function buildAuditLogEmbed(entry: AuditLogEntry, deps: AppDeps): DiscordEmbed {
   const h = EmbedHandler.for(deps).info().title(`${AUDIT_EVENT_LABELS[entry.event]} Audit`);
 
   if (entry.actorId && entry.actorTag) {

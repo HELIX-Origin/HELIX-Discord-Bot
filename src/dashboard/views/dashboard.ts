@@ -17,7 +17,7 @@ import { createRedditFeeds } from '../../feed/reddit.js';
 
 export { getThemeInfo } from './theme.js';
 
-export interface DashboardRoute {
+interface DashboardRoute {
   view: 'guilds' | 'dashboard';
   guildId?: string;
   page?: string;

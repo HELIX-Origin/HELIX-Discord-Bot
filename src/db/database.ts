@@ -5,7 +5,7 @@ import { SCHEMA, SCHEMA_VERSION } from './schema.js';
 import { createLogger, type LogLevel } from '../util/logger.js';
 import { feedCategory, type FeedType } from '../state/types.js';
 
-export interface DbStats {
+interface DbStats {
   feedCount: number;
   sentCount: number;
   dbSizeBytes: number;

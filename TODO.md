@@ -60,6 +60,23 @@
 - [x] Docs: `.env.example`, `wiki/Configuration.md`, `wiki/Architecture-and-Design.md`, `.agents/rules/dashboard-standards.md`, `.agents/agents/engineering/sub-agents/dashboard-engineer.md`
 - [x] `npm run check` + `pnpm build` green
 
+### Workstream: Dead Code Cleanup + Vitest Scan Guard
+
+**Locked user directives:**
+
+- "ok commit and push. then check for any dead code left behind." (m1180)
+- "hold. up let's update out vitests suite to be able to handle scanning for dead code" (m0351) — the vitest suite gained a structural scan that fails on exported symbols with no external references.
+
+**Implementation checklist:**
+
+- [x] New `tests/unit/quality/dead-code.test.ts`: regex export extraction + identifier index over `src/` + `tests/`; fails with `path:name` list for exports referenced in zero other files; exempts dynamically-loaded `src/bot/commands/**`, `_`-prefixed identifiers, `default` exports; regression test ensures live `defaultConfig` stays flagged as consumed
+- [x] `bot/**`: deleted `messages.ts`, `gateway.ts`, `lib/feeds/format.ts` (whole files); deleted dead helpers in `config.ts`, `handlers/commands.ts`, `handlers/registry.ts`, `utils/embeds.ts`, `utils/types.ts`; stripped `export` from internal-only typing across `bot.ts`, `rest.ts`, `lib/admin/*`, `lib/feeds/notify.ts`
+- [x] `dashboard/**`: deleted dead `dashboard/config.ts`, `configuredOAuthError`, `isHostUser`/`requireHost` aliases, `subscribeFeedToWebhook`, `getBaseStyles` (themes/shared.ts `baseStyles` CSS block), `createDiscordRssServer` alias, dead helper middlewares/views; stripped internal-only `export` throughout auth/http/oauth/routes/views
+- [x] `db/**`, `feed/**`, `scheduler/**`, `state/**`, `util/**`: stripped internal-only exports (e.g. `DbStats`, `FetchError`, `FeedPreset`, `RedisCoordinatorImpl`, `LogContext`); deleted unreferenced symbols (`childTextList`, `discoverFeedLinks`, `presetsGroupedByCategory`, `feedTopic`)
+- [x] Cleaned now-unused imports/types fallout (`ApplicationCommand`, `IncomingMessage`, orphaned `GatewayOpcode` const+type)
+- [x] `npx vitest run tests/unit/quality/dead-code.test.ts` → PASS (2 tests)
+- [x] `npm run check` + `pnpm build` green (52 files, +82/−1013)
+
 ---
 
 ## 🛠️ Verification Commands

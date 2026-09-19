@@ -1,4 +1,4 @@
-export interface OverviewOptions {
+interface OverviewOptions {
   dbSizeBytes: number;
 }
 

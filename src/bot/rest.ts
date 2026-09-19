@@ -1,6 +1,6 @@
 import type { ApplicationCommand } from './utils/types.js';
 
-export interface DiscordApplicationInfo {
+interface DiscordApplicationInfo {
   id: string;
   name: string;
   icon?: string | null;

@@ -5,7 +5,7 @@ export interface XmlElement {
   text: string;
 }
 
-export interface XmlDocument {
+interface XmlDocument {
   root: XmlElement;
 }
 
@@ -213,11 +213,4 @@ export function findChild(element: XmlElement, name: string): XmlElement | null 
 export function childText(element: XmlElement, name: string): string | null {
   const child = findChild(element, name);
   return child ? child.text.trim() : null;
-}
-
-export function childTextList(element: XmlElement, name: string): string[] {
-  return element.children
-    .filter((c) => localName(c) === name)
-    .map((c) => c.text.trim())
-    .filter(Boolean);
 }

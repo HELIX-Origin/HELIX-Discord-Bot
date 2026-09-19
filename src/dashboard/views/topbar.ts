@@ -1,7 +1,7 @@
 import { appDisplayName, type AppDeps } from '../../app.js';
 import { isOwnerUser } from '../routes/shared.js';
 
-export interface TopBarOptions {
+interface TopBarOptions {
   /** Logical location the topbar is being rendered on. Used to highlight the active nav item. */
   active?: 'guilds' | 'dashboard' | 'admin' | 'landing' | 'legal' | 'login';
   /** Render the (empty, JS-filled) current-guild pill slot. Used by the per-guild dashboard shell. */

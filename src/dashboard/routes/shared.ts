@@ -13,12 +13,6 @@ export function isValidHttpUrl(url: string): boolean {
   }
 }
 
-export function isLocalhostRequest(req: IncomingMessage): boolean {
-  const ip = req.socket?.remoteAddress;
-  if (!ip) return false;
-  return ip === '127.0.0.1' || ip === '::1' || ip === '::ffff:127.0.0.1' || ip.startsWith('127.');
-}
-
 export function getSessionToken(req: IncomingMessage): string {
   return parseCookies(req)[COOKIE_NAME] ?? '';
 }
@@ -49,8 +43,6 @@ export function isOwnerUser(userId: number | null, deps?: AppDeps): boolean {
   return false;
 }
 
-export const isHostUser = isOwnerUser;
-
 export function isAdminOrOwner(userId: number | null, deps: AppDeps): boolean {
   if (userId === null) return false;
   const user = deps.repo.getUserById(userId);
@@ -66,7 +58,7 @@ export function isAdminOrOwner(userId: number | null, deps: AppDeps): boolean {
   return false;
 }
 
-export function getUserManagedGuildIds(userId: number, deps: AppDeps): string[] | null {
+function getUserManagedGuildIds(userId: number, deps: AppDeps): string[] | null {
   if (isAdminOrOwner(userId, deps)) return null;
   const raw = deps.repo.getUserSetting(userId, 'managed_guild_ids');
   if (!raw) return [];
@@ -78,7 +70,7 @@ export function getUserManagedGuildIds(userId: number, deps: AppDeps): string[] 
   }
 }
 
-export interface StoredUserGuild {
+interface StoredUserGuild {
   id: string;
   name: string;
   icon: string | null;
@@ -164,8 +156,6 @@ export async function requireOwner(req: IncomingMessage, res: ServerResponse, de
   }
   return userId;
 }
-
-export const requireHost = requireAdminOrOwner;
 
 export function getDiscordCallbackUri(deps: AppDeps, _req?: IncomingMessage): string {
   if (process.env['DISCORD_CALLBACK_URL']?.trim()) {

@@ -1,6 +1,6 @@
 import type { Feed } from '../state/types.js';
 
-export interface FeedDeliveryTargets {
+interface FeedDeliveryTargets {
   channelId: string | null;
 }
 

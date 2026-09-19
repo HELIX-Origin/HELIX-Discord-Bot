@@ -28,7 +28,7 @@ interface YouTubeItem {
   };
 }
 
-export interface ChannelMessageSender {
+interface ChannelMessageSender {
   sendChannelMessage(channelId: string, payload: { content?: string; embeds?: unknown[] }): Promise<void>;
   getAppIconUrl?(): string | null;
 }

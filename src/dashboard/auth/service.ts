@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto';
 import type { Repository } from '../../db/repository.js';
 import { passwordService, sessionService } from './password.js';
 
-export class AuthError extends Error {}
+class AuthError extends Error {}
 
 export class AuthService {
   constructor(

@@ -1,6 +1,6 @@
 import { appDisplayName, type AppDeps } from '../../app.js';
 
-export interface FooterOptions {
+interface FooterOptions {
   /** Whether to include the Dashboard link (requires DASHBOARD_ENABLED). */
   dashboardEnabled?: boolean;
   /** Additional custom links to include. */

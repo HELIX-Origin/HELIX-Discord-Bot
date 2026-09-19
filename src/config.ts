@@ -4,7 +4,7 @@ import type { LogLevel } from './util/logger.js';
 import type { FeedCategory } from './state/types.js';
 import { FEED_CATEGORY_LIMITS } from './state/types.js';
 
-export interface FeatureFlags {
+interface FeatureFlags {
   feedsEnabled: boolean;
   streamAlertsEnabled: boolean;
   threadsEnabled: boolean;

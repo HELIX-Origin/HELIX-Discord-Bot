@@ -9,15 +9,7 @@ import type { FeedThreadManager } from '../../feed/threads.js';
 import type { DiscordBot } from '../../bot/bot.js';
 import { streamAlertEmbed, feedEmbed } from '../../bot/utils/embeds.js';
 
-export interface WebhookConfig {
-  secret: string;
-  hubMode: string;
-  hubChallenge: string;
-  hubTopic: string;
-  hubLeaseSeconds?: string;
-}
-
-export interface WebhookSubscription {
+interface WebhookSubscription {
   userId: number;
   feedId: number;
   topic: string;

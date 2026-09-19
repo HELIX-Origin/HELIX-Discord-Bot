@@ -63,7 +63,7 @@ export type FeedType =
   | 'youtube'
   | 'twitch';
 
-export const FEED_TYPES: readonly FeedType[] = [
+const FEED_TYPES: readonly FeedType[] = [
   'rss',
   'scrape',
   'reddit',
@@ -82,7 +82,7 @@ export const FEED_TYPES: readonly FeedType[] = [
   'twitch',
 ];
 
-export function isFeedType(value: unknown): value is FeedType {
+function isFeedType(value: unknown): value is FeedType {
   return typeof value === 'string' && (FEED_TYPES as readonly string[]).includes(value);
 }
 
@@ -254,15 +254,3 @@ export const FEED_CATEGORY_LIMITS: Readonly<Partial<Record<FeedCategory, number>
   rss: 10,
   reddit: 10,
 };
-
-export function feedTopic(feed: Feed): string {
-  if (feed.topic && feed.topic.trim()) {
-    const stored = feed.topic.trim();
-    if (stored === 'World News' || stored === 'US News') return 'News';
-    return stored;
-  }
-  if (feed.feedType === 'reddit') return 'Reddit';
-  if (feed.feedType.startsWith('free_games')) return 'Free Games';
-  if (feed.feedType === 'youtube' || feed.feedType === 'twitch') return 'Stream Alerts';
-  return 'Other';
-}
