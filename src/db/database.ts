@@ -123,6 +123,12 @@ export class Database {
     } catch {
       // Column may already exist
     }
+    // Schema v10: per-feed role auto-subscribed to the feed's dedicated thread
+    try {
+      this.db.exec('ALTER TABLE feeds ADD COLUMN role_id TEXT;');
+    } catch {
+      // Column may already exist
+    }
     // Backfill legacy per-guild, per-category targets onto individual feeds so
     // existing installations keep delivering after the category UI is removed.
     try {

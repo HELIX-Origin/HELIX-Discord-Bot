@@ -7,6 +7,7 @@ import {
   type InteractionResponse,
 } from '../../utils/types.js';
 import { EmbedHandler } from '../../lib/embeds/builder.js';
+import { notifyFeedAdded } from '../../lib/feeds/notify.js';
 import { registerCommandMetadata, type BotCommand } from '../../handlers/registry.js';
 import type { FeedType } from '../../../state/types.js';
 
@@ -47,6 +48,12 @@ export const rssCommandDef: ApplicationCommand = {
             { name: 'RSS / Atom XML', value: 'rss' },
             { name: 'Webpage Scraper', value: 'scrape' },
           ],
+        },
+        {
+          name: 'role',
+          description: 'Role to auto-subscribe to the feed thread (optional)',
+          type: ApplicationCommandOptionType.ROLE,
+          required: false,
         },
       ],
     },
@@ -140,19 +147,25 @@ export async function handleRssCommand(
     }
 
     try {
-      const feed = deps.repo.addFeed(user.id, name, url, channelId, feedType, null, guildId);
+      const roleId = (opts.find((o) => o.name === 'role')?.value as string | undefined) ?? null;
+      const feed = deps.repo.addFeed(user.id, name, url, channelId, feedType, null, guildId, undefined, roleId);
       deps.repo.logActivity(user.id, 'info', 'bot', `Added RSS feed "${name}" via Discord bot`);
+      if (channelId) {
+        await notifyFeedAdded(deps.bot, channelId, name).catch(() => {});
+      }
 
-      return EmbedHandler.for(deps)
+      const h = EmbedHandler.for(deps)
         .success()
         .title('RSS Feed Added', '📰')
         .field('Name', feed.name, true)
         .field('Feed ID', `#${feed.id}`, true)
         .field('Type', feed.feedType.toUpperCase(), true)
         .field('Target Channel', channelId ? `<#${channelId}>` : 'None', true)
-        .field('URL', `\`${feed.url}\``, false)
-        .footer(`${appDisplayName(deps)} • Direct Bot Delivery`)
-        .respond();
+        .field('URL', `\`${feed.url}\``, false);
+      if (feed.roleId) {
+        h.field('Subscribed Role', `<@&${feed.roleId}>`, true);
+      }
+      return h.footer(`${appDisplayName(deps)} • Direct Bot Delivery`).respond();
     } catch (err) {
       return EmbedHandler.for(deps)
         .error()

@@ -8,6 +8,7 @@ import {
   type InteractionResponse,
 } from '../../utils/types.js';
 import { EmbedHandler } from '../../lib/embeds/builder.js';
+import { notifyFeedAdded } from '../../lib/feeds/notify.js';
 import { registerCommandMetadata, type BotCommand } from '../../handlers/registry.js';
 
 export const redditCommandDef: ApplicationCommand = {
@@ -37,6 +38,12 @@ export const redditCommandDef: ApplicationCommand = {
           type: ApplicationCommandOptionType.CHANNEL,
           required: false,
           channel_types: [0, 5],
+        },
+        {
+          name: 'role',
+          description: 'Role to auto-subscribe to the feed thread (optional)',
+          type: ApplicationCommandOptionType.ROLE,
+          required: false,
         },
       ],
     },
@@ -165,18 +172,24 @@ export async function handleRedditCommand(
       const sub = reddit.subredditFromUrlOrName(rawSub) ?? normalizeSubreddit(rawSub).name.replace(/^r\//i, '');
       await reddit.assertTargetAllowed(sub, targetNsfw);
 
-      const feed = deps.repo.addFeed(user.id, name, url, channelId, 'reddit', null, guildId);
+      const roleId = (opts.find((o) => o.name === 'role')?.value as string | undefined) ?? null;
+      const feed = deps.repo.addFeed(user.id, name, url, channelId, 'reddit', null, guildId, undefined, roleId);
       deps.repo.logActivity(user.id, 'info', 'bot', `Added Reddit feed "${name}" via Discord bot`);
+      if (channelId) {
+        await notifyFeedAdded(deps.bot, channelId, name).catch(() => {});
+      }
 
-      return EmbedHandler.for(deps)
+      const h = EmbedHandler.for(deps)
         .success()
         .title('Reddit Feed Added', '👽')
         .field('Subreddit', feed.name, true)
         .field('Feed ID', `#${feed.id}`, true)
         .field('Target Channel', channelId ? `<#${channelId}>` : 'None', true)
-        .field('RSS Feed URL', `\`${feed.url}\``, false)
-        .footer(`${appDisplayName(deps)} • Reddit Direct Delivery`)
-        .respond();
+        .field('RSS Feed URL', `\`${feed.url}\``, false);
+      if (feed.roleId) {
+        h.field('Subscribed Role', `<@&${feed.roleId}>`, true);
+      }
+      return h.footer(`${appDisplayName(deps)} • Reddit Direct Delivery`).respond();
     } catch (err) {
       return EmbedHandler.for(deps)
         .error()

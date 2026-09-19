@@ -16,6 +16,7 @@ export function renderClientScript(): string {
     let currentGuild = null;
     let cachedGuilds = [];
     let cachedCategories = null;
+    let cachedRoles = null;
     let cachedPresets = [];
     let activeTabName = 'overview';
     let currentFeedDetailId = null;
@@ -266,6 +267,7 @@ export function renderClientScript(): string {
         setupGuildHeader();
         setSidebarManage(true);
         populateAddTargetSelects();
+        ensureRoles().then(populateAddRoleSelects);
         loadOverviewTab();
       } catch {
         alert('Failed to load server configuration.');
@@ -300,6 +302,24 @@ export function renderClientScript(): string {
     function populateAddTargetSelects() {
       ['rss', 'reddit', 'freegames', 'streamalerts'].forEach(function(cat) {
         populateAddTargetSelect('add-' + cat + '-target', true);
+      });
+    }
+
+    async function ensureRoles() {
+      if (cachedRoles) return;
+      if (!currentGuildId) return;
+      try {
+        const res = await fetch('/api/guilds/' + encodeURIComponent(currentGuildId) + '/settings', { signal: AbortSignal.timeout(6000) });
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.guildRoles) cachedRoles = data.guildRoles;
+        }
+      } catch {}
+    }
+
+    function populateAddRoleSelects() {
+      ['rss', 'reddit', 'freegames', 'streamalerts'].forEach(function(cat) {
+        populateRoleSelect('add-' + cat + '-role', cachedRoles || [], '', '-- No role --');
       });
     }
 
@@ -657,6 +677,11 @@ export function renderClientScript(): string {
             '<span style="font-size: 0.6875rem; color: var(--text-dim); margin-top: 0.25rem; display: block;">Posts are delivered to this channel. When Thread delivery is enabled for the server, a dedicated thread is auto-created and used instead.</span>' +
           '</div>' +
           '<div class="form-group">' +
+            '<label class="form-label" for="edit-feed-role">Subscribed Role</label>' +
+            '<select id="edit-feed-role" class="form-input"><option value="">-- No role --</option></select>' +
+            '<span style="font-size: 0.6875rem; color: var(--text-dim); margin-top: 0.25rem; display: block;">Optionally auto-subscribe a role to the dedicated thread so members with the role can follow updates.</span>' +
+          '</div>' +
+          '<div class="form-group">' +
             '<label class="form-label" for="edit-feed-enable">Status</label>' +
             '<label style="display: flex; align-items: center; gap: 0.5rem; padding-top: 0.25rem;">' +
               '<input type="checkbox" id="edit-feed-enable"' + (enabled ? ' checked' : '') + '> ' +
@@ -692,6 +717,7 @@ export function renderClientScript(): string {
         detail.classList.add('active');
         window.history.pushState({}, '', '/dashboard/' + currentGuildId + '/feed/' + feedId);
         populateFeedTargetSelect(feed.channelId || '');
+        populateFeedRoleSelect(feed.roleId || '');
       });
     }
 
@@ -700,6 +726,13 @@ export function renderClientScript(): string {
       if (!selectEl) return;
       await ensureChannels();
       selectEl.innerHTML = channelOptionsForSelect(currentTargetId || '', true);
+    }
+
+    async function populateFeedRoleSelect(currentRoleId) {
+      var selectEl = document.getElementById('edit-feed-role');
+      if (!selectEl) return;
+      await ensureRoles();
+      populateRoleSelect('edit-feed-role', cachedRoles || [], currentRoleId || '', '-- No role --');
     }
 
     function closeFeedDetail() {
@@ -714,6 +747,7 @@ export function renderClientScript(): string {
       var topicEl = document.getElementById('edit-feed-topic');
       var urlEl = document.getElementById('edit-feed-url');
       var targetEl = document.getElementById('edit-feed-target');
+      var roleEl = document.getElementById('edit-feed-role');
       var enableEl = document.getElementById('edit-feed-enable');
       if (!nameEl || !targetEl || !enableEl) return;
       var targetValue = targetEl.value || null;
@@ -721,6 +755,7 @@ export function renderClientScript(): string {
         name: nameEl.value.trim() || null,
         topic: topicEl ? topicEl.value.trim() || null : null,
         channelId: targetValue,
+        roleId: roleEl ? (roleEl.value || null) : undefined,
         enabled: enableEl.checked
       };
       if (urlEl && !urlEl.disabled && urlEl.value.trim()) {
@@ -780,6 +815,8 @@ export function renderClientScript(): string {
       const topic = topicInput ? topicInput.value.trim() || null : null;
       const targetSel = document.getElementById('add-rss-target');
       const target = targetFieldsFromValue(targetSel ? targetSel.value : '');
+      const roleSel = document.getElementById('add-rss-role');
+      const roleId = roleSel ? (roleSel.value || null) : null;
       if (!name || !url) return alert('Please enter both feed name and URL.');
 
       let feedType = 'rss';
@@ -805,7 +842,7 @@ export function renderClientScript(): string {
         const res = await fetch('/api/feeds', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, url, topic, feedType, scrape, guildId: currentGuildId, channelId: target.channelId })
+          body: JSON.stringify({ name, url, topic, feedType, scrape, guildId: currentGuildId, channelId: target.channelId, roleId })
         });
         if (!checkAuth(res)) return;
         const data = await res.json();
@@ -858,12 +895,14 @@ export function renderClientScript(): string {
       const name = nameInput && nameInput.value.trim() ? nameInput.value.trim() : 'Reddit · r/' + cleanSub;
       const targetSel = document.getElementById('add-reddit-target');
       const target = targetFieldsFromValue(targetSel ? targetSel.value : '');
+      const roleSel = document.getElementById('add-reddit-role');
+      const roleId = roleSel ? (roleSel.value || null) : null;
 
       try {
         const res = await fetch('/api/feeds', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, url, feedType, guildId: currentGuildId, channelId: target.channelId })
+          body: JSON.stringify({ name, url, feedType, guildId: currentGuildId, channelId: target.channelId, roleId })
         });
         if (!checkAuth(res)) return;
         const data = await res.json();
@@ -915,12 +954,14 @@ export function renderClientScript(): string {
       const url = 'freegames://' + platformKey;
       const targetSel = document.getElementById('add-freegames-target');
       const target = targetFieldsFromValue(targetSel ? targetSel.value : '');
+      const roleSel = document.getElementById('add-freegames-role');
+      const roleId = roleSel ? (roleSel.value || null) : null;
 
       try {
         const res = await fetch('/api/feeds', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, url, feedType, guildId: currentGuildId, channelId: target.channelId })
+          body: JSON.stringify({ name, url, feedType, guildId: currentGuildId, channelId: target.channelId, roleId })
         });
         if (!checkAuth(res)) return;
         const data = await res.json();
@@ -966,12 +1007,14 @@ export function renderClientScript(): string {
       if (!name) name = platform === 'youtube' ? 'YouTube · @' + handle : 'Twitch · ' + handle;
       const targetSel = document.getElementById('add-streamalerts-target');
       const target = targetFieldsFromValue(targetSel ? targetSel.value : '');
+      const roleSel = document.getElementById('add-streamalerts-role');
+      const roleId = roleSel ? (roleSel.value || null) : null;
 
       try {
         const res = await fetch('/api/feeds', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, url, feedType: platform, guildId: currentGuildId, channelId: target.channelId })
+          body: JSON.stringify({ name, url, feedType: platform, guildId: currentGuildId, channelId: target.channelId, roleId })
         });
         if (!checkAuth(res)) return;
         const data = await res.json();

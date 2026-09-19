@@ -32,6 +32,10 @@ export function renderFeedsTab(): string {
             <label class="form-label">Delivery Target</label>
             <select id="add-rss-target" class="form-input"><option value="">(none)</option></select>
           </div>
+          <div class="form-group">
+            <label class="form-label">Subscribed Role (optional)</label>
+            <select id="add-rss-role" class="form-input"><option value="">-- No role --</option></select>
+          </div>
         </div>
         <datalist id="feed-topic-options">
           <option value="News">

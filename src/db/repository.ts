@@ -174,8 +174,9 @@ export class Repository {
     scrape: Feed['scrape'],
     guildId?: string | null,
     topic?: string | null,
+    roleId?: string | null,
   ): Feed {
-    return this.feeds.addFeed(userId, name, url, channelId, feedType, scrape, guildId, topic);
+    return this.feeds.addFeed(userId, name, url, channelId, feedType, scrape, guildId, topic, roleId);
   }
 
   updateFeed(
@@ -191,6 +192,7 @@ export class Repository {
       enabled?: number;
       threadChannelId?: string | null;
       threadEntryCount?: number;
+      roleId?: string | null;
     },
   ): Feed | null {
     return this.feeds.updateFeed(userId, id, fields);

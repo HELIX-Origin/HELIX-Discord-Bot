@@ -40,6 +40,7 @@ export class FeedRepository {
     scrape: Feed['scrape'],
     guildId?: string | null,
     topic?: string | null,
+    roleId?: string | null,
   ): Feed {
     if (feedType === 'scrape' && !scrape) {
       throw new Error('Scrape feeds require a scrape configuration');
@@ -64,8 +65,8 @@ export class FeedRepository {
 
     const result = this.db.raw
       .prepare(
-        `INSERT INTO feeds (user_id, name, url, topic, channel_id, guild_id, feed_type, scrape_item, scrape_title, scrape_link, scrape_description, created_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        `INSERT INTO feeds (user_id, name, url, topic, channel_id, guild_id, feed_type, scrape_item, scrape_title, scrape_link, scrape_description, role_id, created_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       )
       .run(
         userId,
@@ -79,6 +80,7 @@ export class FeedRepository {
         scrape && feedType === 'scrape' ? scrape.title : null,
         scrape && feedType === 'scrape' ? scrape.link : null,
         scrape && feedType === 'scrape' ? (scrape.description ?? null) : null,
+        roleId ?? null,
         nowIso(),
       );
     const feed: Feed = {
@@ -98,6 +100,7 @@ export class FeedRepository {
       createdAt: nowIso(),
       threadChannelId: null,
       threadEntryCount: 0,
+      roleId: roleId ?? null,
     };
     this.state.putFeed(feed);
     return feed;
@@ -116,6 +119,7 @@ export class FeedRepository {
       enabled?: number;
       threadChannelId?: string | null;
       threadEntryCount?: number;
+      roleId?: string | null;
     },
   ): Feed | null {
     const current = this.state.getFeed(userId, id);
@@ -138,10 +142,11 @@ export class FeedRepository {
       enabled: fields.enabled ?? current.enabled,
       threadChannelId: fields.threadChannelId !== undefined ? fields.threadChannelId : current.threadChannelId,
       threadEntryCount: fields.threadEntryCount ?? current.threadEntryCount,
+      roleId: fields.roleId !== undefined ? fields.roleId : current.roleId,
     };
     this.db.raw
       .prepare(
-        'UPDATE feeds SET name = ?, url = ?, topic = ?, feed_type = ?, channel_id = ?, guild_id = ?, enabled = ?, thread_channel_id = ?, thread_entry_count = ? WHERE id = ? AND user_id = ?',
+        'UPDATE feeds SET name = ?, url = ?, topic = ?, feed_type = ?, channel_id = ?, guild_id = ?, enabled = ?, thread_channel_id = ?, thread_entry_count = ?, role_id = ? WHERE id = ? AND user_id = ?',
       )
       .run(
         updated.name,
@@ -153,6 +158,7 @@ export class FeedRepository {
         updated.enabled,
         updated.threadChannelId,
         updated.threadEntryCount,
+        updated.roleId,
         id,
         userId,
       );

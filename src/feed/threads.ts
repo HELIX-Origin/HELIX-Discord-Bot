@@ -13,6 +13,7 @@ export interface ThreadSender {
   ): Promise<{ id: string; name: string; type: number }>;
   archiveThread(threadId: string): Promise<void>;
   unarchiveThread?(threadId: string): Promise<void>;
+  addThreadRole?(threadId: string, roleId: string): Promise<void>;
   getGuildsWithChannels?(): Promise<
     Array<{
       id: string;
@@ -180,6 +181,26 @@ export class FeedThreadManager {
     }
   }
 
+  /** Auto-subscribes the feed's configured role to a thread (non-fatal on failure). */
+  private async subscribeFeedRole(feed: Feed, threadId: string): Promise<void> {
+    if (!feed.roleId || !this.bot?.addThreadRole) return;
+    try {
+      await this.bot.addThreadRole(threadId, feed.roleId);
+      this.logger.info('Subscribed feed role to thread', {
+        feedId: feed.id,
+        threadId,
+        roleId: feed.roleId,
+      });
+    } catch (err) {
+      this.logger.warn('Failed to subscribe feed role to thread', {
+        feedId: feed.id,
+        threadId,
+        roleId: feed.roleId,
+        error: err instanceof Error ? err.message : String(err),
+      });
+    }
+  }
+
   private async createThread(
     feed: Feed,
     channelId: string,
@@ -191,6 +212,7 @@ export class FeedThreadManager {
         name,
         autoArchiveDuration: MAX_AUTO_ARCHIVE_MINUTES,
       });
+      await this.subscribeFeedRole(feed, thread.id);
       await this.bot!.sendChannelMessage(thread.id, payload);
       feed.threadChannelId = thread.id;
       feed.threadEntryCount = 1;
@@ -203,6 +225,7 @@ export class FeedThreadManager {
         error: err instanceof Error ? err.message : String(err),
       });
       const thread = await this.bot!.createThread(channelId, { name });
+      await this.subscribeFeedRole(feed, thread.id);
       await this.bot!.sendChannelMessage(thread.id, payload);
       feed.threadChannelId = thread.id;
       feed.threadEntryCount = 1;
@@ -242,6 +265,7 @@ export class FeedThreadManager {
         name: (feed.name.trim() || 'Feed updates').slice(0, 100),
         autoArchiveDuration: MAX_AUTO_ARCHIVE_MINUTES,
       });
+      await this.subscribeFeedRole(feed, thread.id);
       await this.bot!.sendChannelMessage(thread.id, intro);
       feed.threadChannelId = thread.id;
       feed.threadEntryCount = 0;

@@ -59,6 +59,8 @@ function makeDeps(): { deps: AppDeps; feeds: Feed[]; polledIds: number[] } {
         feedType: Feed['feedType'],
         scrape: Feed['scrape'],
         guildId?: string | null,
+        topic?: string | null,
+        roleId?: string | null,
       ) => {
         const feed: Feed = {
           id: nextId++,
@@ -68,6 +70,7 @@ function makeDeps(): { deps: AppDeps; feeds: Feed[]; polledIds: number[] } {
           topic: null,
           channelId,
           guildId: guildId || null,
+          roleId: roleId || null,
           enabled: 1,
           feedType,
           scrape,

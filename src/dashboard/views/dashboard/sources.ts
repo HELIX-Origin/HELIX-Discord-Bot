@@ -18,6 +18,12 @@ export function renderSourcesTabs(redditAvailable: boolean): string {
             </select>
             <span style="font-size: 0.6875rem; color: var(--text-dim); margin-top: 0.25rem; display: block;">Pick a text channel. NSFW subreddits can only target age-restricted (NSFW) channels.</span>
           </div>
+          <div class="form-group">
+            <label class="form-label">Subscribed Role (optional)</label>
+            <select id="add-reddit-role" class="form-input">
+              <option value="">-- No role --</option>
+            </select>
+          </div>
         </div>
         <div class="form-group" style="margin-top: 0.5rem;">
           <label class="form-label" style="display: flex; align-items: center; gap: 0.5rem;">
@@ -94,6 +100,12 @@ export function renderSourcesTabs(redditAvailable: boolean): string {
             </select>
             <span style="font-size: 0.6875rem; color: var(--text-dim); margin-top: 0.25rem; display: block;">Pick a text channel.</span>
           </div>
+          <div class="form-group">
+            <label class="form-label">Subscribed Role (optional)</label>
+            <select id="add-freegames-role" class="form-input">
+              <option value="">-- No role --</option>
+            </select>
+          </div>
         </div>
         <button onclick="submitAddFreeGamesFeed()" class="btn btn-primary btn-sm btn-block" style="margin-top: 0.75rem; background: #10b981; border-color: #10b981;"><i class="fa-solid fa-gift"></i> Add Free Games Feed</button>
       </div>
@@ -140,6 +152,12 @@ export function renderSourcesTabs(redditAvailable: boolean): string {
               <option value="">(none)</option>
             </select>
             <span style="font-size: 0.6875rem; color: var(--text-dim); margin-top: 0.25rem; display: block;">Pick a text channel.</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Subscribed Role (optional)</label>
+            <select id="add-streamalerts-role" class="form-input">
+              <option value="">-- No role --</option>
+            </select>
           </div>
         </div>
         <button onclick="submitAddStreamAlertFeed()" class="btn btn-primary btn-sm btn-block" style="margin-top: 0.75rem; background: #9146ff; border-color: #9146ff;"><i class="fa-solid fa-video"></i> Add Stream Alert</button>

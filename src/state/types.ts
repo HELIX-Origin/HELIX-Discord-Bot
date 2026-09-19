@@ -103,6 +103,7 @@ export interface Feed {
   createdAt: string;
   threadChannelId: string | null;
   threadEntryCount: number;
+  roleId: string | null;
 }
 
 export interface DiscordGuild {
@@ -196,6 +197,7 @@ export const rowToFeed = (r: Row | undefined): Feed | null => {
     channelId,
     guildId,
     enabled: Number(r.enabled),
+    roleId: r.role_id !== null && r.role_id !== undefined ? String(r.role_id) : null,
     feedType,
     scrape:
       scrapeItem && scrapeTitle && scrapeLink

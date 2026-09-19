@@ -6,6 +6,7 @@ import type { Router } from '../http/router.js';
 import { authedUserId, canUserManageGuild, isValidHttpUrl, requireDashboardUser } from './shared.js';
 import { FeedListener } from '../../feed/listener.js';
 import { createRedditFeeds } from '../../feed/reddit.js';
+import { notifyFeedAdded } from '../../bot/lib/feeds/notify.js';
 import type { IncomingMessage } from 'node:http';
 
 export function registerFeedsRoutes(router: Router<AppDeps>): void {
@@ -63,6 +64,7 @@ export function registerFeedsRoutes(router: Router<AppDeps>): void {
       channelId?: string | null;
       guildId?: string | null;
       feedType?: FeedType;
+      roleId?: string | null;
       scrape?: { item?: string; title?: string; link?: string; description?: string } | null;
     };
     const name = body.name?.trim();
@@ -161,7 +163,17 @@ export function registerFeedsRoutes(router: Router<AppDeps>): void {
         }
       }
 
-      const feed = d.repo.addFeed(userId, name, url, channelId, feedType, scrape, guildId, body.topic?.trim() || null);
+      const feed = d.repo.addFeed(
+        userId,
+        name,
+        url,
+        channelId,
+        feedType,
+        scrape,
+        guildId,
+        body.topic?.trim() || null,
+        body.roleId?.trim() || null,
+      );
       const typeLabel =
         feedType === 'reddit'
           ? 'Reddit image '
@@ -171,6 +183,9 @@ export function registerFeedsRoutes(router: Router<AppDeps>): void {
               ? 'Free Games '
               : '';
       d.repo.logActivity(userId, 'info', 'feeds', `Added ${typeLabel}feed "${feed.name}"`);
+      if (channelId && d.bot) {
+        await notifyFeedAdded(d.bot, channelId, name).catch(() => {});
+      }
       sendJson(res, 201, feed);
     } catch (err) {
       sendError(res, 409, err instanceof Error ? err.message : 'Failed to add feed');
@@ -187,6 +202,7 @@ export function registerFeedsRoutes(router: Router<AppDeps>): void {
       topic?: string;
       feedType?: FeedType;
       channelId?: string | null;
+      roleId?: string | null;
       enabled?: boolean;
     };
     const targetChanged = body.channelId !== undefined;
@@ -254,6 +270,7 @@ export function registerFeedsRoutes(router: Router<AppDeps>): void {
       channelId: channelField,
       guildId,
       enabled: body.enabled === undefined ? undefined : body.enabled ? 1 : 0,
+      roleId: body.roleId !== undefined ? body.roleId?.trim() || null : undefined,
       threadChannelId: targetChanged ? null : undefined,
     });
     if (!feed) return sendError(res, 404, 'Feed not found');

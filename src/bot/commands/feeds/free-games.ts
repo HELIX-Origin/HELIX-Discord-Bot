@@ -7,6 +7,7 @@ import {
   type InteractionResponse,
 } from '../../utils/types.js';
 import { EmbedHandler } from '../../lib/embeds/builder.js';
+import { notifyFeedAdded } from '../../lib/feeds/notify.js';
 import { registerCommandMetadata, type BotCommand } from '../../handlers/registry.js';
 import type { FeedType } from '../../../state/types.js';
 
@@ -40,6 +41,12 @@ export const freeGamesCommandDef: ApplicationCommand = {
             { name: 'Ubisoft Connect', value: 'free_games_ubisoft' },
             { name: 'Humble Bundle', value: 'free_games_humble' },
           ],
+        },
+        {
+          name: 'role',
+          description: 'Role to auto-subscribe to the feed thread (optional)',
+          type: ApplicationCommandOptionType.ROLE,
+          required: false,
         },
       ],
     },
@@ -102,12 +109,14 @@ export async function handleFreeGamesCommand(
     const existing = allFeeds.find((f) => f.feedType === feedType || f.feedType.startsWith('free_games'));
 
     try {
+      const roleId = (opts.find((o) => o.name === 'role')?.value as string | undefined) ?? null;
       if (existing) {
         deps.repo.updateFeed(user.id, existing.id, {
           channelId,
           enabled: 1,
           feedType,
           name: `Free Games (${storeName})`,
+          roleId,
         });
         deps.repo.logActivity(
           user.id,
@@ -124,19 +133,26 @@ export async function handleFreeGamesCommand(
           feedType,
           null,
           guildId,
+          undefined,
+          roleId,
         );
         deps.repo.logActivity(user.id, 'info', 'bot', `Enabled Free Games alerts via Discord bot`);
       }
+      if (channelId) {
+        await notifyFeedAdded(deps.bot, channelId, `Free Games (${storeName})`).catch(() => {});
+      }
 
-      return EmbedHandler.for(deps)
+      const h = EmbedHandler.for(deps)
         .success()
         .title('Free Games Alerts Enabled', '🎮')
         .description(`Weekly free game alerts are now **active** in this server.`)
         .field('Store / Platform', storeName, true)
         .field('Delivery Channel', channelId ? `<#${channelId}>` : 'Default Channel', true)
-        .field('Schedule', 'Weekly on Sundays (UTC)', true)
-        .footer(`${appDisplayName(deps)} • Never miss a free game drop`)
-        .respond();
+        .field('Schedule', 'Weekly on Sundays (UTC)', true);
+      if (roleId) {
+        h.field('Subscribed Role', `<@&${roleId}>`, true);
+      }
+      return h.footer(`${appDisplayName(deps)} • Never miss a free game drop`).respond();
     } catch (err) {
       return EmbedHandler.for(deps)
         .error()

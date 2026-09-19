@@ -66,6 +66,7 @@ CREATE TABLE IF NOT EXISTS feeds (
   created_at TEXT NOT NULL,
   thread_channel_id TEXT,
   thread_entry_count INTEGER NOT NULL DEFAULT 0,
+  role_id TEXT,
   UNIQUE (user_id, url),
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
