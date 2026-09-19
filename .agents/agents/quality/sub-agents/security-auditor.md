@@ -1,6 +1,6 @@
 # Security & Code Quality Auditor Agent (Sub-Agent)
 
-**Parent Primary**: [Test Automation](../test-automation.md)  
+**Parent Primary**: [Test Automation](../test-automation)  
 **Focus**: Quality
 
 The **Security & Code Quality Auditor Agent** continuously audits the repository for security vulnerabilities, secrets leaks, code quality regressions, formatting inconsistencies, and outdated patterns.

@@ -144,7 +144,7 @@ export function registerFeedsRoutes(router: Router<AppDeps>): void {
         const reddit = d.reddit ?? createRedditFeeds();
         if (!reddit.available()) {
           throw new Error(
-            'Reddit feeds are disabled: a cookies.json (or cookies.txt) file with a logged-in Reddit session is required at the repo root (or set REDDIT_COOKIES_FILE). See wiki/Reddit-Feeds.md.',
+            'Reddit feeds are disabled: a cookies.json (or cookies.txt) file with a logged-in Reddit session is required at the repo root (or set REDDIT_COOKIES_FILE). See wiki/Reddit-Feeds.',
           );
         }
         const sub = reddit.subredditFromUrlOrName(url) ?? reddit.subredditFromUrlOrName(name) ?? null;
@@ -239,7 +239,7 @@ export function registerFeedsRoutes(router: Router<AppDeps>): void {
           return sendError(
             res,
             409,
-            'Reddit feeds are disabled: a cookies.json (or cookies.txt) file with a logged-in Reddit session is required at the repo root (or set REDDIT_COOKIES_FILE). See wiki/Reddit-Feeds.md.',
+            'Reddit feeds are disabled: a cookies.json (or cookies.txt) file with a logged-in Reddit session is required at the repo root (or set REDDIT_COOKIES_FILE). See wiki/Reddit-Feeds.',
           );
         }
         let targetNsfw = false;

@@ -25,7 +25,7 @@ modification, are permitted provided that the following conditions are met:
 Subject to the terms and conditions of this License, each contributor grants you a worldwide, royalty-free, non-exclusive license to use, reproduce, modify, display, perform, sublicense, and distribute the software and its documentation in source or binary form.
 
 ### 2. Attribution & Derivative Works
-Any distribution, modification, or fork of this software must clearly indicate that it is based upon HELIX Discord Bot and include this complete License file (`LICENSE.md`) alongside any accompanying notice files.
+Any distribution, modification, or fork of this software must clearly indicate that it is based upon HELIX Discord Bot and include this complete License file (`LICENSE`) alongside any accompanying notice files.
 
 ### 3. Separation of Marks & Non-Affiliation
 The name "HELIX", "HELIX Origin", and associated project branding, badges, or logos represent the official project. Forks, commercial distributions, or hosted offerings of this software may not present themselves as the official HELIX Discord Bot or imply endorsement, sponsorship, or partnership with HELIX Origin without explicit written consent.

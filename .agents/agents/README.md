@@ -43,21 +43,21 @@ flowchart TD
 
 | Agent | Focus Area | Key Responsibilities | Specification |
 |---|---|---|---|
-| **Orchestrator** | Coordination | Task decomposition, roadmap execution, primary-agent coordination, rollback | [orchestrator/orchestrator.md](orchestrator/orchestrator.md) |
-| **Code Architect** | Engineering | TypeScript ESM, SQLite write-through, HTTP dashboard, sub-agent ownership | [engineering/code-architect.md](engineering/code-architect.md) |
-| **Test Automation** | Quality | Validation gate (`npm run check`), test harnesses, mock servers, sub-agent ownership | [quality/test-automation.md](quality/test-automation.md) |
-| **Documentation Specialist** | Documentation | wiki/, md files, issues, rule/skill/template sync, sub-agent ownership | [documentation/documentation-specialist.md](documentation/documentation-specialist.md) |
+| **Orchestrator** | Coordination | Task decomposition, roadmap execution, primary-agent coordination, rollback | [orchestrator/orchestrator](orchestrator/orchestrator) |
+| **Code Architect** | Engineering | TypeScript ESM, SQLite write-through, HTTP dashboard, sub-agent ownership | [engineering/code-architect](engineering/code-architect) |
+| **Test Automation** | Quality | Validation gate (`npm run check`), test harnesses, mock servers, sub-agent ownership | [quality/test-automation](quality/test-automation) |
+| **Documentation Specialist** | Documentation | wiki/, md files, issues, rule/skill/template sync, sub-agent ownership | [documentation/documentation-specialist](documentation/documentation-specialist) |
 
 ### Sub-Agents
 
 | Agent | Primary | Key Responsibilities | Specification |
 |---|---|---|---|
-| **Discord Specialist** | Code Architect | discord.js v14 commands, events, EmbedHandler, `src/bot/lib/` | [engineering/sub-agents/discord-specialist.md](engineering/sub-agents/discord-specialist.md) |
-| **Feed Watcher** | Code Architect | RSS/Atom/Reddit ingestion, dedicated threads, stream alerts | [engineering/sub-agents/feed-watcher.md](engineering/sub-agents/feed-watcher.md) |
-| **Dashboard Specialist** | Code Architect | SSR dashboard, Discord OAuth2, theme engine | [engineering/sub-agents/dashboard-engineer.md](engineering/sub-agents/dashboard-engineer.md) |
-| **Security Auditor** | Test Automation | Secrets protection, ESLint, formatting, dependency audits | [quality/sub-agents/security-auditor.md](quality/sub-agents/security-auditor.md) |
-| **Wiki Specialist** | Documentation Specialist | `wiki/`, README, `.env.example`, `.agents/` catalogs | [documentation/sub-agents/wiki-specialist.md](documentation/sub-agents/wiki-specialist.md) |
-| **Issue & Roadmap Manager** | Documentation Specialist | GitHub issues, roadmaps, PRs, release notes | [documentation/sub-agents/issue-manager.md](documentation/sub-agents/issue-manager.md) |
+| **Discord Specialist** | Code Architect | discord.js v14 commands, events, EmbedHandler, `src/bot/lib/` | [engineering/sub-agents/discord-specialist](engineering/sub-agents/discord-specialist) |
+| **Feed Watcher** | Code Architect | RSS/Atom/Reddit ingestion, dedicated threads, stream alerts | [engineering/sub-agents/feed-watcher](engineering/sub-agents/feed-watcher) |
+| **Dashboard Specialist** | Code Architect | SSR dashboard, Discord OAuth2, theme engine | [engineering/sub-agents/dashboard-engineer](engineering/sub-agents/dashboard-engineer) |
+| **Security Auditor** | Test Automation | Secrets protection, ESLint, formatting, dependency audits | [quality/sub-agents/security-auditor](quality/sub-agents/security-auditor) |
+| **Wiki Specialist** | Documentation Specialist | `wiki/`, README, `.env.example`, `.agents/` catalogs | [documentation/sub-agents/wiki-specialist](documentation/sub-agents/wiki-specialist) |
+| **Issue & Roadmap Manager** | Documentation Specialist | GitHub issues, roadmaps, PRs, release notes | [documentation/sub-agents/issue-manager](documentation/sub-agents/issue-manager) |
 
 ## 📂 Subsystem Ownership Reference
 
@@ -71,5 +71,5 @@ flowchart TD
 | **Feed Syndication** | `src/feed/` | Feed Watcher (Engineering) |
 | **Testing Harnesses** | `tests/` | Test Automation (Quality) |
 | **Agent Rules** | `.agents/rules/` | Security Auditor (Quality) / Orchestrator |
-| **Documentation** | `wiki/`, README, `AGENTS.md` | Wiki Specialist (Documentation) |
+| **Documentation** | `wiki/`, README, `AGENTS` | Wiki Specialist (Documentation) |
 | **Issues & Roadmaps** | GitHub issues/PRs | Issue & Roadmap Manager (Documentation) |

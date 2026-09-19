@@ -81,17 +81,17 @@ export function createHelixRssServer(deps: AppDeps): Server {
   router.add('GET', '/privacy', (_req, res, _ctx, d) => {
     const appName = appDisplayName(d);
     const appIconUrl = d.bot?.getAppIconUrl() || null;
-    sendHtml(res, 200, renderLegalHtml('Privacy Policy', 'PRIVACY.md', appName, appIconUrl, d.config.defaultTheme));
+    sendHtml(res, 200, renderLegalHtml('Privacy Policy', 'PRIVACY', appName, appIconUrl, d.config.defaultTheme));
   });
   router.add('GET', '/security', (_req, res, _ctx, d) => {
     const appName = appDisplayName(d);
     const appIconUrl = d.bot?.getAppIconUrl() || null;
-    sendHtml(res, 200, renderLegalHtml('Security Policy', 'SECURITY.md', appName, appIconUrl, d.config.defaultTheme));
+    sendHtml(res, 200, renderLegalHtml('Security Policy', 'SECURITY', appName, appIconUrl, d.config.defaultTheme));
   });
   router.add('GET', '/tos', (_req, res, _ctx, d) => {
     const appName = appDisplayName(d);
     const appIconUrl = d.bot?.getAppIconUrl() || null;
-    sendHtml(res, 200, renderLegalHtml('Terms of Service', 'TOS.md', appName, appIconUrl, d.config.defaultTheme));
+    sendHtml(res, 200, renderLegalHtml('Terms of Service', 'TOS', appName, appIconUrl, d.config.defaultTheme));
   });
 
   // Public read-only command reference (no login required)

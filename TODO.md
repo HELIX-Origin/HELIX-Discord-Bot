@@ -18,7 +18,7 @@
 - Privacy / ToS pages visible without login.
 - Commands page requires no login (read-only).
 - Ticket system: text channel hosts a button; clicking opens a new thread.
-- Replace forum feed delivery with threads: "if threads are enabled the feeds simply post to threads in the configured text channel. The foums seem to be a bit wonky for our usage." (m0755). Dedicated thread is auto-created in the feed's own delivery `channel_id` (m0759); the separate forum target is removed.
+- Replace forum feed delivery with threads: "if threads are enabled the feeds simply post to threads in the configured text channel. The forums seem to be a bit wonky for our usage." (m0755). Dedicated thread is auto-created in the feed's own delivery `channel_id` (m0759); the separate forum target is removed.
 - Feed threads public + role subscription + add notification: "make the threads public... also add a message to the channels that a feed is set up in to notify of a feed being added to the channel." (m0116). Feed threads are already public (type 12); each feed gets an optional role auto-subscribed to its thread (per-feed role at add time, m0963) and a confirmation message is posted into the feed's channel on add.
 
 **Implementation checklist:**
@@ -36,7 +36,7 @@
 - [x] `dashboard.ts`: render new tab panes; pass `canManage` to sidebar
 - [x] Ticket redesign: sticky text-channel button message → thread per ticket, manager role auto-added (`ticket_channel_id` key)
 - [x] `npm run check` + `pnpm build` green
-- [ ] Commit + push; sync `PLAN.md`/`TODO.md`/`BUGS.md`, `wiki/`, roadmap issue #27 per Rule 04/05
+- [ ] Commit + push; sync `PLAN`/`TODO`/`BUGS`, `wiki/`, roadmap issue #27 per Rule 04/05
 - [x] Forum→thread feed delivery: remove forum target end-to-end; thread-enabled feeds post to a dedicated thread in their own `channel_id` (state types, repos, `FeedThreadManager`, targets, watcher, webhooks, bot, config, dashboard UI)
 - [x] Feed role subscription: per-feed `roleId` stored (`role_id` column + migration); `role` option on all feed-add slash commands + dashboard add/detail role selects; ThreadSender subscribes the role to the feed thread on create/rotate (`addThreadRole`)
 - [x] Feed-add channel notification: `notifyFeedAdded` (`src/bot/lib/feeds/notify.ts`) posts a confirmation into the feed's target channel on slash-command adds and dashboard POST /api/feeds
@@ -57,7 +57,7 @@
 - [x] login / landing / commands / legal / guilds / admin / oauth-callback pages import `getThemeCss()` and drop inline theme blocks; html classes now use real `theme.id`
 - [x] Delete dead `src/dashboard/handlers/pages.ts` (unused local theme duplicates)
 - [x] Remove color-scheme layer: `AppConfig.dashboardColorScheme`, `DashboardRuntimeConfig.colorScheme`, `DASHBOARD_COLOR_SCHEMES`/`DashboardColorScheme`, `colorSchemeOverrides` (shared.ts), `ColorSchemeInfo`/`getColorSchemeInfo` (theme.ts), `scheme-*` html classes, settings-tab scheme fields, `DASHBOARD_COLOR_SCHEME` env var (kept `colorSchemeMode` native `color-scheme` for scrollbars/inputs)
-- [x] Docs: `.env.example`, `wiki/Configuration.md`, `wiki/Architecture-and-Design.md`, `.agents/rules/dashboard-standards.md`, `.agents/agents/engineering/sub-agents/dashboard-engineer.md`
+- [x] Docs: `.env.example`, `wiki/Configuration`, `wiki/Architecture-and-Design`, `.agents/rules/dashboard-standards`, `.agents/agents/engineering/sub-agents/dashboard-engineer`
 - [x] `npm run check` + `pnpm build` green
 
 ### Workstream: Dead Code Cleanup + Vitest Scan Guard
@@ -93,4 +93,4 @@ npx prettier --write src    # only when format:check complains
 ## 🔖 Metadata
 
 - **Project**: HELIX Discord Bot · **version** 0.5.0
-- **Agent Ecosystem:** `AGENTS.md` and `.agents/` are tracked directly in repository git tracking.
+- **Agent Ecosystem:** `AGENTS` and `.agents/` are tracked directly in repository git tracking.

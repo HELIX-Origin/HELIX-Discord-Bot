@@ -1,12 +1,12 @@
 # Skill: GitHub-Flavored Mermaid Diagrams
 
 ## Overview
-This skill covers authoring **Mermaid diagrams** for **HELIX Discord Bot** documentation that render correctly on GitHub and stay legible. It applies to every diagram anywhere in the repo — `AGENTS.md`, `.agents/`, `wiki/`, README, issue bodies, and PR descriptions — per **Rule 09** (`.agents/rules/mermaid-standards.md`).
+This skill covers authoring **Mermaid diagrams** for **HELIX Discord Bot** documentation that render correctly on GitHub and stay legible. It applies to every diagram anywhere in the repo — `AGENTS`, `.agents/`, `wiki/`, README, issue bodies, and PR descriptions — per **Rule 09** (`.agents/rules/mermaid-standards`).
 
 ## When to Use
 - Issue/PR roadmaps and bug reports (Rule 04 requires at least one diagram).
 - Architectural, lifecycle, and decision-flow documentation in `wiki/`.
-- Agent ecosystem docs (`.agents/`) and `AGENTS.md`.
+- Agent ecosystem docs (`.agents/`) and `AGENTS`.
 
 ## Core Rules
 

@@ -1,25 +1,25 @@
 # Wiki & Docs Specialist Agent (Sub-Agent)
 
-**Parent Primary**: [Documentation Specialist](../documentation-specialist.md)  
-**Target Domain**: `wiki/`, `README.md`, `AGENTS.md`, `.env.example`, `.agents/` catalogs  
+**Parent Primary**: [Documentation Specialist](../documentation-specialist)  
+**Target Domain**: `wiki/`, `README`, `AGENTS`, `.env.example`, `.agents/` catalogs  
 **Operational Scope**: All repository Markdown and documentation files except GitHub issue bodies.
 
 ---
 
 ## 1. Role & Identity
 
-The **Wiki & Docs Specialist** is the documentation sub-agent responsible for writing, updating, and synchronizing all repository documentation files. It reports to the **Documentation Specialist** primary agent and is the designated owner of `wiki/`, `README.md`, `AGENTS.md`, `.env.example`, and the `.agents/` rule, skill, and template catalogs.
+The **Wiki & Docs Specialist** is the documentation sub-agent responsible for writing, updating, and synchronizing all repository documentation files. It reports to the **Documentation Specialist** primary agent and is the designated owner of `wiki/`, `README`, `AGENTS`, `.env.example`, and the `.agents/` rule, skill, and template catalogs.
 
 ---
 
 ## 2. Core Responsibilities
 
 1. **Wiki Synchronization (Rule 05)**:
-   - Keep every `wiki/*.md` page accurate against the current codebase state.
-   - Update `.agents/rules/index.md`, `.agents/skills/index.md`, `.agents/templates/index.md`, and `.agents/agents/index.md` when catalog members change.
+   - Keep every `wiki/*` page accurate against the current codebase state.
+   - Update `.agents/rules/index`, `.agents/skills/index`, `.agents/templates/index`, and `.agents/agents/index` when catalog members change.
 2. **Root Documentation**:
-   - `README.md` feature tables, limits, quick-start, and configuration sections.
-   - `AGENTS.md` issue log, agent catalog, and rules list.
+   - `README` feature tables, limits, quick-start, and configuration sections.
+   - `AGENTS` issue log, agent catalog, and rules list.
    - `.env.example` environment variable documentation (never actual secrets — Rule 00).
 3. **Markdown Quality**:
    - Apply Rule 09 for every Mermaid diagram: GitHub-compatible syntax, one concern per diagram, split large flows for legibility.
@@ -31,15 +31,15 @@ The **Wiki & Docs Specialist** is the documentation sub-agent responsible for wr
 
 ## 3. Related Specifications & Rules
 
-- **Rule 00**: [Agent Safety & Compliance](../../../rules/agent-safety-compliance.md)
-- **Rule 05**: [Documentation Standards & Wiki Synchronization](../../../rules/documentation-standards.md)
-- **Rule 09**: [GitHub-Flavored Mermaid & Diagram Standards](../../../rules/mermaid-standards.md)
+- **Rule 00**: [Agent Safety & Compliance](../../../rules/agent-safety-compliance)
+- **Rule 05**: [Documentation Standards & Wiki Synchronization](../../../rules/documentation-standards)
+- **Rule 09**: [GitHub-Flavored Mermaid & Diagram Standards](../../../rules/mermaid-standards)
 
 ## 4. Templates & Guides
 
-- [Commit Message Guide](../../../templates/commit-message-guide.md) — docs commit style (`📝 docs(...)`)
-- [Mermaid Diagram Template](../../../templates/mermaid-diagram-template.md) — diagrams per Rule 09
-- Skills: [Mermaid Diagrams](../../../skills/mermaid-diagrams.md), [Dashboard Engineering](../../../skills/dashboard-engineering.md) (for dashboard-facing docs)
+- [Commit Message Guide](../../../templates/commit-message-guide) — docs commit style (`📝 docs(...)`)
+- [Mermaid Diagram Template](../../../templates/mermaid-diagram-template) — diagrams per Rule 09
+- Skills: [Mermaid Diagrams](../../../skills/mermaid-diagrams), [Dashboard Engineering](../../../skills/dashboard-engineering) (for dashboard-facing docs)
 
 ## 5. Operational Verification
 

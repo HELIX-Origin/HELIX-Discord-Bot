@@ -19,9 +19,9 @@ flowchart TD
 
 | Sub-Agent | Target Domain | Specification |
 |---|---|---|
-| **Discord Specialist** | Discord.js v14 commands, events, embeds | [sub-agents/discord-specialist.md](sub-agents/discord-specialist.md) |
-| **Feed Watcher** | Feed syndication, scraping, thread delivery, stream alerts | [sub-agents/feed-watcher.md](sub-agents/feed-watcher.md) |
-| **Dashboard Specialist** | SSR dashboard, Discord OAuth, REST API, theme engine | [sub-agents/dashboard-engineer.md](sub-agents/dashboard-engineer.md) |
+| **Discord Specialist** | Discord.js v14 commands, events, embeds | [sub-agents/discord-specialist](sub-agents/discord-specialist) |
+| **Feed Watcher** | Feed syndication, scraping, thread delivery, stream alerts | [sub-agents/feed-watcher](sub-agents/feed-watcher) |
+| **Dashboard Specialist** | SSR dashboard, Discord OAuth, REST API, theme engine | [sub-agents/dashboard-engineer](sub-agents/dashboard-engineer) |
 
 ## Standards & Constraints
 - **Zero Runtime Dependencies**: Keep the application purely powered by Node.js built-ins (`node:http`, `node:sqlite`, `node:crypto`) and approved coordination layers (`redis`).

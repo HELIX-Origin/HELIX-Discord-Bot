@@ -14,12 +14,12 @@ All templates adhere strictly to:
 
 | Template | Scope | Description |
 |---|---|---|
-| [**`command-template.md`**](command-template.md) | Slash Command | Standalone command template with colocated options, execution handler, and error catching |
-| [**`subcommand-template.md`**](subcommand-template.md) | Complex Command | Subcommand and subcommand group pattern (e.g., `/role`, `/voice`) |
-| [**`event-template.md`**](event-template.md) | Discord Event | Strongly typed Discord event listener pattern with isolated execution boundaries |
-| [**`embed-template.md`**](embed-template.md) | Embed Standards | Standardized `EmbedHandler` template, formatting guide, and production blueprints |
-| [**`dashboard-route-template.md`**](dashboard-route-template.md) | HTTP API Route | Dashboard domain REST route handler with authentication and audit logging |
-| [**`dashboard-view-template.md`**](dashboard-view-template.md) | SSR View Component | Dashboard SSR HTML component template with safe escaping |
+| [**`command-template`**](command-template) | Slash Command | Standalone command template with colocated options, execution handler, and error catching |
+| [**`subcommand-template`**](subcommand-template) | Complex Command | Subcommand and subcommand group pattern (e.g., `/role`, `/voice`) |
+| [**`event-template`**](event-template) | Discord Event | Strongly typed Discord event listener pattern with isolated execution boundaries |
+| [**`embed-template`**](embed-template) | Embed Standards | Standardized `EmbedHandler` template, formatting guide, and production blueprints |
+| [**`dashboard-route-template`**](dashboard-route-template) | HTTP API Route | Dashboard domain REST route handler with authentication and audit logging |
+| [**`dashboard-view-template`**](dashboard-view-template) | SSR View Component | Dashboard SSR HTML component template with safe escaping |
 
 ---
 
@@ -27,11 +27,11 @@ All templates adhere strictly to:
 
 | Template | Scope | Description |
 |---|---|---|
-| [**`issue-roadmap-template.md`**](issue-roadmap-template.md) | GitHub Issues | Living roadmap template for GitHub issues with Mermaid diagrams and progress tracking |
-| [**`issue-template.md`**](issue-template.md) | Issue Body | Standard issue reporting blueprint |
-| [**`mermaid-diagram-template.md`**](mermaid-diagram-template.md) | Mermaid Diagrams | GitHub-flavored Mermaid diagram template following Rule 09 with legibility checklist |
-| [**`commit-message-guide.md`**](commit-message-guide.md) | Git Commits | Conventional commit standard with emojis and subsystem scopes |
-| [**`release-notes-template.md`**](release-notes-template.md) | GitHub Releases | Structured release notes blueprint with emoji markers and upgrade steps |
+| [**`issue-roadmap-template`**](issue-roadmap-template) | GitHub Issues | Living roadmap template for GitHub issues with Mermaid diagrams and progress tracking |
+| [**`issue-template`**](issue-template) | Issue Body | Standard issue reporting blueprint |
+| [**`mermaid-diagram-template`**](mermaid-diagram-template) | Mermaid Diagrams | GitHub-flavored Mermaid diagram template following Rule 09 with legibility checklist |
+| [**`commit-message-guide`**](commit-message-guide) | Git Commits | Conventional commit standard with emojis and subsystem scopes |
+| [**`release-notes-template`**](release-notes-template) | GitHub Releases | Structured release notes blueprint with emoji markers and upgrade steps |
 
 ---
 

@@ -1,6 +1,6 @@
 # Rule 09: GitHub-Flavored Mermaid & Diagram Standards
 
-This standard governs **every Mermaid diagram** written in this repository — `AGENTS.md`, `.agents/`, `wiki/`, README, issue bodies, and PR descriptions. All diagrams are rendered by **GitHub's Mermaid renderer**, so they must use syntax that renderer supports, and must be structured for legibility.
+This standard governs **every Mermaid diagram** written in this repository — `AGENTS`, `.agents/`, `wiki/`, README, issue bodies, and PR descriptions. All diagrams are rendered by **GitHub's Mermaid renderer**, so they must use syntax that renderer supports, and must be structured for legibility.
 
 ## Baseline
 

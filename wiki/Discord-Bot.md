@@ -64,7 +64,7 @@ Instead of delivering into a regular channel, a server can enable **thread deliv
 - Adding a feed into a channel posts a short confirmation message there: `📡 **feed** configured — updates will be posted here.` (best-effort; never surfaces as a command error).
 - Servers without thread delivery enabled behave exactly as before (direct channel delivery).
 
-See [Configuration → Thread Delivery](Configuration.md) for the full variable reference.
+See [Configuration → Thread Delivery](Configuration) for the full variable reference.
 
 ---
 

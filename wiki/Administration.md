@@ -129,6 +129,6 @@ The web dashboard includes a **Guild Administration** page (enabled when `ADMINI
 
 ## 🔗 Related
 
-- [Discord Bot & Commands](Discord-Bot.md) — Full command reference table
-- [Configuration → Feature Flags](Configuration.md) — `ADMINISTRATION_ENABLED`, `ADMIN_PANEL_ENABLED`
-- [Integrations & Security → RBAC](Integrations-and-Security.md) — Permission model details
+- [Discord Bot & Commands](Discord-Bot) — Full command reference table
+- [Configuration → Feature Flags](Configuration) — `ADMINISTRATION_ENABLED`, `ADMIN_PANEL_ENABLED`
+- [Integrations & Security → RBAC](Integrations-and-Security) — Permission model details

@@ -74,4 +74,4 @@ Because HELIX Discord Bot operates on a self-hosted architecture:
 For questions regarding this policy, security questions, or open-source inquiries:
 - **GitHub Repository**: [https://github.com/HELIX-Origin/HELIX-Discord-Bot](https://github.com/HELIX-Origin/HELIX-Discord-Bot)
 - **Discord Community**: [HELIX Origin Discord](https://discord.gg/Ww3XBZC2HV)
-- **Security Policy**: [SECURITY.md](SECURITY.md)
+- **Security Policy**: [SECURITY](SECURITY)

@@ -6,7 +6,7 @@ The **Test Automation Agent** is the **primary agent** for the **quality focus**
 
 | Sub-Agent | Target Domain | Specification |
 |---|---|---|
-| **Security Auditor** | Secrets protection, lint, formatting, dependency audits | [sub-agents/security-auditor.md](sub-agents/security-auditor.md) |
+| **Security Auditor** | Secrets protection, lint, formatting, dependency audits | [sub-agents/security-auditor](sub-agents/security-auditor) |
 
 ---
 

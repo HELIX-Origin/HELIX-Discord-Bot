@@ -31,17 +31,17 @@ Issue titles are **short, human-readable, general plan ideas** — never detaile
 | Discovery / side-change | `🔧 <plain description>`; linked to parent in body | `🔧 Drop-down refresh on preset enable` |
 
 ### Pull Requests
-- Subject mirrors the primary commit: `<emoji> <type>(<scope>): <subject>` (see `commit-message-guide.md`).
+- Subject mirrors the primary commit: `<emoji> <type>(<scope>): <subject>` (see `commit-message-guide`).
 - Body references the roadmap: `Part of #<parent>` / `Closes #<sub-issue>`.
 
 ### Commits
-- Format: `<emoji> <type>(<scope>): <subject>` per `.agents/templates/commit-message-guide.md`.
+- Format: `<emoji> <type>(<scope>): <subject>` per `.agents/templates/commit-message-guide`.
 - Reference the GitHub issue/sub-issue `#N` when applicable.
 
 ## Mandatory Protocol
 
-1. **Body File Submissions**: When creating or updating remote issues/PRs (body or comments), always write the content to a UTF-8 markdown file first, then submit via `--body-file <file.md>`. Never pass unescaped inline markdown or Unicode directly in PowerShell/bash arguments.
-2. **Mermaid Diagrams Required**: Every plan/bug report must include at least one Mermaid `flowchart` or `sequenceDiagram` visualizing architecture or error flow. Diagrams must follow **Rule 09** (`mermaid-standards.md`): GitHub-compatible syntax, one concern per diagram, split into multiple diagrams where needed to stay legible.
-3. **Roadmap Updates Via Edit**: Updating the roadmap means `gh issue edit <parent> --body-file <roadmap.md>` (or `gh pr edit`). Small explanatory new comments are allowed **only** for newly discovered additions.
-4. **Commit Message Standards**: Follow `.agents/templates/commit-message-guide.md`: emoji type, scoped subject, and `Resolves/Closes #N` reference.
+1. **Body File Submissions**: When creating or updating remote issues/PRs (body or comments), always write the content to a UTF-8 markdown file first, then submit via `--body-file <file>`. Never pass unescaped inline markdown or Unicode directly in PowerShell/bash arguments.
+2. **Mermaid Diagrams Required**: Every plan/bug report must include at least one Mermaid `flowchart` or `sequenceDiagram` visualizing architecture or error flow. Diagrams must follow **Rule 09** (`mermaid-standards`): GitHub-compatible syntax, one concern per diagram, split into multiple diagrams where needed to stay legible.
+3. **Roadmap Updates Via Edit**: Updating the roadmap means `gh issue edit <parent> --body-file <roadmap>` (or `gh pr edit`). Small explanatory new comments are allowed **only** for newly discovered additions.
+4. **Commit Message Standards**: Follow `.agents/templates/commit-message-guide`: emoji type, scoped subject, and `Resolves/Closes #N` reference.
 5. **HELIX Compatibility**: Sub-issue decomposition, comment templates, and emoji commit matrix follow HELIX conventions; the roadmap-first refinement above takes precedence for this repo's tracking.

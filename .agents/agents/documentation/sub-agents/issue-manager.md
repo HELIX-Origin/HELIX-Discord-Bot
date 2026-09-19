@@ -1,6 +1,6 @@
 # Issue & Roadmap Manager Agent (Sub-Agent)
 
-**Parent Primary**: [Documentation Specialist](../documentation-specialist.md)  
+**Parent Primary**: [Documentation Specialist](../documentation-specialist)  
 **Target Domain**: GitHub issues, roadmaps, pull requests, release notes  
 **Operational Scope**: `gh` CLI operations, remote issue bodies on `HELIX-Origin/HELIX-Discord-Bot`, PR descriptions, release drafts.
 
@@ -34,17 +34,17 @@ The **Issue & Roadmap Manager** is the documentation sub-agent responsible for G
 
 ## 3. Related Specifications & Rules
 
-- **Rule 00**: [Agent Safety & Compliance](../../../rules/agent-safety-compliance.md)
-- **Rule 04**: [Remote Issue, PR & Comment Protocol](../../../rules/remote-issue-protocol.md)
-- **Rule 08**: [Semantic Versioning & Release Management Standards](../../../rules/release-standards.md)
-- **Rule 09**: [GitHub-Flavored Mermaid & Diagram Standards](../../../rules/mermaid-standards.md)
+- **Rule 00**: [Agent Safety & Compliance](../../../rules/agent-safety-compliance)
+- **Rule 04**: [Remote Issue, PR & Comment Protocol](../../../rules/remote-issue-protocol)
+- **Rule 08**: [Semantic Versioning & Release Management Standards](../../../rules/release-standards)
+- **Rule 09**: [GitHub-Flavored Mermaid & Diagram Standards](../../../rules/mermaid-standards)
 
 ## 4. Templates & Guides
 
-- [Issue Roadmap Template](../../../templates/issue-roadmap-template.md)
-- [Issue Template](../../../templates/issue-template.md)
-- [Release Notes Template](../../../templates/release-notes-template.md)
-- [Commit Message Guide](../../../templates/commit-message-guide.md)
+- [Issue Roadmap Template](../../../templates/issue-roadmap-template)
+- [Issue Template](../../../templates/issue-template)
+- [Release Notes Template](../../../templates/release-notes-template)
+- [Commit Message Guide](../../../templates/commit-message-guide)
 
 ## 5. Operational Verification
 

@@ -6,8 +6,8 @@ Comprehensive operational workflow for engineering features, commands, events, a
 ---
 
 ## Prerequisites
-- Read `.agents/rules/discord-js-standards.md` (MANDATORY Rule 06)
-- Read `.agents/rules/typescript-architecture.md` (Rule 02)
+- Read `.agents/rules/discord-js-standards` (MANDATORY Rule 06)
+- Read `.agents/rules/typescript-architecture` (Rule 02)
 - Familiarity with discord.js v14 and native Node.js ESM
 
 ---

@@ -4,14 +4,14 @@
 
 1. **Documentation Resides in `wiki/`**:
    - Technical documentation is hosted in the `wiki/` directory.
-   - `wiki/Home.md` and `wiki/_Sidebar.md` serve as the central table of contents and navigation index. Every documentation article must be linked from `_Sidebar.md`.
+   - `wiki/Home` and `wiki/_Sidebar` serve as the central table of contents and navigation index. Every documentation article must be linked from `_Sidebar`.
    - Do NOT create a separate `docs/` directory.
 
 2. **Agent Documentation Synchronization**:
    - Any architectural, command, or schema changes must be synchronized with:
-     - `AGENTS.md` (root operating manual)
-     - Relevant index files: `.agents/rules/index.md`, `.agents/agents/index.md`, `.agents/skills/index.md`, `.agents/templates/index.md`
-     - Matching articles in `wiki/` (e.g. `wiki/Discord-Bot.md`, `wiki/Configuration.md`).
+     - `AGENTS` (root operating manual)
+     - Relevant index files: `.agents/rules/index`, `.agents/agents/index`, `.agents/skills/index`, `.agents/templates/index`
+     - Matching articles in `wiki/` (e.g. `wiki/Discord-Bot`, `wiki/Configuration`).
 
 3. **Markdown Conventions**:
    - Standard GitHub-Flavored Markdown.
@@ -24,4 +24,4 @@
    - Never commit real tokens, API keys, webhook URLs, or passwords in documentation or examples.
 
 5. **Commit Message Standards**:
-   - Follow `.agents/templates/commit-message-guide.md` (emoji type, scope, imperative mood).
+   - Follow `.agents/templates/commit-message-guide` (emoji type, scope, imperative mood).

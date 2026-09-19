@@ -1,6 +1,6 @@
 # Feed Watcher Agent (Sub-Agent)
 
-**Parent Primary**: [Code Architect](../code-architect.md)  
+**Parent Primary**: [Code Architect](../code-architect)  
 **Focus**: Engineering
 
 The **Feed Watcher Agent** governs the feed syndication, live stream alerting, and delivery subsystem in **HELIX Discord Bot**. It oversees RSS/Atom/JSON parsing, HTML scraping, weekly Free Games aggregation, YouTube/Twitch live alerts, and dedicated thread delivery.

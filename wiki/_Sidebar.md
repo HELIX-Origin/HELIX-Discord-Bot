@@ -1,18 +1,18 @@
 ### HELIX Discord Bot Wiki
 
-- [🏠 Home](HOME.md)
-- [📡 Feeds & Scrapers Engine](Feeds-and-Scrapers.md)
-- [🎮 Free Games & Giveaways](Free-Games-Feeds.md)
-- [🤖 Reddit Feeds & Pure Image Mode](Reddit-Feeds.md)
-- [🤖 Discord Bot & Commands](Discord-Bot.md)
-- [🛡️ Guild Administration](Administration.md)
-- [🔌 REST API Reference](API-Reference.md)
-- [🏗️ Architecture & Design](Architecture-and-Design.md)
-- [⚙️ Configuration Guide](Configuration.md)
-- [🚀 Deployment & Hosting](Deployment-and-Hosting.md)
-- [🧪 Development & Testing](Development-and-Testing.md)
-- [🔒 Integrations & Security](Integrations-and-Security.md)
-- [🩺 Troubleshooting & FAQ](Troubleshooting.md)
+- [🏠 Home](HOME)
+- [📡 Feeds & Scrapers Engine](Feeds-and-Scrapers)
+- [🎮 Free Games & Giveaways](Free-Games-Feeds)
+- [🤖 Reddit Feeds & Pure Image Mode](Reddit-Feeds)
+- [🤖 Discord Bot & Commands](Discord-Bot)
+- [🛡️ Guild Administration](Administration)
+- [🔌 REST API Reference](API-Reference)
+- [🏗️ Architecture & Design](Architecture-and-Design)
+- [⚙️ Configuration Guide](Configuration)
+- [🚀 Deployment & Hosting](Deployment-and-Hosting)
+- [🧪 Development & Testing](Development-and-Testing)
+- [🔒 Integrations & Security](Integrations-and-Security)
+- [🩺 Troubleshooting & FAQ](Troubleshooting)
 
 ---
 

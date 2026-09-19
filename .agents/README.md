@@ -2,8 +2,8 @@
 
 This directory contains the operational specifications, mandatory engineering rules, domain skills, and code templates for AI agents, coding assistants, and contributors working on **HELIX Discord Bot**.
 
-> 📖 **Primary Operating Manual**: For high-level project status, architectural mandates, and current issue tracking, refer to the root entry point: [**`AGENTS.md`**](../AGENTS.md).  
-> 📝 **Tracking Files**: `PLAN.md` (current session plan), `BUGS.md` (bug & issue tracker), and `TODO.md` (task checklist) are repository-tracked planning files that hold active workstream state.
+> 📖 **Primary Operating Manual**: For high-level project status, architectural mandates, and current issue tracking, refer to the root entry point: [**`AGENTS`**](../AGENTS).  
+> 📝 **Tracking Files**: `PLAN` (current session plan), `BUGS` (bug & issue tracker), and `TODO` (task checklist) are repository-tracked planning files that hold active workstream state.
 
 ---
 
@@ -11,10 +11,10 @@ This directory contains the operational specifications, mandatory engineering ru
 
 | Directory | Purpose | Primary Focus | Link |
 |---|---|---|---|
-| [**`agents/`**](agents/) | **Agent Roles Catalog** | Focus-area agent teams: primary agents with sub-agents (coordination, engineering, quality, documentation) | [Browse Agents](agents/README.md) |
-| [**`rules/`**](rules/) | **Mandatory Rules** | Non-negotiable safety, architecture, discord.js v14, documentation, and code style rules (Rules 00–09) | [Browse Rules](rules/README.md) |
-| [**`skills/`**](skills/) | **Domain Skills** | In-depth technical guides for Discord.js, feeds, and SQLite state | [Browse Skills](skills/README.md) |
-| [**`templates/`**](templates/) | **Code & Workflow Templates** | Production-ready blueprints for commands, subcommands, events, embeds, and GitHub roadmaps | [Browse Templates](templates/README.md) |
+| [**`agents/`**](agents/) | **Agent Roles Catalog** | Focus-area agent teams: primary agents with sub-agents (coordination, engineering, quality, documentation) | [Browse Agents](agents/README) |
+| [**`rules/`**](rules/) | **Mandatory Rules** | Non-negotiable safety, architecture, discord.js v14, documentation, and code style rules (Rules 00–09) | [Browse Rules](rules/README) |
+| [**`skills/`**](skills/) | **Domain Skills** | In-depth technical guides for Discord.js, feeds, and SQLite state | [Browse Skills](skills/README) |
+| [**`templates/`**](templates/) | **Code & Workflow Templates** | Production-ready blueprints for commands, subcommands, events, embeds, and GitHub roadmaps | [Browse Templates](templates/README) |
 
 ---
 

@@ -1,6 +1,6 @@
 # Discord Specialist Agent (Sub-Agent)
 
-**Parent Primary**: [Code Architect](../code-architect.md)  
+**Parent Primary**: [Code Architect](../code-architect)  
 **Focus**: Engineering
 
 The **Discord Specialist Agent** is the authoritative engineer for all Discord-facing capabilities in **HELIX Discord Bot**. This agent guarantees 100% compliance with `discord.js` v14 standards, Discord API specifications, character limits, self-contained command definitions, and modular `src/bot/lib/` utilities.

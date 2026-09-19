@@ -2,7 +2,7 @@
 
 HELIX Discord Bot is configured entirely via environment variables defined in a `.env` file at the root of the project. The service reads it automatically on `npm start` (`node --env-file-if-exists=.env`).
 
-> **Note**: Because the service is self-hosted, there is **no in-dashboard credential editor**. All secrets and settings live in `.env` only — see [Rule 00](../AGENTS.md) for the safety contract.
+> **Note**: Because the service is self-hosted, there is **no in-dashboard credential editor**. All secrets and settings live in `.env` only — see [Rule 00](../AGENTS) for the safety contract.
 
 ---
 

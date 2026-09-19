@@ -30,9 +30,9 @@ When bumping a version, the version number must be synchronized across all canon
    - `src/dashboard/oauth/discord.ts`: `DiscordBot (${repoUrl}, X.Y.Z)` and `DiscordBot (X.Y.Z)`.
    - `src/dashboard/webhooks/router.ts`: `Mozilla/5.0 (compatible; HELIX-Discord-Bot/X.Y.Z)`.
 5. **Security Policy**:
-   - `SECURITY.md`: Update supported versions table if a minor/major version boundary has transitioned.
+   - `SECURITY`: Update supported versions table if a minor/major version boundary has transitioned.
 6. **Local Scratchpad (Gitignored)**:
-   - `TODO.md` metadata updated to reflect active version.
+   - `TODO` metadata updated to reflect active version.
 
 ---
 
@@ -91,5 +91,5 @@ npm start
 Always prepare release notes in a dedicated UTF-8 Markdown file and publish via the GitHub CLI:
 
 ```bash
-gh release create vX.Y.Z --title "vX.Y.Z — <Title>" --notes-file "<path-to-notes.md>"
+gh release create vX.Y.Z --title "vX.Y.Z — <Title>" --notes-file "<path-to-notes>"
 ```

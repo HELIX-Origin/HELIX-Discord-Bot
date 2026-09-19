@@ -29,12 +29,12 @@ graph LR
 ### 2. Reddit Feeds & Pure Image Mode
 - Native subreddit scraping supporting `/r/subreddit`, sort orders (`hot`, `new`, `top`), and multi-reddits (`/r/subreddit1+subreddit2`).
 - Supports **Pure Image Mode** (`feedType: 'reddit'`) and **Standard RSS Mode** (`feedType: 'rss'`).
-- See [Reddit Feeds Documentation](Reddit-Feeds.md) for full details.
+- See [Reddit Feeds Documentation](Reddit-Feeds) for full details.
 
 ### 3. Free Games & Giveaways Aggregator
 - Multi-storefront engine supporting Epic Games, Steam, GOG, Humble Bundle, IndieGala, Itch.io, Ubisoft, EA App, Prime Gaming, and Battle.net.
 - Automated daily polling with deduplication.
-- See [Free Games Documentation](Free-Games-Feeds.md) for full details.
+- See [Free Games Documentation](Free-Games-Feeds) for full details.
 
 ---
 
@@ -49,7 +49,7 @@ Each dashboard **tab** maps to a feed category. Feeds are counted per category, 
 | **Free Games** | `free_games` (all stores) | Unlimited |
 | **Stream Alerts** | `youtube`, `twitch` | Unlimited |
 
-Hosts can customize the caps with the `FEED_CATEGORY_LIMITS` environment variable (a CSV of `category=number` pairs, e.g. `rss=15,reddit=20`). Setting a category to `0` removes the cap for that tab. See [wiki/Configuration.md](Configuration.md).
+Hosts can customize the caps with the `FEED_CATEGORY_LIMITS` environment variable (a CSV of `category=number` pairs, e.g. `rss=15,reddit=20`). Setting a category to `0` removes the cap for that tab. See [wiki/Configuration](Configuration).
 
 Attempting to exceed a limit returns a clear `Subscription limit reached` error in the dashboard and via the slash commands.
 

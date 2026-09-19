@@ -1,6 +1,6 @@
 # HELIX Discord Bot — Current Session Plan
 
-> 🏷️ **Tracking**: Session/roadmap planning companion to `TODO.md` (task checklist) and `BUGS.md` (bug & issue tracker). Roadmap issue: [#27](https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues/27).
+> 🏷️ **Tracking**: Session/roadmap planning companion to `TODO` (task checklist) and `BUGS` (bug & issue tracker). Roadmap issue: [#27](https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues/27).
 
 ---
 

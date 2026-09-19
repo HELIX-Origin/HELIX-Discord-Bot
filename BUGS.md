@@ -1,10 +1,10 @@
-# BUGS.md — Bug & Issue Tracker
+# BUGS — Bug & Issue Tracker
 
 > This file is the **bug & issue tracker** for HELIX Discord Bot. It tracks only
 > bugs that are **still open**. Once a bug is fixed or superseded, its entry is
-> removed from this file. Complements `PLAN.md` (roadmap) and `TODO.md`
+> removed from this file. Complements `PLAN` (roadmap) and `TODO`
 > (task checklist). Remote, user-facing work is tracked as GitHub issues/roadmaps per
-> Rule 04 (remote-issue-protocol.md).
+> Rule 04 (remote-issue-protocol).
 
 ## Status Legend
 

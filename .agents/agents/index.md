@@ -43,21 +43,21 @@ flowchart TD
 
 | Agent | Focus Area | Core Focus | Specification |
 |---|---|---|---|
-| **Orchestrator** | Coordination | Task decomposition, primary-agent coordination, rollback, roadmap sync | [orchestrator/orchestrator.md](orchestrator/orchestrator.md) |
-| **Code Architect** | Engineering | TypeScript ESM, SQLite write-through, HTTP dashboard, sub-agent ownership | [engineering/code-architect.md](engineering/code-architect.md) |
-| **Test Automation** | Quality | Verification gate (`npm run check`), test harnesses, mock servers | [quality/test-automation.md](quality/test-automation.md) |
-| **Documentation Specialist** | Documentation | wiki/, md files, issues, rule/skill/template sync | [documentation/documentation-specialist.md](documentation/documentation-specialist.md) |
+| **Orchestrator** | Coordination | Task decomposition, primary-agent coordination, rollback, roadmap sync | [orchestrator/orchestrator](orchestrator/orchestrator) |
+| **Code Architect** | Engineering | TypeScript ESM, SQLite write-through, HTTP dashboard, sub-agent ownership | [engineering/code-architect](engineering/code-architect) |
+| **Test Automation** | Quality | Verification gate (`npm run check`), test harnesses, mock servers | [quality/test-automation](quality/test-automation) |
+| **Documentation Specialist** | Documentation | wiki/, md files, issues, rule/skill/template sync | [documentation/documentation-specialist](documentation/documentation-specialist) |
 
 ## Sub-Agents
 
 | Agent | Primary | Core Focus | Specification |
 |---|---|---|---|
-| **Discord Specialist** | Code Architect | discord.js v14 commands, events, EmbedHandler | [engineering/sub-agents/discord-specialist.md](engineering/sub-agents/discord-specialist.md) |
-| **Feed Watcher** | Code Architect | RSS/Atom/Reddit, dedicated thread delivery, stream alerts | [engineering/sub-agents/feed-watcher.md](engineering/sub-agents/feed-watcher.md) |
-| **Dashboard Specialist** | Code Architect | SSR dashboard, Discord OAuth2, theme | [engineering/sub-agents/dashboard-engineer.md](engineering/sub-agents/dashboard-engineer.md) |
-| **Security Auditor** | Test Automation | Secrets, ESLint, formatting, dependencies | [quality/sub-agents/security-auditor.md](quality/sub-agents/security-auditor.md) |
-| **Wiki Specialist** | Documentation Specialist | `wiki/`, README, `.env.example`, `.agents/` catalogs | [documentation/sub-agents/wiki-specialist.md](documentation/sub-agents/wiki-specialist.md) |
-| **Issue & Roadmap Manager** | Documentation Specialist | GitHub issues, roadmaps, PRs, release notes | [documentation/sub-agents/issue-manager.md](documentation/sub-agents/issue-manager.md) |
+| **Discord Specialist** | Code Architect | discord.js v14 commands, events, EmbedHandler | [engineering/sub-agents/discord-specialist](engineering/sub-agents/discord-specialist) |
+| **Feed Watcher** | Code Architect | RSS/Atom/Reddit, dedicated thread delivery, stream alerts | [engineering/sub-agents/feed-watcher](engineering/sub-agents/feed-watcher) |
+| **Dashboard Specialist** | Code Architect | SSR dashboard, Discord OAuth2, theme | [engineering/sub-agents/dashboard-engineer](engineering/sub-agents/dashboard-engineer) |
+| **Security Auditor** | Test Automation | Secrets, ESLint, formatting, dependencies | [quality/sub-agents/security-auditor](quality/sub-agents/security-auditor) |
+| **Wiki Specialist** | Documentation Specialist | `wiki/`, README, `.env.example`, `.agents/` catalogs | [documentation/sub-agents/wiki-specialist](documentation/sub-agents/wiki-specialist) |
+| **Issue & Roadmap Manager** | Documentation Specialist | GitHub issues, roadmaps, PRs, release notes | [documentation/sub-agents/issue-manager](documentation/sub-agents/issue-manager) |
 
 ---
 
@@ -71,5 +71,5 @@ flowchart TD
 | **Persistence** | `src/db/` | `node:sqlite` tables, schema migrations |
 | **State** | `src/state/` | In-memory `AppState`, entity definitions |
 | **Feed Syndication** | `src/feed/` | XML parser, HTML scraper, free games, thread delivery |
-| **Documentation** | `wiki/`, `README.md`, `AGENTS.md` | Wiki sync, `.env.example`, catalogs |
+| **Documentation** | `wiki/`, `README`, `AGENTS` | Wiki sync, `.env.example`, catalogs |
 | **Issues & Roadmaps** | GitHub issues/PRs | Roadmap-first tracking, release notes |

@@ -17,9 +17,9 @@ This document is the central entry point and operating manual for all AI agents,
 
 ## Bug & Issue Tracking
 
-Only bugs that are **still open** are tracked in the **`BUGS.md`** tracker. Once a bug is fixed or superseded, its entry is removed from the file. This file is the agent ecosystem entry point and operating manual — it is not itself a tracker.
+Only bugs that are **still open** are tracked in the **`BUGS`** tracker. Once a bug is fixed or superseded, its entry is removed from the file. This file is the agent ecosystem entry point and operating manual — it is not itself a tracker.
 
-- **Active/public roadmap work** is tracked on GitHub as roadmap issues and sub-issues per **Rule 04** (`remote-issue-protocol.md`).
+- **Active/public roadmap work** is tracked on GitHub as roadmap issues and sub-issues per **Rule 04** (`remote-issue-protocol`).
 
 ---
 
@@ -60,20 +60,20 @@ flowchart TD
 
 ## Agent Team Catalog & Capabilities
 
-Agents are organized as **primary agents with sub-agents** grouped by focus area under `.agents/agents/{focus}` (see [`.agents/agents/README.md`](.agents/agents/README.md)).
+Agents are organized as **primary agents with sub-agents** grouped by focus area under `.agents/agents/{focus}` (see [`.agents/agents/README`](.agents/agents/README)).
 
 | Agent | Focus Area | Key Responsibilities | Specification File |
 |---|---|---|---|
-| **Orchestrator** | Coordination (Primary) | Task decomposition, roadmap execution, primary-agent coordination, permission handling, rollback | [orchestrator.md](.agents/agents/orchestrator/orchestrator.md) |
-| **Code Architect** | Engineering (Primary) | TypeScript ESM architecture, zero-unsolicited runtime injection, SQLite write-through, HTTP routing, engineering sub-agent ownership | [code-architect.md](.agents/agents/engineering/code-architect.md) |
-| **Discord Specialist** | Engineering (Sub) | discord.js v14 standards, command registry, event dispatch, permissions, EmbedHandler | [discord-specialist.md](.agents/agents/engineering/sub-agents/discord-specialist.md) |
-| **Feed Watcher** | Engineering (Sub) | Feed polling, HTML scraping, XML parsing, deduplication, dedicated thread delivery, Sunday free games | [feed-watcher.md](.agents/agents/engineering/sub-agents/feed-watcher.md) |
-| **Dashboard Specialist** | Engineering (Sub) | Zero-frontend-dep SSR, Discord OAuth2, guild admin authorization, theme engine | [dashboard-engineer.md](.agents/agents/engineering/sub-agents/dashboard-engineer.md) |
-| **Test Automation** | Quality (Primary) | Test-driven development (TDD), Vitest suite, mock servers, regression coverage, quality sub-agent ownership | [test-automation.md](.agents/agents/quality/test-automation.md) |
-| **Security Auditor** | Quality (Sub) | Vulnerability scanning, secrets protection, ESLint rule enforcement, formatting, dependency audits | [security-auditor.md](.agents/agents/quality/sub-agents/security-auditor.md) |
-| **Documentation Specialist** | Documentation (Primary) | wiki/, md files, README, issues, rule/skill/template catalogs, documentation sub-agent ownership | [documentation-specialist.md](.agents/agents/documentation/documentation-specialist.md) |
-| **Wiki Specialist** | Documentation (Sub) | `wiki/*.md`, README, `AGENTS.md`, `.env.example`, `.agents/` catalog sync | [wiki-specialist.md](.agents/agents/documentation/sub-agents/wiki-specialist.md) |
-| **Issue & Roadmap Manager** | Documentation (Sub) | GitHub issues, living roadmaps, PRs, release notes, issue title standard | [issue-manager.md](.agents/agents/documentation/sub-agents/issue-manager.md) |
+| **Orchestrator** | Coordination (Primary) | Task decomposition, roadmap execution, primary-agent coordination, permission handling, rollback | [orchestrator](.agents/agents/orchestrator/orchestrator) |
+| **Code Architect** | Engineering (Primary) | TypeScript ESM architecture, zero-unsolicited runtime injection, SQLite write-through, HTTP routing, engineering sub-agent ownership | [code-architect](.agents/agents/engineering/code-architect) |
+| **Discord Specialist** | Engineering (Sub) | discord.js v14 standards, command registry, event dispatch, permissions, EmbedHandler | [discord-specialist](.agents/agents/engineering/sub-agents/discord-specialist) |
+| **Feed Watcher** | Engineering (Sub) | Feed polling, HTML scraping, XML parsing, deduplication, dedicated thread delivery, Sunday free games | [feed-watcher](.agents/agents/engineering/sub-agents/feed-watcher) |
+| **Dashboard Specialist** | Engineering (Sub) | Zero-frontend-dep SSR, Discord OAuth2, guild admin authorization, theme engine | [dashboard-engineer](.agents/agents/engineering/sub-agents/dashboard-engineer) |
+| **Test Automation** | Quality (Primary) | Test-driven development (TDD), Vitest suite, mock servers, regression coverage, quality sub-agent ownership | [test-automation](.agents/agents/quality/test-automation) |
+| **Security Auditor** | Quality (Sub) | Vulnerability scanning, secrets protection, ESLint rule enforcement, formatting, dependency audits | [security-auditor](.agents/agents/quality/sub-agents/security-auditor) |
+| **Documentation Specialist** | Documentation (Primary) | wiki/, md files, README, issues, rule/skill/template catalogs, documentation sub-agent ownership | [documentation-specialist](.agents/agents/documentation/documentation-specialist) |
+| **Wiki Specialist** | Documentation (Sub) | `wiki/*`, README, `AGENTS`, `.env.example`, `.agents/` catalog sync | [wiki-specialist](.agents/agents/documentation/sub-agents/wiki-specialist) |
+| **Issue & Roadmap Manager** | Documentation (Sub) | GitHub issues, living roadmaps, PRs, release notes, issue title standard | [issue-manager](.agents/agents/documentation/sub-agents/issue-manager) |
 
 ---
 
@@ -94,16 +94,16 @@ All agents have access to and must leverage the repository's standard execution 
 ## Agent Rules (`.agents/rules/`)
 
 All agent actions are bound by `.agents/rules/`:
-- **Rule 00 (`agent-safety-compliance.md`)**: Safety invariants, zero irreversible damage, credentials/tokens stay in `.env`, never committed.
-- **Rule 01 (`zero-unsolicited-injection.md`)**: Runtime dependencies require explicit user approval; only standard dev tooling is permitted.
-- **Rule 02 (`typescript-architecture.md`)**: Strict TypeScript ESM structure across `src/`.
-- **Rule 03 (`message-formatting.md`)**: Embed building and Discord channel routing standards via `EmbedHandler`.
-- **Rule 04 (`remote-issue-protocol.md`)**: Roadmap-first tracking; the first post is the roadmap edited as progress occurs; Mermaid diagrams required.
-- **Rule 05 (`documentation-standards.md`)**: Keep `wiki/` and agent files synchronized (documentation is hosted entirely via `wiki/`).
-- **Rule 06 (`discord-js-standards.md`)**: **MANDATORY** — Strict discord.js standards for commands, events, embeds, options, handlers, registry, and dispatch. Command options and subcommands remain colocated in command files (`src/bot/commands/<category>/<command>.ts`), while `src/bot/lib/` is dedicated to reusable libraries, modules, and utilities used by commands and events. Strongly prefers dynamic methods over hardcoding (dynamic command registry, dynamic discovery, dynamic option builders). Zero tolerance for violations.
-- **Rule 07 (`dashboard-standards.md`)**: Management dashboard & Discord integration standards — zero runtime frontend dependencies, Discord OAuth2 authentication, guild administrator authorization, SSR HTML with CSS custom properties theme engine, and EmbedHandler preview parity.
-- **Rule 08 (`release-standards.md`)**: Semantic versioning (`MAJOR.MINOR.PATCH`), multi-file version synchronization, and structured GitHub release notes with emojis and code blocks.
-- **Rule 09 (`mermaid-standards.md`)**: GitHub-flavored Mermaid & diagram standards — GitHub-compatible syntax, one concern per diagram, split large flows into multiple diagrams to keep them legible.
+- **Rule 00 (`agent-safety-compliance`)**: Safety invariants, zero irreversible damage, credentials/tokens stay in `.env`, never committed.
+- **Rule 01 (`zero-unsolicited-injection`)**: Runtime dependencies require explicit user approval; only standard dev tooling is permitted.
+- **Rule 02 (`typescript-architecture`)**: Strict TypeScript ESM structure across `src/`.
+- **Rule 03 (`message-formatting`)**: Embed building and Discord channel routing standards via `EmbedHandler`.
+- **Rule 04 (`remote-issue-protocol`)**: Roadmap-first tracking; the first post is the roadmap edited as progress occurs; Mermaid diagrams required.
+- **Rule 05 (`documentation-standards`)**: Keep `wiki/` and agent files synchronized (documentation is hosted entirely via `wiki/`).
+- **Rule 06 (`discord-js-standards`)**: **MANDATORY** — Strict discord.js standards for commands, events, embeds, options, handlers, registry, and dispatch. Command options and subcommands remain colocated in command files (`src/bot/commands/<category>/<command>.ts`), while `src/bot/lib/` is dedicated to reusable libraries, modules, and utilities used by commands and events. Strongly prefers dynamic methods over hardcoding (dynamic command registry, dynamic discovery, dynamic option builders). Zero tolerance for violations.
+- **Rule 07 (`dashboard-standards`)**: Management dashboard & Discord integration standards — zero runtime frontend dependencies, Discord OAuth2 authentication, guild administrator authorization, SSR HTML with CSS custom properties theme engine, and EmbedHandler preview parity.
+- **Rule 08 (`release-standards`)**: Semantic versioning (`MAJOR.MINOR.PATCH`), multi-file version synchronization, and structured GitHub release notes with emojis and code blocks.
+- **Rule 09 (`mermaid-standards`)**: GitHub-flavored Mermaid & diagram standards — GitHub-compatible syntax, one concern per diagram, split large flows into multiple diagrams to keep them legible.
 
 ---
 

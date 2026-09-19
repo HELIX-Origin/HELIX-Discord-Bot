@@ -8,9 +8,9 @@ The Orchestrator delegates work to the three focus-area primary agents, each of 
 
 | Primary Agent | Focus | Owns Sub-Agents |
 |---|---|---|
-| [Code Architect](../engineering/code-architect.md) | Engineering | Discord Specialist, Feed Watcher, Dashboard Specialist |
-| [Test Automation](../quality/test-automation.md) | Quality | Security Auditor |
-| [Documentation Specialist](../documentation/documentation-specialist.md) | Documentation | Wiki Specialist, Issue & Roadmap Manager |
+| [Code Architect](../engineering/code-architect) | Engineering | Discord Specialist, Feed Watcher, Dashboard Specialist |
+| [Test Automation](../quality/test-automation) | Quality | Security Auditor |
+| [Documentation Specialist](../documentation/documentation-specialist) | Documentation | Wiki Specialist, Issue & Roadmap Manager |
 
 ## Core Capabilities
 
@@ -30,7 +30,7 @@ flowchart TD
 2. **Workflow Coordination**: Manages state transitions and data handoffs between the focus-area primary agents (Engineering, Quality, Documentation).
 3. **Approval Gateways**: Prompts the user when major architectural choices or external permissions are needed.
 4. **Error Handling & Fallbacks**: Monitors tool execution; on failures, attempts clean rollbacks via git to maintain repository stability.
-5. **Issue & Roadmap Sync**: Uses `remote-issue-protocol.md` (Rule 04) to edit parent issue roadmaps and track milestone progress.
+5. **Issue & Roadmap Sync**: Uses `remote-issue-protocol` (Rule 04) to edit parent issue roadmaps and track milestone progress.
 
 ## Operational Commands
 ```bash

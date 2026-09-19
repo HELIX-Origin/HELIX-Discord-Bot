@@ -45,7 +45,7 @@ This is the foundational safety rule for all AI agents working on **HELIX Discor
    - Do not add runtime dependencies (`npm install <pkg>`) without explicit user permission. The runtime stack is deliberately minimal: native Node.js HTTP, `node:sqlite`, `discord.js`, and `ioredis-mock`.
 
 3. **Discord.js Standards (Rule 06)**:
-   - All Discord interactions, commands, events, and embeds MUST comply with Rule 06 (`discord-js-standards.md`).
+   - All Discord interactions, commands, events, and embeds MUST comply with Rule 06 (`discord-js-standards`).
 
 4. **Verification Gate Before Task Completion**:
    - No task is complete until verified through the repository validation gate:
@@ -56,4 +56,4 @@ This is the foundational safety rule for all AI agents working on **HELIX Discor
    - If any type, lint, or format error is introduced, resolve it immediately before reporting completion.
 
 5. **Documentation & Agent Synchronization (Rule 04 & 05)**:
-   - Changes to commands, features, or architecture must be updated in `AGENTS.md`, `wiki/`, and `.agents/`.
+   - Changes to commands, features, or architecture must be updated in `AGENTS`, `wiki/`, and `.agents/`.

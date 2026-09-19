@@ -8,13 +8,13 @@ Please read these Terms of Service ("Terms") carefully before deploying, self-ho
 
 ## 1. Acceptance of Terms
 
-By installing, hosting, configuring, inviting, or using HELIX Discord Bot or its management dashboard, you agree to be bound by these Terms, the project's open-source license ([LICENSE.md](LICENSE.md)), and our [Privacy Policy](PRIVACY.md). If you do not agree to these Terms, do not install or use the Software.
+By installing, hosting, configuring, inviting, or using HELIX Discord Bot or its management dashboard, you agree to be bound by these Terms, the project's open-source license ([LICENSE](LICENSE)), and our [Privacy Policy](PRIVACY). If you do not agree to these Terms, do not install or use the Software.
 
 ---
 
 ## 2. Open Source License & Intellectual Property
 
-HELIX Discord Bot is licensed under the open-source license specified in [LICENSE.md](LICENSE.md). You are free to inspect, fork, modify, self-host, and distribute the codebase in full accordance with the applicable license terms. All original intellectual property and copyrights belong to their respective authors and contributors.
+HELIX Discord Bot is licensed under the open-source license specified in [LICENSE](LICENSE). You are free to inspect, fork, modify, self-host, and distribute the codebase in full accordance with the applicable license terms. All original intellectual property and copyrights belong to their respective authors and contributors.
 
 ---
 
@@ -73,4 +73,4 @@ The project maintainers reserve the right to revise or update these Terms period
 For questions regarding these Terms or the project:
 - **GitHub Repository**: [https://github.com/HELIX-Origin/HELIX-Discord-Bot](https://github.com/HELIX-Origin/HELIX-Discord-Bot)
 - **Discord Community**: [HELIX Origin Discord](https://discord.gg/Ww3XBZC2HV)
-- **Security Inquiries**: [SECURITY.md](SECURITY.md)
+- **Security Inquiries**: [SECURITY](SECURITY)

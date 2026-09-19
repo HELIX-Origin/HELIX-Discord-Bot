@@ -36,7 +36,7 @@ export function renderSourcesTabs(redditAvailable: boolean): string {
     : `      <div class="card" style="border-color: rgba(255, 69, 0, 0.4);">
         <div class="card-title" style="font-size: 0.9375rem; color: #ff4500;"><i class="fa-solid fa-triangle-exclamation"></i> Reddit Feeds Disabled</div>
         <p style="font-size: 0.8125rem; color: var(--text-muted); line-height: 1.5; margin-top: 0.5rem;">
-          Reddit feeds are disabled because no Reddit session cookie file was found. Place a <code style="font-size: 0.75rem;">cookies.json</code> (or <code style="font-size: 0.75rem;">cookies.txt</code>) file with a logged-in Reddit session in the repo root, or set <code style="font-size: 0.75rem;">REDDIT_COOKIES_FILE</code>, then restart the bot. See <code style="font-size: 0.75rem;">wiki/Reddit-Feeds.md</code>.
+          Reddit feeds are disabled because no Reddit session cookie file was found. Place a <code style="font-size: 0.75rem;">cookies.json</code> (or <code style="font-size: 0.75rem;">cookies.txt</code>) file with a logged-in Reddit session in the repo root, or set <code style="font-size: 0.75rem;">REDDIT_COOKIES_FILE</code>, then restart the bot. See <code style="font-size: 0.75rem;">wiki/Reddit-Feeds</code>.
         </p>
         <p style="font-size: 0.75rem; color: var(--text-dim); line-height: 1.5;">Use a dedicated alt Reddit account when exporting your cookies to avoid bans on your primary account.</p>
       </div>`;

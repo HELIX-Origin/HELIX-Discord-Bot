@@ -8,18 +8,18 @@ Welcome to the comprehensive technical and operational wiki for **HELIX Discord 
 
 | Section | Description |
 | :--- | :--- |
-| [**📡 Feeds & Scrapers Engine**](Feeds-and-Scrapers.md) | Deep dive into XML/RSS/Atom parsing, Reddit, Free Games, and custom scrapers. |
-| [**🎮 Free Games & Giveaways**](Free-Games-Feeds.md) | Multi-store aggregation (Epic Games, Steam, GOG, Humble, etc.), Monday cron scheduler, and store branding. |
-| [**🤖 Reddit Feeds & Pure Image Mode**](Reddit-Feeds.md) | Reddit scraping, Pure Image Mode vs Standard RSS Mode, animated GIF/gifv banners, and subreddit filtering. |
-| [**🤖 Discord Bot & Commands**](Discord-Bot.md) | Slash commands (`/rss`, `/youtube`, `/twitch`, `/free-games`, `/reddit`, `/stats`, `/about`, `/help`), direct channel + dedicated thread delivery, embed formatting, and Discord permissions. |
-| [**🛡️ Guild Administration**](Administration.md) | Moderation (`/warn`, `/kick`, `/ban`, `/lock`, `/purge`, `/slowmode`, `/announce`), role management, voice controls, permission guards. |
-| [**🔌 REST API Reference**](API-Reference.md) | Complete documentation of all REST endpoints, request/response schemas, and query params. |
-| [**🏗️ Architecture & Design**](Architecture-and-Design.md) | System components, data flow diagrams, background polling engine, caching, and state management. |
-| [**⚙️ Configuration Guide**](Configuration.md) | Exhaustive reference of all `.env` variables, timeouts, polling, dashboard themes, and hosting settings. |
-| [**🚀 Deployment & Hosting**](Deployment-and-Hosting.md) | Deployment guides for Docker, Linux VPS/systemd, Windows, and manual Cloud PaaS (Railway, Render, Fly.io). |
-| [**🧪 Development & Testing**](Development-and-Testing.md) | Local environment setup, test runner commands, TypeScript checking, and code style standards. |
-| [**🔒 Integrations & Security**](Integrations-and-Security.md) | Discord OAuth2, Owner ID resolution, CSRF/XSS protection, rate limiting, and database security. |
-| [**🩺 Troubleshooting & FAQ**](Troubleshooting.md) | Diagnostic flows for feed delivery failures, permission errors, Reddit 429s, and database locks. |
+| [**📡 Feeds & Scrapers Engine**](Feeds-and-Scrapers) | Deep dive into XML/RSS/Atom parsing, Reddit, Free Games, and custom scrapers. |
+| [**🎮 Free Games & Giveaways**](Free-Games-Feeds) | Multi-store aggregation (Epic Games, Steam, GOG, Humble, etc.), Monday cron scheduler, and store branding. |
+| [**🤖 Reddit Feeds & Pure Image Mode**](Reddit-Feeds) | Reddit scraping, Pure Image Mode vs Standard RSS Mode, animated GIF/gifv banners, and subreddit filtering. |
+| [**🤖 Discord Bot & Commands**](Discord-Bot) | Slash commands (`/rss`, `/youtube`, `/twitch`, `/free-games`, `/reddit`, `/stats`, `/about`, `/help`), direct channel + dedicated thread delivery, embed formatting, and Discord permissions. |
+| [**🛡️ Guild Administration**](Administration) | Moderation (`/warn`, `/kick`, `/ban`, `/lock`, `/purge`, `/slowmode`, `/announce`), role management, voice controls, permission guards. |
+| [**🔌 REST API Reference**](API-Reference) | Complete documentation of all REST endpoints, request/response schemas, and query params. |
+| [**🏗️ Architecture & Design**](Architecture-and-Design) | System components, data flow diagrams, background polling engine, caching, and state management. |
+| [**⚙️ Configuration Guide**](Configuration) | Exhaustive reference of all `.env` variables, timeouts, polling, dashboard themes, and hosting settings. |
+| [**🚀 Deployment & Hosting**](Deployment-and-Hosting) | Deployment guides for Docker, Linux VPS/systemd, Windows, and manual Cloud PaaS (Railway, Render, Fly.io). |
+| [**🧪 Development & Testing**](Development-and-Testing) | Local environment setup, test runner commands, TypeScript checking, and code style standards. |
+| [**🔒 Integrations & Security**](Integrations-and-Security) | Discord OAuth2, Owner ID resolution, CSRF/XSS protection, rate limiting, and database security. |
+| [**🩺 Troubleshooting & FAQ**](Troubleshooting) | Diagnostic flows for feed delivery failures, permission errors, Reddit 429s, and database locks. |
 
 ---
 

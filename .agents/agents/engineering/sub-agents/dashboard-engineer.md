@@ -1,6 +1,6 @@
 # Dashboard Specialist Agent (Sub-Agent)
 
-**Parent Primary**: [Code Architect](../code-architect.md)  
+**Parent Primary**: [Code Architect](../code-architect)  
 **Focus**: Engineering
 
 **Target Domain**: Full-Stack Management Dashboard & Discord OAuth Integration  
@@ -39,8 +39,8 @@ The **Dashboard Specialist** designs, implements, and maintains the self-hosted 
 
 ## 3. Related Specifications & Rules
 
-- **Rule 00**: [Agent Safety & Compliance](../../../rules/agent-safety-compliance.md)
-- **Rule 01**: [Zero-Unsolicited Dependency Injection](../../../rules/zero-unsolicited-injection.md)
-- **Rule 02**: [Strict TypeScript ESM Architecture](../../../rules/typescript-architecture.md)
-- **Rule 06**: [Discord.js Standards & Modular Command Architecture](../../../rules/discord-js-standards.md)
-- **Rule 07**: [Management Dashboard & Discord Integration Standards](../../../rules/dashboard-standards.md)
+- **Rule 00**: [Agent Safety & Compliance](../../../rules/agent-safety-compliance)
+- **Rule 01**: [Zero-Unsolicited Dependency Injection](../../../rules/zero-unsolicited-injection)
+- **Rule 02**: [Strict TypeScript ESM Architecture](../../../rules/typescript-architecture)
+- **Rule 06**: [Discord.js Standards & Modular Command Architecture](../../../rules/discord-js-standards)
+- **Rule 07**: [Management Dashboard & Discord Integration Standards](../../../rules/dashboard-standards)

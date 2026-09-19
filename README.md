@@ -5,7 +5,7 @@
   **A modern, self-hosted RSS, Web Scraper, Reddit, & Free Games syndication hub for Discord.**
 
   [![Version](https://img.shields.io/github/package-json/v/HELIX-Origin/HELIX-Discord-Bot?style=flat-square&logo=github)](https://github.com/HELIX-Origin/HELIX-Discord-Bot/releases)
-  [![License](https://img.shields.io/github/license/HELIX-Origin/HELIX-Discord-Bot?style=flat-square)](LICENSE.md)
+  [![License](https://img.shields.io/github/license/HELIX-Origin/HELIX-Discord-Bot?style=flat-square)](LICENSE)
   [![Node.js](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FHELIX-Origin%2FHELIX-Discord-Bot%2Fmain%2Fpackage.json&query=engines.node&label=Node.js&logo=node.js&logoColor=white&color=339933&style=flat-square)](https://nodejs.org/)
   [![TypeScript](https://img.shields.io/github/languages/top/HELIX-Origin/HELIX-Discord-Bot?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
   <br />
@@ -108,7 +108,7 @@ Comprehensive guides, configuration references, architecture breakdowns, and API
 ## 🤝 Contributing & Policies
 
 Contributions, feature suggestions, and bug reports are welcome!
-- Review [CONTRIBUTING.md](CONTRIBUTING.md) for code quality standards and git commit conventions.
+- Review [CONTRIBUTING](CONTRIBUTING.md) for code quality standards and git commit conventions.
 - Report issues and request features on our [GitHub Issue Tracker](https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues).
 - Review our [Security Policy](SECURITY.md) for vulnerability reporting.
 - Review our [Privacy Policy](PRIVACY.md) and [Terms of Service](TOS.md).
@@ -117,4 +117,4 @@ Contributions, feature suggestions, and bug reports are welcome!
 
 ## 📄 License
 
-This project is open source and available under the terms of the [BSD 3-Clause License](LICENSE.md).
+This project is open source and available under the terms of the [BSD 3-Clause License](LICENSE).

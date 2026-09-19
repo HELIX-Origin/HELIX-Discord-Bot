@@ -1,4 +1,4 @@
-# Release Notes Template (`release-notes-template.md`)
+# Release Notes Template (`release-notes-template`)
 
 Use this template when preparing release notes for GitHub Releases according to **Rule 08 (Semantic Versioning & Release Management Standards)**.
 
@@ -28,7 +28,7 @@ A concise, high-level summary (2–3 sentences) capturing the core focus of this
 ## 🛡️ Security, Privacy & Reliability
 
 - **Security Hardening**: Note any authentication, cookie, permission bitfield, or dependency audits.
-- **Policy & Data Custody**: Note changes to `SECURITY.md`, `PRIVACY.md`, or `TOS.md`.
+- **Policy & Data Custody**: Note changes to `SECURITY`, `PRIVACY`, or `TOS`.
 
 ---
 

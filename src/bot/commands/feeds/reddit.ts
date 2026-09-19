@@ -155,7 +155,7 @@ export async function handleRedditCommand(
           .error()
           .title('Reddit Feeds Disabled')
           .description(
-            'Reddit feeds are disabled: a cookies.json (or cookies.txt) file with a logged-in Reddit session is required at the repo root (or set REDDIT_COOKIES_FILE). See wiki/Reddit-Feeds.md.',
+            'Reddit feeds are disabled: a cookies.json (or cookies.txt) file with a logged-in Reddit session is required at the repo root (or set REDDIT_COOKIES_FILE). See wiki/Reddit-Feeds.',
           )
           .respond(true);
       }

@@ -39,8 +39,8 @@ flowchart TD
   - [ ] Unit tests added in `tests/bot/`
   - [ ] `npm run check` passes completely (types, format, lint, tests)
 - [ ] **Phase 4: Documentation Sync**
-  - [ ] Updated command docs in `wiki/Discord-Bot.md` or corresponding wiki page
-  - [ ] Synchronized `AGENTS.md` and `.agents/` if operational rules changed
+  - [ ] Updated command docs in `wiki/Discord-Bot` or corresponding wiki page
+  - [ ] Synchronized `AGENTS` and `.agents/` if operational rules changed
 
 ---
 
