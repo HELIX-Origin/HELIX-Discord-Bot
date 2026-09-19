@@ -16,8 +16,10 @@ export function renderAdminHtml(deps: AppDeps, userId: number | null): string {
   ${appIconUrl ? `<link rel="icon" type="image/png" href="${appIconUrl}">` : ''}
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    :root { --bg: #0b0f19; --card-bg: rgba(17, 24, 39, 0.85); --card-inner: #111827; --border: #1f2937; --text: #f3f4f6; --text-muted: #9ca3af; --primary: #06b6d4; --discord: #5865F2; }
-    html.light { --bg: #e8ecf2; --card-bg: rgba(248, 250, 252, 0.95); --card-inner: #ffffff; --border: #cbd5e1; --text: #1e293b; --text-muted: #475569; --primary: #0284c7; }
+    :root { --bg: #0b0f19; --card-bg: rgba(17, 24, 39, 0.85); --card-inner: #111827; --border: #1f2937; --border-hover: #374151; --text: #f3f4f6; --text-muted: #9ca3af; --primary: #06b6d4; --discord: #5865F2; }
+    html.light { --bg: #e8ecf2; --card-bg: rgba(248, 250, 252, 0.95); --card-inner: #ffffff; --border: #cbd5e1; --border-hover: #94a3b8; --text: #1e293b; --text-muted: #475569; --primary: #0284c7; }
+    html.dashboard-theme { color-scheme: dark; }
+    html.light { color-scheme: light; }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     body { background-color: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
     .container { max-width: 1280px; width: 100%; margin: 0 auto; padding: 1.5rem; flex: 1; }
@@ -45,7 +47,9 @@ export function renderAdminHtml(deps: AppDeps, userId: number | null): string {
     .badge-gray { background: rgba(156,163,175,0.12); color: #9ca3af; border: 1px solid var(--border); }
     .form-group { display: flex; flex-direction: column; gap: 0.375rem; margin-bottom: 1rem; }
     .form-label { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); }
-    select { width: 100%; background: var(--card-inner); border: 1px solid var(--border); border-radius: 0.75rem; padding: 0.75rem 1rem; font-size: 0.875rem; color: var(--text); outline: none; min-height: 44px; }
+    select { width: 100%; background: var(--card-inner); background-image: linear-gradient(45deg, transparent 50%, var(--text-muted) 50%), linear-gradient(135deg, var(--text-muted) 50%, transparent 50%); background-position: calc(100% - 1.3rem) calc(1em + 0.35rem), calc(100% - 0.95rem) calc(1em + 0.35rem); background-size: 0.4rem 0.4rem; background-repeat: no-repeat; appearance: none; -webkit-appearance: none; -moz-appearance: none; border: 1px solid var(--border); border-radius: 0.75rem; padding: 0.75rem 2.25rem 0.75rem 1rem; font-size: 0.875rem; color: var(--text); outline: none; min-height: 44px; cursor: pointer; }
+    select:hover { border-color: var(--border-hover); }
+    select option, select optgroup { background: var(--card-inner); color: var(--text); }
   </style>
 </head>
 <body>

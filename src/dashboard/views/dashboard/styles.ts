@@ -413,7 +413,7 @@ export function renderDashboardStyles(_theme: ThemeInfo, _colorScheme: ColorSche
     .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; }
     .form-group { display: flex; flex-direction: column; gap: 0.375rem; }
     .form-label { font-size: 0.8125rem; font-weight: 600; color: var(--text-muted); }
-    input[type="text"], input[type="number"], select, textarea {
+    input[type="text"], input[type="number"], textarea {
       width: 100%;
       background: var(--card-inner);
       border: 1px solid var(--border);
@@ -424,7 +424,30 @@ export function renderDashboardStyles(_theme: ThemeInfo, _colorScheme: ColorSche
       outline: none;
       transition: border-color 0.15s;
     }
-    input[type="text"]:focus, input[type="number"]:focus, select:focus, textarea:focus { border-color: var(--primary); }
+    select {
+      width: 100%;
+      background: var(--card-inner);
+      background-image: linear-gradient(45deg, transparent 50%, var(--text-muted) 50%),
+        linear-gradient(135deg, var(--text-muted) 50%, transparent 50%);
+      background-position: calc(100% - 1.3rem) calc(1em + 0.35rem), calc(100% - 0.95rem) calc(1em + 0.35rem);
+      background-size: 0.4rem 0.4rem;
+      background-repeat: no-repeat;
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      border: 1px solid var(--border);
+      border-radius: 0.625rem;
+      padding: 0.625rem 2.25rem 0.625rem 0.875rem;
+      font-size: 0.875rem;
+      color: var(--text);
+      outline: none;
+      cursor: pointer;
+      transition: border-color 0.15s;
+    }
+    select:hover { border-color: var(--border-hover); }
+    select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-bg); }
+    select option, select optgroup { background: var(--card-inner); color: var(--text); }
+    input[type="text"]:focus, input[type="number"]:focus, textarea:focus { border-color: var(--primary); }
     input[type="checkbox"] { accent-color: var(--primary); width: 1.125rem; height: 1.125rem; cursor: pointer; }
 
     /* Buttons */
