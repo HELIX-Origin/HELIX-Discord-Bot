@@ -1,4 +1,4 @@
-import { getThemeInfo } from './dashboard.js';
+import { getThemeInfo, getThemeCss } from './theme.js';
 import { renderFooter } from './footer.js';
 
 export function renderLoginHtml(
@@ -21,103 +21,7 @@ export function renderLoginHtml(
   ${appIconUrl ? `<link rel="icon" type="image/png" href="${appIconUrl}">` : ''}
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    :root, html.dark {
-      --bg: #0b0f19;
-      --card-bg: rgba(17, 24, 39, 0.85);
-      --card-inner: #111827;
-      --border: #1f2937;
-      --text: #f3f4f6;
-      --text-muted: #9ca3af;
-      --primary: #06b6d4;
-      --primary-hover: #0891b2;
-      --discord: #5865F2;
-      --discord-hover: #4752C4;
-    }
-    html.light {
-      --bg: #e8ecf2;
-      --card-bg: rgba(248, 250, 252, 0.95);
-      --card-inner: #ffffff;
-      --border: #cbd5e1;
-      --text: #1e293b;
-      --text-muted: #475569;
-      --primary: #0284c7;
-      --primary-hover: #0369a1;
-      --discord: #5865F2;
-      --discord-hover: #4752C4;
-    }
-    html.glassmorphism {
-      --bg: #0a0d18;
-      --card-bg: rgba(18, 24, 43, 0.55);
-      --card-inner: rgba(255, 255, 255, 0.04);
-      --border: rgba(255, 255, 255, 0.12);
-      --text: #ffffff;
-      --text-muted: #cbd5e1;
-      --primary: #a855f7;
-      --primary-hover: #9333ea;
-      --discord: #5865F2;
-      --discord-hover: #4752C4;
-    }
-    html.glassmorphism body {
-      background: radial-gradient(circle at 15% 15%, rgba(168, 85, 247, 0.18), transparent 35%),
-                  radial-gradient(circle at 85% 20%, rgba(6, 182, 212, 0.18), transparent 35%),
-                  radial-gradient(circle at 50% 85%, rgba(236, 72, 153, 0.15), transparent 45%),
-                  #0a0d18;
-      background-attachment: fixed;
-    }
-    html.glassmorphism .card {
-      backdrop-filter: blur(20px) saturate(180%) !important;
-      -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
-      border: 1px solid rgba(255, 255, 255, 0.12) !important;
-      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37) !important;
-    }
-    html.cyberpunk {
-      --bg: #05050a;
-      --card-bg: rgba(14, 14, 24, 0.92);
-      --card-inner: #0a0a12;
-      --border: rgba(0, 240, 255, 0.25);
-      --text: #fcee0a;
-      --text-muted: #e2e8f0;
-      --primary: #00f0ff;
-      --primary-hover: #00c8d6;
-      --discord: #5865F2;
-      --discord-hover: #4752C4;
-    }
-    html.dracula {
-      --bg: #282a36;
-      --card-bg: rgba(40, 42, 54, 0.92);
-      --card-inner: #21222c;
-      --border: #44475a;
-      --text: #f8f8f2;
-      --text-muted: #bd93f9;
-      --primary: #ff79c6;
-      --primary-hover: #ff92d0;
-      --discord: #5865F2;
-      --discord-hover: #4752C4;
-    }
-    html.nord {
-      --bg: #2e3440;
-      --card-bg: rgba(46, 52, 64, 0.95);
-      --card-inner: #3b4252;
-      --border: #434c5e;
-      --text: #eceff4;
-      --text-muted: #d8dee9;
-      --primary: #88c0d0;
-      --primary-hover: #81a1c1;
-      --discord: #5865F2;
-      --discord-hover: #4752C4;
-    }
-    html.emerald {
-      --bg: #041712;
-      --card-bg: rgba(6, 38, 28, 0.9);
-      --card-inner: #07261d;
-      --border: #134e3a;
-      --text: #ecfdf5;
-      --text-muted: #a7f3d0;
-      --primary: #10b981;
-      --primary-hover: #059669;
-      --discord: #5865F2;
-      --discord-hover: #4752C4;
-    }
+    ${getThemeCss()}
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     body { background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1rem; }

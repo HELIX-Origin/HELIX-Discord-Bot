@@ -27,69 +27,6 @@ export const baseStyles = `
   .empty-state { padding: 2rem 1rem; text-align: center; color: var(--text-muted); font-size: 0.875rem; }
 `;
 
-export const colorSchemeOverrides = `
-  html.scheme-purple, html[class*="scheme-purple"] {
-    --primary: #a855f7 !important;
-    --primary-hover: #9333ea !important;
-    --primary-bg: rgba(168, 85, 247, 0.15) !important;
-    --primary-border: rgba(168, 85, 247, 0.4) !important;
-  }
-  html.scheme-blue, html[class*="scheme-blue"] {
-    --primary: #3b82f6 !important;
-    --primary-hover: #2563eb !important;
-    --primary-bg: rgba(59, 130, 246, 0.15) !important;
-    --primary-border: rgba(59, 130, 246, 0.4) !important;
-  }
-  html.scheme-emerald, html[class*="scheme-emerald"] {
-    --primary: #10b981 !important;
-    --primary-hover: #059669 !important;
-    --primary-bg: rgba(16, 185, 129, 0.15) !important;
-    --primary-border: rgba(16, 185, 129, 0.4) !important;
-  }
-  html.scheme-rose, html[class*="scheme-rose"] {
-    --primary: #f43f5e !important;
-    --primary-hover: #e11d48 !important;
-    --primary-bg: rgba(244, 63, 94, 0.15) !important;
-    --primary-border: rgba(244, 63, 94, 0.4) !important;
-  }
-  html.scheme-amber, html[class*="scheme-amber"] {
-    --primary: #f59e0b !important;
-    --primary-hover: #d97706 !important;
-    --primary-bg: rgba(245, 158, 11, 0.15) !important;
-    --primary-border: rgba(245, 158, 11, 0.4) !important;
-  }
-  html.scheme-indigo, html[class*="scheme-indigo"] {
-    --primary: #6366f1 !important;
-    --primary-hover: #4f46e5 !important;
-    --primary-bg: rgba(99, 102, 241, 0.15) !important;
-    --primary-border: rgba(99, 102, 241, 0.4) !important;
-  }
-  html.scheme-crimson, html[class*="scheme-crimson"] {
-    --primary: #ef4444 !important;
-    --primary-hover: #dc2626 !important;
-    --primary-bg: rgba(239, 68, 68, 0.15) !important;
-    --primary-border: rgba(239, 68, 68, 0.4) !important;
-  }
-  html.scheme-teal, html[class*="scheme-teal"] {
-    --primary: #14b8a6 !important;
-    --primary-hover: #0d9488 !important;
-    --primary-bg: rgba(20, 184, 166, 0.15) !important;
-    --primary-border: rgba(20, 184, 166, 0.4) !important;
-  }
-  html.scheme-sunset, html[class*="scheme-sunset"] {
-    --primary: #ff6b6b !important;
-    --primary-hover: #fa5252 !important;
-    --primary-bg: rgba(255, 107, 107, 0.15) !important;
-    --primary-border: rgba(255, 107, 107, 0.4) !important;
-  }
-  html.scheme-cyan, html[class*="scheme-cyan"] {
-    --primary: #06b6d4 !important;
-    --primary-hover: #0891b2 !important;
-    --primary-bg: rgba(6, 182, 212, 0.15) !important;
-    --primary-border: rgba(6, 182, 212, 0.4) !important;
-  }
-`;
-
 export const colorSchemeMode = `
   html.light { color-scheme: light; }
   html.dark, html.glassmorphism, html.cyberpunk, html.dracula, html.nord, html.emerald { color-scheme: dark; }

@@ -1,14 +1,16 @@
 import { appDisplayName, type AppDeps } from '../../app.js';
 import { renderTopBar } from './topbar.js';
 import { renderFooter } from './footer.js';
+import { getThemeCss, resolveThemeAndScheme } from './theme.js';
 
 export function renderGuildsHtml(deps: AppDeps, userId: number | null): string {
   const appName = appDisplayName(deps);
   const appIconUrl = deps.bot?.getAppIconUrl() || null;
   const features = deps.config.features;
+  const { theme } = resolveThemeAndScheme(deps);
 
   return `<!DOCTYPE html>
-<html lang="en" class="dashboard-theme">
+<html lang="en" class="${theme.id}">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -16,8 +18,7 @@ export function renderGuildsHtml(deps: AppDeps, userId: number | null): string {
   ${appIconUrl ? `<link rel="icon" type="image/png" href="${appIconUrl}">` : ''}
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    :root { --bg: #0b0f19; --card-bg: rgba(17, 24, 39, 0.85); --card-inner: #111827; --border: #1f2937; --text: #f3f4f6; --text-muted: #9ca3af; --primary: #06b6d4; --discord: #5865F2; }
-    html.light { --bg: #e8ecf2; --card-bg: rgba(248, 250, 252, 0.95); --card-inner: #ffffff; --border: #cbd5e1; --text: #1e293b; --text-muted: #475569; --primary: #0284c7; }
+    ${getThemeCss()}
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     body { background-color: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
     .guild-grid { display: grid; grid-template-columns: 1fr; gap: 0.625rem; padding: 1.5rem; max-width: 720px; margin: 0 auto; width: 100%; }

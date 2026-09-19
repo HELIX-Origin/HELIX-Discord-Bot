@@ -58,7 +58,7 @@ flowchart TB
 - Built with **native Node.js `http`** and a zero-dependency router, serving a responsive, zero-frontend-dependency Vanilla CSS & JavaScript UI.
 - **Modular View Components**: Deconstructed into domain-focused view modules in `src/dashboard/views/dashboard/` (`sidebar.ts`, `overview.ts`, `feeds.ts`, `sources.ts`, `guildadmin.ts`, `settings.ts`, `styles.ts`, `client-script.ts`).
 - **Discord-Style Categorized Navigation**: Section-grouped sidebar navigation (**General**, **Feeds & Alerts**, **System**) with an active server switcher banner.
-- **Theme System**: Env-driven themes (`glassmorphism`, `dark`, `light`, `cyberpunk`, `dracula`, `nord`, `emerald`) with 11 accent color schemes and a toggleable landing page.
+- **Theme System**: Env-driven themes (`glassmorphism`, `dark`, `light`, `cyberpunk`, `dracula`, `nord`, `emerald`), each defining its own accent color palette via canonical theme files (`src/dashboard/views/themes/*.ts`) served through `getThemeCss()`, plus a toggleable landing page.
 - **REST Endpoints**: CRUD operations for feeds, guild channel inspection, role listing, and activity logs (Developer Tools).
 
 ### 2. Background Feed Watcher (`src/feed/watcher.ts`)

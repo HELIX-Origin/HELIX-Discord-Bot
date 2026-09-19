@@ -21,7 +21,7 @@ export function registerOAuthRoutes(router: Router<AppDeps>): void {
       : 'The requested OAuth provider is unavailable or encountered an error. The rest of the dashboard is up and running smoothly, so feel free to return there safely.';
     const appName = appDisplayName(d);
     const appIconUrl = d.bot?.getAppIconUrl() || null;
-    sendHtml(res, 200, renderOAuthErrorHtml(title, message, appName, appIconUrl));
+    sendHtml(res, 200, renderOAuthErrorHtml(title, message, appName, appIconUrl, d.config.defaultTheme));
   };
 
   router.add('GET', '/oauth/error', handleOAuthError);
@@ -49,7 +49,11 @@ export function registerOAuthRoutes(router: Router<AppDeps>): void {
       const redirectUri = redirectUriForProvider(d, provider, req);
       await d.oauth.handleCallback(state, code, redirectUri);
       d.repo.logActivity(null, 'info', 'oauth', `OAuth provider "${provider}" connected`);
-      sendHtml(res, 200, renderOAuthCallbackHtml('success', provider, undefined, appName, appIconUrl));
+      sendHtml(
+        res,
+        200,
+        renderOAuthCallbackHtml('success', provider, undefined, appName, appIconUrl, d.config.defaultTheme),
+      );
     } catch (err) {
       sendHtml(
         res,
@@ -60,6 +64,7 @@ export function registerOAuthRoutes(router: Router<AppDeps>): void {
           err instanceof Error ? err.message : 'OAuth callback failed',
           appName,
           appIconUrl,
+          d.config.defaultTheme,
         ),
       );
     }

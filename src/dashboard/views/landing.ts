@@ -1,12 +1,11 @@
 import { appDisplayName, type AppDeps } from '../../app.js';
-import { getThemeInfo, getColorSchemeInfo } from './dashboard.js';
+import { getThemeInfo, getThemeCss } from './theme.js';
 import { renderFooter } from './footer.js';
 
 export function renderLandingHtml(deps: AppDeps, userId: number | null = null): string {
   const appName = appDisplayName(deps);
   const appIconUrl = deps.bot?.getAppIconUrl() || null;
   const theme = getThemeInfo(deps.config.defaultTheme);
-  const colorScheme = getColorSchemeInfo(deps.config.dashboardColorScheme);
   const botInviteUrl = deps.config.clientId
     ? `https://discord.com/oauth2/authorize?client_id=${encodeURIComponent(deps.config.clientId)}&scope=bot%20applications.commands&permissions=586263558272`
     : null;
@@ -15,7 +14,7 @@ export function renderLandingHtml(deps: AppDeps, userId: number | null = null): 
   const dashboardEnabled = deps.config.features.dashboardEnabled;
 
   return `<!DOCTYPE html>
-<html lang="en" class="${theme.id} scheme-${colorScheme.id}">
+<html lang="en" class="${theme.id}">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -24,147 +23,7 @@ export function renderLandingHtml(deps: AppDeps, userId: number | null = null): 
   <meta name="description" content="High-performance RSS, Reddit, and Free Games giveaway syndication bot with rich embeds and a real-time dashboard for Discord.">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    :root, html.dark {
-      --bg: #0b0f19;
-      --card-bg: rgba(17, 24, 39, 0.85);
-      --card-inner: #111827;
-      --border: #1f2937;
-      --border-hover: #374151;
-      --text: #f3f4f6;
-      --text-muted: #9ca3af;
-      --text-dim: #6b7280;
-      --primary: #06b6d4;
-      --primary-hover: #0891b2;
-      --primary-bg: rgba(6, 182, 212, 0.12);
-      --primary-border: rgba(6, 182, 212, 0.35);
-      --discord: #5865F2;
-      --discord-hover: #4752C4;
-      --amber: #f59e0b;
-      --emerald: #10b981;
-      --red: #ef4444;
-      --shadow: 0 4px 20px rgba(0,0,0,0.25);
-    }
-    html.light {
-      --bg: #e8ecf2;
-      --card-bg: rgba(248, 250, 252, 0.95);
-      --card-inner: #ffffff;
-      --border: #cbd5e1;
-      --border-hover: #94a3b8;
-      --text: #1e293b;
-      --text-muted: #475569;
-      --text-dim: #64748b;
-      --primary: #0284c7;
-      --primary-hover: #0369a1;
-      --primary-bg: rgba(14, 165, 233, 0.12);
-      --primary-border: rgba(14, 165, 233, 0.35);
-      --shadow: 0 4px 20px rgba(0,0,0,0.06);
-    }
-    html.glassmorphism {
-      --bg: #0a0d18;
-      --card-bg: rgba(18, 24, 43, 0.55);
-      --card-inner: rgba(255, 255, 255, 0.04);
-      --border: rgba(255, 255, 255, 0.12);
-      --border-hover: rgba(168, 85, 247, 0.5);
-      --text: #ffffff;
-      --text-muted: #cbd5e1;
-      --text-dim: #94a3b8;
-      --primary: #a855f7;
-      --primary-hover: #9333ea;
-      --primary-bg: rgba(168, 85, 247, 0.2);
-      --primary-border: rgba(168, 85, 247, 0.45);
-      --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-    }
-    html.glassmorphism body {
-      background: radial-gradient(circle at 15% 15%, rgba(168, 85, 247, 0.18), transparent 35%),
-                  radial-gradient(circle at 85% 20%, rgba(6, 182, 212, 0.18), transparent 35%),
-                  radial-gradient(circle at 50% 85%, rgba(236, 72, 153, 0.15), transparent 45%),
-                  #0a0d18;
-      background-attachment: fixed;
-    }
-    html.glassmorphism .card,
-    html.glassmorphism header,
-    html.glassmorphism .hero-banner {
-      backdrop-filter: blur(20px) saturate(180%) !important;
-      -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
-      border: 1px solid rgba(255, 255, 255, 0.12) !important;
-      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37) !important;
-    }
-    html.cyberpunk {
-      --bg: #05050a;
-      --card-bg: rgba(14, 14, 24, 0.92);
-      --card-inner: #0a0a12;
-      --border: rgba(0, 240, 255, 0.25);
-      --border-hover: #00f0ff;
-      --text: #fcee0a;
-      --text-muted: #e2e8f0;
-      --text-dim: #8b9bb4;
-      --primary: #00f0ff;
-      --primary-hover: #00c8d6;
-      --primary-bg: rgba(0, 240, 255, 0.16);
-      --primary-border: rgba(0, 240, 255, 0.5);
-      --amber: #fcee0a;
-      --red: #ff0055;
-      --emerald: #00ff9f;
-      --shadow: 0 0 20px rgba(0, 240, 255, 0.15);
-    }
-    html.cyberpunk body {
-      background: linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
-                  linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px),
-                  #05050a;
-      background-size: 32px 32px;
-      background-attachment: fixed;
-    }
-    html.dracula {
-      --bg: #282a36;
-      --card-bg: rgba(40, 42, 54, 0.92);
-      --card-inner: #21222c;
-      --border: #44475a;
-      --border-hover: #bd93f9;
-      --text: #f8f8f2;
-      --text-muted: #bd93f9;
-      --text-dim: #6272a4;
-      --primary: #ff79c6;
-      --primary-hover: #ff92d0;
-      --primary-bg: rgba(255, 121, 198, 0.15);
-      --primary-border: rgba(255, 121, 198, 0.45);
-      --emerald: #50fa7b;
-      --amber: #f1fa8c;
-      --red: #ff5555;
-      --shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
-    }
-    html.nord {
-      --bg: #2e3440;
-      --card-bg: rgba(46, 52, 64, 0.95);
-      --card-inner: #3b4252;
-      --border: #434c5e;
-      --border-hover: #88c0d0;
-      --text: #eceff4;
-      --text-muted: #d8dee9;
-      --text-dim: #7b88a1;
-      --primary: #88c0d0;
-      --primary-hover: #81a1c1;
-      --primary-bg: rgba(136, 192, 208, 0.15);
-      --primary-border: rgba(136, 192, 208, 0.4);
-      --emerald: #a3be8c;
-      --amber: #ebcb8b;
-      --red: #bf616a;
-      --shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
-    }
-    html.emerald {
-      --bg: #041712;
-      --card-bg: rgba(6, 38, 28, 0.9);
-      --card-inner: #07261d;
-      --border: #134e3a;
-      --border-hover: #10b981;
-      --text: #ecfdf5;
-      --text-muted: #a7f3d0;
-      --text-dim: #34d399;
-      --primary: #10b981;
-      --primary-hover: #059669;
-      --primary-bg: rgba(16, 185, 129, 0.16);
-      --primary-border: rgba(16, 185, 129, 0.45);
-      --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-    }
+    ${getThemeCss()}
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     body { background-color: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; line-height: 1.6; }

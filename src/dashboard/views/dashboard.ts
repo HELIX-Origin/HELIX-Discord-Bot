@@ -1,6 +1,6 @@
 import { appDisplayName, type AppDeps } from '../../app.js';
 import { isOwnerUser, isAdminOrOwner, canUserAccessDashboard, canUserManageGuild } from '../routes/shared.js';
-import { getThemeInfo, getColorSchemeInfo } from './theme.js';
+import { getThemeInfo } from './theme.js';
 import { renderDashboardStyles } from './dashboard/styles.js';
 import { renderSidebar } from './dashboard/sidebar.js';
 import { renderOverviewTab } from './dashboard/overview.js';
@@ -15,7 +15,7 @@ import { renderCommandsTab } from './dashboard/commands.js';
 import { renderClientScript } from './dashboard/client-script.js';
 import { createRedditFeeds } from '../../feed/reddit.js';
 
-export { getThemeInfo, getColorSchemeInfo } from './theme.js';
+export { getThemeInfo } from './theme.js';
 
 export interface DashboardRoute {
   view: 'guilds' | 'dashboard';
@@ -31,7 +31,6 @@ export function renderDashboardHtml(
   const appName = appDisplayName(deps);
   const appIconUrl = deps.bot?.getAppIconUrl() || null;
   const theme = getThemeInfo(deps.config.defaultTheme);
-  const colorScheme = getColorSchemeInfo(deps.config.dashboardColorScheme);
   const publicBaseUrl = deps.config.publicBaseUrl || null;
   const internalUrl = deps.config.internalUrl;
   const botInviteUrl = deps.config.clientId
@@ -41,7 +40,7 @@ export function renderDashboardHtml(
   // Permission check for logged in Discord users without server manage permissions
   if (userId !== null && !canUserAccessDashboard(userId, deps)) {
     return `<!DOCTYPE html>
-<html lang="en" class="${theme.id} scheme-${colorScheme.id}">
+<html lang="en" class="${theme.id}">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -49,7 +48,7 @@ export function renderDashboardHtml(
   ${appIconUrl ? `<link rel="icon" type="image/png" href="${appIconUrl}">` : ''}
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    ${renderDashboardStyles(theme, colorScheme)}
+    ${renderDashboardStyles()}
     body { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 1rem; }
     .denied-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 1.25rem; padding: 2rem; max-width: 440px; text-align: center; backdrop-filter: blur(16px); box-shadow: var(--shadow); }
     .denied-icon { display: inline-flex; width: 3.5rem; height: 3.5rem; align-items: center; justify-content: center; border-radius: 1rem; background: rgba(245,158,11,0.1); color: #f59e0b; font-size: 1.5rem; margin-bottom: 1rem; }
@@ -85,7 +84,7 @@ export function renderDashboardHtml(
   const redditAvailable = (deps.reddit ?? createRedditFeeds()).available();
 
   return `<!DOCTYPE html>
-<html lang="en" class="${theme.id} scheme-${colorScheme.id}">
+<html lang="en" class="${theme.id}">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -93,7 +92,7 @@ export function renderDashboardHtml(
   ${appIconUrl ? `<link rel="icon" type="image/png" href="${appIconUrl}">` : ''}
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    ${renderDashboardStyles(theme, colorScheme)}
+    ${renderDashboardStyles()}
   </style>
 </head>
 <body>
@@ -118,8 +117,8 @@ export function renderDashboardHtml(
     </div>
 
     <div class="nav-actions">
-      <span class="badge badge-gray" title="Active Theme: ${theme.name}${colorScheme.id !== 'default' ? ` · Scheme: ${colorScheme.name}` : ''} (Configured via .env)" style="padding: 0.4rem 0.75rem; font-size: 0.75rem;">
-        <i class="${theme.icon}" style="color: var(--primary); margin-right: 0.25rem;"></i> ${theme.name}${colorScheme.id !== 'default' ? ` <span style="opacity: 0.7; font-size: 0.6875rem;">(${colorScheme.name})</span>` : ''}
+      <span class="badge badge-gray" title="Active Theme: ${theme.name} (Configured via DASHBOARD_THEME)" style="padding: 0.4rem 0.75rem; font-size: 0.75rem;">
+        <i class="${theme.icon}" style="color: var(--primary); margin-right: 0.25rem;"></i> ${theme.name}
       </span>
       ${
         botInviteUrl
@@ -189,8 +188,6 @@ export function renderDashboardHtml(
                 internalUrl,
                 themeName: theme.name,
                 themeId: theme.id,
-                colorSchemeName: colorScheme.name,
-                colorSchemeId: colorScheme.id,
               })
             : ''
         }

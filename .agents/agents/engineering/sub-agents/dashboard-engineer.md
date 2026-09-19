@@ -27,7 +27,8 @@ The **Dashboard Specialist** designs, implements, and maintains the self-hosted 
    - Query live bot state (`deps.bot`) for channels, threads, voice states, and application information.
    - Ensure the UI channel and thread selectors reflect live Discord permissions and active bot guild memberships.
 4. **Theme Engine & Appearance**:
-   - Maintain full compatibility with `.env` theme settings (`DASHBOARD_THEME`, `DASHBOARD_COLOR_SCHEME`, `LANDING_PAGE_ENABLED`).
+   - Maintain full compatibility with `.env` theme settings (`DASHBOARD_THEME`, `LANDING_PAGE_ENABLED`).
+   - Theme colors are defined only in the canonical theme files (`src/dashboard/views/themes/*.ts`); views import theme CSS via `getThemeCss()` from `src/dashboard/views/theme.ts` — never inline duplicate theme blocks.
    - Ensure all UI views adhere to CSS custom property styling across Light and Dark modes.
 5. **Security & Route Guarding**:
    - Enforce strict authentication via `requireAuth` and `requireOwner`.

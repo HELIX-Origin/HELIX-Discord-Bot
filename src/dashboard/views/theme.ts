@@ -6,17 +6,12 @@ import { cyberpunkTheme } from './themes/cyberpunk.js';
 import { draculaTheme } from './themes/dracula.js';
 import { nordTheme } from './themes/nord.js';
 import { emeraldTheme } from './themes/emerald.js';
-import { baseStyles, colorSchemeOverrides, colorSchemeMode } from './themes/shared.js';
+import { baseStyles, colorSchemeMode } from './themes/shared.js';
 
 export interface ThemeInfo {
   id: string;
   name: string;
   icon: string;
-}
-
-export interface ColorSchemeInfo {
-  id: string;
-  name: string;
 }
 
 export function getThemeInfo(theme?: string): ThemeInfo {
@@ -42,25 +37,9 @@ export function getThemeInfo(theme?: string): ThemeInfo {
   return { id: 'dark', name: 'Dark', icon: 'fa-solid fa-moon' };
 }
 
-export function getColorSchemeInfo(scheme?: string): ColorSchemeInfo {
-  const s = (scheme || '').trim().toLowerCase();
-  if (s === 'purple' || s === 'amethyst') return { id: 'purple', name: 'Amethyst Purple' };
-  if (s === 'blue' || s === 'ocean') return { id: 'blue', name: 'Ocean Blue' };
-  if (s === 'emerald' || s === 'jade' || s === 'green') return { id: 'emerald', name: 'Emerald Green' };
-  if (s === 'rose' || s === 'pink' || s === 'fuchsia') return { id: 'rose', name: 'Rose Pink' };
-  if (s === 'amber' || s === 'gold' || s === 'yellow') return { id: 'amber', name: 'Amber Gold' };
-  if (s === 'indigo' || s === 'violet') return { id: 'indigo', name: 'Indigo Violet' };
-  if (s === 'crimson' || s === 'ruby' || s === 'red') return { id: 'crimson', name: 'Crimson Ruby' };
-  if (s === 'teal' || s === 'aqua') return { id: 'teal', name: 'Teal Aqua' };
-  if (s === 'sunset' || s === 'coral' || s === 'orange') return { id: 'sunset', name: 'Sunset Coral' };
-  if (s === 'cyan' || s === 'electric') return { id: 'cyan', name: 'Electric Cyan' };
-  return { id: 'default', name: 'Theme Default' };
-}
-
-export function resolveThemeAndScheme(deps: AppDeps): { theme: ThemeInfo; colorScheme: ColorSchemeInfo } {
+export function resolveThemeAndScheme(deps: AppDeps): { theme: ThemeInfo } {
   const theme = getThemeInfo(deps.config.defaultTheme);
-  const colorScheme = getColorSchemeInfo(deps.config.dashboardColorScheme);
-  return { theme, colorScheme };
+  return { theme };
 }
 
 export function getThemeCss(): string {
@@ -73,7 +52,6 @@ export function getThemeCss(): string {
     ${nordTheme}
     ${emeraldTheme}
     ${colorSchemeMode}
-    ${colorSchemeOverrides}
   `;
 }
 

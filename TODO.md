@@ -44,6 +44,22 @@
 
 **Status:** dashboard phase (`627d783`), ticket redesign (`cf6c6c3`), forum→thread refactor (`21a4734`), docs sync + THREADS_ENABLED gate (`536e992`), and role-subscription + add-notification (`779e4bb`) committed + pushed — each ran green `npm run check` + `pnpm build`. Remaining: final docs/wiki/issue sync (roadmap issue #27 Phase 9/10 checkboxes + new Phase 11 role/notification row). Progress mirrored on roadmap issue #27.
 
+### Workstream: Theme System — Single Source of Truth (`themes/*.ts`)
+
+**Locked user directives:**
+
+- "all themes and colors should be handled by the theme files... the dashboard pages and elements need to import their styles from the actual theme files. this is a mandatory feature to allow contributors to easily create new themes and colors for the dashboard." (m1083)
+- "since we have custom themes, separate color schemes might be a bit overkill. the themes can just provide their own unique color schemes." (m1131)
+
+**Implementation checklist:**
+
+- [x] Dashboard `styles.ts` → `${getThemeCss()}` + component CSS (import from `theme.ts`); no inline theme var blocks
+- [x] login / landing / commands / legal / guilds / admin / oauth-callback pages import `getThemeCss()` and drop inline theme blocks; html classes now use real `theme.id`
+- [x] Delete dead `src/dashboard/handlers/pages.ts` (unused local theme duplicates)
+- [x] Remove color-scheme layer: `AppConfig.dashboardColorScheme`, `DashboardRuntimeConfig.colorScheme`, `DASHBOARD_COLOR_SCHEMES`/`DashboardColorScheme`, `colorSchemeOverrides` (shared.ts), `ColorSchemeInfo`/`getColorSchemeInfo` (theme.ts), `scheme-*` html classes, settings-tab scheme fields, `DASHBOARD_COLOR_SCHEME` env var (kept `colorSchemeMode` native `color-scheme` for scrollbars/inputs)
+- [x] Docs: `.env.example`, `wiki/Configuration.md`, `wiki/Architecture-and-Design.md`, `.agents/rules/dashboard-standards.md`, `.agents/agents/engineering/sub-agents/dashboard-engineer.md`
+- [x] `npm run check` + `pnpm build` green
+
 ---
 
 ## 🛠️ Verification Commands

@@ -84,13 +84,12 @@ src/dashboard/
 ## 3. Environment-Only Theme Engine
 
 1. **Configuration Exclusively via `.env`**:
-   - `DASHBOARD_THEME`: Active theme (`glassmorphism`, `dark`, `light`, `cyberpunk`, `dracula`, `nord`, `emerald`).
-   - `DASHBOARD_COLOR_SCHEME`: Primary accent scheme (11 options).
+   - `DASHBOARD_THEME`: Active theme (`glassmorphism`, `dark`, `light`, `cyberpunk`, `dracula`, `nord`, `emerald`). Each theme provides its own accent color palette.
    - `LANDING_PAGE_ENABLED`: Boolean controlling whether `/` serves the landing page or redirects to `/dashboard`.
 2. **CSS Custom Properties**:
    - All styling MUST use theme CSS variables (`var(--bg-primary)`, `var(--bg-secondary)`, `var(--text-primary)`, `var(--accent)`, `var(--border-color)`). Never hardcode hex colors in view markup.
-3. **Theme Toggle**:
-   - Client-side theme toggling is saved to `localStorage` and toggles `data-theme="light|dark"` on the root `<html>` element.
+3. **Theme Engine**:
+   - Themes and colors MUST live exclusively in the canonical theme files (`src/dashboard/views/themes/*.ts`). Views import theme CSS from `getThemeCss()` (`src/dashboard/views/theme.ts`); they never inline duplicate theme blocks. Adding a theme is a single new file in `src/dashboard/views/themes/`.
 
 ---
 

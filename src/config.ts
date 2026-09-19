@@ -33,7 +33,6 @@ export interface AppConfig {
   repoUrl: string;
   userAgent: string;
   defaultTheme: string;
-  dashboardColorScheme: string;
   landingPageEnabled: boolean;
   threadKeepaliveEnabled: boolean;
   threadKeepaliveIntervalMs: number;
@@ -168,12 +167,6 @@ export function defaultConfig(): AppConfig {
     process.env['LANDING_PAGE_ENABLED']?.trim().toLowerCase() !== 'false' &&
     process.env['ENABLE_LANDING_PAGE']?.trim().toLowerCase() !== 'false';
 
-  const dashboardColorScheme =
-    process.env['DASHBOARD_COLOR_SCHEME']?.trim().toLowerCase() ||
-    process.env['COLOR_SCHEME']?.trim().toLowerCase() ||
-    process.env['ACCENT_COLOR']?.trim().toLowerCase() ||
-    'default';
-
   const threadKeepaliveEnabled =
     process.env['THREAD_KEEPALIVE_ENABLED']?.toLowerCase() !== 'false' &&
     process.env['KEEP_THREADS_OPEN']?.toLowerCase() !== 'false';
@@ -218,7 +211,6 @@ export function defaultConfig(): AppConfig {
     repoUrl,
     userAgent,
     defaultTheme,
-    dashboardColorScheme,
     landingPageEnabled,
     threadKeepaliveEnabled,
     threadKeepaliveIntervalMs: parsePositiveInt(process.env['THREAD_KEEPALIVE_INTERVAL_MS'], 6 * 3600 * 1000),

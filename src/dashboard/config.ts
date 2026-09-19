@@ -16,7 +16,6 @@ export interface DashboardRuntimeConfig {
   internalUrl: string;
   publicBaseUrl: string | null;
   defaultTheme: string;
-  colorScheme: string;
   landingPageEnabled: boolean;
   clientId: string | null;
   redirectUrl: string | null;
@@ -31,7 +30,6 @@ export function extractDashboardConfig(config: AppConfig): DashboardRuntimeConfi
     internalUrl: config.internalUrl,
     publicBaseUrl: config.publicBaseUrl,
     defaultTheme: config.defaultTheme,
-    colorScheme: config.dashboardColorScheme,
     landingPageEnabled: config.landingPageEnabled,
     clientId: config.clientId,
     redirectUrl: config.redirectUrl,
@@ -48,20 +46,3 @@ export function resolveDashboardBaseUrl(deps: AppDeps): string {
 export const DASHBOARD_THEMES = ['glassmorphism', 'dark', 'light', 'cyberpunk', 'dracula', 'nord', 'emerald'] as const;
 
 export type DashboardTheme = (typeof DASHBOARD_THEMES)[number];
-
-/** Supported dashboard color scheme identifiers. */
-export const DASHBOARD_COLOR_SCHEMES = [
-  'default',
-  'purple',
-  'blue',
-  'emerald',
-  'rose',
-  'amber',
-  'cyan',
-  'indigo',
-  'teal',
-  'orange',
-  'pink',
-] as const;
-
-export type DashboardColorScheme = (typeof DASHBOARD_COLOR_SCHEMES)[number];
