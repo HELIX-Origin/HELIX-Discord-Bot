@@ -6,7 +6,12 @@ import { hasInvitePermission } from '../oauth/discord.js';
 import { getAllCommands, isCommandDisabled } from '../../bot/handlers/registry.js';
 import { loadAllCommands } from '../../bot/handlers/loader.js';
 import { getWelcomeConfig } from '../../bot/commands/admin/welcome.js';
-import { DEFAULT_TICKET_MESSAGE, getTicketConfig, sendTicketButtonMessage } from '../../bot/commands/admin/ticket.js';
+import {
+  DEFAULT_TICKET_MESSAGE,
+  getTicketConfig,
+  renderTicketMessage,
+  sendTicketButtonMessage,
+} from '../../bot/commands/admin/ticket.js';
 import { parseModLogEvents, MOD_ACTIONS } from '../../bot/lib/admin/modlog.js';
 import { AUDIT_EVENTS, dispatchAuditLog, parseAuditEvents } from '../../bot/lib/admin/auditlog.js';
 
@@ -385,11 +390,24 @@ export function registerGuildRoutes(router: Router<AppDeps>): void {
             body.tickets.color !== undefined) &&
           d.bot
         ) {
-          const msg = d.repo.getGuildSetting(guildId, 'ticket_message') || DEFAULT_TICKET_MESSAGE;
+          const rawMsg = d.repo.getGuildSetting(guildId, 'ticket_message') || DEFAULT_TICKET_MESSAGE;
           const isEmbed = d.repo.getGuildSetting(guildId, 'ticket_embed') === '1';
           const rawColor = d.repo.getGuildSetting(guildId, 'ticket_color');
           const cleaned = (rawColor ?? '').trim().replace(/^#/, '');
           const color = /^[0-9a-fA-F]{6}$/.test(cleaned) ? parseInt(cleaned, 16) : null;
+          const binding = d.repo.getGuildBinding(guildId);
+          const serverName = (binding?.name || '').trim() || 'this server';
+          const memberCount =
+            typeof d.bot.getGuildMemberCount === 'function' ? ((await d.bot.getGuildMemberCount(guildId)) ?? '?') : '?';
+          const managerRoleId = d.repo.getGuildSetting(guildId, 'ticket_manager_role_id');
+          const msg = renderTicketMessage(rawMsg, {
+            server: serverName,
+            membercount: memberCount,
+            role: managerRoleId ? `<@&${managerRoleId}>` : '@Support',
+            channel: `<#${activeChanId}>`,
+            user: 'Member',
+            mention: '@Member',
+          });
           void sendTicketButtonMessage(d.bot.rest, activeChanId, msg, { embed: isEmbed, color }).catch(() => {});
         }
       }

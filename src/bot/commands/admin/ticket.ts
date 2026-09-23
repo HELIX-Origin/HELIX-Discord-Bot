@@ -58,6 +58,38 @@ function parseHexColor(raw: string | undefined): number | null {
   return parseInt(cleaned, 16);
 }
 
+export interface TicketMessageArgs {
+  server?: string;
+  membercount?: number | string;
+  role?: string;
+  channel?: string;
+  user?: string;
+  mention?: string;
+}
+
+export function renderTicketMessage(template: string, args: TicketMessageArgs = {}): string {
+  let content = template;
+  if (args.server !== undefined) {
+    content = content.replace(/\{server\}/g, args.server);
+  }
+  if (args.membercount !== undefined) {
+    content = content.replace(/\{membercount\}/g, String(args.membercount));
+  }
+  if (args.role !== undefined) {
+    content = content.replace(/\{role\}/g, args.role);
+  }
+  if (args.channel !== undefined) {
+    content = content.replace(/\{channel\}/g, args.channel);
+  }
+  if (args.user !== undefined) {
+    content = content.replace(/\{user\}/g, args.user);
+  }
+  if (args.mention !== undefined) {
+    content = content.replace(/\{mention\}/g, args.mention);
+  }
+  return content.slice(0, 2000);
+}
+
 export interface TicketConfig {
   channelId: string | null;
   managerRoleId: string | null;
@@ -112,7 +144,7 @@ export async function handleTicketCommand(
 
   switch (optionValue(options, 'action')) {
     case 'setup':
-      return handleSetup(guildId, options, deps, rest);
+      return handleSetup(guildId, options, deps, rest, interaction);
     case 'disable':
       return handleDisable(guildId, deps);
     case 'view':
@@ -202,6 +234,7 @@ async function handleSetup(
   options: InteractionOption[],
   deps: AppDeps,
   rest: DiscordRestClient,
+  interaction?: DiscordInteraction,
 ): Promise<InteractionResponse> {
   const channelId = optionValue(options, 'channel') || undefined;
   const managerRoleId = optionValue(options, 'manager_role');
@@ -258,8 +291,27 @@ async function handleSetup(
   const targetChannel = channelId || config.channelId;
   const msgContent = ticketMessage || config.ticketMessage || DEFAULT_TICKET_MESSAGE;
   if (targetChannel && (channelId || ticketMessage || embed !== undefined || color)) {
+    const binding = deps.repo.getGuildBinding(guildId);
+    const serverName = (binding?.name || '').trim() || 'this server';
+    const memberCount =
+      typeof deps.bot?.getGuildMemberCount === 'function'
+        ? ((await deps.bot.getGuildMemberCount(guildId)) ?? '?')
+        : '?';
+    const effectiveRoleId = managerRoleId || config.managerRoleId;
+    const username = interaction?.member?.user?.global_name || interaction?.member?.user?.username || 'User';
+    const userMention = interaction?.member?.user?.id ? `<@${interaction.member.user.id}>` : '@user';
+
+    const renderedContent = renderTicketMessage(msgContent, {
+      server: serverName,
+      membercount: memberCount,
+      role: effectiveRoleId ? `<@&${effectiveRoleId}>` : '@Support',
+      channel: `<#${targetChannel}>`,
+      user: username,
+      mention: userMention,
+    });
+
     try {
-      await sendTicketButtonMessage(rest, targetChannel, msgContent, {
+      await sendTicketButtonMessage(rest, targetChannel, renderedContent, {
         embed: isEmbed,
         color: parsedColor,
       });

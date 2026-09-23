@@ -84,14 +84,21 @@ HELIX Discord Bot includes a native thread-based support ticket system. A sticky
 
 ### Workflow Architecture
 1. **Host Message**: Bot posts the configured ticket prompt and `[🎫 Open Ticket]` button to the ticket channel. Supports both **Plain Text** and **Rich Embed** formats (`embed: true` or Format dropdown on dashboard).
-2. **Ticket Creation**: Clicking the button creates a new thread in the channel (e.g. `ticket-username`) and adds the member.
-3. **Manager Role Alert**: If a Support Manager role is configured, the bot mentions/adds the role to the thread for rapid staff response.
-4. **Ticket Operations**: Staff and users can add members (`/ticket action:add`), close the ticket (`/ticket action:close`), or archive transcripts.
+2. **Template Placeholders**: Ticket message supports dynamic placeholders:
+   - `{server}`: Server name
+   - `{role}`: Ticket manager role mention (or `@Support`)
+   - `{channel}`: Ticket channel mention (e.g. `<#tickets>`)
+   - `{membercount}`: Total server member count
+   - `{user}`: Username of the user
+   - `{mention}`: User mention ping (`<@user>`)
+3. **Ticket Creation**: Clicking the button creates a new thread in the channel (e.g. `ticket-username`) and adds the member.
+4. **Manager Role Alert**: If a Support Manager role is configured, the bot mentions/adds the role to the thread for rapid staff response.
+5. **Ticket Operations**: Staff and users can add members (`/ticket action:add`), close the ticket (`/ticket action:close`), or archive transcripts.
 
 ### Dashboard Tickets Tab
 Configurable under **General → Support Tickets** on the web dashboard:
-- **Responsive 2-Column Grid**: Channel & Role routing selectors, **Format dropdown** (`Plain text` / `Embed`), and prompt textarea on the left; **Live Button & Message Preview** on the right.
-- **Live Interactive Button & Embed Preview**: Previews the prompt (plain text or rich embed card) and interactive blurple Discord ticket button before saving.
+- **Responsive 2-Column Grid**: Channel & Role routing selectors, **Format dropdown** (`Plain text` / `Embed`), **Available Placeholders** helper card, and prompt textarea on the left; **Live Button & Message Preview** on the right.
+- **Live Interactive Button & Embed Preview**: Previews the prompt (plain text or rich embed card with live placeholder interpolation) and interactive blurple Discord ticket button before saving.
 
 ---
 

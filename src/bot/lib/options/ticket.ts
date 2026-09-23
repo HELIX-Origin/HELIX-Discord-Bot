@@ -60,7 +60,7 @@ export const ticketOptions: ApplicationCommandOption[] = [
   },
   {
     name: 'message',
-    description: 'Message hosting the Open Ticket button in the ticket channel (setup)',
+    description: 'Message hosting the Open Ticket button. Supports {server}, {role}, {channel}, etc. (setup)',
     type: ApplicationCommandOptionType.STRING,
     required: false,
   },

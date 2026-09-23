@@ -1557,8 +1557,27 @@ export function renderClientScript(): string {
       const container = document.getElementById('ticket-preview-container');
       if (!container) return;
       const isEmbed = document.getElementById('admin-ticket-embed')?.value === '1';
-      const rawMsg = document.getElementById('admin-ticket-message')?.value || 'Click the button below to open a support ticket.';
-      const formatted = formatDiscordMarkdown(rawMsg);
+      const guildName = (currentGuild && currentGuild.name) ? currentGuild.name : 'My Server';
+
+      const roleSelect = document.getElementById('admin-ticket-manager-role');
+      const selectedRoleText = roleSelect && roleSelect.selectedIndex > 0 ? roleSelect.options[roleSelect.selectedIndex].text : '@Support';
+      const cleanRoleText = selectedRoleText.startsWith('@') ? selectedRoleText : '@' + selectedRoleText;
+      const roleDisplay = '<span class="discord-mention">' + esc(cleanRoleText) + '</span>';
+
+      const channelSelect = document.getElementById('admin-ticket-channel');
+      const selectedChanText = channelSelect && channelSelect.selectedIndex > 0 ? channelSelect.options[channelSelect.selectedIndex].text : '#tickets';
+      const cleanChanText = selectedChanText.startsWith('#') ? selectedChanText : '#' + selectedChanText;
+      const channelDisplay = '<span class="discord-mention">' + esc(cleanChanText) + '</span>';
+
+      const rawMsg = document.getElementById('admin-ticket-message')?.value || 'Click the button below to open a support ticket in {server}.';
+
+      const formatted = formatDiscordMarkdown(rawMsg)
+        .replace(/{server}/g, esc(guildName))
+        .replace(/{role}/g, roleDisplay)
+        .replace(/{channel}/g, channelDisplay)
+        .replace(/{membercount}/g, '128')
+        .replace(/{user}/g, 'Member')
+        .replace(/{mention}/g, '<span class="discord-mention">@Member</span>');
       const botName = esc((currentGuild && currentGuild.botName) ? currentGuild.botName : 'HELIX');
       const botIcon = (currentGuild && currentGuild.icon) ? guildIconUrl(currentGuildId, currentGuild.icon) : null;
       const avatarHtml = botIcon

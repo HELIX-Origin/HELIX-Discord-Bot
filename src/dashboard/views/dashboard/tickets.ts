@@ -23,7 +23,7 @@ export function renderTicketsTab(): string {
           <div class="form-grid" style="margin-top: 0.75rem;">
             <div class="form-group">
               <label class="form-label">Ticket Channel (button message)</label>
-              <select id="admin-ticket-channel"><option value="">-- Disabled --</option></select>
+              <select id="admin-ticket-channel" onchange="updateTicketPreview()"><option value="">-- Disabled --</option></select>
             </div>
             <div class="form-group">
               <label class="form-label">Format</label>
@@ -34,7 +34,7 @@ export function renderTicketsTab(): string {
             </div>
             <div class="form-group">
               <label class="form-label">Ticket Manager Role</label>
-              <select id="admin-ticket-manager-role"><option value="">-- None --</option></select>
+              <select id="admin-ticket-manager-role" onchange="updateTicketPreview()"><option value="">-- None --</option></select>
             </div>
             <div class="form-group">
               <label class="form-label">Transcript Channel (closed tickets)</label>
@@ -50,7 +50,16 @@ export function renderTicketsTab(): string {
               <label class="form-label">Ticket Message (Hosts the Open Ticket button)</label>
               <span style="font-size: 0.6875rem; color: var(--text-dim);">Markdown supported</span>
             </div>
-            <textarea id="admin-ticket-message" rows="4" spellcheck="false" placeholder="Click the button below to open a support ticket." oninput="updateTicketPreview()"></textarea>
+            <textarea id="admin-ticket-message" rows="4" spellcheck="false" placeholder="Click the button below to open a support ticket in {server}." oninput="updateTicketPreview()"></textarea>
+          </div>
+          <div style="background: var(--card-inner); border: 1px solid var(--border); border-radius: 0.625rem; padding: 0.75rem; font-size: 0.75rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 0.75rem;">
+            <div style="font-weight: 700; color: var(--text); margin-bottom: 0.25rem;"><i class="fa-solid fa-tags" style="color: #6366f1;"></i> Available Placeholders</div>
+            <div><code>{server}</code> — Server name</div>
+            <div><code>{role}</code> — Ticket manager role mention (e.g. <strong>@Support</strong>)</div>
+            <div><code>{channel}</code> — Ticket channel mention (e.g. <strong>#tickets</strong>)</div>
+            <div><code>{membercount}</code> — Total server member count</div>
+            <div><code>{user}</code> — Username</div>
+            <div><code>{mention}</code> — User mention ping</div>
           </div>
           <div style="background: var(--card-inner); border: 1px solid var(--border); border-radius: 0.625rem; padding: 0.75rem; font-size: 0.75rem; color: var(--text-muted); line-height: 1.5;">
             <div style="font-weight: 700; color: var(--text); margin-bottom: 0.25rem;"><i class="fa-solid fa-circle-info" style="color: #6366f1;"></i> How Tickets Work</div>

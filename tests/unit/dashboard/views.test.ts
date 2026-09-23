@@ -131,4 +131,20 @@ describe('renderDashboardHtml', () => {
     expect(result).toContain('<code');
     expect(result).toContain('code</code>');
   });
+
+  it('renders ticket placeholders card and client script substitutes ticket placeholders', () => {
+    const deps = makeDeps();
+    const html = renderDashboardHtml(deps, 1, { view: 'dashboard', guildId: 'guild-1' });
+
+    expect(html).toContain('Available Placeholders');
+    expect(html).toContain('<code>{server}</code>');
+    expect(html).toContain('<code>{role}</code>');
+    expect(html).toContain('<code>{channel}</code>');
+
+    const script = renderClientScript();
+    expect(script).toContain('.replace(/{server}/g, esc(guildName))');
+    expect(script).toContain('.replace(/{role}/g, roleDisplay)');
+    expect(script).toContain('.replace(/{channel}/g, channelDisplay)');
+    expect(script).toContain('.replace(/{membercount}/g, \'128\')');
+  });
 });

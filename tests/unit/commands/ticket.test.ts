@@ -1,7 +1,7 @@
-import { describe, it, expect } from 'vitest';
 import {
   handleTicketCommand,
   getTicketConfig,
+  renderTicketMessage,
   sendTicketButtonMessage,
   DEFAULT_TICKET_MESSAGE,
   TICKET_OPEN_BUTTON_ID,
@@ -48,6 +48,7 @@ function makeDeps(initialSettings: Record<string, string> = {}): {
     },
     bot: {
       getAppName: () => 'HELIX Bot',
+      getGuildMemberCount: async () => 128,
       rest,
     },
   } as unknown as AppDeps;
@@ -222,5 +223,48 @@ describe('handleTicketCommand — Setup & Ticket Message', () => {
     expect(payload.embeds?.[0].description).toBe('Need help?');
     expect(payload.embeds?.[0].color).toBe(0x6366f1);
     expect(payload.components[0].components[0].custom_id).toBe(TICKET_OPEN_BUTTON_ID);
+  });
+
+  it('renders placeholders in ticket button message on setup', async () => {
+    const { deps, sentMessages, rest } = makeDeps();
+    const interaction = makeInteraction([
+      { name: 'action', value: 'setup' },
+      { name: 'channel', value: 'chan-tickets' },
+      { name: 'manager_role', value: 'role-mgr' },
+      {
+        name: 'message',
+        value: 'Welcome to {server}! Click below to get help from {role} in {channel}. Total: {membercount}. Setup by {user} ({mention}).',
+      },
+      { name: 'embed', value: false },
+    ]);
+
+    await handleTicketCommand(interaction, deps, rest);
+    expect(sentMessages.length).toBe(1);
+    const payload = sentMessages[0].payload as { content: string };
+    expect(payload.content).toContain('Welcome to Test Guild!');
+    expect(payload.content).toContain('get help from <@&role-mgr>');
+    expect(payload.content).toContain('in <#chan-tickets>');
+    expect(payload.content).toContain('Setup by Tester (<@user-1>)');
+  });
+});
+
+describe('renderTicketMessage utility', () => {
+  it('correctly replaces all supported placeholders', () => {
+    const template = 'Server: {server} | Role: {role} | Channel: {channel} | Members: {membercount} | User: {user} ({mention})';
+    const result = renderTicketMessage(template, {
+      server: 'Acme Corp',
+      role: '<@&999>',
+      channel: '<#123>',
+      membercount: 42,
+      user: 'Alice',
+      mention: '<@456>',
+    });
+    expect(result).toBe('Server: Acme Corp | Role: <@&999> | Channel: <#123> | Members: 42 | User: Alice (<@456>)');
+  });
+
+  it('leaves untouched placeholders if arguments are not provided', () => {
+    const template = 'Hello {server} and {role}';
+    const result = renderTicketMessage(template);
+    expect(result).toBe('Hello {server} and {role}');
   });
 });
