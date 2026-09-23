@@ -24,5 +24,5 @@ repository:
   branch: main
 title: HELIX Discord Bot
 description: "Self-hosted Discord bot for RSS/Reddit/Free Games feeds, YouTube/Twitch live alerts, guild administration, and web dashboard in TypeScript ESM"
-version: 0.5.0
+version: 0.6.0
 license: BSD-3-Clause

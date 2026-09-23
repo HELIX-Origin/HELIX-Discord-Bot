@@ -112,5 +112,5 @@ flowchart TD
 
 ## 🔖 Metadata
 
-- **Project**: HELIX Discord Bot · **version** 0.5.0
+- **Project**: HELIX Discord Bot · **version** 0.6.0
 - **Repos**: `HELIX-Discord-Bot`.

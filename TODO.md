@@ -171,5 +171,5 @@ npx prettier --write src    # only when format:check complains
 
 ## 🔖 Metadata
 
-- **Project**: HELIX Discord Bot · **version** 0.5.0
+- **Project**: HELIX Discord Bot · **version** 0.6.0
 - **Agent Ecosystem:** `AGENTS` and `.agents/` are tracked directly in repository git tracking.

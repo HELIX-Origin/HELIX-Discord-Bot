@@ -10,8 +10,8 @@ We release patches and security fixes for the latest active release branch. Self
 
 | Version | Supported          | Security Status |
 | :--- | :--- | :--- |
-| `0.5.x` | :white_check_mark: | Currently Supported (Active) |
-| `< 0.5.0` | :x: | Unsupported (End-of-Life) |
+| `0.6.x` | :white_check_mark: | Currently Supported (Active) |
+| `< 0.6.0` | :x: | Unsupported (End-of-Life) |
 
 ---
 

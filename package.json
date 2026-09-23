@@ -1,6 +1,6 @@
 {
   "name": "helix-discord-bot",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Self-hosted Discord bot for RSS/Atom/Reddit/Free Games feed syndication, YouTube/Twitch live alerts, and guild administration. Built entirely in TypeScript ESM with zero frontend dependencies (native http, node:sqlite, built-in web dashboard, Discord bot, and API). Posts directly to Discord channels via REST — no webhooks required.",
   "type": "module",
   "main": "dist/index.js",

@@ -34,7 +34,7 @@ HELIX Discord Bot is configured entirely via environment variables defined in a 
 | Variable | Required | Default | Description |
 | :--- | :--- | :--- | :--- |
 | `REPO_URL` | No | — | Repository URL used in Discord REST requests, feed fetchers, and dashboard "GitHub" links. Aliases: `GITHUB_REPO`, `REPOSITORY_URL`, `PROJECT_URL`. |
-| `USER_AGENT` | No | `DiscordBot (<REPO_URL>, 0.5.0)` | Custom HTTP User-Agent sent with outgoing requests. Alias: `DISCORD_USER_AGENT`. |
+| `USER_AGENT` | No | `DiscordBot (<REPO_URL>, 0.6.0)` | Custom HTTP User-Agent sent with outgoing requests. Alias: `DISCORD_USER_AGENT`. |
 
 ### 🗂️ Logging & Timeouts
 

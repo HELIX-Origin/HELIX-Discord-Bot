@@ -40,7 +40,7 @@ const defaultRepoUrl =
 const DEFAULT_USER_AGENT =
   process.env['FEED_USER_AGENT']?.trim() ||
   process.env['USER_AGENT']?.trim() ||
-  (defaultRepoUrl ? `HELIX-Discord-Bot/0.5.0 (+${defaultRepoUrl})` : 'HELIX-Discord-Bot/0.5.0');
+  (defaultRepoUrl ? `HELIX-Discord-Bot/0.6.0 (+${defaultRepoUrl})` : 'HELIX-Discord-Bot/0.6.0');
 
 export async function fetchRaw(url: string, options: HttpFetcherOptions = {}): Promise<FetchResult> {
   const {
