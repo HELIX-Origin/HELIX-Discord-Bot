@@ -137,6 +137,25 @@
 - [x] `npm run check` + `npm run build` green (22/22 test files, 348/348 tests passing)
 - [x] Repository documentation sync (`README.md`, `wiki/Feeds-and-Scrapers.md`, `wiki/Configuration.md`, `.env.example`, `TODO.md`)
 
+### Workstream: Optional Embed Support for Ticket Message Setup
+
+**Locked user directives:**
+- "ok let's add optional embed support to the ticket message setup"
+- Ensure parity with `/welcome` embed options across slash commands, web dashboard, and live Discord preview.
+- Use camelCase file naming scheme across the codebase.
+
+**Implementation checklist:**
+- [x] `src/bot/lib/options/ticket.ts`: Add `embed` (boolean) and `color` (hex string) options to `/ticket` setup command
+- [x] `src/bot/commands/admin/ticket.ts`: Update `TicketConfig` and `getTicketConfig` with `embed` and `color` settings
+- [x] `src/bot/commands/admin/ticket.ts`: Update `sendTicketButtonMessage` to support optional embed payloads hosting the `Open Ticket` button
+- [x] `src/bot/commands/admin/ticket.ts`: Update `handleSetup` and `handleView` to store, dispatch, and display embed format
+- [x] `src/dashboard/views/dashboard/tickets.ts`: Add Format selector (`Plain text` / `Embed`) to the Ticket Routing & Message card
+- [x] `src/dashboard/routes/guilds.ts`: Handle `embed` and `color` in `body.tickets` on `PUT /api/guilds/:guildId/settings`
+- [x] `src/dashboard/views/dashboard/clientScript.ts`: Populate, save, and dynamically render simulated Discord embed card in `updateTicketPreview()`
+- [x] `tests/unit/commands/ticket.test.ts` & `tests/unit/dashboard/views.test.ts`: Add unit tests for ticket embed setup and preview elements
+- [x] `wiki/*`: Document embed options in `Administration.md`, `Discord-Bot.md`, and `API-Reference.md`
+- [x] `npm run check` + `npm run build` green (22/22 test files, 350/350 tests passing)
+
 ---
 
 ## 🛠️ Verification Commands

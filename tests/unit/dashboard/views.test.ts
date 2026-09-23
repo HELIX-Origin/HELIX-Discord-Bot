@@ -110,6 +110,7 @@ describe('renderDashboardHtml', () => {
 
     expect(html).toContain('id="welcome-preview-container"');
     expect(html).toContain('id="ticket-preview-container"');
+    expect(html).toContain('id="admin-ticket-embed"');
     expect(html).toContain('updateWelcomePreview()');
     expect(html).toContain('updateTicketPreview()');
   });

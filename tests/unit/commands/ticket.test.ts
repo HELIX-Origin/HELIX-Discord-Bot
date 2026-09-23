@@ -175,4 +175,52 @@ describe('handleTicketCommand — Setup & Ticket Message', () => {
     expect(payload.content).toBe(DEFAULT_TICKET_MESSAGE);
     expect(payload.components[0].components[0].custom_id).toBe(TICKET_OPEN_BUTTON_ID);
   });
+
+  it('posts the ticket message as an embed with button component when embed: true', async () => {
+    const { deps, settings, sentMessages, rest } = makeDeps();
+    const interaction = makeInteraction([
+      { name: 'action', value: 'setup' },
+      { name: 'channel', value: 'channel-tickets' },
+      { name: 'manager_role', value: 'role-mgr' },
+      { name: 'message', value: 'Open a support ticket here.' },
+      { name: 'embed', value: true },
+    ]);
+
+    const res = await handleTicketCommand(interaction, deps, rest);
+    expect(res.data?.embeds?.[0].title).toContain('Ticket System Configured');
+    expect(settings['guild-123:ticket_embed']).toBe('1');
+
+    expect(sentMessages.length).toBe(1);
+    const payload = sentMessages[0].payload as {
+      content?: string;
+      embeds?: { title: string; description: string }[];
+      components: { components: { custom_id: string }[] }[];
+    };
+    expect(payload.content).toBeUndefined();
+    expect(payload.embeds).toBeDefined();
+    expect(payload.embeds?.[0].title).toBe('🎫 Support Tickets');
+    expect(payload.embeds?.[0].description).toBe('Open a support ticket here.');
+    expect(payload.components[0].components[0].custom_id).toBe(TICKET_OPEN_BUTTON_ID);
+  });
+
+  it('sendTicketButtonMessage sends embed when options.embed is true', async () => {
+    const sent: { channelId: string; payload: unknown }[] = [];
+    const mockRest = {
+      sendChannelMessage: async (channelId: string, payload: unknown) => {
+        sent.push({ channelId, payload });
+      },
+    } as unknown as DiscordRestClient;
+
+    await sendTicketButtonMessage(mockRest, 'chan-123', 'Need help?', { embed: true, color: 0x6366f1 });
+    expect(sent.length).toBe(1);
+    const payload = sent[0].payload as {
+      content?: string;
+      embeds?: { title: string; description: string; color: number }[];
+      components: { components: { custom_id: string }[] }[];
+    };
+    expect(payload.content).toBeUndefined();
+    expect(payload.embeds?.[0].description).toBe('Need help?');
+    expect(payload.embeds?.[0].color).toBe(0x6366f1);
+    expect(payload.components[0].components[0].custom_id).toBe(TICKET_OPEN_BUTTON_ID);
+  });
 });

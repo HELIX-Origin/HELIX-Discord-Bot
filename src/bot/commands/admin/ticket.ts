@@ -51,6 +51,13 @@ function errorResponse(title: string, description: string): InteractionResponse 
   );
 }
 
+function parseHexColor(raw: string | undefined): number | null {
+  if (!raw) return null;
+  const cleaned = raw.trim().replace(/^#/, '');
+  if (!/^[0-9a-fA-F]{6}$/.test(cleaned)) return null;
+  return parseInt(cleaned, 16);
+}
+
 export interface TicketConfig {
   channelId: string | null;
   managerRoleId: string | null;
@@ -58,6 +65,8 @@ export interface TicketConfig {
   logChannelId: string | null;
   ticketMessage: string;
   welcomeMessage: string;
+  embed: boolean;
+  color: number | null;
   enabled: boolean;
 }
 
@@ -71,6 +80,7 @@ export function getTicketConfig(deps: AppDeps, guildId: string): TicketConfig {
     deps.repo.getGuildSetting(guildId, 'ticket_message') ||
     deps.repo.getGuildSetting(guildId, 'ticket_welcome_message') ||
     DEFAULT_TICKET_MESSAGE;
+  const rawColor = deps.repo.getGuildSetting(guildId, 'ticket_color');
   return {
     channelId,
     managerRoleId: deps.repo.getGuildSetting(guildId, 'ticket_manager_role_id') || null,
@@ -78,6 +88,8 @@ export function getTicketConfig(deps: AppDeps, guildId: string): TicketConfig {
     logChannelId: deps.repo.getGuildSetting(guildId, 'ticket_log_channel_id') || null,
     ticketMessage,
     welcomeMessage: ticketMessage,
+    embed: deps.repo.getGuildSetting(guildId, 'ticket_embed') === '1',
+    color: parseHexColor(rawColor ?? undefined),
     enabled: deps.repo.getGuildSetting(guildId, 'ticket_enabled') === '1',
   };
 }
@@ -146,9 +158,15 @@ export async function sendTicketButtonMessage(
   rest: DiscordRestClient,
   channelId: string,
   content: string = DEFAULT_TICKET_MESSAGE,
+  options?: {
+    embed?: boolean;
+    color?: number | null;
+    title?: string;
+  },
 ): Promise<void> {
-  await rest.sendChannelMessage(channelId, {
-    content: content || DEFAULT_TICKET_MESSAGE,
+  const isEmbed = Boolean(options?.embed);
+  const color = options?.color ?? EMBED_COLORS.INFO;
+  const payload: { content?: string; embeds?: DiscordEmbed[]; components: unknown[] } = {
     components: [
       {
         type: 1,
@@ -162,7 +180,21 @@ export async function sendTicketButtonMessage(
         ],
       },
     ],
-  });
+  };
+
+  if (isEmbed) {
+    payload.embeds = [
+      createEmbed({
+        title: options?.title || '🎫 Support Tickets',
+        description: content || DEFAULT_TICKET_MESSAGE,
+        color: color ?? EMBED_COLORS.INFO,
+      }),
+    ];
+  } else {
+    payload.content = content || DEFAULT_TICKET_MESSAGE;
+  }
+
+  await rest.sendChannelMessage(channelId, payload);
 }
 
 async function handleSetup(
@@ -176,6 +208,9 @@ async function handleSetup(
   const transcriptChannelId = optionValue(options, 'transcript_channel') || undefined;
   const logChannelId = optionValue(options, 'log_channel') || undefined;
   const ticketMessage = optionValue(options, 'message') || optionValue(options, 'welcome_message') || undefined;
+  const embedOption = optionRaw(options, 'embed');
+  const embed = typeof embedOption === 'boolean' ? embedOption : undefined;
+  const color = optionValue(options, 'color') || undefined;
 
   if (!managerRoleId) {
     return ticketUsage();
@@ -194,6 +229,12 @@ async function handleSetup(
     deps.repo.setGuildSetting(guildId, 'ticket_message', ticketMessage);
     deps.repo.setGuildSetting(guildId, 'ticket_welcome_message', ticketMessage);
   }
+  if (embed !== undefined) {
+    deps.repo.setGuildSetting(guildId, 'ticket_embed', embed ? '1' : '0');
+  }
+  if (color) {
+    deps.repo.setGuildSetting(guildId, 'ticket_color', color);
+  }
   deps.repo.setGuildSetting(guildId, 'ticket_enabled', '1');
 
   deps.repo.logActivity(null, 'info', 'bot', `Configured ticket system for guild ${guildId} via /ticket`);
@@ -210,12 +251,18 @@ async function handleSetup(
     deps,
   );
 
+  const isEmbed = embed !== undefined ? embed : config.embed;
+  const parsedColor = color ? parseHexColor(color) : config.color;
+
   let buttonError: string | null = null;
   const targetChannel = channelId || config.channelId;
   const msgContent = ticketMessage || config.ticketMessage || DEFAULT_TICKET_MESSAGE;
-  if (targetChannel && (channelId || ticketMessage)) {
+  if (targetChannel && (channelId || ticketMessage || embed !== undefined || color)) {
     try {
-      await sendTicketButtonMessage(rest, targetChannel, msgContent);
+      await sendTicketButtonMessage(rest, targetChannel, msgContent, {
+        embed: isEmbed,
+        color: parsedColor,
+      });
     } catch (err) {
       buttonError = (err as Error).message;
     }
@@ -229,6 +276,11 @@ async function handleSetup(
       inline: true,
     },
     { name: 'Manager Role', value: `<@&${managerRoleId}>`, inline: true },
+    {
+      name: 'Format',
+      value: isEmbed ? 'Embed' : 'Plain text',
+      inline: true,
+    },
     {
       name: 'Transcript Channel',
       value: transcriptChannelId
@@ -296,6 +348,7 @@ function handleView(guildId: string, deps: AppDeps): InteractionResponse {
           inline: true,
         },
         { name: '📋 Log Channel', value: config.logChannelId ? `<#${config.logChannelId}>` : 'Not set', inline: true },
+        { name: '🎨 Format', value: config.embed ? 'Embed' : 'Plain text', inline: true },
         { name: '🎫 Ticket Message', value: config.ticketMessage.slice(0, 256), inline: false },
       ],
       footer: { text: `${appDisplayName(deps)} • /ticket view` },

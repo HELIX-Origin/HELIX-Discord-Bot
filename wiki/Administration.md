@@ -80,18 +80,18 @@ HELIX Discord Bot includes a native thread-based support ticket system. A sticky
 ### Commands & Options
 | Command | Options | Required Permission | Description |
 | :--- | :--- | :--- | :--- |
-| `/ticket` | `action: setup\|disable\|view\|create\|close\|add\|remove\|claim\|transcript`, `channel: <channel?>`, `manager_role: <role?>`, `transcript_channel: <channel?>`, `log_channel: <channel?>`, `message: <string?>`, `reason: <string?>`, `user: <user?>` | `Manage Channels` | Configure, manage, and handle support tickets. |
+| `/ticket` | `action: setup\|disable\|view\|create\|close\|add\|remove\|claim\|transcript`, `channel: <channel?>`, `manager_role: <role?>`, `transcript_channel: <channel?>`, `log_channel: <channel?>`, `message: <string?>`, `embed: <bool?>`, `color: <string?>`, `reason: <string?>`, `user: <user?>` | `Manage Channels` | Configure, manage, and handle support tickets. |
 
 ### Workflow Architecture
-1. **Host Message**: Bot posts the configured ticket prompt and `[🎫 Open Ticket]` button to the ticket channel.
+1. **Host Message**: Bot posts the configured ticket prompt and `[🎫 Open Ticket]` button to the ticket channel. Supports both **Plain Text** and **Rich Embed** formats (`embed: true` or Format dropdown on dashboard).
 2. **Ticket Creation**: Clicking the button creates a new thread in the channel (e.g. `ticket-username`) and adds the member.
 3. **Manager Role Alert**: If a Support Manager role is configured, the bot mentions/adds the role to the thread for rapid staff response.
 4. **Ticket Operations**: Staff and users can add members (`/ticket action:add`), close the ticket (`/ticket action:close`), or archive transcripts.
 
 ### Dashboard Tickets Tab
 Configurable under **General → Support Tickets** on the web dashboard:
-- **Responsive 2-Column Grid**: Channel & Role routing selectors on the left, **Live Button & Message Preview** on the right.
-- **Live Interactive Button Preview**: Previews the prompt and interactive blurple Discord ticket button before saving.
+- **Responsive 2-Column Grid**: Channel & Role routing selectors, **Format dropdown** (`Plain text` / `Embed`), and prompt textarea on the left; **Live Button & Message Preview** on the right.
+- **Live Interactive Button & Embed Preview**: Previews the prompt (plain text or rich embed card) and interactive blurple Discord ticket button before saving.
 
 ---
 

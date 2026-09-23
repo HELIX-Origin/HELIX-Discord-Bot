@@ -1342,6 +1342,8 @@ export function renderClientScript(): string {
         populateRoleSelect('admin-ticket-manager-role', data.guildRoles || [], tickets.managerRoleId, '-- None --');
         populateChannelSelect('admin-ticket-transcript-channel', data.textChannels || [], tickets.transcriptChannelId, '-- None --');
         populateChannelSelect('admin-ticket-log-channel', data.textChannels || [], tickets.logChannelId, '-- None --');
+        const ticketEmbedEl = document.getElementById('admin-ticket-embed');
+        if (ticketEmbedEl) ticketEmbedEl.value = tickets.embed ? '1' : '0';
         const ticketMsgEl = document.getElementById('admin-ticket-message');
         if (ticketMsgEl) ticketMsgEl.value = tickets.ticketMessage || tickets.message || tickets.welcomeMessage || '';
         updateTicketPreview();
@@ -1461,6 +1463,7 @@ export function renderClientScript(): string {
         logChannelId: document.getElementById('admin-ticket-log-channel') ? document.getElementById('admin-ticket-log-channel').value || null : null,
         message: document.getElementById('admin-ticket-message') ? document.getElementById('admin-ticket-message').value : '',
         welcomeMessage: document.getElementById('admin-ticket-message') ? document.getElementById('admin-ticket-message').value : '',
+        embed: document.getElementById('admin-ticket-embed') ? document.getElementById('admin-ticket-embed').value === '1' : false,
       };
       try {
         const res = await fetch('/api/guilds/' + encodeURIComponent(currentGuildId) + '/settings', {
@@ -1549,6 +1552,7 @@ export function renderClientScript(): string {
     function updateTicketPreview() {
       const container = document.getElementById('ticket-preview-container');
       if (!container) return;
+      const isEmbed = document.getElementById('admin-ticket-embed')?.value === '1';
       const rawMsg = document.getElementById('admin-ticket-message')?.value || 'Click the button below to open a support ticket.';
       const formatted = formatDiscordMarkdown(rawMsg);
       const botName = esc((currentGuild && currentGuild.botName) ? currentGuild.botName : 'HELIX');
@@ -1557,19 +1561,38 @@ export function renderClientScript(): string {
         ? '<img src="' + botIcon + '" alt="" style="width: 2.5rem; height: 2.5rem; border-radius: 50%; object-fit: cover;">'
         : '<div class="discord-avatar"><i class="fa-solid fa-robot"></i></div>';
 
-      container.innerHTML =
-        avatarHtml +
-        '<div class="discord-msg-body">' +
-          '<div class="discord-msg-header">' +
-            '<span class="discord-bot-name">' + botName + '</span>' +
-            '<span class="discord-bot-badge">APP</span>' +
-            '<span class="discord-timestamp">Today at 12:00 PM</span>' +
-          '</div>' +
-          '<div class="discord-msg-text">' + formatted + '</div>' +
-          '<div class="discord-btn-row">' +
-            '<div class="discord-btn-primary"><i class="fa-solid fa-ticket"></i> Open Ticket</div>' +
-          '</div>' +
-        '</div>';
+      if (isEmbed) {
+        container.innerHTML =
+          avatarHtml +
+          '<div class="discord-msg-body">' +
+            '<div class="discord-msg-header">' +
+              '<span class="discord-bot-name">' + botName + '</span>' +
+              '<span class="discord-bot-badge">APP</span>' +
+              '<span class="discord-timestamp">Today at 12:00 PM</span>' +
+            '</div>' +
+            '<div class="discord-embed-card">' +
+              '<div class="discord-embed-title">🎫 Support Tickets</div>' +
+              '<div class="discord-embed-desc">' + formatted + '</div>' +
+            '</div>' +
+            '<div class="discord-btn-row">' +
+              '<div class="discord-btn-primary"><i class="fa-solid fa-ticket"></i> Open Ticket</div>' +
+            '</div>' +
+          '</div>';
+      } else {
+        container.innerHTML =
+          avatarHtml +
+          '<div class="discord-msg-body">' +
+            '<div class="discord-msg-header">' +
+              '<span class="discord-bot-name">' + botName + '</span>' +
+              '<span class="discord-bot-badge">APP</span>' +
+              '<span class="discord-timestamp">Today at 12:00 PM</span>' +
+            '</div>' +
+            '<div class="discord-msg-text">' + formatted + '</div>' +
+            '<div class="discord-btn-row">' +
+              '<div class="discord-btn-primary"><i class="fa-solid fa-ticket"></i> Open Ticket</div>' +
+            '</div>' +
+          '</div>';
+      }
     }
 
     async function saveLogsTab() {

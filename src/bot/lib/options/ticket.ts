@@ -65,6 +65,18 @@ export const ticketOptions: ApplicationCommandOption[] = [
     required: false,
   },
   {
+    name: 'embed',
+    description: 'Use embed format for the ticket prompt message (setup)',
+    type: ApplicationCommandOptionType.BOOLEAN,
+    required: false,
+  },
+  {
+    name: 'color',
+    description: 'Embed color hex, e.g. #6366f1 (setup)',
+    type: ApplicationCommandOptionType.STRING,
+    required: false,
+  },
+  {
     name: 'reason',
     description: 'Reason for creating or closing the ticket (create / close)',
     type: ApplicationCommandOptionType.STRING,

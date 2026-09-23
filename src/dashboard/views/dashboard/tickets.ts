@@ -26,6 +26,13 @@ export function renderTicketsTab(): string {
               <select id="admin-ticket-channel"><option value="">-- Disabled --</option></select>
             </div>
             <div class="form-group">
+              <label class="form-label">Format</label>
+              <select id="admin-ticket-embed" onchange="updateTicketPreview()">
+                <option value="0">Plain text</option>
+                <option value="1">Embed</option>
+              </select>
+            </div>
+            <div class="form-group">
               <label class="form-label">Ticket Manager Role</label>
               <select id="admin-ticket-manager-role"><option value="">-- None --</option></select>
             </div>

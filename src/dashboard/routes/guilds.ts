@@ -205,6 +205,8 @@ export function registerGuildRoutes(router: Router<AppDeps>): void {
         message?: string | null;
         ticketMessage?: string | null;
         welcomeMessage?: string | null;
+        embed?: boolean;
+        color?: string | null;
       };
       logs?: {
         auditLogChannelId?: string | null;
@@ -366,11 +368,29 @@ export function registerGuildRoutes(router: Router<AppDeps>): void {
           d.repo.setGuildSetting(guildId, 'ticket_welcome_message', value);
           changes.push('Ticket message updated');
         }
+        if (body.tickets.embed !== undefined) {
+          d.repo.setGuildSetting(guildId, 'ticket_embed', body.tickets.embed ? '1' : '0');
+          changes.push(`Ticket format → ${body.tickets.embed ? 'Embed' : 'Plain text'}`);
+        }
+        if (body.tickets.color !== undefined) {
+          d.repo.setGuildSetting(guildId, 'ticket_color', (body.tickets.color ?? '').trim());
+        }
 
         const activeChanId = body.tickets.channelId || d.repo.getGuildSetting(guildId, 'ticket_channel_id');
-        if (activeChanId && (body.tickets.channelId || ticketMsgInput !== undefined) && d.bot) {
+        if (
+          activeChanId &&
+          (body.tickets.channelId ||
+            ticketMsgInput !== undefined ||
+            body.tickets.embed !== undefined ||
+            body.tickets.color !== undefined) &&
+          d.bot
+        ) {
           const msg = d.repo.getGuildSetting(guildId, 'ticket_message') || DEFAULT_TICKET_MESSAGE;
-          void sendTicketButtonMessage(d.bot.rest, activeChanId, msg).catch(() => {});
+          const isEmbed = d.repo.getGuildSetting(guildId, 'ticket_embed') === '1';
+          const rawColor = d.repo.getGuildSetting(guildId, 'ticket_color');
+          const cleaned = (rawColor ?? '').trim().replace(/^#/, '');
+          const color = /^[0-9a-fA-F]{6}$/.test(cleaned) ? parseInt(cleaned, 16) : null;
+          void sendTicketButtonMessage(d.bot.rest, activeChanId, msg, { embed: isEmbed, color }).catch(() => {});
         }
       }
 

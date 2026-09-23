@@ -16,7 +16,7 @@ All commands register through Discord's native interaction model and use ephemer
 | `/free-games` | `enable`, `status`, `disable`, `check` | `Manage Channels` | Manage weekly free game notifications and trigger manual giveaway checks. |
 | `/reddit` | `add`, `list`, `remove`, `toggle`, `poll` | `Manage Channels` | Manage Reddit subreddit image and news feeds, or trigger immediate checks. |
 | `/welcome` | `action: setup\|channel\|message\|view\|test\|disable`, `channel`, `content`, `embed`, `color`, `thumbnail`, `banner` | `Manage Guild` | Configure and test welcome announcements for new arrivals. |
-| `/ticket` | `action: setup\|disable\|view\|create\|close\|add\|remove\|claim\|transcript`, `channel`, `manager_role`, `message`, etc. | `Manage Channels` | Configure and manage the support ticket system and thread dispatch. |
+| `/ticket` | `action: setup\|disable\|view\|create\|close\|add\|remove\|claim\|transcript`, `channel`, `manager_role`, `message`, `embed`, `color`, etc. | `Manage Channels` | Configure and manage the support ticket system and thread dispatch. |
 | `/warn` | `user: <user>`, `reason: <string>` | `Moderate Members` | Warn a member. |
 | `/kick` | `user: <user>`, `reason: <string>` | `Kick Members` | Kick a member. |
 | `/ban` | `user: <user>`, `reason: <string>` | `Ban Members` | Ban a member. |

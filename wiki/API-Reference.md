@@ -272,7 +272,7 @@ PUT /api/guilds/:guildId/settings
 Content-Type: application/json
 ```
 **Auth**: User must be able to manage the target guild.
-**Accepted body fields**: `adminRoleId`, `prefix`, `features`, `welcomeChannelId`, `welcomeMessage`, `welcomeEmbed`, `ticketChannelId`, `ticketRoleId`, `ticketMessage`, `logs` fields, `commands`, and `threadsEnabled` (boolean — master thread-delivery toggle for the server).
+**Accepted body fields**: `adminRoleId`, `prefix`, `features`, `welcomeChannelId`, `welcomeMessage`, `welcomeEmbed`, `ticketChannelId`, `ticketRoleId`, `ticketMessage`, `ticketEmbed`, `logs` fields, `commands`, and `threadsEnabled` (boolean — master thread-delivery toggle for the server).
 **Example**:
 ```json
 {
