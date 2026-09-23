@@ -77,6 +77,7 @@ describe('toDiscordInteraction', () => {
       applicationId: 'app-888',
       isAutocomplete: () => false,
       guildId: 'guild-777',
+      guild: { name: 'Helix Server' },
       channelId: 'ch-666',
       token: 'tok-555',
       version: 1,
@@ -100,9 +101,7 @@ describe('toDiscordInteraction', () => {
         bitfield: 8n,
       },
       options: {
-        data: [
-          { name: 'query', type: 3, value: 'lofi hip hop' },
-        ],
+        data: [{ name: 'query', type: 3, value: 'lofi hip hop' }],
       },
     } as unknown as ChatInputCommandInteraction;
 
@@ -112,6 +111,7 @@ describe('toDiscordInteraction', () => {
     expect(result.application_id).toBe('app-888');
     expect(result.type).toBe(2);
     expect(result.guild_id).toBe('guild-777');
+    expect(result.guild_name).toBe('Helix Server');
     expect(result.channel_id).toBe('ch-666');
     expect(result.token).toBe('tok-555');
     expect(result.user?.id).toBe('user-111');

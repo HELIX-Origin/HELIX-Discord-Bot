@@ -2,6 +2,7 @@ import {
   handleTicketCommand,
   getTicketConfig,
   renderTicketMessage,
+  resolveGuildName,
   sendTicketButtonMessage,
   DEFAULT_TICKET_MESSAGE,
   TICKET_OPEN_BUTTON_ID,
@@ -266,5 +267,43 @@ describe('renderTicketMessage utility', () => {
     const template = 'Hello {server} and {role}';
     const result = renderTicketMessage(template);
     expect(result).toBe('Hello {server} and {role}');
+  });
+});
+
+describe('resolveGuildName utility', () => {
+  it('uses interaction.guild_name when present', async () => {
+    const { deps } = makeDeps();
+    const interaction = { ...makeInteraction(), guild_name: 'Super Discord Guild' };
+    const name = await resolveGuildName(deps, 'guild-123', interaction);
+    expect(name).toBe('Super Discord Guild');
+  });
+
+  it('uses deps.bot.getGuildName when interaction has no guild_name', async () => {
+    const { deps } = makeDeps();
+    (deps.bot as unknown as { getGuildName: (id: string) => string }).getGuildName = (id: string) =>
+      id === 'guild-123' ? 'Bot Cached Guild' : '';
+    const name = await resolveGuildName(deps, 'guild-123');
+    expect(name).toBe('Bot Cached Guild');
+  });
+
+  it('falls back to repo binding name when bot is not available', async () => {
+    const deps = {
+      repo: {
+        getGuildBinding: (id: string) => (id === 'guild-123' ? { name: 'Repo Guild' } : null),
+      },
+    } as unknown as AppDeps;
+    const name = await resolveGuildName(deps, 'guild-123');
+    expect(name).toBe('Repo Guild');
+  });
+
+  it('falls back to "Server" and never "this server" when no name is found', async () => {
+    const deps = {
+      repo: {
+        getGuildBinding: () => null,
+      },
+    } as unknown as AppDeps;
+    const name = await resolveGuildName(deps, 'guild-unknown');
+    expect(name).toBe('Server');
+    expect(name).not.toBe('this server');
   });
 });

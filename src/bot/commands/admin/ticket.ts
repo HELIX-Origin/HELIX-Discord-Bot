@@ -90,6 +90,36 @@ export function renderTicketMessage(template: string, args: TicketMessageArgs = 
   return content.slice(0, 2000);
 }
 
+export async function resolveGuildName(
+  deps: AppDeps,
+  guildId: string,
+  interaction?: DiscordInteraction,
+): Promise<string> {
+  if (interaction?.guild_name && interaction.guild_name.trim().length > 0) {
+    return interaction.guild_name.trim();
+  }
+  if (deps.bot) {
+    if (typeof deps.bot.getGuildName === 'function') {
+      const name = deps.bot.getGuildName(guildId);
+      if (name && name.trim().length > 0) return name.trim();
+    }
+    if (
+      typeof (deps.bot as unknown as { resolveGuildName?: (id: string) => Promise<string | null> }).resolveGuildName ===
+      'function'
+    ) {
+      const name = await (
+        deps.bot as unknown as { resolveGuildName: (id: string) => Promise<string | null> }
+      ).resolveGuildName(guildId);
+      if (name && name.trim().length > 0) return name.trim();
+    }
+  }
+  const binding = deps.repo.getGuildBinding(guildId);
+  if (binding?.name && binding.name.trim().length > 0) {
+    return binding.name.trim();
+  }
+  return 'Server';
+}
+
 export interface TicketConfig {
   channelId: string | null;
   managerRoleId: string | null;
@@ -148,7 +178,7 @@ export async function handleTicketCommand(
     case 'disable':
       return handleDisable(guildId, deps);
     case 'view':
-      return handleView(guildId, deps);
+      return handleView(guildId, deps, interaction);
     case 'create':
       return handleCreate(interaction, guildId, options, deps, rest);
     case 'close':
@@ -291,8 +321,7 @@ async function handleSetup(
   const targetChannel = channelId || config.channelId;
   const msgContent = ticketMessage || config.ticketMessage || DEFAULT_TICKET_MESSAGE;
   if (targetChannel && (channelId || ticketMessage || embed !== undefined || color)) {
-    const binding = deps.repo.getGuildBinding(guildId);
-    const serverName = (binding?.name || '').trim() || 'this server';
+    const serverName = await resolveGuildName(deps, guildId, interaction);
     const memberCount =
       typeof deps.bot?.getGuildMemberCount === 'function'
         ? ((await deps.bot.getGuildMemberCount(guildId)) ?? '?')
@@ -377,10 +406,13 @@ function handleDisable(guildId: string, deps: AppDeps): InteractionResponse {
   );
 }
 
-function handleView(guildId: string, deps: AppDeps): InteractionResponse {
+async function handleView(
+  guildId: string,
+  deps: AppDeps,
+  interaction?: DiscordInteraction,
+): Promise<InteractionResponse> {
   const config = getTicketConfig(deps, guildId);
-  const binding = deps.repo.getGuildBinding(guildId);
-  const guildName = (binding?.name || '').trim() || 'this server';
+  const guildName = await resolveGuildName(deps, guildId, interaction);
 
   return embedResponse(
     createEmbed({

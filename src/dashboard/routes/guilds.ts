@@ -10,6 +10,7 @@ import {
   DEFAULT_TICKET_MESSAGE,
   getTicketConfig,
   renderTicketMessage,
+  resolveGuildName,
   sendTicketButtonMessage,
 } from '../../bot/commands/admin/ticket.js';
 import { parseModLogEvents, MOD_ACTIONS } from '../../bot/lib/admin/modlog.js';
@@ -395,8 +396,7 @@ export function registerGuildRoutes(router: Router<AppDeps>): void {
           const rawColor = d.repo.getGuildSetting(guildId, 'ticket_color');
           const cleaned = (rawColor ?? '').trim().replace(/^#/, '');
           const color = /^[0-9a-fA-F]{6}$/.test(cleaned) ? parseInt(cleaned, 16) : null;
-          const binding = d.repo.getGuildBinding(guildId);
-          const serverName = (binding?.name || '').trim() || 'this server';
+          const serverName = await resolveGuildName(d, guildId);
           const memberCount =
             typeof d.bot.getGuildMemberCount === 'function' ? ((await d.bot.getGuildMemberCount(guildId)) ?? '?') : '?';
           const managerRoleId = d.repo.getGuildSetting(guildId, 'ticket_manager_role_id');

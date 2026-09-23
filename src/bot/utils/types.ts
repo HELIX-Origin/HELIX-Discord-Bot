@@ -138,6 +138,7 @@ export interface DiscordInteraction {
   type: InteractionType;
   data?: InteractionData;
   guild_id?: string;
+  guild_name?: string;
   channel_id?: string;
   member?: {
     user: { id: string; username: string; global_name?: string; avatar?: string | null };

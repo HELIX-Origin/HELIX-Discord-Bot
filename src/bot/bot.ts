@@ -218,6 +218,35 @@ export class DiscordBot {
     return this.rest.getGuildChannelsAll(guildId);
   }
 
+  getGuildName(guildId: string): string | null {
+    const guild = this.client.guilds.cache.get(guildId);
+    return guild?.name ?? null;
+  }
+
+  async resolveGuildName(guildId: string): Promise<string | null> {
+    const cached = this.getGuildName(guildId);
+    if (cached) return cached;
+    try {
+      const fetched = await this.client.guilds.fetch(guildId);
+      return fetched?.name ?? null;
+    } catch {
+      return null;
+    }
+  }
+
+  syncGuildNamesToRepo(): void {
+    try {
+      for (const guild of this.client.guilds.cache.values()) {
+        const existing = this.deps.repo.getGuildBinding(guild.id);
+        if (!existing || !existing.name || existing.name !== guild.name) {
+          this.deps.repo.bindGuild(guild.id, existing?.userId ?? 0, guild.name);
+        }
+      }
+    } catch (err) {
+      this.logger.debug('Failed to sync guild names to repository', { err: (err as Error).message });
+    }
+  }
+
   async getGuildMemberCount(guildId: string): Promise<number | null> {
     const guild = this.client.guilds.cache.get(guildId);
     if (!guild) return null;

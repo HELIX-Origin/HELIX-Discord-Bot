@@ -12,6 +12,7 @@ import { registerCommandMetadata, type BotCommand } from '../../handlers/registr
 import { dispatchAuditLog } from '../../lib/admin/auditlog.js';
 
 import { welcomeOptions, WELCOME_ACTIONS, type WelcomeAction } from '../../lib/options/welcome.js';
+import { resolveGuildName } from './ticket.js';
 export { welcomeOptions, WELCOME_ACTIONS, type WelcomeAction };
 
 export const welcomeCommandDef: ApplicationCommand = {
@@ -158,7 +159,7 @@ export async function handleWelcomeCommand(
     case 'disable':
       return handleDisable(guildId, deps);
     case 'view':
-      return handleView(guildId, deps);
+      return handleView(guildId, deps, interaction);
     case 'test':
       return handleTest(interaction, guildId, deps);
     default:
@@ -354,10 +355,13 @@ function handleDisable(guildId: string, deps: AppDeps): InteractionResponse {
   );
 }
 
-function handleView(guildId: string, deps: AppDeps): InteractionResponse {
+async function handleView(
+  guildId: string,
+  deps: AppDeps,
+  interaction?: DiscordInteraction,
+): Promise<InteractionResponse> {
   const config = getWelcomeConfig(deps, guildId);
-  const binding = deps.repo.getGuildBinding(guildId);
-  const guildName = (binding?.name || '').trim() || 'this server';
+  const guildName = await resolveGuildName(deps, guildId, interaction);
 
   return embedResponse(
     createEmbed({
@@ -389,8 +393,7 @@ async function handleTest(
     );
   }
 
-  const binding = deps.repo.getGuildBinding(guildId);
-  const serverName = (binding?.name || '').trim() || 'this server';
+  const serverName = await resolveGuildName(deps, guildId, interaction);
   const memberCount = (await deps.bot?.getGuildMemberCount(guildId)) ?? '?';
   const userId = interaction.member?.user?.id || interaction.user?.id || '0';
   const username = interaction.member?.user?.global_name || interaction.member?.user?.username || 'Test User';

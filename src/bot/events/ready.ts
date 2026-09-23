@@ -5,4 +5,5 @@ export async function handleReady(bot: DiscordBot, _deps: AppDeps): Promise<void
   const logger = bot['logger'];
   logger.info('Discord client ready', { user: bot.getAppName() });
   await bot.detectApplicationOwners();
+  bot.syncGuildNamesToRepo();
 }

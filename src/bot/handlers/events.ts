@@ -79,6 +79,7 @@ export function toDiscordInteraction(
     application_id: interaction.applicationId,
     type: interaction.isAutocomplete() ? 4 : 2,
     guild_id: interaction.guildId ?? undefined,
+    guild_name: interaction.guild?.name ?? undefined,
     channel_id: interaction.channelId ?? undefined,
     member,
     user,
