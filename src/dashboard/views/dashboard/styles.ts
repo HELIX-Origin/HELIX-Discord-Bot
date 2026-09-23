@@ -212,6 +212,7 @@ export function renderDashboardStyles(): string {
     .form-label { font-size: 0.8125rem; font-weight: 600; color: var(--text-muted); }
     input[type="text"], input[type="number"], textarea {
       width: 100%;
+      max-width: 100%;
       background: var(--card-inner);
       border: 1px solid var(--border);
       border-radius: 0.625rem;
@@ -220,6 +221,8 @@ export function renderDashboardStyles(): string {
       color: var(--text);
       outline: none;
       transition: border-color 0.15s;
+      resize: vertical;
+      line-height: 1.5;
     }
     select {
       width: 100%;
@@ -308,6 +311,117 @@ export function renderDashboardStyles(): string {
     .user-menu-item i { width: 1.125rem; text-align: center; color: var(--text-muted); }
     .user-menu-item:hover { background: rgba(255,255,255,0.06); }
     .user-menu-logout, .user-menu-logout i { color: #f87171 !important; }
+
+    /* Discord Live Preview Components */
+    .discord-preview-container {
+      background: #313338;
+      border: 1px solid var(--border);
+      border-radius: 0.875rem;
+      padding: 1.125rem;
+      display: flex;
+      gap: 0.875rem;
+      color: #dbdee1;
+      font-size: 0.9375rem;
+      font-family: "gg sans", "Noto Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+    }
+    .discord-avatar {
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 50%;
+      flex-shrink: 0;
+      background: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 1.125rem;
+    }
+    .discord-msg-body {
+      display: flex;
+      flex-direction: column;
+      gap: 0.375rem;
+      min-width: 0;
+      flex: 1;
+    }
+    .discord-msg-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .discord-bot-name {
+      font-weight: 600;
+      color: #f2f3f5;
+      font-size: 0.9375rem;
+    }
+    .discord-bot-badge {
+      background: #5865f2;
+      color: #fff;
+      font-size: 0.625rem;
+      font-weight: 700;
+      padding: 0.0625rem 0.25rem;
+      border-radius: 0.1875rem;
+      text-transform: uppercase;
+    }
+    .discord-timestamp {
+      font-size: 0.75rem;
+      color: #949ba4;
+    }
+    .discord-msg-text {
+      color: #dbdee1;
+      line-height: 1.45;
+      word-break: break-word;
+      white-space: pre-wrap;
+    }
+    .discord-embed-card {
+      background: #2b2d31;
+      border-left: 4px solid var(--primary);
+      border-radius: 0.25rem;
+      padding: 0.75rem 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-top: 0.25rem;
+      max-width: 520px;
+    }
+    .discord-embed-title {
+      font-weight: 700;
+      color: #f2f3f5;
+      font-size: 0.9375rem;
+    }
+    .discord-embed-desc {
+      color: #dbdee1;
+      font-size: 0.875rem;
+      line-height: 1.4;
+      white-space: pre-wrap;
+    }
+    .discord-btn-row {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.625rem;
+      flex-wrap: wrap;
+    }
+    .discord-btn-primary {
+      background: #5865f2;
+      color: #fff;
+      border: none;
+      border-radius: 0.25rem;
+      padding: 0.45rem 1rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: default;
+      user-select: none;
+    }
+    .discord-mention {
+      background: rgba(88, 101, 242, 0.3);
+      color: #c9cdfb;
+      padding: 0 0.25rem;
+      border-radius: 0.1875rem;
+      font-weight: 500;
+    }
 
     /* Utility */
     .section-title { font-size: 1.25rem; font-weight: 800; margin-bottom: 0.25rem; display: flex; align-items: center; gap: 0.5rem; }

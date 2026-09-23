@@ -103,4 +103,14 @@ describe('renderDashboardHtml', () => {
 
     expect(html).toContain("document.querySelectorAll('#dashboard-view main > .tab-pane, #dashboard-view .tab-pane, #feed-detail-view')");
   });
+
+  it('renders live Discord preview containers for welcome and ticket tabs', () => {
+    const deps = makeDeps();
+    const html = renderDashboardHtml(deps, 1, { view: 'dashboard', guildId: 'guild-1' });
+
+    expect(html).toContain('id="welcome-preview-container"');
+    expect(html).toContain('id="ticket-preview-container"');
+    expect(html).toContain('updateWelcomePreview()');
+    expect(html).toContain('updateTicketPreview()');
+  });
 });

@@ -1324,7 +1324,10 @@ export function renderClientScript(): string {
         if (welcomeEmbedEl) welcomeEmbedEl.value = welcome.embed ? '1' : '0';
         const welcomeMsgEl = document.getElementById('admin-welcome-message');
         if (welcomeMsgEl) welcomeMsgEl.value = welcome.message || '';
-      } catch {}
+        updateWelcomePreview();
+      } catch {
+        updateWelcomePreview();
+      }
     }
 
     async function loadTicketsTab() {
@@ -1341,7 +1344,10 @@ export function renderClientScript(): string {
         populateChannelSelect('admin-ticket-log-channel', data.textChannels || [], tickets.logChannelId, '-- None --');
         const ticketMsgEl = document.getElementById('admin-ticket-message');
         if (ticketMsgEl) ticketMsgEl.value = tickets.ticketMessage || tickets.message || tickets.welcomeMessage || '';
-      } catch {}
+        updateTicketPreview();
+      } catch {
+        updateTicketPreview();
+      }
     }
 
     async function loadLogsTab() {
@@ -1481,6 +1487,89 @@ export function renderClientScript(): string {
       } catch {
         alert('Failed to save ticket settings.');
       }
+    }
+
+    function formatDiscordMarkdown(text) {
+      if (!text) return '';
+      let s = esc(text);
+      s = s.replace(new RegExp('\\*\\*([^*]+)\\*\\*', 'g'), '<strong>$1</strong>');
+      s = s.replace(new RegExp('\\*([^*]+)\\*', 'g'), '<em>$1</em>');
+      s = s.replace(/\`([^\`]+)\`/g, '<code style="background: rgba(0,0,0,0.3); padding: 0.15rem 0.35rem; border-radius: 0.25rem; font-family: monospace;">$1</code>');
+      return s;
+    }
+
+    function updateWelcomePreview() {
+      const container = document.getElementById('welcome-preview-container');
+      if (!container) return;
+      const isEmbed = document.getElementById('admin-welcome-embed')?.value === '1';
+      const rawMsg = document.getElementById('admin-welcome-message')?.value || 'Welcome {mention} to **{server}**! We are now {membercount} members. 🎉';
+      const guildName = (currentGuild && currentGuild.name) ? currentGuild.name : 'My Server';
+
+      let rendered = rawMsg
+        .replace(/{mention}/g, '<span class="discord-mention">@NewMember</span>')
+        .replace(/{user}/g, 'NewMember')
+        .replace(/{server}/g, esc(guildName))
+        .replace(/{membercount}/g, '128');
+
+      const formatted = formatDiscordMarkdown(rendered);
+      const botName = esc((currentGuild && currentGuild.botName) ? currentGuild.botName : 'HELIX');
+      const botIcon = (currentGuild && currentGuild.icon) ? guildIconUrl(currentGuildId, currentGuild.icon) : null;
+      const avatarHtml = botIcon
+        ? '<img src="' + botIcon + '" alt="" style="width: 2.5rem; height: 2.5rem; border-radius: 50%; object-fit: cover;">'
+        : '<div class="discord-avatar"><i class="fa-solid fa-robot"></i></div>';
+
+      if (isEmbed) {
+        container.innerHTML =
+          avatarHtml +
+          '<div class="discord-msg-body">' +
+            '<div class="discord-msg-header">' +
+              '<span class="discord-bot-name">' + botName + '</span>' +
+              '<span class="discord-bot-badge">APP</span>' +
+              '<span class="discord-timestamp">Today at 12:00 PM</span>' +
+            '</div>' +
+            '<div class="discord-embed-card">' +
+              '<div class="discord-embed-title">👋 Welcome to ' + esc(guildName) + '!</div>' +
+              '<div class="discord-embed-desc">' + formatted + '</div>' +
+            '</div>' +
+          '</div>';
+      } else {
+        container.innerHTML =
+          avatarHtml +
+          '<div class="discord-msg-body">' +
+            '<div class="discord-msg-header">' +
+              '<span class="discord-bot-name">' + botName + '</span>' +
+              '<span class="discord-bot-badge">APP</span>' +
+              '<span class="discord-timestamp">Today at 12:00 PM</span>' +
+            '</div>' +
+            '<div class="discord-msg-text">' + formatted + '</div>' +
+          '</div>';
+      }
+    }
+
+    function updateTicketPreview() {
+      const container = document.getElementById('ticket-preview-container');
+      if (!container) return;
+      const rawMsg = document.getElementById('admin-ticket-message')?.value || 'Click the button below to open a support ticket.';
+      const formatted = formatDiscordMarkdown(rawMsg);
+      const botName = esc((currentGuild && currentGuild.botName) ? currentGuild.botName : 'HELIX');
+      const botIcon = (currentGuild && currentGuild.icon) ? guildIconUrl(currentGuildId, currentGuild.icon) : null;
+      const avatarHtml = botIcon
+        ? '<img src="' + botIcon + '" alt="" style="width: 2.5rem; height: 2.5rem; border-radius: 50%; object-fit: cover;">'
+        : '<div class="discord-avatar"><i class="fa-solid fa-robot"></i></div>';
+
+      container.innerHTML =
+        avatarHtml +
+        '<div class="discord-msg-body">' +
+          '<div class="discord-msg-header">' +
+            '<span class="discord-bot-name">' + botName + '</span>' +
+            '<span class="discord-bot-badge">APP</span>' +
+            '<span class="discord-timestamp">Today at 12:00 PM</span>' +
+          '</div>' +
+          '<div class="discord-msg-text">' + formatted + '</div>' +
+          '<div class="discord-btn-row">' +
+            '<div class="discord-btn-primary"><i class="fa-solid fa-ticket"></i> Open Ticket</div>' +
+          '</div>' +
+        '</div>';
     }
 
     async function saveLogsTab() {
