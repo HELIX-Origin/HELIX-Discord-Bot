@@ -246,4 +246,60 @@ describe('FeedWatcher Real-Time Single-Newest-Post Delivery', () => {
     expect(repo.isEntrySent(feed.id, 'epic-game-2')).toBe(true);
     expect(repo.isEntrySent(feed.id, 'epic-game-3')).toBe(true);
   });
+
+  it('ignores static Community Home posts in Reddit feeds and delivers real newest post', async () => {
+    const feed = repo.addFeed(
+      userId,
+      'r/technology',
+      'https://www.reddit.com/r/technology/.rss',
+      'ch-reddit',
+      'reddit',
+      null,
+    );
+
+    const items = [
+      {
+        title: 'Community Home',
+        link: 'https://www.reddit.com/r/technology/comments/abc/community_home/',
+        guid: 'reddit-guid-community-home',
+        pubDate: 'Wed, 23 Sep 2026 13:00:00 GMT',
+      },
+      {
+        title: 'Real News Article',
+        link: 'https://www.reddit.com/r/technology/comments/def/real_news_article/',
+        guid: 'reddit-guid-real-news',
+        pubDate: 'Wed, 23 Sep 2026 12:00:00 GMT',
+      },
+      {
+        title: 'Older Article',
+        link: 'https://www.reddit.com/r/technology/comments/ghi/older_article/',
+        guid: 'reddit-guid-older',
+        pubDate: 'Wed, 23 Sep 2026 11:00:00 GMT',
+      },
+    ];
+
+    vi.spyOn(fetchModule, 'fetchRaw').mockResolvedValue({
+      url: feed.url,
+      status: 200,
+      contentType: 'application/rss+xml',
+      body: new Uint8Array(),
+      text: sampleRssXml(items),
+      durationMs: 12,
+      challenged: false,
+    });
+
+    const watcher = new FeedWatcher(repo, null, 'error', botMock);
+    await watcher.pollFeed(userId, feed.id, true);
+
+    expect(sentMessages).toHaveLength(1);
+    const embed = sentMessages[0].payload.embeds?.[0] as { title?: string };
+    expect(embed?.title).toBe('Real News Article');
+
+    expect(repo.isEntrySent(feed.id, 'reddit-guid-real-news')).toBe(true);
+    expect(repo.isEntrySent(feed.id, 'reddit-guid-older')).toBe(true);
+    expect(repo.isEntrySent(feed.id, 'reddit-guid-community-home')).toBe(true);
+
+    const updatedFeed = repo.getFeed(userId, feed.id);
+    expect(updatedFeed?.lastEntryId).toBe('reddit-guid-real-news');
+  });
 });

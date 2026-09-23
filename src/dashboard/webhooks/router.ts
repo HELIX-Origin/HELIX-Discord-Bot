@@ -8,6 +8,7 @@ import { resolveFeedTargets } from '../../feed/targets.js';
 import type { FeedThreadManager } from '../../feed/threads.js';
 import type { DiscordBot } from '../../bot/bot.js';
 import { streamAlertEmbed, feedEmbed } from '../../bot/utils/embeds.js';
+import { isRedditCommunityHomePost } from '../../feed/reddit.js';
 
 interface WebhookSubscription {
   userId: number;
@@ -118,7 +119,10 @@ export class WebhookRouter {
       }
 
       const entries = await this.parseFeedContent(body, feed.feedType);
-      const unposted = entries.filter((e) => {
+      const isReddit = feed.feedType === 'reddit' || feed.url.toLowerCase().includes('reddit.com');
+      const validEntries = isReddit ? entries.filter((e) => !isRedditCommunityHomePost(e)) : entries;
+
+      const unposted = validEntries.filter((e) => {
         const guid = e.id || e.link;
         return guid && !this.deps.repo.isEntrySent(feed.id, guid);
       });

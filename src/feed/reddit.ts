@@ -232,3 +232,32 @@ export function createRedditFeeds(): RedditFeedsService {
     subredditFromUrlOrName,
   };
 }
+
+/**
+ * Detect whether a Reddit feed entry is a static "Community Home" post.
+ * Community Home posts are persistent interactive landing widgets generated
+ * by moderators via the Reddit Developer Platform (Devvit) that should be
+ * ignored so they don't block actual new posts or flood delivery channels.
+ */
+export function isRedditCommunityHomePost(entry: {
+  title?: string | null;
+  link?: string | null;
+  id?: string | null;
+}): boolean {
+  const title = (entry.title ?? '').trim().toLowerCase();
+  if (
+    title === 'community home' ||
+    title === '[community home]' ||
+    title === '(community home)' ||
+    /^\[?community\s+home\]?(\s*[-:–—|].*)?$/i.test(title) ||
+    /.*[-:–—|]\s*community\s+home$/i.test(title) ||
+    title.includes('community home')
+  ) {
+    return true;
+  }
+  const target = `${entry.link ?? ''} ${entry.id ?? ''}`.toLowerCase();
+  if (target.includes('/community_home') || target.includes('/community-home') || target.includes('_community_home')) {
+    return true;
+  }
+  return false;
+}

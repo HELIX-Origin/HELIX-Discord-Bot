@@ -1,7 +1,7 @@
 export function renderFeedsTab(): string {
   return `
     <!-- TAB: NEWS & RSS (add by URL + catalog + RSS/scrape feeds) -->
-    <section id="tab-rss" class="tab-pane active">
+    <section id="tab-rss" class="tab-pane">
       <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
         <div>
           <div class="section-title"><i class="fa-solid fa-rss" style="color: var(--primary);"></i> News &amp; RSS Feeds</div>
@@ -91,8 +91,6 @@ export function renderFeedsTab(): string {
         <div id="presets-list-container" style="display: flex; flex-direction: column; gap: 1.25rem;">
           <div class="empty-state">Loading news feeds catalog...</div>
         </div>
-      </div>
-
       </div>
     </section>
 

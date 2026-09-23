@@ -18,6 +18,7 @@ import {
   assertRedditTargetAllowed,
   clearRedditCookieCache,
   clearRedditNsfwCache,
+  isRedditCommunityHomePost,
 } from '../../../src/feed/reddit.js';
 
 const ORIGINAL_COOKIES_FILE = process.env['REDDIT_COOKIES_FILE'];
@@ -88,7 +89,14 @@ describe('parseJsonCookies', () => {
     const json = JSON.stringify({
       cookies: [
         { name: 'expired', value: 'no', domain: '.reddit.com', hostOnly: false, session: false, expirationDate: past },
-        { name: 'future', value: 'yes', domain: '.reddit.com', hostOnly: false, session: false, expirationDate: futureMs },
+        {
+          name: 'future',
+          value: 'yes',
+          domain: '.reddit.com',
+          hostOnly: false,
+          session: false,
+          expirationDate: futureMs,
+        },
         { name: 'live', value: 'ok', domain: '.reddit.com', hostOnly: false, session: true, expires: past },
       ],
     });
@@ -149,5 +157,48 @@ describe('assertRedditTargetAllowed (NSFW age-restriction rule)', () => {
     await expect(assertRedditTargetAllowed('memes', false)).rejects.toThrow(
       "r/memes's content rating could not be verified",
     );
+  });
+});
+
+describe('isRedditCommunityHomePost', () => {
+  it('identifies exact and bracketed Community Home titles', () => {
+    expect(isRedditCommunityHomePost({ title: 'Community Home' })).toBe(true);
+    expect(isRedditCommunityHomePost({ title: 'community home' })).toBe(true);
+    expect(isRedditCommunityHomePost({ title: '  Community Home  ' })).toBe(true);
+    expect(isRedditCommunityHomePost({ title: '[Community Home]' })).toBe(true);
+    expect(isRedditCommunityHomePost({ title: '(Community Home)' })).toBe(true);
+  });
+
+  it('identifies Community Home title prefixes and suffixes', () => {
+    expect(isRedditCommunityHomePost({ title: 'Community Home - Welcome to r/gadgets' })).toBe(true);
+    expect(isRedditCommunityHomePost({ title: 'r/gadgets | Community Home' })).toBe(true);
+    expect(isRedditCommunityHomePost({ title: '[Community Home] Rules & Discussion' })).toBe(true);
+  });
+
+  it('identifies Community Home URLs and GUIDs', () => {
+    expect(
+      isRedditCommunityHomePost({
+        title: 'Welcome',
+        link: 'https://www.reddit.com/r/technology/comments/12345/community_home/',
+      }),
+    ).toBe(true);
+    expect(
+      isRedditCommunityHomePost({
+        title: 'Welcome',
+        link: 'https://www.reddit.com/r/technology/comments/12345/community-home/',
+      }),
+    ).toBe(true);
+  });
+
+  it('does not match regular community or home posts', () => {
+    expect(isRedditCommunityHomePost({ title: 'A new home for our community' })).toBe(false);
+    expect(isRedditCommunityHomePost({ title: 'Building a home in our community' })).toBe(false);
+    expect(isRedditCommunityHomePost({ title: 'Home theater setup discussion' })).toBe(false);
+    expect(
+      isRedditCommunityHomePost({
+        title: 'Regular Post',
+        link: 'https://www.reddit.com/r/technology/comments/12345/regular_post/',
+      }),
+    ).toBe(false);
   });
 });

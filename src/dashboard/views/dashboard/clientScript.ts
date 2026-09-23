@@ -69,7 +69,7 @@ export function renderClientScript(): string {
     function switchTab(tabId) {
       activeTabName = tabId;
       currentFeedDetailId = null;
-      document.querySelectorAll('#dashboard-view .tab-pane').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('#dashboard-view main > .tab-pane, #dashboard-view .tab-pane, #feed-detail-view').forEach(el => el.classList.remove('active'));
       document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
 
       const target = document.getElementById('tab-' + tabId);
@@ -764,7 +764,7 @@ export function renderClientScript(): string {
         if (!feed) { closeFeedDetail(); return; }
         var content = document.getElementById('feed-detail-content');
         if (content) content.innerHTML = renderFeedDetail(feed);
-        document.querySelectorAll('#dashboard-view .tab-pane').forEach(function(el) { el.classList.remove('active'); });
+        document.querySelectorAll('#dashboard-view main > .tab-pane, #dashboard-view .tab-pane, #feed-detail-view').forEach(function(el) { el.classList.remove('active'); });
         document.querySelectorAll('.tab-btn').forEach(function(btn) { btn.classList.remove('active'); });
         detail.classList.add('active');
         window.history.pushState({}, '', '/dashboard/' + currentGuildId + '/feed/' + feedId);

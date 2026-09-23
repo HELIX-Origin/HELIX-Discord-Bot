@@ -11,6 +11,7 @@ import { scrapeItems, absoluteUrl } from './scraper.js';
 import { feedEmbed, freeGameEmbed, streamAlertEmbed } from '../bot/utils/embeds.js';
 import { createLogger, type LogLevel } from '../util/logger.js';
 import { FeedThreadManager } from './threads.js';
+import { isRedditCommunityHomePost } from './reddit.js';
 
 interface YouTubeItem {
   id?: { videoId?: string };
@@ -212,9 +213,27 @@ export class FeedWatcher {
       }
     }
 
+    const isReddit = feed.feedType === 'reddit' || feed.url.toLowerCase().includes('reddit.com');
+
+    // Filter out persistent static "Community Home" posts from Reddit feeds so they
+    // never block real incoming posts or get mistakenly delivered.
+    const validEntries = isReddit ? entries.filter((e) => !isRedditCommunityHomePost(e)) : entries;
+
+    if (isReddit) {
+      for (const entry of entries) {
+        if (isRedditCommunityHomePost(entry)) {
+          const withId = withGuid({ title: feed.name, link: feed.url, entries: [] }, entry);
+          if (!this.repo.isEntrySent(feed.id, withId.guid)) {
+            this.repo.markEntrySent(feed.id, withId.guid);
+            void this.redis?.markEntrySent(feed.id, withId.guid);
+          }
+        }
+      }
+    }
+
     const seen = new Set<string>();
     const toSend: Array<FeedEntry & { guid: string }> = [];
-    for (const entry of entries) {
+    for (const entry of validEntries) {
       const withId = withGuid({ title: feed.name, link: feed.url, entries: [] }, entry);
       if (seen.has(withId.guid)) continue;
       seen.add(withId.guid);
@@ -270,7 +289,9 @@ export class FeedWatcher {
     this.repo.setFeedChecked(
       userId,
       feed.id,
-      entries.length ? withGuid({ title: feed.name, link: feed.url, entries: [] }, entries[0]).guid : feed.lastEntryId,
+      validEntries.length
+        ? withGuid({ title: feed.name, link: feed.url, entries: [] }, validEntries[0]).guid
+        : feed.lastEntryId,
     );
     this.logger.info('Feed polled', { feedId: feed.id, feedName: feed.name, newEntries: toSend.length });
   }
