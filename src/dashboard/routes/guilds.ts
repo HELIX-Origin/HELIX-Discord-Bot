@@ -6,7 +6,7 @@ import { hasInvitePermission } from '../oauth/discord.js';
 import { getAllCommands, isCommandDisabled } from '../../bot/handlers/registry.js';
 import { loadAllCommands } from '../../bot/handlers/loader.js';
 import { getWelcomeConfig } from '../../bot/commands/admin/welcome.js';
-import { getTicketConfig } from '../../bot/commands/admin/ticket.js';
+import { DEFAULT_TICKET_MESSAGE, getTicketConfig, sendTicketButtonMessage } from '../../bot/commands/admin/ticket.js';
 import { parseModLogEvents, MOD_ACTIONS } from '../../bot/lib/admin/modlog.js';
 import { AUDIT_EVENTS, dispatchAuditLog, parseAuditEvents } from '../../bot/lib/admin/auditlog.js';
 
@@ -202,6 +202,8 @@ export function registerGuildRoutes(router: Router<AppDeps>): void {
         managerRoleId?: string | null;
         transcriptChannelId?: string | null;
         logChannelId?: string | null;
+        message?: string | null;
+        ticketMessage?: string | null;
         welcomeMessage?: string | null;
       };
       logs?: {
@@ -357,10 +359,18 @@ export function registerGuildRoutes(router: Router<AppDeps>): void {
           d.repo.setGuildSetting(guildId, 'ticket_log_channel_id', id);
           changes.push(id ? `Ticket log channel → <#${id}>` : 'Ticket log channel cleared');
         }
-        if (body.tickets.welcomeMessage !== undefined) {
-          const value = (body.tickets.welcomeMessage ?? '').slice(0, 2000);
+        const ticketMsgInput = body.tickets.message ?? body.tickets.ticketMessage ?? body.tickets.welcomeMessage;
+        if (ticketMsgInput !== undefined) {
+          const value = (ticketMsgInput ?? '').slice(0, 2000);
+          d.repo.setGuildSetting(guildId, 'ticket_message', value);
           d.repo.setGuildSetting(guildId, 'ticket_welcome_message', value);
-          changes.push('Ticket welcome message updated');
+          changes.push('Ticket message updated');
+        }
+
+        const activeChanId = body.tickets.channelId || d.repo.getGuildSetting(guildId, 'ticket_channel_id');
+        if (activeChanId && (body.tickets.channelId || ticketMsgInput !== undefined) && d.bot) {
+          const msg = d.repo.getGuildSetting(guildId, 'ticket_message') || DEFAULT_TICKET_MESSAGE;
+          void sendTicketButtonMessage(d.bot.rest, activeChanId, msg).catch(() => {});
         }
       }
 

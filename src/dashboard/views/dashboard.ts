@@ -5,14 +5,15 @@ import { renderDashboardStyles } from './dashboard/styles.js';
 import { renderSidebar } from './dashboard/sidebar.js';
 import { renderOverviewTab } from './dashboard/overview.js';
 import { renderFeedsTab } from './dashboard/feeds.js';
+import { renderManageFeedsTab } from './dashboard/manageFeeds.js';
 import { renderSourcesTabs } from './dashboard/sources.js';
-import { renderGuildAdminTab } from './dashboard/guildadmin.js';
+import { renderGuildAdminTab } from './dashboard/admin.js';
 import { renderSettingsTab } from './dashboard/settings.js';
 import { renderWelcomeTab } from './dashboard/welcome.js';
 import { renderTicketsTab } from './dashboard/tickets.js';
 import { renderLogsTab } from './dashboard/logs.js';
 import { renderCommandsTab } from './dashboard/commands.js';
-import { renderClientScript } from './dashboard/client-script.js';
+import { renderClientScript } from './dashboard/clientScript.js';
 import { createRedditFeeds } from '../../feed/reddit.js';
 
 export { getThemeInfo } from './theme.js';
@@ -175,6 +176,7 @@ export function renderDashboardHtml(
       <main>
         ${renderOverviewTab({ dbSizeBytes: dbStats.dbSizeBytes })}
         ${renderGuildAdminTab()}
+        ${renderManageFeedsTab()}
         ${renderFeedsTab()}
         ${renderSourcesTabs(redditAvailable)}
         ${renderWelcomeTab()}

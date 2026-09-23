@@ -1,9 +1,7 @@
 import { appDisplayName, type AppDeps } from '../../../app.js';
 import type { DiscordRestClient } from '../../rest.js';
 import {
-  ApplicationCommandOptionType,
   type ApplicationCommand,
-  type ApplicationCommandOption,
   type DiscordEmbed,
   type DiscordInteraction,
   type InteractionOption,
@@ -13,61 +11,8 @@ import { createEmbed, EMBED_COLORS, successEmbed } from '../../utils/embeds.js';
 import { registerCommandMetadata, type BotCommand } from '../../handlers/registry.js';
 import { dispatchAuditLog } from '../../lib/admin/auditlog.js';
 
-export const WELCOME_ACTIONS = ['channel', 'message', 'disable', 'view', 'test'] as const;
-export type WelcomeAction = (typeof WELCOME_ACTIONS)[number];
-
-export const welcomeOptions: ApplicationCommandOption[] = [
-  {
-    name: 'action',
-    description: 'What to configure',
-    type: ApplicationCommandOptionType.STRING,
-    required: true,
-    choices: [
-      { name: 'Set the welcome channel', value: 'channel' },
-      { name: 'Set the welcome message', value: 'message' },
-      { name: 'Disable the welcome system', value: 'disable' },
-      { name: 'View current configuration', value: 'view' },
-      { name: 'Send a test message', value: 'test' },
-    ],
-  },
-  {
-    name: 'channel',
-    description: 'Channel to send welcome messages (channel)',
-    type: ApplicationCommandOptionType.CHANNEL,
-    required: false,
-    channel_types: [0, 5],
-  },
-  {
-    name: 'content',
-    description: 'Welcome message template, supports placeholders (message)',
-    type: ApplicationCommandOptionType.STRING,
-    required: false,
-  },
-  {
-    name: 'embed',
-    description: 'Use embed format (message)',
-    type: ApplicationCommandOptionType.BOOLEAN,
-    required: false,
-  },
-  {
-    name: 'color',
-    description: 'Embed color hex, e.g. #06b6d4 (message)',
-    type: ApplicationCommandOptionType.STRING,
-    required: false,
-  },
-  {
-    name: 'thumbnail',
-    description: 'Show user avatar as thumbnail (message)',
-    type: ApplicationCommandOptionType.BOOLEAN,
-    required: false,
-  },
-  {
-    name: 'banner',
-    description: 'Banner image URL for embed (message)',
-    type: ApplicationCommandOptionType.STRING,
-    required: false,
-  },
-];
+import { welcomeOptions, WELCOME_ACTIONS, type WelcomeAction } from '../../lib/options/welcome.js';
+export { welcomeOptions, WELCOME_ACTIONS, type WelcomeAction };
 
 export const welcomeCommandDef: ApplicationCommand = {
   name: 'welcome',
@@ -201,8 +146,11 @@ export async function handleWelcomeCommand(
   }
 
   const options = interaction.data?.options ?? [];
+  const action = optionValue(options, 'action');
 
-  switch (optionValue(options, 'action')) {
+  switch (action) {
+    case 'setup':
+      return handleSetup(guildId, options, deps);
     case 'channel':
       return handleSetChannel(guildId, options, deps);
     case 'message':
@@ -214,6 +162,9 @@ export async function handleWelcomeCommand(
     case 'test':
       return handleTest(interaction, guildId, deps);
     default:
+      if (optionValue(options, 'channel') || optionValue(options, 'content')) {
+        return handleSetup(guildId, options, deps);
+      }
       return welcomeUsage();
   }
 }
@@ -225,6 +176,11 @@ function welcomeUsage(): InteractionResponse {
       title: '👋 Welcome Command Usage',
       description: 'Use `/welcome` with one of the actions below.',
       fields: [
+        {
+          name: '⚙️ setup',
+          value: '`/welcome action:setup channel:#welcome content:"Welcome {mention} to {server}!" embed:True`',
+          inline: false,
+        },
         { name: '📢 channel', value: '`/welcome action:channel channel:#welcome`', inline: false },
         { name: '📝 message', value: '`/welcome action:message content:"Welcome {user}!" embed:True`', inline: false },
         { name: '🧪 test', value: '`/welcome action:test`', inline: false },
@@ -235,6 +191,66 @@ function welcomeUsage(): InteractionResponse {
   );
 }
 
+function handleSetup(guildId: string, options: InteractionOption[], deps: AppDeps): InteractionResponse {
+  const channelId = optionValue(options, 'channel') || undefined;
+  const content = optionValue(options, 'content') || undefined;
+  const embedFlag = optionRaw(options, 'embed');
+  const rawColor = optionValue(options, 'color') || undefined;
+  const thumbnailFlag = optionRaw(options, 'thumbnail');
+  const banner = optionValue(options, 'banner') || undefined;
+
+  if (rawColor && !parseHexColor(rawColor)) {
+    return errorResponse('Invalid Color', `\`${rawColor}\` is not a valid hex color. Use a format like \`#06b6d4\`.`);
+  }
+
+  const config = getWelcomeConfig(deps, guildId);
+  const fields: { name: string; value: string; inline?: boolean }[] = [];
+
+  if (channelId) {
+    deps.repo.setGuildSetting(guildId, 'welcome_channel_id', channelId);
+    fields.push({ name: '📢 Welcome Channel', value: `<#${channelId}>`, inline: true });
+  }
+  if (content) {
+    deps.repo.setGuildSetting(guildId, 'welcome_message', content);
+    fields.push({ name: '📝 Message', value: content.slice(0, 256), inline: false });
+  }
+  if (embedFlag !== undefined) {
+    deps.repo.setGuildSetting(guildId, 'welcome_embed', embedFlag ? '1' : '0');
+    fields.push({ name: '🎨 Format', value: embedFlag ? 'Embed' : 'Plain text', inline: true });
+  }
+  if (rawColor) {
+    deps.repo.setGuildSetting(guildId, 'welcome_color', rawColor);
+    fields.push({ name: '🎨 Color', value: rawColor, inline: true });
+  }
+  if (thumbnailFlag !== undefined) {
+    deps.repo.setGuildSetting(guildId, 'welcome_thumbnail', thumbnailFlag ? '1' : '0');
+    fields.push({ name: '🖼️ Thumbnail', value: thumbnailFlag ? 'Enabled' : 'Disabled', inline: true });
+  }
+  if (banner) {
+    deps.repo.setGuildSetting(guildId, 'welcome_banner', banner);
+    fields.push({ name: '🖼️ Banner', value: banner.slice(0, 100), inline: true });
+  }
+
+  if (fields.length === 0 && !config.channelId) {
+    return welcomeUsage();
+  }
+
+  deps.repo.logActivity(null, 'info', 'bot', `Configured welcome system for guild ${guildId} via /welcome`);
+  void dispatchAuditLog(
+    guildId,
+    {
+      event: 'welcome',
+      message: 'Welcome system configured.',
+      guildName: undefined,
+      actorId: null,
+      actorTag: null,
+    },
+    deps,
+  );
+
+  return embedResponse(successEmbed('Welcome System Configured', 'Welcome settings have been updated.', fields));
+}
+
 function handleSetChannel(guildId: string, options: InteractionOption[], deps: AppDeps): InteractionResponse {
   const channelId = optionValue(options, 'channel');
   if (!channelId) {
@@ -242,6 +258,13 @@ function handleSetChannel(guildId: string, options: InteractionOption[], deps: A
   }
 
   deps.repo.setGuildSetting(guildId, 'welcome_channel_id', channelId);
+
+  // If message options are also provided, apply them
+  const content = optionValue(options, 'content');
+  if (content) deps.repo.setGuildSetting(guildId, 'welcome_message', content);
+  const embedFlag = optionRaw(options, 'embed');
+  if (embedFlag !== undefined) deps.repo.setGuildSetting(guildId, 'welcome_embed', embedFlag ? '1' : '0');
+
   deps.repo.logActivity(null, 'info', 'bot', `Set welcome channel to ${channelId} for guild ${guildId} via /welcome`);
 
   void dispatchAuditLog(
@@ -265,13 +288,13 @@ function handleSetChannel(guildId: string, options: InteractionOption[], deps: A
 }
 
 function handleSetMessage(guildId: string, options: InteractionOption[], deps: AppDeps): InteractionResponse {
-  const content = optionValue(options, 'content');
+  const content = optionValue(options, 'content') || undefined;
   const embedFlag = optionRaw(options, 'embed');
-  const rawColor = optionValue(options, 'color');
+  const rawColor = optionValue(options, 'color') || undefined;
   const thumbnailFlag = optionRaw(options, 'thumbnail');
-  const banner = optionValue(options, 'banner');
+  const banner = optionValue(options, 'banner') || undefined;
 
-  if (!content) {
+  if (!content && embedFlag === undefined && !rawColor && thumbnailFlag === undefined && !banner) {
     return welcomeUsage();
   }
 
@@ -279,13 +302,9 @@ function handleSetMessage(guildId: string, options: InteractionOption[], deps: A
     return errorResponse('Invalid Color', `\`${rawColor}\` is not a valid hex color. Use a format like \`#06b6d4\`.`);
   }
 
-  const config = getWelcomeConfig(deps, guildId);
-  const embed = embedFlag === undefined ? config.embed : Boolean(embedFlag);
-  const thumbnail = thumbnailFlag === undefined ? config.thumbnail : Boolean(thumbnailFlag);
-
-  deps.repo.setGuildSetting(guildId, 'welcome_message', content);
-  deps.repo.setGuildSetting(guildId, 'welcome_embed', embed ? '1' : '0');
-  deps.repo.setGuildSetting(guildId, 'welcome_thumbnail', thumbnail ? '1' : '0');
+  if (content) deps.repo.setGuildSetting(guildId, 'welcome_message', content);
+  if (embedFlag !== undefined) deps.repo.setGuildSetting(guildId, 'welcome_embed', embedFlag ? '1' : '0');
+  if (thumbnailFlag !== undefined) deps.repo.setGuildSetting(guildId, 'welcome_thumbnail', thumbnailFlag ? '1' : '0');
   if (rawColor) deps.repo.setGuildSetting(guildId, 'welcome_color', rawColor);
   if (banner) deps.repo.setGuildSetting(guildId, 'welcome_banner', banner);
 
@@ -295,7 +314,7 @@ function handleSetMessage(guildId: string, options: InteractionOption[], deps: A
     guildId,
     {
       event: 'welcome',
-      message: `Welcome message updated (format: ${embed ? 'embed' : 'plain text'}).`,
+      message: `Welcome message updated.`,
       guildName: undefined,
       actorId: null,
       actorTag: null,
@@ -303,12 +322,13 @@ function handleSetMessage(guildId: string, options: InteractionOption[], deps: A
     deps,
   );
 
-  const fields = [
-    { name: 'Message', value: content.slice(0, 256), inline: false },
-    { name: 'Format', value: embed ? 'Embed' : 'Plain text', inline: true },
-  ];
+  const fields: { name: string; value: string; inline?: boolean }[] = [];
+  if (content) fields.push({ name: 'Message', value: content.slice(0, 256), inline: false });
+  if (embedFlag !== undefined) fields.push({ name: 'Format', value: embedFlag ? 'Embed' : 'Plain text', inline: true });
   if (rawColor) fields.push({ name: 'Color', value: rawColor, inline: true });
-  if (thumbnail) fields.push({ name: 'Thumbnail', value: 'User avatar', inline: true });
+  if (thumbnailFlag !== undefined)
+    fields.push({ name: 'Thumbnail', value: thumbnailFlag ? 'User avatar' : 'Disabled', inline: true });
+  if (banner) fields.push({ name: 'Banner', value: banner.slice(0, 100), inline: true });
 
   return embedResponse(successEmbed('Welcome Message Updated', undefined, fields));
 }
@@ -411,34 +431,36 @@ registerCommandMetadata({
       type: 3,
       required: true,
       choices: [
+        { name: 'Configure welcome system', value: 'setup' },
         { name: 'Set the welcome channel', value: 'channel' },
         { name: 'Set the welcome message', value: 'message' },
-        { name: 'Disable the welcome system', value: 'disable' },
         { name: 'View current configuration', value: 'view' },
         { name: 'Send a test message', value: 'test' },
+        { name: 'Disable the welcome system', value: 'disable' },
       ],
     },
     {
       name: 'channel',
-      description: 'Channel to send welcome messages (channel)',
+      description: 'Channel to send welcome messages (setup / channel)',
       type: 7,
       required: false,
       channel_types: [0, 5],
     },
     {
       name: 'content',
-      description: 'Welcome message template, supports placeholders (message)',
+      description: 'Welcome message template, supports placeholders (setup / message)',
       type: 3,
       required: false,
     },
-    { name: 'embed', description: 'Use embed format (message)', type: 5, required: false },
-    { name: 'color', description: 'Embed color hex, e.g. #06b6d4 (message)', type: 3, required: false },
-    { name: 'thumbnail', description: 'Show user avatar as thumbnail (message)', type: 5, required: false },
-    { name: 'banner', description: 'Banner image URL for embed (message)', type: 3, required: false },
+    { name: 'embed', description: 'Use embed format (setup / message)', type: 5, required: false },
+    { name: 'color', description: 'Embed color hex, e.g. #06b6d4 (setup / message)', type: 3, required: false },
+    { name: 'thumbnail', description: 'Show user avatar as thumbnail (setup / message)', type: 5, required: false },
+    { name: 'banner', description: 'Banner image URL for embed (setup / message)', type: 3, required: false },
   ],
   examples: [
+    '/welcome action:setup channel:#welcome content:"Welcome {mention} to {server}!" embed:True',
     '/welcome action:channel channel:#welcome',
-    '/welcome action:message content:"Welcome {user}!" embed:True',
+    '/welcome action:message content:"Welcome {mention} to {server}!" embed:True',
     '/welcome action:test',
     '/welcome action:view',
     '/welcome action:disable',

@@ -12,8 +12,6 @@ import { feedEmbed, freeGameEmbed, streamAlertEmbed } from '../bot/utils/embeds.
 import { createLogger, type LogLevel } from '../util/logger.js';
 import { FeedThreadManager } from './threads.js';
 
-const RSS_POST_INTERVAL_FLOOR_MS = 6 * 60 * 60 * 1000;
-
 interface YouTubeItem {
   id?: { videoId?: string };
   snippet?: {
@@ -81,7 +79,7 @@ export class FeedWatcher {
       const n = Number(globalSaved);
       if (Number.isInteger(n) && n > 0) return n;
     }
-    return 3_600_000;
+    return 60_000;
   }
 
   private async pollFeedLocked(userId: number, feed: Feed, force = false): Promise<void> {
@@ -224,17 +222,7 @@ export class FeedWatcher {
       if (this.redis && (await this.redis.isEntrySent(feed.id, withId.guid))) continue;
       toSend.push(withId);
     }
-    toSend.reverse(); // oldest first
-
-    // RSS/scrape feeds publish at most one post per source at a time, at most
-    // once per UTC day, with a minimum 6-hour floor between posts (rate limiting).
-    const todayUtc = new Date().toISOString().slice(0, 10);
-    const lastPosted = feed.lastPostedAt ? new Date(feed.lastPostedAt).getTime() : Number.NaN;
-    const lastPostedDay = feed.lastPostedAt ? feed.lastPostedAt.slice(0, 10) : null;
-    const sinceLastPost = Number.isFinite(lastPosted) ? Date.now() - lastPosted : Number.POSITIVE_INFINITY;
-    const canPost = !feed.lastPostedAt || (lastPostedDay !== todayUtc && sinceLastPost >= RSS_POST_INTERVAL_FLOOR_MS);
-
-    if (canPost && toSend.length > 0) {
+    if (toSend.length > 0) {
       const entry = toSend[0];
       const embed = feedEmbed({
         title: entry.title,
@@ -261,6 +249,14 @@ export class FeedWatcher {
         this.repo.markEntrySent(feed.id, entry.guid);
         await this.redis?.markEntrySent(feed.id, entry.guid);
         this.repo.setFeedPosted(userId, feed.id);
+
+        // Drain backlog: mark older unposted entries in this cycle as sent so
+        // they don't accumulate into multi-post bursts on subsequent ticks.
+        for (let i = 1; i < toSend.length; i++) {
+          const older = toSend[i];
+          this.repo.markEntrySent(feed.id, older.guid);
+          await this.redis?.markEntrySent(feed.id, older.guid);
+        }
       } else {
         this.logger.warn('Delivery failed for feed entry', {
           feedId: feed.id,
@@ -269,12 +265,6 @@ export class FeedWatcher {
           error: errorDetail,
         });
       }
-    } else if (toSend.length > 0) {
-      this.logger.debug('Skipping feed entry delivery; publishing window not reached', {
-        feedId: feed.id,
-        feedName: feed.name,
-        pending: toSend.length,
-      });
     }
 
     this.repo.setFeedChecked(
@@ -355,7 +345,8 @@ export class FeedWatcher {
       toSend.push(game);
     }
 
-    for (const game of toSend) {
+    if (toSend.length > 0) {
+      const game = toSend[0];
       const embed = freeGameEmbed(game, feed.name);
       let delivered = false;
       let errorDetail: string | null = null;
@@ -369,6 +360,14 @@ export class FeedWatcher {
       if (delivered) {
         this.repo.markEntrySent(feed.id, game.id);
         await this.redis?.markEntrySent(feed.id, game.id);
+        this.repo.setFeedPosted(userId, feed.id);
+
+        // Drain backlog: mark older unposted games as sent to avoid 10-20 game bursts
+        for (let i = 1; i < toSend.length; i++) {
+          const older = toSend[i];
+          this.repo.markEntrySent(feed.id, older.id);
+          await this.redis?.markEntrySent(feed.id, older.id);
+        }
       } else {
         this.logger.warn('Delivery failed for free game entry', {
           feedId: feed.id,
@@ -376,7 +375,6 @@ export class FeedWatcher {
           gameTitle: game.title,
           error: errorDetail,
         });
-        break;
       }
     }
 
@@ -427,7 +425,8 @@ export class FeedWatcher {
       toSend.push(entry);
     }
 
-    for (const entry of toSend) {
+    if (toSend.length > 0) {
+      const entry = toSend[0];
       const embed = streamAlertEmbed({
         title: entry.title,
         url: entry.link,
@@ -452,6 +451,14 @@ export class FeedWatcher {
       if (delivered) {
         this.repo.markEntrySent(feed.id, entry.id);
         await this.redis?.markEntrySent(feed.id, entry.id);
+        this.repo.setFeedPosted(userId, feed.id);
+
+        // Drain backlog: mark older unposted stream alerts as sent
+        for (let i = 1; i < toSend.length; i++) {
+          const older = toSend[i];
+          this.repo.markEntrySent(feed.id, older.id);
+          await this.redis?.markEntrySent(feed.id, older.id);
+        }
       } else {
         this.logger.warn('Delivery failed for stream alert entry', {
           feedId: feed.id,
@@ -459,7 +466,6 @@ export class FeedWatcher {
           entryTitle: entry.title,
           error: errorDetail,
         });
-        break;
       }
     }
 
@@ -604,12 +610,24 @@ export class FeedWatcher {
       if (feed.enabled !== 1 && !force) continue;
       allFeeds.push({ userId: feed.userId, id: feed.id });
     }
-    await Promise.all(allFeeds.map((f) => this.pollFeed(f.userId, f.id, force)));
+    for (let i = 0; i < allFeeds.length; i++) {
+      const f = allFeeds[i];
+      await this.pollFeed(f.userId, f.id, force);
+      if (i < allFeeds.length - 1) {
+        await new Promise((resolve) => setTimeout(resolve, 250));
+      }
+    }
   }
 
   async pollGuildFeeds(guildId: string, force = true): Promise<number> {
     const feeds = this.repo.listFeedsForAllUsers().filter((f) => f.guildId === guildId && (force || f.enabled === 1));
-    await Promise.all(feeds.map((f) => this.pollFeed(f.userId, f.id, force)));
+    for (let i = 0; i < feeds.length; i++) {
+      const f = feeds[i];
+      await this.pollFeed(f.userId, f.id, force);
+      if (i < feeds.length - 1) {
+        await new Promise((resolve) => setTimeout(resolve, 250));
+      }
+    }
     return feeds.length;
   }
 }

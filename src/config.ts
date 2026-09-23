@@ -198,7 +198,7 @@ export function defaultConfig(): AppConfig {
     publicBaseUrl,
     dbUri,
     dbPath: resolve(dataDir, 'database.sqlite'),
-    pollIntervalMs: 3_600_000,
+    pollIntervalMs: parsePositiveInt(process.env['POLL_INTERVAL_MS'], 60_000),
     requestTimeoutMs: parsePositiveInt(process.env['REQUEST_TIMEOUT_MS'], 15_000),
     logLevel,
     botToken,

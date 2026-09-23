@@ -1,9 +1,7 @@
 import { appDisplayName, type AppDeps } from '../../../app.js';
 import type { DiscordRestClient } from '../../rest.js';
 import {
-  ApplicationCommandOptionType,
   type ApplicationCommand,
-  type ApplicationCommandOption,
   type DiscordEmbed,
   type DiscordInteraction,
   type InteractionOption,
@@ -13,83 +11,8 @@ import { createEmbed, EMBED_COLORS, successEmbed } from '../../utils/embeds.js';
 import { registerCommandMetadata, type BotCommand } from '../../handlers/registry.js';
 import { dispatchAuditLog } from '../../lib/admin/auditlog.js';
 
-export const TICKET_ACTIONS = [
-  'setup',
-  'disable',
-  'view',
-  'create',
-  'close',
-  'add',
-  'remove',
-  'claim',
-  'transcript',
-] as const;
-export type TicketAction = (typeof TICKET_ACTIONS)[number];
-
-export const ticketOptions: ApplicationCommandOption[] = [
-  {
-    name: 'action',
-    description: 'What to do',
-    type: ApplicationCommandOptionType.STRING,
-    required: true,
-    choices: [
-      { name: 'Configure the ticket system', value: 'setup' },
-      { name: 'Disable the ticket system', value: 'disable' },
-      { name: 'View current configuration', value: 'view' },
-      { name: 'Create a support ticket', value: 'create' },
-      { name: 'Close the current ticket', value: 'close' },
-      { name: 'Add a user to the ticket', value: 'add' },
-      { name: 'Remove a user from the ticket', value: 'remove' },
-      { name: 'Claim the ticket', value: 'claim' },
-      { name: 'Generate a transcript', value: 'transcript' },
-    ],
-  },
-  {
-    name: 'manager_role',
-    description: 'Role that can manage tickets (setup)',
-    type: ApplicationCommandOptionType.ROLE,
-    required: false,
-  },
-  {
-    name: 'channel',
-    description: 'Text channel that hosts the Open Ticket button (setup)',
-    type: ApplicationCommandOptionType.CHANNEL,
-    required: false,
-    channel_types: [0, 5],
-  },
-  {
-    name: 'transcript_channel',
-    description: 'Channel for ticket transcripts (setup)',
-    type: ApplicationCommandOptionType.CHANNEL,
-    required: false,
-    channel_types: [0, 5],
-  },
-  {
-    name: 'log_channel',
-    description: 'Channel for ticket logs (setup)',
-    type: ApplicationCommandOptionType.CHANNEL,
-    required: false,
-    channel_types: [0, 5],
-  },
-  {
-    name: 'welcome_message',
-    description: 'Message shown when a ticket is created (setup)',
-    type: ApplicationCommandOptionType.STRING,
-    required: false,
-  },
-  {
-    name: 'reason',
-    description: 'Reason for creating or closing the ticket (create / close)',
-    type: ApplicationCommandOptionType.STRING,
-    required: false,
-  },
-  {
-    name: 'user',
-    description: 'User to add or remove from the ticket (add / remove)',
-    type: ApplicationCommandOptionType.USER,
-    required: false,
-  },
-];
+import { ticketOptions, TICKET_ACTIONS, type TicketAction } from '../../lib/options/ticket.js';
+export { ticketOptions, TICKET_ACTIONS, type TicketAction };
 
 export const ticketCommandDef: ApplicationCommand = {
   name: 'ticket',
@@ -107,8 +30,7 @@ function optionValue(options: InteractionOption[], name: string): string {
   return String(optionRaw(options, name) ?? '').trim();
 }
 
-const DEFAULT_TICKET_WELCOME =
-  '📩 A support agent will be with you shortly. Please describe your issue in detail and remain patient.';
+export const DEFAULT_TICKET_MESSAGE = '🎫 Click the button below to open a support ticket.';
 
 const MAX_TICKET_NAME = 100;
 
@@ -134,6 +56,7 @@ export interface TicketConfig {
   managerRoleId: string | null;
   transcriptChannelId: string | null;
   logChannelId: string | null;
+  ticketMessage: string;
   welcomeMessage: string;
   enabled: boolean;
 }
@@ -144,12 +67,17 @@ export function getTicketConfig(deps: AppDeps, guildId: string): TicketConfig {
     deps.repo.getGuildSetting(guildId, 'ticket_channel_id') ||
     deps.repo.getGuildSetting(guildId, 'ticket_category_id') ||
     null;
+  const ticketMessage =
+    deps.repo.getGuildSetting(guildId, 'ticket_message') ||
+    deps.repo.getGuildSetting(guildId, 'ticket_welcome_message') ||
+    DEFAULT_TICKET_MESSAGE;
   return {
     channelId,
     managerRoleId: deps.repo.getGuildSetting(guildId, 'ticket_manager_role_id') || null,
     transcriptChannelId: deps.repo.getGuildSetting(guildId, 'ticket_transcript_channel_id') || null,
     logChannelId: deps.repo.getGuildSetting(guildId, 'ticket_log_channel_id') || null,
-    welcomeMessage: deps.repo.getGuildSetting(guildId, 'ticket_welcome_message') || DEFAULT_TICKET_WELCOME,
+    ticketMessage,
+    welcomeMessage: ticketMessage,
     enabled: deps.repo.getGuildSetting(guildId, 'ticket_enabled') === '1',
   };
 }
@@ -211,7 +139,31 @@ function ticketUsage(): InteractionResponse {
   );
 }
 
-const TICKET_OPEN_BUTTON_ID = 'ticket_open';
+export const TICKET_OPEN_BUTTON_ID = 'ticket_open';
+
+/** Sends or updates the message hosting the Open Ticket button in the configured ticket channel. */
+export async function sendTicketButtonMessage(
+  rest: DiscordRestClient,
+  channelId: string,
+  content: string = DEFAULT_TICKET_MESSAGE,
+): Promise<void> {
+  await rest.sendChannelMessage(channelId, {
+    content: content || DEFAULT_TICKET_MESSAGE,
+    components: [
+      {
+        type: 1,
+        components: [
+          {
+            type: 2,
+            style: 1,
+            label: 'Open Ticket',
+            custom_id: TICKET_OPEN_BUTTON_ID,
+          },
+        ],
+      },
+    ],
+  });
+}
 
 async function handleSetup(
   guildId: string,
@@ -223,7 +175,7 @@ async function handleSetup(
   const managerRoleId = optionValue(options, 'manager_role');
   const transcriptChannelId = optionValue(options, 'transcript_channel') || undefined;
   const logChannelId = optionValue(options, 'log_channel') || undefined;
-  const welcomeMessage = optionValue(options, 'welcome_message') || undefined;
+  const ticketMessage = optionValue(options, 'message') || optionValue(options, 'welcome_message') || undefined;
 
   if (!managerRoleId) {
     return ticketUsage();
@@ -238,7 +190,10 @@ async function handleSetup(
   deps.repo.setGuildSetting(guildId, 'ticket_manager_role_id', managerRoleId);
   if (transcriptChannelId) deps.repo.setGuildSetting(guildId, 'ticket_transcript_channel_id', transcriptChannelId);
   if (logChannelId) deps.repo.setGuildSetting(guildId, 'ticket_log_channel_id', logChannelId);
-  if (welcomeMessage) deps.repo.setGuildSetting(guildId, 'ticket_welcome_message', welcomeMessage);
+  if (ticketMessage) {
+    deps.repo.setGuildSetting(guildId, 'ticket_message', ticketMessage);
+    deps.repo.setGuildSetting(guildId, 'ticket_welcome_message', ticketMessage);
+  }
   deps.repo.setGuildSetting(guildId, 'ticket_enabled', '1');
 
   deps.repo.logActivity(null, 'info', 'bot', `Configured ticket system for guild ${guildId} via /ticket`);
@@ -256,24 +211,11 @@ async function handleSetup(
   );
 
   let buttonError: string | null = null;
-  if (channelId && channelId !== config.channelId) {
+  const targetChannel = channelId || config.channelId;
+  const msgContent = ticketMessage || config.ticketMessage || DEFAULT_TICKET_MESSAGE;
+  if (targetChannel && (channelId || ticketMessage)) {
     try {
-      await rest.sendChannelMessage(channelId, {
-        content: '🎫 Click the button below to open a support ticket.',
-        components: [
-          {
-            type: 1,
-            components: [
-              {
-                type: 2,
-                style: 1,
-                label: 'Open Ticket',
-                custom_id: TICKET_OPEN_BUTTON_ID,
-              },
-            ],
-          },
-        ],
-      });
+      await sendTicketButtonMessage(rest, targetChannel, msgContent);
     } catch (err) {
       buttonError = (err as Error).message;
     }
@@ -354,7 +296,7 @@ function handleView(guildId: string, deps: AppDeps): InteractionResponse {
           inline: true,
         },
         { name: '📋 Log Channel', value: config.logChannelId ? `<#${config.logChannelId}>` : 'Not set', inline: true },
-        { name: '👋 Ticket Welcome', value: config.welcomeMessage.slice(0, 256), inline: false },
+        { name: '🎫 Ticket Message', value: config.ticketMessage.slice(0, 256), inline: false },
       ],
       footer: { text: `${appDisplayName(deps)} • /ticket view` },
     }),
@@ -446,11 +388,7 @@ async function openTicketThread(
   }
 
   await rest.sendChannelMessage(thread.id, {
-    content: `🎫 **Ticket #${threadName}**\n\n**Opened by:** <@${userId}>${reason ? `\n**Reason:** ${reason}` : ''}`,
-  });
-
-  await rest.sendChannelMessage(thread.id, {
-    content: config.welcomeMessage,
+    content: `🎫 **Ticket #${threadName}**\n\n**Opened by:** <@${userId}>${reason ? `\n**Reason:** ${reason}` : ''}\n\nA support agent will be with you shortly. Please describe your issue in detail.`,
   });
 
   return thread;
@@ -813,8 +751,8 @@ registerCommandMetadata({
       channel_types: [0, 5],
     },
     {
-      name: 'welcome_message',
-      description: 'Message shown when a ticket is created (setup)',
+      name: 'message',
+      description: 'Message hosting the Open Ticket button in the ticket channel (setup)',
       type: 3,
       required: false,
     },

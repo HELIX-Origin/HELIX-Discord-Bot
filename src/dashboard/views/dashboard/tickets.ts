@@ -31,8 +31,8 @@ export function renderTicketsTab(): string {
           </div>
         </div>
         <div class="form-group" style="margin-top: 0.75rem;">
-          <label class="form-label">Ticket Welcome Message (Markdown supported)</label>
-          <textarea id="admin-ticket-message" rows="3" spellcheck="false" placeholder="A support agent will be with you shortly. Please describe your issue in detail and remain patient."></textarea>
+          <label class="form-label">Ticket Message (The message hosting the Open Ticket button)</label>
+          <textarea id="admin-ticket-message" rows="3" spellcheck="false" placeholder="Click the button below to open a support ticket."></textarea>
         </div>
       </div>
 

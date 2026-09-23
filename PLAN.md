@@ -6,55 +6,105 @@
 
 ## 🎯 Active Plan
 
-### Goal — Guild Admin Sections, Dedicated Feature Tabs & Permission-Gated Dashboard
+### Goal — Real-Time Single-Newest-Post Feed Delivery & Rate-Limit Shield
 
-Split dashboard configuration into dedicated, permission-gated feature tabs (welcome, tickets, logs) while keeping Guild Admin for secure settings. Add a public Commands tab and a guilds page that lists every guild the user is in with invite/manage actions.
+Modernize feed delivery across all feed types (RSS/Atom, Scrape, Reddit, Free Games, YouTube, Twitch) so feeds are not bound by artificial multi-hour poll interval floors or once-per-day quotas. Feeds pick up new posts as they arrive and deliver **strictly the single newest post** per feed check cycle. This ensures Discord channels stay continuously up-to-date in near-real-time while eliminating backlog dumps of 10–20 posts at once and completely avoiding Discord channel rate limits.
 
 **Locked user directives** (do not re-litigate):
 
-- Guild Admin tab is for specific configurations that benefit from being there; it is NOT a hiding place for features (m0584).
-- Existing tabs stay as they are — they just need a check so only guild admins can access them. New features go in their own dedicated tabs with the same check. Guild Admin page is for displaying detailed info or secure settings that don't belong in the feature tabs (m0587).
-- Users with Manage Channels permissions should have access to tabs that set things to channels (m0599).
-- The guilds page should display all guilds the user is in, but only allow inviting the bot to guilds the user has permission to invite to. Buttons: invite icon + cog icon for managing (m0605).
-- Guilds page uses pills: guild icon left, buttons right (m0609/m0612).
-- Privacy and ToS pages visible to all users regardless of login (m0616).
-- Commands page should not require login — it is read-only (m0617).
-- Ticket system redesign: "the ticket system should open a new thread for the issues. but it should us a text channel for the message. Users simply click a button on the ticket channel message to open a ticket."
-- Drop forum-channel feed delivery: "Let's also replace forum support with simply using threads instead. this way if threads are enabled the feeds simply post to threads in the configured text channel. The foums seem to be a bit wonky for our usage." (m0755). Resolved: a feed's dedicated thread is auto-created in the feed's own delivery `channel_id` (m0759) — the separate `forum_channel_id` target is removed.
-- Feed thread role subscription + add notification: "make the threads public... also add a message to the channels that a feed is set up in to notify of a feed being added to the channel." (m0116). Resolved: feed threads are already public (type 12); feeds now carry an optional per-feed role (`role_id`) auto-subscribed to the feed's thread on creation/rotation (m0963 — per-feed role at add time), and adding a feed posts a short confirmation message into its target channel (dashboard + slash commands).
+- **No poll interval limitation**: "All feeds should not be limited by poll intervals. Instead they should pick up new posts as they arrive and post them."
+- **Single newest post on arrival**: "We should make sure they post the single newest post as it comes in. That way they are always up to date and aren't posting 10 to 20 posts at a time."
+- **Rate-limit prevention & information integrity**: "this is the correct way to handle the rate limiting problem while still ensuring they don't miss information. We should prepare a plan in our PLAN.md for this update, as well as update our TODO.md accordingly."
+- **File naming scheme**: camelCase file naming across the codebase (e.g., `manageFeeds.ts`).
+
+---
+
+### Architectural Analysis: Current Bottlenecks vs. Target Solution
+
+```mermaid
+flowchart TD
+    subgraph Current["Current Polling & Delivery Bottlenecks"]
+        A1["Long Poll Interval (Default 1 Hour)"] --> B1["Artificial Rate Floor (6h + Once Per UTC Day)"]
+        B1 --> C1["Backlog Inversion: Reverses to Oldest Post First"]
+        C1 --> D1["Channels Fall Behind / Bursts of 10-20 Posts (Free Games / Stream Alerts)"]
+    end
+
+    subgraph Target["Target Real-Time Single-Post Shield"]
+        A2["Near-Real-Time Cadence (Webhooks + 1-2m Background Check)"] --> B2["Detect Unseen Posts in Chronological Order"]
+        B2 --> C2["Select Single Newest Unposted Entry"]
+        C2 --> D2["Deliver 1 Embed to Discord Target/Thread"]
+        D2 --> E2["Drain Backlog: Mark Remaining Unseen as Sent & Advance Cursor"]
+        E2 --> F2["Zero Channel Flooding & 100% Rate Limit Safe"]
+    end
+```
+
+1. **Current Bottlenecks**:
+   - `RSS_POST_INTERVAL_FLOOR_MS = 6 * 60 * 60 * 1000` artificially blocks delivery if a post occurred in the last 6 hours or on the same UTC calendar day.
+   - Long default interval (`pollIntervalMs = 3_600_000`, 1 hour) delays fresh updates.
+   - When multiple posts accumulate, free games and stream alerts iterate through `toSend` and attempt to blast all entries in a tight loop, triggering Discord API 429s.
+   - RSS feeds reverse entries to oldest first (`toSend.reverse()`) and post only `toSend[0]`, meaning channels receive hours- or days-old news rather than breaking updates.
+2. **Target Solution**:
+   - Remove `RSS_POST_INTERVAL_FLOOR_MS` and UTC-day gating entirely.
+   - Fast background check cadence (e.g., 60–120s polling interval) combined with WebSub/PubSubHubbub webhooks for instant event-driven delivery.
+   - For any feed with unposted items, immediately deliver **only the single newest post** (`entries[0]` / newest publication timestamp).
+   - Mark all unposted backlog items from that cycle as processed in `sent_entries` and update `lastEntryId`/`lastCheckedAt`/`lastPostedAt` so they do not accumulate into a delayed cascade.
+   - Apply identical single-newest-post gating to Free Games and Stream Alerts (`pollStreamAlertFeed` / `pollFreeGamesLocked`) to eliminate multi-message bursts.
+   - Add inter-feed pacing in `pollAllFeeds` / `pollGuildFeeds` to prevent concurrent Discord delivery spikes across multiple feeds.
+
+---
 
 ### Implementation Plan
 
-> Status: steps 1-10 complete and committed (`627d783` dashboard, `cf6c6c3` ticket redesign, `21a4734` forum→thread refactor, `536e992` docs sync + THREADS_ENABLED gate — all pushed). Step 12 (feed role subscription + add notification) done in `779e4bb`; final docs/wiki/issue sync reruns now.
+1. **Feed Watcher Core Refactor (`src/feed/watcher.ts`)**:
+   - Delete `RSS_POST_INTERVAL_FLOOR_MS` and remove the `canPost` 6-hour / once-per-day restriction.
+   - Refactor `pollFeedLocked`:
+     - Sort/inspect parsed entries to locate the single newest unseen post.
+     - Deliver only the newest post to the configured Discord channel or dedicated thread.
+     - Bulk-mark all older unseen entries in this cycle as sent via `repo.markEntrySent` / `redis.markEntrySent` so backlog items do not leak into future cycles.
+     - Update feed state (`setFeedPosted`, `setFeedChecked`) with the newest entry ID.
+   - Refactor `pollFreeGamesLocked`:
+     - Deliver only the single newest / most recent free game entry instead of looping through all unposted games.
+     - Mark remaining unposted games as sent to prevent spamming 10+ games in one tick.
+   - Refactor `pollStreamAlertFeed`:
+     - Deliver only the single newest stream/video alert entry instead of looping through all unposted streams.
+     - Mark remaining stream entries as sent.
+   - Inter-feed delivery pacing: Introduce non-blocking staggered delays (e.g., 250ms) between feed dispatches in `pollAllFeeds` to remain well below Discord's global REST limits.
 
-1. **Access relaxation**: allow any Discord user to log in; persist full guild list (`discord_guilds` setting) incl. `{id,name,icon,owner,permissions}`; relax `canUserAccessDashboard` to require only Discord auth (keep `canUserManageGuild` for per-guild admin). ✅
-2. **Permission helpers**: reuse `hasManageChannelsPermission`; add `hasInvitePermission` (owner || ADMINISTRATOR || MANAGE_GUILD || CREATE_INSTANT_INVITE). ✅
-3. **Guilds API**: `GET /api/guilds` merges stored user guilds + bot guilds → per-guild `{id,name,icon,botIn,canManage,canInvite,inviteUrl}`; `GET /api/guilds/:guildId/channels` adds `canManage`. ✅
-4. **Public Commands page**: `GET /commands` (no auth) + public Commands tab data (registry metadata: name, category, description, usage, examples); `robots.txt` allows `/commands`. ✅
-5. **Guilds view**: standalone `/guilds` page + in-dashboard guild-selection rewritten to pill grid (icon left, name middle, invite icon btn + cog btn right). ✅
-6. **Sidebar**: add Commands tab (always visible); gate feed/alerts/admin sections behind `canManage`; add Welcome, Tickets, Logs dedicated tabs (manage-gated). ✅
-7. **Secure Guild Admin tab**: keep admin role, feature modules, command toggles, prefix. Move Welcome / Tickets / Logs into their own tabs with per-tab partial save (PUT already partial-tolerant). ✅
-8. **Client-side**: pill grid render, sidebar gating, `loadCommandsTab`, `loadWelcomeTab`/`loadTicketsTab`/`loadLogsTab` with per-tab save, relaxed 403 handling for non-managers. ✅
-9. **Ticket redesign**: sticky button message in text channel → new thread per ticket; manager role auto-added; config key moves to `ticket_channel_id` (legacy `ticket_category_id` fallback read). ✅
-10. **Forum→thread feed delivery**: remove the forum-channel feed target; thread-enabled feeds deliver into a dedicated thread auto-created in the feed's own `channel_id`; drop `forum_channel_id`/`forum_channel_ids`/`FORUM_CHANNEL_IDS` usage end-to-end (state types, repos, `FeedThreadManager`, targets, watcher, webhooks, bot, config, dashboard UI). ✅
-11. **Role subscription + add notification**: feeds store an optional `role_id` (schema `role_id` column, migration tolerant); `FeedThreadManager` auto-subscribes the role to the feed thread on create/rotate (`addThreadRole`); `role` option on `/rss add`, `/reddit add`, `/youtube add`, `/twitch add`, `/free-games enable` + dashboard add/detail role selects; adding a feed posts `📡 **…** configured — updates will be posted here.` into the feed's target channel via `src/bot/lib/feeds/notify.ts`. ✅
-12. **Verify + sync**: `npm run check` + `pnpm build`; commit + push; sync PLAN/TODO/BUGS, `wiki/`, and roadmap issue #27 items. ⏳
-13. **Theme system magic-cleanup**: themes/colors must live only in the canonical theme files (`src/dashboard/views/themes/*.ts`); all dashboard pages import them via `getThemeCss()` from `theme.ts` — no inline duplicate theme blocks (contributors add a theme by dropping a single file in `src/dashboard/views/themes/`). Removed the separate color-scheme layer (`dashboardColorScheme`, `DASHBOARD_COLOR_SCHEME`, `scheme-*` overrides) since each theme provides its own accent palette. Deleted dead `src/dashboard/handlers/pages.ts`. ✅
-14. **Dead code cleanup + vitest scan guard**: after the theme engine refactor, swept the whole codebase for exported symbols with zero external references using a new structural vitest test (`tests/unit/quality/dead-code.test.ts` — regex export extraction + identifier index over src+tests; exempts dynamically-loaded `src/bot/commands/**`, `_`-prefixed, and `default` exports). Removed 1000+ lines: deleted whole dead files (`bot/handlers/messages.ts`, `bot/utils/gateway.ts`, `bot/lib/feeds/format.ts`, `dashboard/config.ts`) plus orphaned symbols across bot/dashboard/db/feed/scheduler/state/util. `npm run check` + `pnpm build` both green. ✅
+2. **Scheduler & Polling Cadence Update (`src/config.ts`, `src/index.ts`, `src/scheduler/scheduler.ts`)**:
+   - Update default `pollIntervalMs` in `defaultConfig()` from `3_600_000` (1 hour) to `60_000` (1 minute) for responsive near-real-time checks.
+   - Support `POLL_INTERVAL_MS` environment variable parsing in `defaultConfig()` so operators can configure custom frequencies.
+   - In `pollFeedLocked`, allow checks to proceed smoothly without requiring a 1-hour delay between runs.
 
-### Files likely touched
+3. **Webhook & Event Alignment (`src/dashboard/webhooks/router.ts`)**:
+   - Ensure webhook-driven ingestion (YouTube PubSubHubbub, Twitch EventSub, WebSub) adheres to the exact same single-newest-post delivery pattern and deduping logic.
+   - Advance `lastEntryId` and mark entries sent upon webhook delivery.
 
-- `src/dashboard/routes/auth.ts`, `src/dashboard/routes/shared.ts`, `src/dashboard/routes/guilds.ts`
-- `src/dashboard/oauth/discord.ts`
-- `src/dashboard/server.ts`, `src/dashboard/views/guilds.ts`, `src/dashboard/views/dashboard.ts`
-- `src/dashboard/views/dashboard/sidebar.ts`, `guildadmin.ts`, `client-script.ts`, new `welcome.ts`, `tickets.ts`, `logs.ts`, `commands.ts`
-- `src/bot/rest.ts` (message components / thread start support)
-- `src/bot/commands/admin/ticket.ts`, `welcome.ts`, `set.ts`
-- `src/bot/lib/admin/auditlog.ts` (new), `src/bot/lib/admin/modlog.ts`
-- `src/feed/threads.ts`, `targets.ts`, `watcher.ts`, `src/bot/bot.ts`, `src/feed/index.ts`, `src/config.ts`
-- `src/state/types.ts`, `src/db/repository.ts`, `src/db/repositories/feeds.ts`, `src/db/repositories/users.ts`, `src/db/schema.ts`, `src/db/database.ts`
-- `src/dashboard/webhooks/router.ts`, `src/dashboard/routes/guilds.ts`, `src/dashboard/views/dashboard/feeds.ts`, `client-script.ts` (thread-delivery toggle)
-- `src/bot/lib/feeds/notify.ts` (new), `src/bot/commands/feeds/{rss,reddit,youtube,twitch,free-games}.ts`, `src/dashboard/routes/feeds.ts`, `src/feed/threads.ts`, `src/db/schema.ts`, `src/db/database.ts`, `src/db/repositories/feeds.ts`, `src/state/types.ts` (per-feed `role_id` subscription + channel-added notification)
+4. **Testing & Quality Verification**:
+   - Add unit tests in `tests/unit/feed/watcher.test.ts` covering:
+     - Single newest post is selected and delivered when multiple entries are present.
+     - Backlog older entries are marked as sent and not queued for future cycles.
+     - No 6-hour or once-per-day artificial block prevents timely delivery.
+     - Free games and stream alerts post only 1 newest entry per cycle.
+     - Rapid successive polls deliver new arrivals immediately without duplicate posting.
+   - Run complete validation gate: `npm run check` (typecheck, lint, formatting, tests).
+
+---
+
+### Files Touched
+
+- `src/feed/watcher.ts`: Core delivery logic, removal of 6h floor, single newest post selection, backlog drain.
+- `src/config.ts`: `pollIntervalMs` configuration update and env parsing.
+- `src/index.ts`: Polling scheduler initialization check.
+- `src/dashboard/webhooks/router.ts`: Parity check for webhook entry processing.
+- `tests/unit/feed/watcher.test.ts`: Comprehensive test suite for real-time single-post delivery.
+
+---
+
+## 📦 Past Completed Workstreams (Archived)
+
+- **Guild Admin Sections & Dedicated Tabs** (welcome, tickets, logs, manage-feeds tabs; ticket text-channel button; forum-to-thread refactor; role subscriptions).
+- **Theme System Single Source of Truth** (`src/dashboard/views/themes/*.ts`, removed duplicate scheme layer).
+- **Dead Code Cleanup & Vitest Structural Scan Guard** (`tests/unit/quality/deadCode.test.ts`).
 
 ---
 

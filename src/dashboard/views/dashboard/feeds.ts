@@ -93,14 +93,6 @@ export function renderFeedsTab(): string {
         </div>
       </div>
 
-      <div class="card">
-        <div>
-          <div class="card-title"><i class="fa-solid fa-rss" style="color: var(--primary);"></i> News &amp; RSS Feeds</div>
-          <div class="card-desc">All RSS and scrape feeds for this server, grouped by topic. Click the settings cog to manage each feed.</div>
-        </div>
-        <div id="feeds-topic-groups" style="display: flex; flex-direction: column; gap: 1.25rem; margin-top: 0.75rem;">
-          <div class="empty-state">Loading feeds...</div>
-        </div>
       </div>
     </section>
 

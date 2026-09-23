@@ -6,6 +6,28 @@
 
 ## 🔥 Active Tasks
 
+### Workstream: Real-Time Single-Newest-Post Feed Delivery & Rate-Limit Shield
+
+**Locked user directives:**
+
+- "All feeds should not be limited by poll intervals. Instead they should pick up new posts as they arrive and post them."
+- "We should make sure they post the single newest post as it comes in. That way they are always up to date and aren't posting 10 to 20 posts at a time."
+- "this is the correct way to handle the rate limiting problem while still ensuring they don't miss information."
+- Use camelCase file naming scheme across the codebase.
+
+**Implementation checklist:**
+
+- [x] `src/feed/watcher.ts`: Eliminate `RSS_POST_INTERVAL_FLOOR_MS` (6 hours) and once-per-UTC-day throttle
+- [x] `src/feed/watcher.ts`: For RSS/scrape/Reddit feeds, select and post only the single newest unposted entry
+- [x] `src/feed/watcher.ts`: Drain backlog: mark older unposted entries in the current cycle as sent (`repo.markEntrySent` / `redis.markEntrySent`) and advance cursor
+- [x] `src/feed/watcher.ts`: Align Free Games delivery to single newest entry per cycle instead of looping over all unposted games
+- [x] `src/feed/watcher.ts`: Align Stream Alerts (YouTube / Twitch fallback) to single newest entry per cycle instead of looping
+- [x] `src/feed/watcher.ts`: Add inter-feed pacing in `pollAllFeeds` / `pollGuildFeeds` to avoid bursting Discord API
+- [x] `src/config.ts`: Update default `pollIntervalMs` to 1 minute (`60_000`) and support `POLL_INTERVAL_MS` env var
+- [x] `src/dashboard/webhooks/router.ts`: Verify single-entry delivery parity across WebSub / PubSubHubbub / EventSub
+- [x] `tests/unit/feed/watcher.test.ts`: Create test suite verifying single-newest-post delivery, backlog drain, and zero artificial time gating
+- [x] `npm run check` + `pnpm build` green
+
 ### Workstream: Guild Admin Sections, Dedicated Feature Tabs & Permission-Gated Dashboard
 
 **Locked user directives:**

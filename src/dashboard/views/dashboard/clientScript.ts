@@ -55,7 +55,7 @@ export function renderClientScript(): string {
         if (route.page === 'feed' && route.feedId) {
           switchTab('rss');
           openFeedDetail(Number(route.feedId));
-        } else if (route.page && ['rss', 'reddit', 'freegames', 'streamalerts', 'overview', 'guildadmin', 'settings', 'welcome', 'tickets', 'logs', 'commands'].includes(route.page)) {
+        } else if (route.page && ['manage-feeds', 'rss', 'reddit', 'freegames', 'streamalerts', 'overview', 'guildadmin', 'settings', 'welcome', 'tickets', 'logs', 'commands'].includes(route.page)) {
           switchTab(route.page);
         } else {
           switchTab('overview');
@@ -82,7 +82,8 @@ export function renderClientScript(): string {
         window.history.pushState({}, '', '/dashboard/' + currentGuildId + '/' + tabId);
       }
 
-      if (tabId === 'rss') loadRssTab();
+      if (tabId === 'manage-feeds') loadManageFeedsTab();
+      else if (tabId === 'rss') loadRssTab();
       else if (tabId === 'reddit') loadSourceTab('reddit');
       else if (tabId === 'freegames') loadSourceTab('freegames');
       else if (tabId === 'streamalerts') loadSourceTab('streamalerts');
@@ -395,10 +396,61 @@ export function renderClientScript(): string {
       container.innerHTML = categoryFeeds.map(renderFeedPill).join('');
     }
 
+    var cachedAllGuildFeeds = [];
+
+    async function loadManageFeedsTab() {
+      if (!currentGuildId) return;
+      var listEl = document.getElementById('manage-feeds-list');
+      if (listEl) listEl.innerHTML = '<div class="empty-state">Loading feeds...</div>';
+      cachedAllGuildFeeds = await loadGuildFeeds();
+      filterManageFeeds();
+    }
+
+    function filterManageFeeds() {
+      var listEl = document.getElementById('manage-feeds-list');
+      var countEl = document.getElementById('manage-feeds-count');
+      if (!listEl) return;
+
+      var searchEl = document.getElementById('manage-feeds-search');
+      var search = (searchEl ? searchEl.value : '').toLowerCase().trim();
+      var catEl = document.getElementById('manage-feeds-category-filter');
+      var cat = catEl ? catEl.value : 'all';
+      var statusEl = document.getElementById('manage-feeds-status-filter');
+      var status = statusEl ? statusEl.value : 'all';
+
+      var filtered = cachedAllGuildFeeds.filter(function (f) {
+        if (cat !== 'all' && categoryForFeed(f) !== cat) return false;
+        if (status === 'active' && !f.enabled) return false;
+        if (status === 'paused' && f.enabled) return false;
+        if (search) {
+          var name = (f.name || '').toLowerCase();
+          var url = (f.url || '').toLowerCase();
+          var topic = (f.topic || '').toLowerCase();
+          if (!name.includes(search) && !url.includes(search) && !topic.includes(search)) return false;
+        }
+        return true;
+      });
+
+      if (countEl) {
+        countEl.textContent = 'Showing ' + filtered.length + ' of ' + cachedAllGuildFeeds.length + ' feeds';
+      }
+
+      if (!filtered.length) {
+        if (cachedAllGuildFeeds.length === 0) {
+          listEl.innerHTML = '<div class="empty-state">No enabled feeds found for this server. You can enable feeds in the News &amp; RSS, Reddit, Free Games, or Stream Alerts tabs.</div>';
+        } else {
+          listEl.innerHTML = '<div class="empty-state">No feeds match your search or filter criteria.</div>';
+        }
+        return;
+      }
+
+      listEl.innerHTML = filtered.map(renderFeedPill).join('');
+    }
+
     async function loadRssTab() {
       await ensureChannels();
       populateAddTargetSelects();
-      await Promise.all([loadNewsTab(), loadFeedsTab()]);
+      await loadNewsTab();
     }
 
     async function loadSourceTab(category) {
@@ -784,7 +836,8 @@ export function renderClientScript(): string {
 
     function refreshCurrentTab() {
       if (currentFeedDetailId) { openFeedDetail(currentFeedDetailId); return; }
-      if (activeTabName === 'rss') loadRssTab();
+      if (activeTabName === 'manage-feeds') loadManageFeedsTab();
+      else if (activeTabName === 'rss') loadRssTab();
       else if (activeTabName === 'reddit') loadSourceTab('reddit');
       else if (activeTabName === 'freegames') loadSourceTab('freegames');
       else if (activeTabName === 'streamalerts') loadSourceTab('streamalerts');
@@ -1287,7 +1340,7 @@ export function renderClientScript(): string {
         populateChannelSelect('admin-ticket-transcript-channel', data.textChannels || [], tickets.transcriptChannelId, '-- None --');
         populateChannelSelect('admin-ticket-log-channel', data.textChannels || [], tickets.logChannelId, '-- None --');
         const ticketMsgEl = document.getElementById('admin-ticket-message');
-        if (ticketMsgEl) ticketMsgEl.value = tickets.welcomeMessage || '';
+        if (ticketMsgEl) ticketMsgEl.value = tickets.ticketMessage || tickets.message || tickets.welcomeMessage || '';
       } catch {}
     }
 
@@ -1400,6 +1453,7 @@ export function renderClientScript(): string {
         managerRoleId: document.getElementById('admin-ticket-manager-role') ? document.getElementById('admin-ticket-manager-role').value || null : null,
         transcriptChannelId: document.getElementById('admin-ticket-transcript-channel') ? document.getElementById('admin-ticket-transcript-channel').value || null : null,
         logChannelId: document.getElementById('admin-ticket-log-channel') ? document.getElementById('admin-ticket-log-channel').value || null : null,
+        message: document.getElementById('admin-ticket-message') ? document.getElementById('admin-ticket-message').value : '',
         welcomeMessage: document.getElementById('admin-ticket-message') ? document.getElementById('admin-ticket-message').value : '',
       };
       try {

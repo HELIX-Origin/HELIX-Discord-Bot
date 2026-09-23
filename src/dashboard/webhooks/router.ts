@@ -118,8 +118,19 @@ export class WebhookRouter {
       }
 
       const entries = await this.parseFeedContent(body, feed.feedType);
-      for (const entry of entries) {
-        await this.processEntry(feed, entry);
+      const unposted = entries.filter((e) => {
+        const guid = e.id || e.link;
+        return guid && !this.deps.repo.isEntrySent(feed.id, guid);
+      });
+      if (unposted.length > 0) {
+        const newest = unposted[0];
+        await this.processEntry(feed, newest);
+        for (let i = 1; i < unposted.length; i++) {
+          const olderGuid = unposted[i].id || unposted[i].link;
+          if (olderGuid) {
+            this.deps.repo.markEntrySent(feed.id, olderGuid);
+          }
+        }
       }
 
       res.writeHead(200);
@@ -253,6 +264,7 @@ export class WebhookRouter {
     const delivered = await this.deliverToTargets(feed, embed);
     if (delivered) {
       this.deps.repo.markEntrySent(feed.id, guid);
+      this.deps.repo.setFeedPosted(feed.userId, feed.id);
     } else {
       this.logger.warn('Delivery failed for webhook entry', { feedId: feed.id, guid });
     }

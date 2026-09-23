@@ -48,6 +48,9 @@ export function renderSidebar(options: SidebarOptions): string {
         <div class="nav-section manage-gated" ${manageHidden}>
           <div class="nav-section-title"><i class="fa-solid fa-rss"></i> Feeds &amp; Alerts</div>
           <div class="tab-list">
+            <button onclick="switchTab('manage-feeds')" id="tab-btn-manage-feeds" class="tab-btn">
+              <i class="fa-solid fa-list-check" style="color: var(--primary);"></i> <span>Manage Feeds</span>
+            </button>
             <button onclick="switchTab('rss')" id="tab-btn-rss" class="tab-btn active">
               <i class="fa-solid fa-newspaper" style="color: var(--amber);"></i> <span>News &amp; RSS</span>
             </button>
