@@ -12,6 +12,7 @@ import { feedEmbed, freeGameEmbed, streamAlertEmbed } from '../bot/utils/embeds.
 import { createLogger, type LogLevel } from '../util/logger.js';
 import { FeedThreadManager } from './threads.js';
 import { isRedditCommunityHomePost } from './reddit.js';
+import { resolveYouTubeXmlUrl, resolveYouTubeChannelId, parseYouTubeAtomXml } from './youtube.js';
 
 interface YouTubeItem {
   id?: { videoId?: string };
@@ -423,6 +424,8 @@ export class FeedWatcher {
       author?: string;
       description?: string;
       imageUrl?: string;
+      game?: string;
+      viewers?: number;
     }> = [];
 
     if (feed.feedType === 'youtube') {
@@ -431,15 +434,7 @@ export class FeedWatcher {
       entries = await this.fetchTwitchFeed(feed);
     }
 
-    const toSend: Array<{
-      id: string;
-      title: string;
-      link: string;
-      publishedAt: string;
-      author?: string;
-      description?: string;
-      imageUrl?: string;
-    }> = [];
+    const toSend: typeof entries = [];
     for (const entry of entries) {
       if (this.repo.isEntrySent(feed.id, entry.id)) continue;
       if (this.redis && (await this.redis.isEntrySent(feed.id, entry.id))) continue;
@@ -459,6 +454,8 @@ export class FeedWatcher {
         imageUrl: entry.imageUrl,
         feedType: feed.feedType,
         brandIconUrl: null,
+        game: entry.game,
+        viewers: entry.viewers,
       });
       let delivered = false;
       let errorDetail: string | null = null;
@@ -505,13 +502,40 @@ export class FeedWatcher {
       imageUrl?: string;
     }>
   > {
+    // 1. Resolve to public Atom XML feed URL (Free, Zero API Key Required)
+    let xmlUrl = await resolveYouTubeXmlUrl(feed.url);
+    if (!xmlUrl.includes('channel_id=UC')) {
+      const resolvedId = await resolveYouTubeChannelId(feed.url);
+      if (resolvedId) {
+        xmlUrl = `https://www.youtube.com/feeds/videos.xml?channel_id=${resolvedId}`;
+      }
+    }
+
+    if (xmlUrl.includes('channel_id=')) {
+      try {
+        const res = await fetchRaw(xmlUrl);
+        if (res.status >= 200 && res.status < 300 && res.text) {
+          const entries = parseYouTubeAtomXml(res.text);
+          if (entries.length > 0) {
+            return entries;
+          }
+        }
+      } catch (err) {
+        this.logger.warn('Failed to fetch public YouTube XML feed, checking API fallback', {
+          feedId: feed.id,
+          xmlUrl,
+          err: (err as Error).message,
+        });
+      }
+    }
+
+    // 2. Optional Fallback to YouTube Data API v3 if API key is configured
     const apiKey = process.env['YOUTUBE_API_KEY'];
     if (!apiKey) {
-      this.logger.warn('YouTube API key not configured, skipping YouTube feed', { feedId: feed.id });
       return [];
     }
 
-    const channelIdMatch = feed.url.match(/(?:channel\/|user\/|c\/|@)([^/?]+)/);
+    const channelIdMatch = feed.url.match(/(?:channel\/|user\/|c\/|@|channel_id=)(UC[a-zA-Z0-9_-]{22}|[^/?&]+)/i);
     const channelId = channelIdMatch?.[1] || feed.url;
 
     try {
@@ -532,11 +556,14 @@ export class FeedWatcher {
           publishedAt: item.snippet?.publishedAt || new Date().toISOString(),
           author: item.snippet?.channelTitle,
           description: item.snippet?.description,
-          imageUrl: item.snippet?.thumbnails?.high?.url || item.snippet?.thumbnails?.default?.url,
+          imageUrl:
+            item.snippet?.thumbnails?.high?.url ||
+            item.snippet?.thumbnails?.default?.url ||
+            (videoId ? `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg` : undefined),
         };
       });
     } catch (err) {
-      this.logger.error('Failed to fetch YouTube feed', { feedId: feed.id }, err);
+      this.logger.error('Failed to fetch YouTube feed via API fallback', { feedId: feed.id }, err);
       return [];
     }
   }
@@ -550,13 +577,20 @@ export class FeedWatcher {
       author?: string;
       description?: string;
       imageUrl?: string;
+      game?: string;
+      viewers?: number;
     }>
   > {
     const clientId = process.env['TWITCH_CLIENT_ID'];
     const clientSecret = process.env['TWITCH_CLIENT_SECRET'];
 
     if (!clientId || !clientSecret) {
-      this.logger.warn('Twitch credentials not configured, skipping Twitch feed', { feedId: feed.id });
+      this.logger.warn(
+        'Twitch credentials (TWITCH_CLIENT_ID / TWITCH_CLIENT_SECRET) not configured, skipping Twitch feed',
+        {
+          feedId: feed.id,
+        },
+      );
       return [];
     }
 
@@ -572,6 +606,10 @@ export class FeedWatcher {
           grant_type: 'client_credentials',
         }),
       });
+      if (!tokenRes.ok) {
+        this.logger.warn('Twitch OAuth token request failed', { status: tokenRes.status });
+        return [];
+      }
       const tokenData = await tokenRes.json();
       accessToken = tokenData.access_token;
       accessTokenSet = true;
@@ -582,11 +620,11 @@ export class FeedWatcher {
 
     if (!accessToken || !accessTokenSet) return [];
 
-    const channelMatch = feed.url.match(/twitch\.tv\/([^/?]+)/);
-    const channelName = channelMatch?.[1] || feed.url;
+    const channelMatch = feed.url.match(/twitch\.tv\/([^/?#]+)/i);
+    const channelName = (channelMatch?.[1] || feed.url).replace(/^@/, '').trim().toLowerCase();
 
     try {
-      const url = `https://api.twitch.tv/helix/streams?user_login=${channelName}`;
+      const url = `https://api.twitch.tv/helix/streams?user_login=${encodeURIComponent(channelName)}`;
       const response = await fetch(url, {
         headers: {
           'Client-ID': clientId,
@@ -606,6 +644,8 @@ export class FeedWatcher {
           id: string;
           user_name: string;
           title: string;
+          game_name?: string;
+          viewer_count?: number;
           user_login: string;
           started_at: string;
           thumbnail_url?: string;
@@ -616,6 +656,8 @@ export class FeedWatcher {
           publishedAt: stream.started_at,
           author: stream.user_name,
           description: stream.title,
+          game: stream.game_name || undefined,
+          viewers: typeof stream.viewer_count === 'number' ? stream.viewer_count : undefined,
           imageUrl: stream.thumbnail_url?.replace('{width}', '1280').replace('{height}', '720'),
         }),
       );

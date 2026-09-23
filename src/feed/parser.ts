@@ -178,30 +178,40 @@ function findEntryImage(element: XmlElement, descriptionHtml?: string | null): s
     }
   }
 
-  // 2. Check <media:content>, <media:thumbnail>, <itunes:image>
-  for (const child of element.children) {
-    const name = localName(child);
-    if (name === 'content') {
-      const url = child.attributes['url'];
-      const type = child.attributes['type']?.toLowerCase() ?? '';
-      const medium = child.attributes['medium']?.toLowerCase() ?? '';
-      if (url && (medium === 'image' || type.startsWith('image/') || isLikelyImageUrl(url))) {
-        if (!isTrackingPixel(url)) return normalizeImageUrl(url.trim());
+  // 2. Check <media:content>, <media:thumbnail>, <itunes:image>, and nested <media:group>
+  const checkMediaChildren = (children: XmlElement[]): string | null => {
+    for (const child of children) {
+      const name = localName(child);
+      if (name === 'content') {
+        const url = child.attributes['url'];
+        const type = child.attributes['type']?.toLowerCase() ?? '';
+        const medium = child.attributes['medium']?.toLowerCase() ?? '';
+        if (url && (medium === 'image' || type.startsWith('image/') || isLikelyImageUrl(url))) {
+          if (!isTrackingPixel(url)) return normalizeImageUrl(url.trim());
+        }
+      }
+      if (name === 'thumbnail') {
+        const url = child.attributes['url'];
+        if (url && !isTrackingPixel(url)) return normalizeImageUrl(url.trim());
+      }
+      if (name === 'image') {
+        const href = child.attributes['href'] || child.attributes['url'];
+        if (href && !isTrackingPixel(href)) return normalizeImageUrl(href.trim());
+        const urlChild = findChild(child, 'url');
+        if (urlChild && urlChild.text.trim() && !isTrackingPixel(urlChild.text.trim())) {
+          return normalizeImageUrl(urlChild.text.trim());
+        }
+      }
+      if (name === 'group') {
+        const nested = checkMediaChildren(child.children);
+        if (nested) return nested;
       }
     }
-    if (name === 'thumbnail') {
-      const url = child.attributes['url'];
-      if (url && !isTrackingPixel(url)) return normalizeImageUrl(url.trim());
-    }
-    if (name === 'image') {
-      const href = child.attributes['href'] || child.attributes['url'];
-      if (href && !isTrackingPixel(href)) return normalizeImageUrl(href.trim());
-      const urlChild = findChild(child, 'url');
-      if (urlChild && urlChild.text.trim() && !isTrackingPixel(urlChild.text.trim())) {
-        return normalizeImageUrl(urlChild.text.trim());
-      }
-    }
-  }
+    return null;
+  };
+
+  const mediaImg = checkMediaChildren(element.children);
+  if (mediaImg) return mediaImg;
 
   // 3. Check Atom <link rel="enclosure"> or <link rel="preview">
   for (const child of element.children) {
@@ -251,8 +261,16 @@ function parseAtom(root: XmlElement): ParsedFeed {
   const items = root.children.filter((c) => localName(c) === 'entry');
 
   const entries: FeedEntry[] = items.map((item) => {
-    const desc = firstChildByLocal(item, ['summary', 'content']);
-    const imageUrl = findEntryImage(item, desc);
+    const mediaGroup = findChild(item, 'group');
+    const desc =
+      firstChildByLocal(item, ['summary', 'content']) ??
+      (mediaGroup ? firstChildByLocal(mediaGroup, ['description']) : null);
+    let imageUrl = findEntryImage(item, desc);
+    const videoId =
+      firstChildByLocal(item, ['videoId']) ?? firstChildByLocal(item, ['id'])?.match(/^yt:video:(.+)$/)?.[1] ?? null;
+    if (!imageUrl && videoId) {
+      imageUrl = `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
+    }
     return {
       id: firstChildByLocal(item, ['id']) ?? linkFor(item) ?? '',
       title: firstChildByLocal(item, ['title']) ?? 'Untitled entry',

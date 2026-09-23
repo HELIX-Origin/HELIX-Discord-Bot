@@ -119,6 +119,24 @@
 - [x] `npx vitest run tests/unit/quality/dead-code.test.ts` → PASS (2 tests)
 - [x] `npm run check` + `pnpm build` green (52 files, +82/−1013)
 
+### Workstream: Stream Alerts Audit, Zero-Config YouTube Ingestion & Rich Twitch Metadata
+
+**Locked user directives:**
+- "ok we need to audit our stream alert support. I don't know if they work or not, but we should check just in case."
+- Ensure reliable out-of-the-box operation for YouTube video uploads/streams and Twitch live alerts.
+- Use camelCase file naming scheme across the codebase.
+
+**Implementation checklist:**
+- [x] Audit stream alert ingestion, polling, and embed formatting across `src/feed/watcher.ts`, `src/bot/utils/embeds.ts`, `src/bot/commands/feeds/youtube.ts`, and `src/bot/commands/feeds/twitch.ts`
+- [x] Create `src/feed/youtube.ts`: zero-config public Atom XML parsing (`channel_id=UC...`), smart channel ID resolution (`@handle`, `/channel/UC...`, bare IDs), and high-resolution thumbnail generation
+- [x] `src/feed/watcher.ts`: Ingest YouTube feeds via public Atom feeds with zero API keys required; preserve optional YouTube Data API v3 fallback with corrected regex
+- [x] `src/feed/watcher.ts`: Extract Twitch stream metadata (`game_name`, `viewer_count`, thumbnail URL, user login sanitization)
+- [x] `src/bot/utils/embeds.ts`: Update `streamAlertEmbed` with dynamic `🎮 Category` and `👥 Viewers` for Twitch, and `▶️ Type` for YouTube
+- [x] `src/feed/parser.ts`: Support nested `<media:group>` tags in `findEntryImage` and fallback `<media:description>` in `parseAtom`
+- [x] `tests/unit/feed/streamAlerts.test.ts`: 10 comprehensive unit tests covering YouTube channel ID/XML resolution, Atom parsing, Twitch live stream extraction, and rich embed formatting
+- [x] `npm run check` + `npm run build` green (22/22 test files, 348/348 tests passing)
+- [x] Repository documentation sync (`README.md`, `wiki/Feeds-and-Scrapers.md`, `wiki/Configuration.md`, `.env.example`, `TODO.md`)
+
 ---
 
 ## 🛠️ Verification Commands

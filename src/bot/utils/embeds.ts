@@ -418,8 +418,11 @@ export function streamAlertEmbed(args: {
   imageUrl?: string | null;
   feedType?: string;
   brandIconUrl?: string | null;
+  game?: string | null;
+  viewers?: number | null;
 }): DiscordEmbed {
-  const { title, url, description, author, publishedAt, feedTitle, imageUrl, feedType, brandIconUrl } = args;
+  const { title, url, description, author, publishedAt, feedTitle, imageUrl, feedType, brandIconUrl, game, viewers } =
+    args;
   const isYouTube = feedType === 'youtube';
   const isTwitch = feedType === 'twitch';
   const color = isTwitch ? 0x9146ff : isYouTube ? 0xff0000 : 0x06b6d4;
@@ -436,11 +439,11 @@ export function streamAlertEmbed(args: {
 
   if (isTwitch) {
     fields.push(
-      { name: '🎮 Category', value: args.description || 'Live', inline: true },
-      { name: '👥 Viewers', value: args.description ? 'Live' : 'Unknown', inline: true },
+      { name: '🎮 Category', value: game || description || 'Live Streaming', inline: true },
+      { name: '👥 Viewers', value: viewers != null ? `${viewers.toLocaleString()} viewers` : 'Live', inline: true },
     );
   } else if (isYouTube) {
-    fields.push({ name: '▶️ Type', value: args.publishedAt?.includes('T') ? 'Video Upload' : 'Video', inline: true });
+    fields.push({ name: '▶️ Type', value: publishedAt?.includes('T') ? 'Video Upload' : 'Video', inline: true });
   }
 
   const { description: cleanDesc, links } = extractDescriptionAndLinks(description ?? null, STANDARD_DESC_LENGTH);

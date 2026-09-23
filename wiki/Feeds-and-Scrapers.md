@@ -36,6 +36,17 @@ graph LR
 - Automated daily polling with deduplication.
 - See [Free Games Documentation](Free-Games-Feeds) for full details.
 
+### 4. Stream Alerts Engine (YouTube & Twitch)
+- **YouTube Alerts**:
+  - **Zero-Config Operation**: By default, YouTube alerts ingest public Atom XML feeds (`https://www.youtube.com/feeds/videos.xml?channel_id=UC...`) requiring **no API keys** and avoiding YouTube Data API quota restrictions entirely.
+  - **Smart Channel Resolution**: Supports bare 24-character `UC...` IDs, XML feed URLs, `/channel/UC...` links, and creator `@handles` (resolved automatically via HTML metadata scraping and cached).
+  - **Rich Embeds & Thumbnails**: Parses `<media:group>` tags, full video descriptions, and high-definition video thumbnails (`https://i.ytimg.com/vi/{videoId}/hqdefault.jpg`).
+  - Optional fallback to YouTube Data API v3 if `YOUTUBE_API_KEY` is configured.
+- **Twitch Alerts**:
+  - **Twitch Helix API**: Polls streamer status using App Access tokens via `TWITCH_CLIENT_ID` and `TWITCH_CLIENT_SECRET`.
+  - **Live Metadata Presentation**: Embeds feature streamer status, live title, `🎮 Category` (`game_name`), formatted live viewer count `👥 Viewers` (`viewer_count`), and live preview screenshots (1280x720).
+
+
 ---
 
 ## 📊 Subscription Limits (Per Dashboard Tab)

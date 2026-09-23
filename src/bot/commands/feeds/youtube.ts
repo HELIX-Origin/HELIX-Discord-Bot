@@ -9,6 +9,7 @@ import {
 import { EmbedHandler } from '../../lib/embeds/builder.js';
 import { notifyFeedAdded } from '../../lib/feeds/notify.js';
 import { registerCommandMetadata, type BotCommand } from '../../handlers/registry.js';
+import { resolveYouTubeXmlUrl } from '../../../feed/youtube.js';
 
 export const youtubeCommandDef: ApplicationCommand = {
   name: 'youtube',
@@ -155,7 +156,8 @@ export async function handleYouTubeCommand(
         .respond(true);
     }
 
-    const { url, fallbackName } = normalizeYouTubeUrl(rawInput);
+    const { url: initialUrl, fallbackName } = normalizeYouTubeUrl(rawInput);
+    const resolvedUrl = await resolveYouTubeXmlUrl(initialUrl);
     const customName = String(opts.find((o) => o.name === 'name')?.value ?? '').trim();
     const name = customName || fallbackName;
     const channelId =
@@ -163,7 +165,17 @@ export async function handleYouTubeCommand(
 
     try {
       const roleId = (opts.find((o) => o.name === 'role')?.value as string | undefined) ?? null;
-      const feed = deps.repo.addFeed(user.id, name, url, channelId, 'youtube', null, guildId, undefined, roleId);
+      const feed = deps.repo.addFeed(
+        user.id,
+        name,
+        resolvedUrl,
+        channelId,
+        'youtube',
+        null,
+        guildId,
+        undefined,
+        roleId,
+      );
       deps.repo.logActivity(user.id, 'info', 'bot', `Added YouTube feed "${name}" via Discord bot`);
       if (channelId) {
         await notifyFeedAdded(deps.bot, channelId, name).catch(() => {});

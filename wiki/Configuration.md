@@ -140,7 +140,7 @@ DISCORD_REDIRECT_URL=https://discord.com/oauth2/authorize?client_id=your_client_
 DASHBOARD_THEME=dark
 LANDING_PAGE_ENABLED=true
 
-# YouTube API credentials (for YouTube Stream Alerts)
+# YouTube API credentials (optional — YouTube alerts use public Atom feeds out-of-the-box with zero keys required)
 YOUTUBE_API_KEY=
 YOUTUBE_CLIENT_ID=
 YOUTUBE_CLIENT_SECRET=
