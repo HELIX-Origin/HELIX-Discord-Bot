@@ -6,103 +6,95 @@
 
 ## 🎯 Active Plan
 
-### Goal — Real-Time Single-Newest-Post Feed Delivery & Rate-Limit Shield
+### Goal — Free Games Reliability, Storefront Platform Parity & Dashboard Pill Catalogs
 
-Modernize feed delivery across all feed types (RSS/Atom, Scrape, Reddit, Free Games, YouTube, Twitch) so feeds are not bound by artificial multi-hour poll interval floors or once-per-day quotas. Feeds pick up new posts as they arrive and deliver **strictly the single newest post** per feed check cycle. This ensures Discord channels stay continuously up-to-date in near-real-time while eliminating backlog dumps of 10–20 posts at once and completely avoiding Discord channel rate limits.
+Resolve hit-or-miss individual storefront alerts (`steam`, `epic`, `gog`, `indiegala`, `humble`, `itchio`, `ubisoft`, `prime`, `ea`, `battlenet`), ensure embed footers retain individual game storefront branding when "All Platforms" is selected, and add one-click pill catalog sections to the Free Games and Reddit dashboard tabs.
 
 **Locked user directives** (do not re-litigate):
 
-- **No poll interval limitation**: "All feeds should not be limited by poll intervals. Instead they should pick up new posts as they arrive and post them."
-- **Single newest post on arrival**: "We should make sure they post the single newest post as it comes in. That way they are always up to date and aren't posting 10 to 20 posts at a time."
-- **Rate-limit prevention & information integrity**: "this is the correct way to handle the rate limiting problem while still ensuring they don't miss information. We should prepare a plan in our PLAN.md for this update, as well as update our TODO.md accordingly."
-- **File naming scheme**: camelCase file naming across the codebase (e.g., `manageFeeds.ts`).
+- **Storefront reliability**: "free game alerts only seem to work when all platfroms is chosen. individual platforms are hit or miss."
+- **Embed footer retention**: "the all platforms one shouldn't replace the platform information in the embeds. right now it's replacing the footer information."
+- **Pill sections parity**: "we should adjust the page to use pill sections to enable the options as well, just like the reddit and news feed tabs."
 
 ---
 
-### Architectural Analysis: Current Bottlenecks vs. Target Solution
+### Architectural Analysis: Root Causes & Target Architecture
 
 ```mermaid
 flowchart TD
-    subgraph Current["Current Polling & Delivery Bottlenecks"]
-        A1["Long Poll Interval (Default 1 Hour)"] --> B1["Artificial Rate Floor (6h + Once Per UTC Day)"]
-        B1 --> C1["Backlog Inversion: Reverses to Oldest Post First"]
-        C1 --> D1["Channels Fall Behind / Bursts of 10-20 Posts (Free Games / Stream Alerts)"]
+    subgraph Issues["Previous Bottlenecks & Bugs"]
+        A1["GamerPower API 404s on platform=indiegala / humble / prime"]
+        A2["watcher.ts early lowerUrl.includes('epic') coerced all feeds to Epic"]
+        A3["freeGameEmbed overwrote footer with feedTitle 'All Stores & Giveaways'"]
+        A4["Manual feed creation required on Free Games & Reddit tabs"]
     end
 
-    subgraph Target["Target Real-Time Single-Post Shield"]
-        A2["Near-Real-Time Cadence (Webhooks + 1-2m Background Check)"] --> B2["Detect Unseen Posts in Chronological Order"]
-        B2 --> C2["Select Single Newest Unposted Entry"]
-        C2 --> D2["Deliver 1 Embed to Discord Target/Thread"]
-        D2 --> E2["Drain Backlog: Mark Remaining Unseen as Sent & Advance Cursor"]
-        E2 --> F2["Zero Channel Flooding & 100% Rate Limit Safe"]
+    subgraph Solution["Robust Multi-Platform Architecture"]
+        B1["GamerPower platform=pc query + detectGamerPowerPlatform fallback"]
+        B2["Strict feed.feedType & freegames:// platformKey resolution in watcher.ts"]
+        B3["freeGameEmbed checks isGenericOrAllTitle and preserves platform branding & icon"]
+        B4["Storefronts & Giveaways Catalog + Popular Subreddit Presets with one-click pill activation"]
     end
+
+    A1 --> B1
+    A2 --> B2
+    A3 --> B3
+    A4 --> B4
 ```
 
-1. **Current Bottlenecks**:
-   - `RSS_POST_INTERVAL_FLOOR_MS = 6 * 60 * 60 * 1000` artificially blocks delivery if a post occurred in the last 6 hours or on the same UTC calendar day.
-   - Long default interval (`pollIntervalMs = 3_600_000`, 1 hour) delays fresh updates.
-   - When multiple posts accumulate, free games and stream alerts iterate through `toSend` and attempt to blast all entries in a tight loop, triggering Discord API 429s.
-   - RSS feeds reverse entries to oldest first (`toSend.reverse()`) and post only `toSend[0]`, meaning channels receive hours- or days-old news rather than breaking updates.
-2. **Target Solution**:
-   - Remove `RSS_POST_INTERVAL_FLOOR_MS` and UTC-day gating entirely.
-   - Fast background check cadence (e.g., 60–120s polling interval) combined with WebSub/PubSubHubbub webhooks for instant event-driven delivery.
-   - For any feed with unposted items, immediately deliver **only the single newest post** (`entries[0]` / newest publication timestamp).
-   - Mark all unposted backlog items from that cycle as processed in `sent_entries` and update `lastEntryId`/`lastCheckedAt`/`lastPostedAt` so they do not accumulate into a delayed cascade.
-   - Apply identical single-newest-post gating to Free Games and Stream Alerts (`pollStreamAlertFeed` / `pollFreeGamesLocked`) to eliminate multi-message bursts.
-   - Add inter-feed pacing in `pollAllFeeds` / `pollGuildFeeds` to prevent concurrent Discord delivery spikes across multiple feeds.
+1. **GamerPower API Queries & Platform Detection**:
+   - Querying GamerPower with `platform=indiegala`, `platform=humble`, or `platform=prime` resulted in HTTP 404 responses.
+   - Solution: Query `platform=pc&type=game` which returns all active giveaways across all PC storefronts without HTTP 404s, and use `detectGamerPowerPlatform` to inspect titles, URLs, and descriptions, resolving storefront even when GamerPower marks as `PC, DRM-Free`.
+2. **Watcher URL Resolution**:
+   - `watcher.ts` evaluated `lowerUrl.includes('epic')` before checking `feed.feedType`. Feeds created via Discord slash commands had `url: 'https://store.epicgames.com'`, causing all feeds to be treated as Epic.
+   - Solution: Strictly check `feed.feedType` (`free_games_steam`, etc.) and `freegames://${slug}` URLs first.
+3. **Embed Footer Platform Retention**:
+   - `freeGameEmbed` set `footer.text = `${feedTitle} · Weekly Free Games``. When `feedTitle` was "Free Games (All Stores & Giveaways)", this replaced the game's actual platform name and icon.
+   - Solution: Add `isGenericOrAllTitle` check. For generic or all-platforms feeds, footer text preserves `${branding.name} · Free Games` and `branding.iconUrl`.
+4. **Dashboard Pill Sections**:
+   - Add `#freegames-options-container` to Free Games tab and `#reddit-presets-container` to Reddit tab.
+   - Dynamic JavaScript hooks `renderFreeGamesOptions`, `enableFreeGamesOption`, `renderRedditPresets`, and `enableRedditPreset`.
 
 ---
 
-### Implementation Plan
+### Implementation & Verification Checklist
 
-1. **Feed Watcher Core Refactor (`src/feed/watcher.ts`)**:
-   - Delete `RSS_POST_INTERVAL_FLOOR_MS` and remove the `canPost` 6-hour / once-per-day restriction.
-   - Refactor `pollFeedLocked`:
-     - Sort/inspect parsed entries to locate the single newest unseen post.
-     - Deliver only the newest post to the configured Discord channel or dedicated thread.
-     - Bulk-mark all older unseen entries in this cycle as sent via `repo.markEntrySent` / `redis.markEntrySent` so backlog items do not leak into future cycles.
-     - Update feed state (`setFeedPosted`, `setFeedChecked`) with the newest entry ID.
-   - Refactor `pollFreeGamesLocked`:
-     - Deliver only the single newest / most recent free game entry instead of looping through all unposted games.
-     - Mark remaining unposted games as sent to prevent spamming 10+ games in one tick.
-   - Refactor `pollStreamAlertFeed`:
-     - Deliver only the single newest stream/video alert entry instead of looping through all unposted streams.
-     - Mark remaining stream entries as sent.
-   - Inter-feed delivery pacing: Introduce non-blocking staggered delays (e.g., 250ms) between feed dispatches in `pollAllFeeds` to remain well below Discord's global REST limits.
-
-2. **Scheduler & Polling Cadence Update (`src/config.ts`, `src/index.ts`, `src/scheduler/scheduler.ts`)**:
-   - Update default `pollIntervalMs` in `defaultConfig()` from `3_600_000` (1 hour) to `60_000` (1 minute) for responsive near-real-time checks.
-   - Support `POLL_INTERVAL_MS` environment variable parsing in `defaultConfig()` so operators can configure custom frequencies.
-   - In `pollFeedLocked`, allow checks to proceed smoothly without requiring a 1-hour delay between runs.
-
-3. **Webhook & Event Alignment (`src/dashboard/webhooks/router.ts`)**:
-   - Ensure webhook-driven ingestion (YouTube PubSubHubbub, Twitch EventSub, WebSub) adheres to the exact same single-newest-post delivery pattern and deduping logic.
-   - Advance `lastEntryId` and mark entries sent upon webhook delivery.
-
-4. **Testing & Quality Verification**:
-   - Add unit tests in `tests/unit/feed/watcher.test.ts` covering:
-     - Single newest post is selected and delivered when multiple entries are present.
-     - Backlog older entries are marked as sent and not queued for future cycles.
-     - No 6-hour or once-per-day artificial block prevents timely delivery.
-     - Free games and stream alerts post only 1 newest entry per cycle.
-     - Rapid successive polls deliver new arrivals immediately without duplicate posting.
-   - Run complete validation gate: `npm run check` (typecheck, lint, formatting, tests).
+- [x] `src/feed/freegames.ts`: Overhaul storefront fetching, detect dedicated storefronts, add `'pc'` to `PLATFORM_BRANDING`
+- [x] `src/feed/watcher.ts`: Strict `feed.feedType` matching in `pollFreeGamesLocked`
+- [x] `src/bot/commands/feeds/free-games.ts`: `freegames://${platformSlug}` URLs, expanded platform choices
+- [x] `src/bot/utils/embeds.ts`: Embed footer platform retention
+- [x] `src/dashboard/views/dashboard/sources.ts`: `#freegames-options-container` & `#reddit-presets-container`
+- [x] `src/dashboard/views/dashboard/clientScript.ts`: Pill rendering & activation logic
+- [x] `tests/unit/feed/freegames.test.ts`: New unit tests for multi-storefront fetching and embed footer retention
+- [x] `tests/unit/dashboard/views.test.ts` & `tests/unit/feed/watcher.test.ts`: Updated tests
+- [ ] Export `FetchResult` in `src/feed/fetch.ts` and pass `npm run check` and `npm run build`
+- [ ] Git commit and push
 
 ---
 
 ### Files Touched
 
-- `src/feed/watcher.ts`: Core delivery logic, removal of 6h floor, single newest post selection, backlog drain.
-- `src/config.ts`: `pollIntervalMs` configuration update and env parsing.
-- `src/index.ts`: Polling scheduler initialization check.
-- `src/dashboard/webhooks/router.ts`: Parity check for webhook entry processing.
-- `tests/unit/feed/watcher.test.ts`: Comprehensive test suite for real-time single-post delivery.
+- `src/feed/freegames.ts`
+- `src/feed/fetch.ts`
+- `src/feed/watcher.ts`
+- `src/bot/commands/feeds/free-games.ts`
+- `src/bot/utils/embeds.ts`
+- `src/dashboard/views/dashboard/sources.ts`
+- `src/dashboard/views/dashboard/clientScript.ts`
+- `tests/unit/feed/freegames.test.ts`
+- `tests/unit/feed/watcher.test.ts`
+- `tests/unit/dashboard/views.test.ts`
+- `tests/unit/admin/commandToggles.test.ts`
 
 ---
 
 ## 📦 Past Completed Workstreams (Archived)
 
-- **Dashboard UI Window-Fitting & Simulated Discord Previews** (responsive 2-column layout for Welcome and Tickets tabs; real-time simulated Discord preview cards with dynamic placeholder substitutions, markdown parsing, and interactive button previews; tab carryover fix; options modularization in `src/bot/lib/options/`).
+- **Command Toggles, Feature Gating & Dynamic Guild Command Registration** (guild-level slash command unregistration for disabled commands, dynamic dashboard page hiding for disabled feature tabs).
+- **Ticket Message Placeholders & Dynamic Guild Resolution** (`{server}`, `{guild}`, `{user}`, `{member}`, `{channel}`, `{time}` placeholders, dynamic `guild.name` resolution).
+- **Optional Embed Support for Ticket Message Setup** (ticket setup slash command, embed format toggle, simulated Discord embed preview).
+- **Stream Alerts Audit, Zero-Config YouTube Ingestion & Rich Twitch Metadata** (YouTube Atom parsing, Twitch live stream extraction, rich embed formatting).
+- **Dashboard UI Window-Fitting & Simulated Discord Previews** (responsive 2-column layout for Welcome and Tickets tabs; real-time simulated Discord preview cards; tab carryover fix; options modularization).
 - **Real-Time Single-Newest-Post Feed Delivery & Rate-Limit Shield** (delivered strictly the single newest post per polling cycle across all feed types; backlog draining; removed artificial 6h floor; Reddit persistent community home post filter).
 - **Guild Admin Sections & Dedicated Tabs** (welcome, tickets, logs, manage-feeds tabs; ticket text-channel button; forum-to-thread refactor; role subscriptions).
 - **Theme System Single Source of Truth** (`src/dashboard/views/themes/*.ts`, removed duplicate scheme layer).

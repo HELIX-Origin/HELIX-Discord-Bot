@@ -156,6 +156,73 @@
 - [x] `wiki/*`: Document embed options in `Administration.md`, `Discord-Bot.md`, and `API-Reference.md`
 - [x] `npm run check` + `npm run build` green (22/22 test files, 350/350 tests passing)
 
+### Workstream: Ticket Message Placeholders & Dynamic Guild Resolution
+
+**Locked user directives:**
+- "also the ticket message needs to support placeholders."
+- "issue with the placholder output.s instead of displaying the server name `{server}` is showin `this server`. that is wrong."
+- "discord js can get the guild name by using guild.name so it is not incorrect to assume that the bot can get it's own name"
+
+**Implementation checklist:**
+- [x] `src/bot/utils/placeholders.ts`: Add support for `{server}`, `{guild}`, `{user}`, `{member}`, `{channel}`, and `{time}` placeholders in ticket messages
+- [x] Resolve guild name dynamically via `guild.name` when available instead of defaulting to static `'this server'` fallback
+- [x] Support ticket placeholders in both slash command button messages and live dashboard preview updates
+- [x] Unit test coverage for placeholder replacement in `tests/unit/bot/placeholders.test.ts`
+- [x] `npm run check` + `npm run build` green
+
+### Workstream: Command Toggles, Feature Gating & Dynamic Guild Command Registration
+
+**Locked user directives:**
+- "the command toggles have absolutley no effect. they are suppose to enable or disabled the selected commands and their related features."
+- "when i say features i mean that any command that has it's own dashboard page should also have it's dashboard page hidden when the command is disabled."
+- "for instance if the feed command is disabled the feeds page should be hidden. if both youtube and twitch are disabled the stream alerts page should be disabled, etc"
+- "no error embed if command disabled. the command should be unregistered if it is disabled and the registration should be automatically applied to the guild."
+
+**Implementation checklist:**
+- [x] `src/bot/handlers/commands.ts` & `src/bot/handlers/registry.ts`: Implement dynamic guild command unregistration and registration when commands are toggled on/off
+- [x] Ensure disabled commands are unregistered from guild slash command registration without replying with an error embed
+- [x] `src/dashboard/views/dashboard/sidebar.ts` & `src/dashboard/views/dashboard/clientScript.ts`: Dynamically hide associated dashboard pages when commands are toggled off:
+  - Feeds page hidden when `feed` is disabled
+  - Stream alerts page hidden when both `youtube` and `twitch` are disabled
+  - Welcome page hidden when `welcome` is disabled
+  - Tickets page hidden when `ticket` is disabled
+  - Logs page hidden when `logs` is disabled
+- [x] Re-register commands on guild level dynamically upon dashboard settings update
+- [x] Unit test coverage in `tests/unit/admin/commandToggles.test.ts`
+- [x] `npm run check` + `npm run build` green
+
+### Workstream: Free Games Reliability, Embed Platform Branding & Dashboard Pill Catalogs
+
+**Locked user directives:**
+- "free game alerts only seem to work when all platfroms is chosen. individual platforms are hit or miss."
+- "the all platforms one shouldn't replace the platform information in the embeds. right now it's replacing the footer information."
+- "we should adjust the page to use pill sections to enable the options as well, just like the reddit and news feed tabs."
+
+**Implementation checklist:**
+- [x] `src/feed/freegames.ts`: Overhaul storefront fetching and detection
+  - Use `platform=pc&type=game` on GamerPower to prevent HTTP 404 errors for IndieGala, Humble, and Prime Gaming
+  - Implement `detectGamerPowerPlatform` to inspect titles, URLs, and descriptions, resolving storefront even when GamerPower marks as `PC, DRM-Free`
+  - Add `'pc'` to `PLATFORM_BRANDING`
+- [x] `src/feed/watcher.ts`: Fix platform key resolution in `pollFreeGamesLocked`
+  - Removed early `lowerUrl.includes('epic')` check that erroneously forced all feeds with store.epicgames.com to Epic, ignoring `free_games_steam`, `free_games_gog`, etc.
+  - Strict matching against `feed.feedType` and `freegames://` URLs
+- [x] `src/bot/commands/feeds/free-games.ts`: Modernize `/free-games` slash command
+  - Store `url: freegames://${platformSlug}` instead of hardcoded Epic URL
+  - Expand choices for IndieGala, Itch.io, EA App, and Battle.net
+- [x] `src/bot/utils/embeds.ts`: Preserve individual platform branding in embed footer
+  - When "All Platforms" / "All Stores & Giveaways" is configured, preserve individual game platform name and icon in footer instead of overwriting with all-platforms feed title
+- [x] `src/dashboard/views/dashboard/sources.ts`: Add pill catalog UI
+  - Add `#freegames-options-container` catalog card to Free Games tab
+  - Add `#reddit-presets-container` catalog card to Reddit tab
+- [x] `src/dashboard/views/dashboard/clientScript.ts`: Dynamic pill rendering and one-click enablement
+  - Implement `renderFreeGamesOptions` and `enableFreeGamesOption`
+  - Implement `renderRedditPresets` and `enableRedditPreset`
+  - Update add/delete handlers to refresh option pill catalogs seamlessly
+- [x] `tests/unit/feed/freegames.test.ts`: Comprehensive unit tests for multi-storefront fetching and embed footer branding preservation
+- [x] `tests/unit/dashboard/views.test.ts` & `tests/unit/feed/watcher.test.ts`: Tests for catalog containers, client functions, and watcher platform resolution
+- [ ] Export `FetchResult` interface in `src/feed/fetch.ts` and pass full validation gate (`npm run check` and `npm run build`)
+- [ ] Commit, push, and sync release notes / documentation
+
 ---
 
 ## 🛠️ Verification Commands
