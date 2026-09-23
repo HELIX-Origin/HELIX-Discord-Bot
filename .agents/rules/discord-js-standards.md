@@ -9,9 +9,10 @@
 ## 1. Architectural Philosophy: Self-Contained Commands & Modular Lib
 
 To guarantee maximum readability, maintainability, and clean domain isolation:
-1. **Self-Contained Commands**: Subcommands and options MUST be colocated directly within their respective command files (`src/bot/commands/<category>/<command>.ts`). This keeps the schema, option choices, autocomplete definitions, and execution logic together.
-2. **Dedicated Lib Directory (`src/bot/lib/`)**: The `lib/` directory is reserved exclusively for reusable libraries, modules, and utilities (such as `embeds/`, `admin/`, `feeds/`, and common helpers) used by **both commands and events**.
-3. **Dynamic Methods Over Hardcoding**: Prefer dynamic registration, automated discovery, dynamic option generation, and registry queries over rigid static mappings and hardcoded command lists.
+1. **Self-Contained Commands**: Commands must declare their schemas, option choices, autocomplete definitions, and execution logic clearly.
+2. **Options Over Subcommands & Modular Options Files**: Flat options are strongly preferred over deep subcommands to minimize Discord command registration footprint and keep registrations lightweight. For commands with rich option sets (e.g. `/welcome`, `/ticket`), options are modularized into dedicated camelCase option files under `src/bot/lib/options/<command>.ts` (e.g. `src/bot/lib/options/ticket.ts`) and imported into the command definition.
+3. **Dedicated Lib Directory (`src/bot/lib/`)**: The `lib/` directory is reserved exclusively for reusable libraries, modules, and utilities (such as `embeds/`, `admin/`, `feeds/`, `options/`, and common helpers) used by **both commands and events**.
+4. **Dynamic Methods Over Hardcoding**: Prefer dynamic registration, automated discovery, dynamic option generation, and registry queries over rigid static mappings and hardcoded command lists.
 
 ### Discord API Limits (Hard Invariants)
 | Metric | Discord API Limit | Architectural Guardrail |
@@ -79,6 +80,9 @@ src/bot/
 │   ├── admin/                      # Moderation & permission utilities
 │   │   ├── permissions.ts          # Native permission checks & role hierarchy
 │   │   └── modlog.ts               # Mod log embed dispatch
+│   ├── options/                    # Modular option builders & definitions (camelCase)
+│   │   ├── ticket.ts               # Ticket system options & action choices
+│   │   └── welcome.ts              # Welcome announcement options & action choices
 │   └── feeds/                      # Feed formatting and delivery helpers
 └── utils/                          # Discord API typings & constants
     ├── types.ts                    # Discord interaction, command, and channel types

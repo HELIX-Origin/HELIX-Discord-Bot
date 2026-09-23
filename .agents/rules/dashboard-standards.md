@@ -23,8 +23,11 @@ The HELIX management dashboard provides an integrated, web-based management cons
    - Developer Tools and system-level operations (`/api/admin/*`) require application **Owner** or **Team Admin** status verified during OAuth2 exchange.
 4. **Live Discord Bot Synchronization**:
    - The dashboard does not maintain duplicate Discord channel or guild state. It queries the live `DiscordBot` instance (`deps.bot`) for guild discovery, voice state, channel listings, and thread creation.
-5. **EmbedHandler Parity**:
-   - Any embed preview or formatted card rendered in the dashboard UI MUST mirror the exact layout, color accents, and text clamping standards of `EmbedHandler` (`src/bot/lib/embeds/`).
+5. **Responsive Window-Fitting Layouts**:
+   - Dashboard tab pages (e.g. Welcome, Tickets) MUST fit the browser viewport smoothly alongside `nav.sidebar` using responsive auto-fit grids (`repeat(auto-fit, minmax(360px, 1fr))`), pairing settings forms on the left with live preview cards on the right.
+6. **Live Discord Previews & EmbedHandler Parity**:
+   - Any embed preview, welcome message, or ticket prompt rendered in the dashboard UI MUST simulate Discord's layout with high fidelity (avatar, bot tag, timestamp, role/user mentions, blurple buttons, markdown parsing) and mirror `EmbedHandler` styling.
+   - Live previews must update reactively on `input` and `change` events.
 
 ---
 
@@ -57,15 +60,18 @@ src/dashboard/
 ├── views/                          # Server-side HTML template components
 │   ├── admin.ts                    # Developer Tools UI pane
 │   ├── dashboard.ts                # Main application dashboard layout orchestrator
-│   ├── dashboard/                  # Modular dashboard view components
+│   ├── dashboard/                  # Modular dashboard view components (camelCase)
 │   │   ├── styles.ts               # Theme-aware CSS stylesheet & responsive rules
 │   │   ├── sidebar.ts              # Categorized sidebar navigation & guild switcher
 │   │   ├── overview.ts             # Executive overview stats & activity viewer
 │   │   ├── feeds.ts                # News catalog & custom RSS/Atom/Scrape forms
 │   │   ├── sources.ts              # Reddit, Free Games, and Stream Alerts tab views
+│   │   ├── welcome.ts              # Welcome announcement config & live Discord preview
+│   │   ├── tickets.ts              # Support ticket channel routing & button preview
+│   │   ├── logs.ts                 # Audit & moderation event logs view
 │   │   ├── guildadmin.ts           # Roles, feature flags, and command prefix
 │   │   ├── settings.ts             # System endpoints & team member viewer
-│   │   └── client-script.ts        # Modular client-side browser logic & routing
+│   │   └── clientScript.ts         # Modular client-side browser logic, tabs, & previews
 │   ├── footer.ts                   # Standardized footer component
 │   ├── guilds.ts                   # Guild selection & management panel
 │   ├── landing.ts                  # Public landing page (when LANDING_PAGE_ENABLED=true)

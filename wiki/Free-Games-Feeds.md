@@ -30,6 +30,7 @@ The Free Games engine integrates with the official **Epic Games Store Promotions
 Free game giveaways are often time-limited, so HELIX Discord Bot polls active `freegames` feeds **daily** instead of only once a week.
 - The background feed watcher inspects active `freegames` feeds on a daily schedule.
 - Only genuinely new giveaways are announced; duplicates are suppressed by the composite deduplication engine.
+- **Single-Newest-Game Delivery & Rate-Limit Shield**: Each polling cycle delivers strictly the single newest free game giveaway and drains older backlog items as sent, completely protecting your Discord channels from 10+ game burst dumps and rate limits.
 
 ---
 

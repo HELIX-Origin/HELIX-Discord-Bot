@@ -56,19 +56,21 @@ flowchart TB
 
 ### 1. Web Dashboard & API (`src/dashboard/`)
 - Built with **native Node.js `http`** and a zero-dependency router, serving a responsive, zero-frontend-dependency Vanilla CSS & JavaScript UI.
-- **Modular View Components**: Deconstructed into domain-focused view modules in `src/dashboard/views/dashboard/` (`sidebar.ts`, `overview.ts`, `feeds.ts`, `sources.ts`, `guildadmin.ts`, `settings.ts`, `styles.ts`, `client-script.ts`).
+- **Modular View Components**: Deconstructed into domain-focused view modules in `src/dashboard/views/dashboard/` (`sidebar.ts`, `overview.ts`, `feeds.ts`, `sources.ts`, `welcome.ts`, `tickets.ts`, `logs.ts`, `guildadmin.ts`, `settings.ts`, `styles.ts`, `clientScript.ts`).
+- **Responsive Layout & Live Discord Previews**: Management views (e.g. Welcome and Tickets) feature a responsive 2-column grid (`repeat(auto-fit, minmax(360px, 1fr))`) that pairs settings with simulated live Discord preview cards rendering markdown and interactive components in real time.
 - **Discord-Style Categorized Navigation**: Section-grouped sidebar navigation (**General**, **Feeds & Alerts**, **System**) with an active server switcher banner.
 - **Theme System**: Env-driven themes (`glassmorphism`, `dark`, `light`, `cyberpunk`, `dracula`, `nord`, `emerald`), each defining its own accent color palette via canonical theme files (`src/dashboard/views/themes/*.ts`) served through `getThemeCss()`, plus a toggleable landing page.
 - **REST Endpoints**: CRUD operations for feeds, guild channel inspection, role listing, and activity logs (Developer Tools).
 
 ### 2. Background Feed Watcher (`src/feed/watcher.ts`)
-- Operates on a continuous polling loop with per-user configurable intervals (1, 10, 30 or 60 minutes) persisted in SQLite.
+- Operates on a continuous polling loop with near-real-time cadence (default 1 minute, configurable via `POLL_INTERVAL_MS` or 1, 10, 30, 60 minutes) persisted in SQLite.
+- **Real-Time Single-Newest-Post Delivery**: Delivers strictly the single newest post per polling cycle and drains the older backlog as sent, eliminating burst dumps and shielding channels from Discord rate limits.
 - Runs balanced asynchronous worker pools.
-- Features a weekly Monday cron scheduler for Free Games promotions.
+- Features weekly/daily schedulers for Free Games promotions.
 - **Thread Delivery**: routes entries through `FeedThreadManager` (`src/feed/threads.ts`), auto-creating/rotating a dedicated thread per feed in the feed's own delivery channel for thread-enabled guilds, with a keepalive pass (`THREAD_KEEPALIVE_*`) scheduled alongside the watcher loop.
 
 ### 3. Parser & Scrapers Engine (`src/feed/`)
-- Unified parser handling XML (RSS/Atom), JSON Feed, Reddit, and Free Games storefronts.
+- Unified parser handling XML (RSS/Atom), JSON Feed, Reddit (with community home post filtering), and Free Games storefronts.
 - Sanitizes malformed XML, extracts CDATA payloads, resolves relative links, and cleans HTML tags for Discord embed descriptions.
 
 ### 4. Persistence Layer (`src/db/`)
@@ -121,6 +123,13 @@ erDiagram
     SETTINGS {
         string guild_id PK "Discord Guild ID"
         string log_channel_id "Diagnostics Channel ID"
+        string mod_log_channel_id "Mod Actions Log Channel"
+        string welcome_channel_id "Welcome Channel ID"
+        string welcome_message "Welcome Announcement Template"
+        boolean welcome_embed "Welcome Embed Format"
+        string ticket_channel_id "Ticket Button Channel ID"
+        string ticket_role_id "Ticket Support Manager Role ID"
+        string ticket_message "Ticket Prompt Message"
         string default_color "Default Embed Hex"
         boolean notifications_enabled "Global Mute Toggle"
     }

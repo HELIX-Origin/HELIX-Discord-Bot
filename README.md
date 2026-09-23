@@ -30,12 +30,14 @@ It ships with a built-in web dashboard, Discord OAuth2 authentication, no fronte
 | Feature | Details |
 |:---|:---|
 | 🎮 **Free Games Alerts** | Automated free-game giveaways from Epic Games, Steam, GOG, Humble, Itch.io, and more — with rich store embeds and deduplication. → [Wiki](../../wiki/Free-Games-Feeds) |
-| 🤖 **Reddit Feeds** | Subreddit/user feeds with Pure Image & Standard RSS modes, animated GIF support, and NSFW age-restriction enforcement. Needs a Reddit session cookie (`cookies.json`/`cookies.txt`). → [Wiki](../../wiki/Reddit-Feeds) |
-| 📰 **RSS, Web Scrapers & News Catalog** | RSS/Atom/JSON feeds, CSS-selector scrapers for sites without RSS, and a 700+ preset news catalog. → [Wiki](../../wiki/Feeds-and-Scrapers) |
+| 🤖 **Reddit Feeds** | Subreddit/user feeds with Pure Image & Standard RSS modes, animated GIF support, community home post filtering, and NSFW age-restriction enforcement. Needs a Reddit session cookie (`cookies.json`/`cookies.txt`). → [Wiki](../../wiki/Reddit-Feeds) |
+| 📰 **RSS, Web Scrapers & News Catalog** | RSS/Atom/JSON feeds, CSS-selector scrapers for sites without RSS, and a 700+ preset news catalog. Features single-newest-post delivery and rate-limit shield. → [Wiki](../../wiki/Feeds-and-Scrapers) |
 | 📢 **Stream Alerts** | YouTube & Twitch live/upload alerts delivered via webhooks with polling fallback. → [Wiki](../../wiki/Feeds-and-Scrapers) |
-| 🛡️ **Guild Administration** | Moderation (`/warn`, `/kick`, `/ban`, `/purge`, ...), role management, and voice controls. → [Wiki](../../wiki/Administration) |
-| 🧵 **Thread Delivery** | Deliver each feed into its own dedicated thread auto-created in the feed's channel. → [Wiki](../../wiki/Discord-Bot) |
-| 🖥️ **Web Dashboard** | Built-in management dashboard with Discord OAuth2, Light/Dark themes, and per-guild feed configuration. → [Wiki](../../wiki/Architecture-and-Design) |
+| 🛡️ **Guild Administration** | Moderation (`/warn`, `/kick`, `/ban`, `/purge`, ...), role management, voice controls, and server settings. → [Wiki](../../wiki/Administration) |
+| 👋 **Welcome System** | Customizable welcome announcements for new arrivals (`/welcome` & dashboard) with placeholders (`{user}`, `{mention}`, `{server}`, `{membercount}`), plain text or embed format, and live Discord preview. → [Wiki](../../wiki/Administration) |
+| 🎫 **Ticket System** | Text-channel button prompt (`/ticket` & dashboard) that creates dedicated threads upon user interaction with support manager role pings and live button preview. → [Wiki](../../wiki/Administration) |
+| 🧵 **Thread Delivery** | Deliver each feed into its own dedicated thread auto-created in the feed's channel with auto-subscription. → [Wiki](../../wiki/Discord-Bot) |
+| 🖥️ **Web Dashboard** | Built-in management dashboard with Discord OAuth2, Light/Dark themes, responsive window-fitting layouts, live Discord previews, and per-guild configuration. → [Wiki](../../wiki/Architecture-and-Design) |
 
 Feature flags (`FEEDS_ENABLED`, `STREAM_ALERTS_ENABLED`, `DASHBOARD_ENABLED`, etc.) toggle each subsystem. → [Wiki: Configuration](../../wiki/Configuration)
 

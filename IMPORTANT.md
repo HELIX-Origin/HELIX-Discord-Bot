@@ -28,20 +28,22 @@ This document outlines critical operational requirements, security practices, ar
 
 ## ⚙️ Feed Scrapers & Rate Limiting
 
-1. **Reddit Scrapers**:
-   - **Custom User-Agent**: Reddit requires unique User-Agents for RSS polling. Configure a descriptive `REDDIT_USER_AGENT` in `.env` to prevent `429 Too Many Requests`.
+1. **Real-Time Single-Newest-Post Delivery & Rate-Limit Shield**:
+   - All feeds (RSS, Atom, Scrapers, Reddit, Free Games, Stream Alerts) deliver **strictly the single newest post** per polling cycle.
+   - Older unseen entries within a cycle are drained (marked as sent), preventing channels from being spammed with 10–20 posts at once and completely avoiding Discord channel rate limits.
+   - Artificial post-interval floors and once-per-UTC-day restrictions have been eliminated for real-time responsiveness.
+
+2. **Reddit Scrapers**:
+   - **Community Home Post Filtering**: Community home posts are automatically detected and ignored because they are persistent static entries that could cause feeds to miss actual new submissions.
+   - **Session Cookies**: Reddit requires authenticated session cookies (`cookies.json` or `cookies.txt`) to access subreddit ratings and prevent HTTP 403 blocks.
    - **Image Mode vs RSS Mode**:
      - `Image Mode` (`feedType: 'reddit'`): Automatically strips markdown text body, extracts full-resolution image/gallery/gifv media, and posts as a standalone banner.
      - `Standard RSS Mode` (`feedType: 'rss'`): Preserves post text excerpt, author tags, and comment link footer.
 
-2. **Free Games & Giveaways**:
+3. **Free Games & Giveaways**:
    - Multi-platform aggregation combines Epic Games Store Promotions API and GamerPower API.
    - Supported platforms: `epic`, `steam`, `gog`, `indiegala`, `humble`, `itchio`, `ubisoft`, `ea`, `prime`, and `battlenet`.
-   - Polling Schedule: Runs automatically every **Monday at 00:00 UTC** (aligning with global giveaway cycles) with manual poll capability via `POST /api/feeds/freegames/poll`.
-
-3. **Social Media Fallbacks**:
-   - **YouTube**: Direct XML channel feeds (`https://www.youtube.com/feeds/videos.xml?channel_id=...`) with optional YouTube Data API v3 fallback for video details.
-   - **TikTok & Bluesky**: Uses specialized headless extractors and open syndication endpoints.
+   - Polling Schedule: Polled automatically with deduplication and single-newest-game delivery.
 
 ---
 
@@ -55,7 +57,7 @@ This document outlines critical operational requirements, security practices, ar
    - The database maintains an indexed log of processed entries to avoid duplicate notifications even during rapid polling restarts.
 
 2. **Database Support**:
-   - **SQLite**: Default for all deployments. Database file stored at `./data/database.sqlite`.
+   - **SQLite**: Default and only database engine via native `node:sqlite` (WAL mode). Database file stored at `./data/database.sqlite`.
 
 ---
 
@@ -66,4 +68,4 @@ This document outlines critical operational requirements, security practices, ar
    - In clustered/multi-replica deployments, ensure only one instance runs the Feed Watcher worker (or use distributed database locking) to prevent duplicated Discord message dispatches.
 
 2. **Proxy Support**:
-   - If deploying behind reverse proxies (Nginx, Traefik, Cloudflare), ensure `TRUST_PROXY=true` is set in `.env` so Express correctly resolves client IP addresses for rate limiting and secure cookie transmission.
+   - If deploying behind reverse proxies (Nginx, Traefik, Cloudflare), set `PUBLIC_URL` to your external address and configure `TRUST_PROXY=true` in `.env` so the native HTTP server correctly resolves forwarded client IP addresses and headers.

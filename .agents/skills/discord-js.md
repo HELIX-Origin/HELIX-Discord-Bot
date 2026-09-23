@@ -7,10 +7,13 @@ This skill provides deep operational reference for engineering Discord bots with
 
 ## 1. Command Structure & Options Pattern
 
-### Why Colocate Options in Command Files?
-- **Self-Contained & Understandable**: Keeping option definitions, choices, and subcommands in the command file (`src/bot/commands/<category>/<command>.ts`) provides instant visibility of the schema alongside the execution logic.
-- **Discord API Limits**: Max 25 options per command/subcommand, max 25 choices per option, 4,000 characters total command definition budget.
-- **Shared Libs in `src/bot/lib/`**: The `lib/` directory is reserved for reusable modules, helpers, and utilities (such as `embeds/`, `admin/`, `feeds/`), rather than individual option files.
+### Options Architecture & Options Over Subcommands
+- **Options Over Subcommands**: Prefer flat options with action choices over deep subcommands to minimize Discord command registration overhead and prevent command tree bloat.
+- **Colocated vs Modular Options**:
+  - Simple commands declare their options directly within the command file (`src/bot/commands/<category>/<command>.ts`).
+  - Complex administrative commands with extensive schemas (e.g. `/welcome`, `/ticket`) modularize their option arrays and action enums into dedicated camelCase option files in `src/bot/lib/options/<command>.ts` (e.g. `src/bot/lib/options/ticket.ts`).
+- **Discord API Limits**: Max 25 options per command, max 25 choices per option, 4,000 characters total command definition budget.
+- **Shared Libs in `src/bot/lib/`**: The `lib/` directory is reserved for reusable modules, helpers, option definitions, and utilities (such as `embeds/`, `admin/`, `feeds/`, `options/`).
 
 ### Command Structure Example (`src/bot/commands/entertainment/gif.ts`):
 ```ts

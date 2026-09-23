@@ -74,10 +74,21 @@ export function renderComponent(title: string, content: string): string {
 }
 ```
 
+## 3. Responsive Window-Fitting Layouts & Simulated Discord Previews
+
+1. **Responsive 2-Column Grid**:
+   - Use CSS Grid with `repeat(auto-fit, minmax(360px, 1fr))` and `gap: 1.25rem` for management tab panes.
+   - Pairs configuration form controls on the left with simulated Discord preview cards on the right.
+   - Fits the window alongside `nav.sidebar` on desktop viewports and gracefully collapses into single columns on mobile.
+2. **Discord Preview Component (`.discord-preview-container`)**:
+   - Render Discord elements: avatar (`.discord-avatar`), bot username tag and badge (`.discord-bot-badge`), timestamp, mention pills (`.discord-mention`), and interactive buttons (`.discord-btn-primary`).
+   - Dynamically bind `input` and `change` event listeners in `clientScript.ts` to refresh previews in real-time as users edit templates.
+
 ---
 
-## 3. Mandatory Guardrails
+## 4. Mandatory Guardrails
 
 1. **No External Frontend Bundles**: Never introduce npm packages for frontend UI frameworks or bundlers.
 2. **Never Return Raw Unhandled Exceptions**: All route handlers must use try/catch blocks and respond with `sendError(res, 500, ...)`.
 3. **Always Log State-Changing Actions**: Use `deps.repo.logActivity(...)` on all create/update/delete operations.
+4. **Clean DOM Tab Isolation**: When switching tabs, clean up or hide all sibling panes (`#dashboard-view main > .tab-pane, #dashboard-view .tab-pane, #feed-detail-view`) to prevent content bleed between views.

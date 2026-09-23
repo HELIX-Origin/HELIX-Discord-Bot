@@ -81,17 +81,28 @@ Content-Type: application/json
 
 ---
 
-## 🛡️ Preventing Reddit Rate Limiting (429 Errors)
+---
 
-Reddit enforces rate limits on RSS and XML queries based on the HTTP `User-Agent`.
+## 🚫 Community Home Post Filtering
+
+Reddit feeds automatically detect and ignore community home posts (e.g. pinned community overview posts). Because the community home post is a persistent static entry provided in the XML/JSON response, treating it as an active new post would risk causing feeds to stall or miss actual new community submissions. HELIX automatically filters out these static home posts, ensuring only genuine new submissions are dispatched.
+
+---
+
+## 🛡️ Preventing Reddit Rate Limiting & Burst Protection
+
+Reddit enforces strict rate limits on RSS and XML queries based on the HTTP `User-Agent`. Additionally, Discord enforces rate limits on channel message delivery.
+
+### Real-Time Single-Post Shield & Backlog Drain:
+- HELIX delivers **strictly the single newest post** detected per polling cycle.
+- Older unposted entries within the cycle are automatically drained (marked as sent), ensuring your Discord channels are never flooded with 10–20 posts at once when a feed catches up.
 
 ### Best Practices:
 1. Set a unique, descriptive User-Agent in `.env` (`USER_AGENT`):
    ```env
    USER_AGENT="HelixRSS/0.1.0 (by /u/YourRedditUsername; contact: admin@yourdomain.com)"
    ```
-2. Avoid short delivery intervals for high-volume Reddit subscriptions — use the dashboard's 10–60 minute posting options.
-3. If you run multiple subreddits, combine them using the multi-reddit format (e.g., `r/tech+gadgets+hardware`) rather than 3 separate feeds.
+2. If you monitor multiple subreddits within the same topic, combine them using the multi-reddit format (e.g., `r/tech+gadgets+hardware`) rather than creating separate feed entries.
 
 ---
 

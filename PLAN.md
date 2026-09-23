@@ -102,6 +102,8 @@ flowchart TD
 
 ## 📦 Past Completed Workstreams (Archived)
 
+- **Dashboard UI Window-Fitting & Simulated Discord Previews** (responsive 2-column layout for Welcome and Tickets tabs; real-time simulated Discord preview cards with dynamic placeholder substitutions, markdown parsing, and interactive button previews; tab carryover fix; options modularization in `src/bot/lib/options/`).
+- **Real-Time Single-Newest-Post Feed Delivery & Rate-Limit Shield** (delivered strictly the single newest post per polling cycle across all feed types; backlog draining; removed artificial 6h floor; Reddit persistent community home post filter).
 - **Guild Admin Sections & Dedicated Tabs** (welcome, tickets, logs, manage-feeds tabs; ticket text-channel button; forum-to-thread refactor; role subscriptions).
 - **Theme System Single Source of Truth** (`src/dashboard/views/themes/*.ts`, removed duplicate scheme layer).
 - **Dead Code Cleanup & Vitest Structural Scan Guard** (`tests/unit/quality/deadCode.test.ts`).

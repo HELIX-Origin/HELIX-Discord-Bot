@@ -249,8 +249,8 @@ GET /api/guilds/:guildId/settings
   "roles": { "adminRoleId": null },
   "prefix": null,
   "features": { "welcome": true, "tickets": false, "logs": true },
-  "welcome": { "enabled": false, "channelId": null },
-  "tickets": { "channelId": null, "categoryId": null },
+  "welcome": { "channelId": "987654321098765432", "message": "Welcome {mention} to **{server}**!", "embed": true },
+  "tickets": { "channelId": "987654321098765432", "managerRoleId": "112233445566778899", "message": "Click the button below to open a ticket." },
   "logs": {
     "auditLogChannelId": null,
     "auditLogEvents": ["guildBanAdd", "memberRoleUpdate", "channelCreate"],
@@ -272,7 +272,7 @@ PUT /api/guilds/:guildId/settings
 Content-Type: application/json
 ```
 **Auth**: User must be able to manage the target guild.
-**Accepted body fields**: `adminRoleId`, `prefix`, `features`, `ticketChannelId`/`ticketCategoryId` (or `ticketChannelId ""` to clear), `logs` fields, `welcome` fields, `commands`, and `threadsEnabled` (boolean — master thread-delivery toggle for the server).
+**Accepted body fields**: `adminRoleId`, `prefix`, `features`, `welcomeChannelId`, `welcomeMessage`, `welcomeEmbed`, `ticketChannelId`, `ticketRoleId`, `ticketMessage`, `logs` fields, `commands`, and `threadsEnabled` (boolean — master thread-delivery toggle for the server).
 **Example**:
 ```json
 {

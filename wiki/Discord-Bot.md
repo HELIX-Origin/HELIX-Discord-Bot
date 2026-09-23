@@ -15,6 +15,8 @@ All commands register through Discord's native interaction model and use ephemer
 | `/twitch` | `add`, `list`, `remove`, `toggle`, `check` | `Manage Channels` | Manage Twitch livestream alerts, or trigger manual live checks. |
 | `/free-games` | `enable`, `status`, `disable`, `check` | `Manage Channels` | Manage weekly free game notifications and trigger manual giveaway checks. |
 | `/reddit` | `add`, `list`, `remove`, `toggle`, `poll` | `Manage Channels` | Manage Reddit subreddit image and news feeds, or trigger immediate checks. |
+| `/welcome` | `action: setup\|channel\|message\|view\|test\|disable`, `channel`, `content`, `embed`, `color`, `thumbnail`, `banner` | `Manage Guild` | Configure and test welcome announcements for new arrivals. |
+| `/ticket` | `action: setup\|disable\|view\|create\|close\|add\|remove\|claim\|transcript`, `channel`, `manager_role`, `message`, etc. | `Manage Channels` | Configure and manage the support ticket system and thread dispatch. |
 | `/warn` | `user: <user>`, `reason: <string>` | `Moderate Members` | Warn a member. |
 | `/kick` | `user: <user>`, `reason: <string>` | `Kick Members` | Kick a member. |
 | `/ban` | `user: <user>`, `reason: <string>` | `Ban Members` | Ban a member. |
@@ -25,10 +27,13 @@ All commands register through Discord's native interaction model and use ephemer
 | `/announce` | `channel: <channel>`, `message: <string>` | `Manage Channels` | Send an announcement. |
 | `/role` | `add`, `remove`, `list` | `Manage Roles` | Assign, remove, or list roles. |
 | `/voice` | `mute`, `unmute`, `deafen`, `undeafen`, `move`, `disconnect` | `Mute/Deafen/Move Members` | Voice channel member management. |
+| `/set` | `action: mod-log\|welcome\|tickets\|prefix`, `channel`, `role`, `value` | `Administrator` | Quick-set guild settings, channels, and prefix. |
 | `/server` | `export`, `import`, `command` | `Administrator` | Guild configurations and per-server command toggles. |
 | `/stats` | *None* | Everyone | Displays bot uptime, memory usage, and delivery analytics. |
 | `/about` | `bot`, `user [@user]`, `guild` | Everyone | View bot, user, or guild information and stats. |
 | `/help` | `command: <string?>` | Everyone | Interactive documentation browser with command usage tips. |
+
+> 💡 **Modular Options Architecture**: To maintain minimal command registration overhead and clean separation of concerns, command options are structured in modular option files (`src/bot/lib/options/<command>.ts`) using camelCase naming, keeping command definition and validation lightweight.
 
 ---
 

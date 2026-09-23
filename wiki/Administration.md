@@ -46,6 +46,64 @@ HELIX Discord Bot includes a comprehensive administration system for server mode
 
 ---
 
+## 👋 Welcome Message System
+
+HELIX Discord Bot provides a fully customizable welcome announcement system triggered automatically when a new member joins the server.
+
+### Commands & Options
+| Command | Options | Required Permission | Description |
+| :--- | :--- | :--- | :--- |
+| `/welcome` | `action: setup\|channel\|message\|view\|test\|disable`, `channel: <channel?>`, `content: <string?>`, `embed: <bool?>`, `color: <string?>`, `thumbnail: <bool?>`, `banner: <string?>` | `Manage Guild` | Configure and test the welcome announcement system. |
+
+### Dynamic Placeholders
+Welcome messages support the following dynamic variables in both plain text and embed descriptions:
+- `{user}` — Username of the member who joined (e.g. `NewMember`).
+- `{mention}` — Interactive user mention ping (e.g. `@NewMember`).
+- `{server}` — Name of the Discord server.
+- `{membercount}` — Total server member count after the member joined.
+
+### Format Modes
+- **Plain Text**: Sends standard markdown text directly into the designated channel.
+- **Rich Embed**: Renders a styled Discord embed card with custom accent color, user avatar thumbnail, and optional banner image.
+
+### Dashboard Welcome Tab
+Configurable under **General → Welcome Message** on the web dashboard:
+- **Responsive 2-Column Grid**: Form configuration on the left, **Live Discord Preview** on the right.
+- **Live Markdown & Placeholder Preview**: Changes to the message textarea instantly update the simulated Discord message showing resolved placeholders and formatting.
+
+---
+
+## 🎫 Support Ticket System
+
+HELIX Discord Bot includes a native thread-based support ticket system. A sticky prompt message containing an interactive **[🎫 Open Ticket]** button is posted to your configured ticket channel. When a member clicks the button, the bot automatically creates a dedicated private thread and pings the support manager role.
+
+### Commands & Options
+| Command | Options | Required Permission | Description |
+| :--- | :--- | :--- | :--- |
+| `/ticket` | `action: setup\|disable\|view\|create\|close\|add\|remove\|claim\|transcript`, `channel: <channel?>`, `manager_role: <role?>`, `transcript_channel: <channel?>`, `log_channel: <channel?>`, `message: <string?>`, `reason: <string?>`, `user: <user?>` | `Manage Channels` | Configure, manage, and handle support tickets. |
+
+### Workflow Architecture
+1. **Host Message**: Bot posts the configured ticket prompt and `[🎫 Open Ticket]` button to the ticket channel.
+2. **Ticket Creation**: Clicking the button creates a new thread in the channel (e.g. `ticket-username`) and adds the member.
+3. **Manager Role Alert**: If a Support Manager role is configured, the bot mentions/adds the role to the thread for rapid staff response.
+4. **Ticket Operations**: Staff and users can add members (`/ticket action:add`), close the ticket (`/ticket action:close`), or archive transcripts.
+
+### Dashboard Tickets Tab
+Configurable under **General → Support Tickets** on the web dashboard:
+- **Responsive 2-Column Grid**: Channel & Role routing selectors on the left, **Live Button & Message Preview** on the right.
+- **Live Interactive Button Preview**: Previews the prompt and interactive blurple Discord ticket button before saving.
+
+---
+
+## ⚙️ Server Configuration Commands
+
+| Command | Options | Required Permission | Description |
+| :--- | :--- | :--- | :--- |
+| `/set` | `action: mod-log\|welcome\|tickets\|prefix`, `channel: <channel?>`, `role: <role?>`, `value: <string?>` | `Administrator` | Set server-wide settings and channels. |
+| `/server` | `action: export\|import\|command`, `command_name: <string?>`, `enabled: <bool?>` | `Administrator` | Export/import server settings or enable/disable specific bot commands. |
+
+---
+
 ## 🔐 Permission System
 
 All administration commands respect Discord's native permission system:
@@ -103,15 +161,14 @@ When configured, all warn/kick/ban/purge/lock/unlock/slowmode actions post an em
 
 ---
 
-## 🖥️ Dashboard Admin Page
+## 🖥️ Dedicated Dashboard Admin & Management Tabs
 
-The web dashboard includes a **Guild Administration** page (enabled when `ADMINISTRATION_ENABLED=true` and `ADMIN_PANEL_ENABLED=true`):
+The web dashboard organizes server management into dedicated, permission-gated tabs (enabled when `ADMINISTRATION_ENABLED=true` and `DASHBOARD_ENABLED=true`):
 
-- **Moderation Panel**: Quick-access buttons for warn/kick/ban/purge/lock/slowmode/announce.
-- **Role Manager**: Visual role list with add/remove buttons per member.
-- **Voice Panel**: Current voice channel members with mute/deafen/move/disconnect controls.
-- **Mod Log Viewer**: Paginated view of recent moderation actions.
-- **Permission Check**: Shows which admin permissions the bot has in the current guild.
+- **Welcome Message Tab**: Dedicated 2-column layout with channel select, plain text vs embed toggle, message textarea, available placeholders reference, and live simulated Discord preview.
+- **Support Tickets Tab**: Dedicated 2-column layout with ticket channel selector, support manager role dropdown, prompt message textarea, workflow guide, and live Discord button preview.
+- **Audit & Mod Logs Tab**: Audit log channel selection, event subscriptions (`guildBanAdd`, `memberRoleUpdate`, etc.), and paginated log stream.
+- **Guild Admin Tab**: Dedicated configuration for Administrator role, custom bot command prefix, feature flag toggles, per-server command enable/disable list, and thread delivery settings.
 
 ---
 

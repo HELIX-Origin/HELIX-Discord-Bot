@@ -54,15 +54,35 @@
 - [x] Rewrite `/guilds` view + in-dashboard guild-selection to pill grid (invite btn + cog btn)
 - [x] `sidebar.ts`: always-visible Commands tab; gate feed/admin sections by `canManage`; add Welcome/Tickets/Logs tabs
 - [x] Split `guildadmin.ts`: keep Roles/Features/Commands/Prefix; new `welcome.ts`/`tickets.ts`/`logs.ts` tabs with per-tab save
-- [x] `client-script.ts`: pill grid, sidebar gating, `loadCommandsTab`, per-tab load/save, relaxed 403 handling
+- [x] `clientScript.ts`: pill grid, sidebar gating, `loadCommandsTab`, per-tab load/save, relaxed 403 handling
 - [x] `dashboard.ts`: render new tab panes; pass `canManage` to sidebar
 - [x] Ticket redesign: sticky text-channel button message → thread per ticket, manager role auto-added (`ticket_channel_id` key)
 - [x] `npm run check` + `pnpm build` green
-- [ ] Commit + push; sync `PLAN`/`TODO`/`BUGS`, `wiki/`, roadmap issue #27 per Rule 04/05
+- [x] Commit + push; sync `PLAN`/`TODO`/`BUGS`, `wiki/`, roadmap issue #27 per Rule 04/05
 - [x] Forum→thread feed delivery: remove forum target end-to-end; thread-enabled feeds post to a dedicated thread in their own `channel_id` (state types, repos, `FeedThreadManager`, targets, watcher, webhooks, bot, config, dashboard UI)
 - [x] Feed role subscription: per-feed `roleId` stored (`role_id` column + migration); `role` option on all feed-add slash commands + dashboard add/detail role selects; ThreadSender subscribes the role to the feed thread on create/rotate (`addThreadRole`)
 - [x] Feed-add channel notification: `notifyFeedAdded` (`src/bot/lib/feeds/notify.ts`) posts a confirmation into the feed's target channel on slash-command adds and dashboard POST /api/feeds
 - [x] `npm run check` + `pnpm build` green (779e4bb)
+
+### Workstream: Dashboard UI Window-Fitting, Live Discord Previews & Reddit Filter
+
+**Locked user directives:**
+- Filter out Reddit community home posts: "The community home post should always be ignored in reddit feeds since it is a persistent static post that could cause reddit feeds to miss actual new posts."
+- Fix tab content carryover: "there is also a slight issue with switching between tabs. the previous tab's content is being carried over when changing tabs."
+- Window fitting & live preview: "also the content of the tickets page and welcome page need to be properly fitted to the window. just like the other pages were."
+- Prefer options over subcommands with modular option files (`src/bot/lib/options/<command>.ts`).
+- Preserve camelCase file naming scheme across the codebase.
+
+**Implementation checklist:**
+- [x] `src/feed/reddit.ts`: Filter out static community home posts from subreddit syndication
+- [x] `src/dashboard/views/dashboard/clientScript.ts`: Fix tab switching carryover by strictly selecting and hiding all `.tab-pane` and `#feed-detail-view` elements
+- [x] `src/dashboard/views/dashboard/styles.ts`: Add responsive styles and Discord preview components (`.discord-preview-container`, `.discord-btn-primary`, `.discord-mention`, etc.)
+- [x] `src/dashboard/views/dashboard/welcome.ts`: 2-column responsive layout with Welcome Configuration card and Live Discord Preview card
+- [x] `src/dashboard/views/dashboard/tickets.ts`: 2-column responsive layout with Routing card and Live Button Preview card
+- [x] `src/dashboard/views/dashboard/clientScript.ts`: Add `updateWelcomePreview()` and `updateTicketPreview()` with live markdown and placeholder parsing
+- [x] `tests/unit/dashboard/views.test.ts`: Add unit tests for live preview containers and client hooks
+- [x] `npm run check` + `pnpm build` green
+- [x] Repository documentation sync (README, wiki/*, .agents/*, IMPORTANT.md)
 
 **Status:** dashboard phase (`627d783`), ticket redesign (`cf6c6c3`), forum→thread refactor (`21a4734`), docs sync + THREADS_ENABLED gate (`536e992`), and role-subscription + add-notification (`779e4bb`) committed + pushed — each ran green `npm run check` + `pnpm build`. Remaining: final docs/wiki/issue sync (roadmap issue #27 Phase 9/10 checkboxes + new Phase 11 role/notification row). Progress mirrored on roadmap issue #27.
 
