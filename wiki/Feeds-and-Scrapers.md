@@ -55,12 +55,13 @@ Attempting to exceed a limit returns a clear `Subscription limit reached` error 
 
 ---
 
-## ⏱️ Delivery Cadence
+## ⏱️ Delivery Cadence & Real-Time Single-Post Shield
 
-- **RSS / Atom / Scrape feeds**: published **once per day, one post per source** (a 6-hour minimum floor also applies). Pending posts stay queued and are delivered by the next eligible polling window.
-- **Reddit feeds**: follow the dashboard's configurable 10–60 minute interval.
-- **Free Games**: polled **daily**, delivering only new giveaways.
-- **Stream Alerts (YouTube / Twitch)**: delivered immediately on live/upload events via webhooks (periodic polling as fallback).
+- **Real-Time Single-Newest-Post Delivery**: Feeds pick up new posts as they arrive and deliver **strictly the single newest post** per feed check cycle. This ensures Discord channels stay continuously up to date without posting 10–20 posts at a time.
+- **Backlog Draining & Rate-Limit Shield**: Older unposted entries within a cycle are automatically marked as sent, eliminating burst dumps and shielding channels from Discord's rate limits.
+- **Continuous Cadence**: Automated background polling runs continuously on a 1-minute cadence (`POLL_INTERVAL_MS=60000` default) alongside WebSub / PubSubHubbub webhooks for instant event-driven delivery.
+- **Free Games**: Polled on schedule, delivering strictly the single newest free game giveaway per cycle with burst protection.
+- **Stream Alerts (YouTube / Twitch)**: Delivered immediately on live/upload events via webhooks, with fallback polling adhering to the single-newest-alert delivery standard.
 
 ---
 

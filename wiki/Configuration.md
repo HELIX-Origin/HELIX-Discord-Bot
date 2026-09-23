@@ -42,6 +42,7 @@ HELIX Discord Bot is configured entirely via environment variables defined in a 
 | :--- | :--- | :--- | :--- |
 | `LOG_LEVEL` | No | `info` | `debug` \| `info` \| `warn` \| `error`. |
 | `REQUEST_TIMEOUT_MS` | No | `15000` | HTTP request timeout for fetching remote feeds (milliseconds). |
+| `POLL_INTERVAL_MS` | No | `60000` | Automated feed background polling check cadence (default 1 minute). |
 
 ### 💾 Persistence
 
@@ -89,11 +90,10 @@ Thread delivery is a **per-server** feature — when enabled, each feed delivers
 ---
 
 ## ⏱️ Feed Polling & Delivery Intervals
-
-Feed polling intervals are **user-configurable** from the dashboard (Feeds tab) rather than via environment variables, and are persisted per user:
-
-- `1 minute`, `10 minutes`, `30 minutes`, or `1 hour` per feed subscription.
-- A global fallback of `1 hour` is used unless overridden (`poll_interval_ms` app setting).
+ 
+- Automated background polling runs continuously on a **1-minute cadence** (`POLL_INTERVAL_MS=60000`).
+- Feed polling intervals can also be customized per-user or globally in the dashboard (`1 minute`, `10 minutes`, `30 minutes`, or `1 hour`).
+- Every feed cycle delivers **strictly the single newest post** on arrival and drains the older backlog to eliminate burst spam and avoid Discord rate limits.
 
 ---
 
