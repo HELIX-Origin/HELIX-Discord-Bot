@@ -45,7 +45,7 @@ export function renderSidebar(options: SidebarOptions): string {
         </div>
 
         <!-- Section: Feed Subscriptions -->
-        <div class="nav-section manage-gated" ${manageHidden}>
+        <div class="nav-section manage-gated" id="nav-section-feeds" ${manageHidden}>
           <div class="nav-section-title"><i class="fa-solid fa-rss"></i> Feeds &amp; Alerts</div>
           <div class="tab-list">
             <button onclick="switchTab('manage-feeds')" id="tab-btn-manage-feeds" class="tab-btn">
@@ -73,7 +73,7 @@ export function renderSidebar(options: SidebarOptions): string {
         </div>
 
         <!-- Section: Feature Settings -->
-        <div class="nav-section manage-gated" ${manageHidden}>
+        <div class="nav-section manage-gated" id="nav-section-features" ${manageHidden}>
           <div class="nav-section-title"><i class="fa-solid fa-sliders"></i> Feature Settings</div>
           <div class="tab-list">
             <button onclick="switchTab('welcome')" id="tab-btn-welcome" class="tab-btn">

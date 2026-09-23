@@ -106,4 +106,35 @@ describe('isCommandDisabled()', () => {
     expect(isCommandDisabled(null, 'testcommand', deps)).toBe(false);
     expect(isCommandDisabled(undefined, 'testcommand', deps)).toBe(false);
   });
+
+  it('disables feed commands when feature_feeds is 0 for guild', () => {
+    const mockRssCmd: BotCommand = {
+      def: { name: 'rss', description: 'RSS command' },
+      category: 'feeds',
+      execute: async () => ({ type: 4 }),
+    };
+    registerCommand(mockRssCmd);
+
+    const depsEnabled = makeMockDeps({});
+    expect(isCommandDisabled('guild-1', 'rss', depsEnabled)).toBe(false);
+
+    const depsDisabled = makeMockDeps({ 'guild-1:feature_feeds': '0' });
+    expect(isCommandDisabled('guild-1', 'rss', depsDisabled)).toBe(true);
+    expect(isCommandDisabled('guild-2', 'rss', depsDisabled)).toBe(false);
+  });
+
+  it('disables stream commands when feature_streamalerts is 0 for guild', () => {
+    const mockYtCmd: BotCommand = {
+      def: { name: 'youtube', description: 'YouTube command' },
+      category: 'feeds',
+      execute: async () => ({ type: 4 }),
+    };
+    registerCommand(mockYtCmd);
+
+    const depsEnabled = makeMockDeps({});
+    expect(isCommandDisabled('guild-1', 'youtube', depsEnabled)).toBe(false);
+
+    const depsDisabled = makeMockDeps({ 'guild-1:feature_streamalerts': '0' });
+    expect(isCommandDisabled('guild-1', 'youtube', depsDisabled)).toBe(true);
+  });
 });

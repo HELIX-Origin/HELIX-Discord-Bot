@@ -131,7 +131,7 @@ export function registerGuildRoutes(router: Router<AppDeps>): void {
       const prefix = d.repo.getGuildSetting(guildId, 'prefix') || null;
       const features: Record<string, boolean> = {};
       for (const name of FEATURE_NAMES) {
-        features[name] = d.repo.getGuildSetting(guildId, `feature_${name}`) === '1';
+        features[name] = d.repo.getGuildSetting(guildId, `feature_${name}`) !== '0';
       }
 
       const welcome = getWelcomeConfig(d, guildId);
@@ -272,6 +272,10 @@ export function registerGuildRoutes(router: Router<AppDeps>): void {
           d.repo.setGuildSetting(guildId, `cmd_disabled_${cmdName}`, enabled ? '0' : '1');
           changes.push(`command /${cmdName} ${enabled ? 'enabled' : 'disabled'}`);
         }
+      }
+
+      if (body.commands || body.features) {
+        void d.bot?.syncGuildCommands(guildId);
       }
 
       const eventConfigs: Array<{

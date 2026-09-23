@@ -111,9 +111,9 @@ export interface InteractionOption {
 }
 
 interface InteractionData {
-  id: string;
-  name: string;
-  type: number;
+  id?: string;
+  name?: string;
+  type?: number;
   options?: InteractionOption[];
   guild_id?: string;
   /** Present on message component (type 3) interactions. */

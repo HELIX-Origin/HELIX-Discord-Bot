@@ -20,6 +20,7 @@ export function renderClientScript(): string {
     let cachedPresets = [];
     let activeTabName = 'overview';
     let currentFeedDetailId = null;
+    let cachedGuildSettings = null;
 
     // Path-based routing helpers
     const DASHBOARD_ROUTE_REGEX = '^/dashboard/([^/]+)(?:/([^/]+))?(?:/([^/]+))?$';
@@ -65,8 +66,97 @@ export function renderClientScript(): string {
       }
     }
 
+    // Tab Visibility & Guard Helpers
+    function setElementVisible(elementId, visible) {
+      const el = document.getElementById(elementId);
+      if (el) {
+        el.style.setProperty('display', visible ? '' : 'none', 'important');
+      }
+    }
+
+    function isCommandEnabled(cmdName) {
+      if (!cachedGuildSettings || !Array.isArray(cachedGuildSettings.commands)) return true;
+      const found = cachedGuildSettings.commands.find(c => c.name.toLowerCase() === cmdName.toLowerCase());
+      return found ? !found.disabled : true;
+    }
+
+    function isFeatureEnabled(featureName) {
+      if (!cachedGuildSettings || !cachedGuildSettings.features) return true;
+      return cachedGuildSettings.features[featureName] !== false;
+    }
+
+    function isTabAllowed(tabId) {
+      if (!cachedGuildSettings) return true;
+      if (tabId === 'welcome') return isCommandEnabled('welcome');
+      if (tabId === 'tickets') return isCommandEnabled('ticket');
+      if (tabId === 'rss') return isFeatureEnabled('feeds') && isCommandEnabled('rss');
+      if (tabId === 'reddit') return isFeatureEnabled('feeds') && isCommandEnabled('reddit');
+      if (tabId === 'freegames') return isFeatureEnabled('feeds') && isCommandEnabled('free-games');
+      if (tabId === 'streamalerts') {
+        return isFeatureEnabled('streamalerts') && (isCommandEnabled('youtube') || isCommandEnabled('twitch'));
+      }
+      if (tabId === 'manage-feeds') {
+        const anyFeed = (isFeatureEnabled('feeds') && (isCommandEnabled('rss') || isCommandEnabled('reddit') || isCommandEnabled('free-games'))) ||
+                        (isFeatureEnabled('streamalerts') && (isCommandEnabled('youtube') || isCommandEnabled('twitch')));
+        return anyFeed;
+      }
+      return true;
+    }
+
+    function applyTabVisibility(settings) {
+      if (!settings) return;
+      cachedGuildSettings = settings;
+
+      const welcomeAllowed = isTabAllowed('welcome');
+      const ticketsAllowed = isTabAllowed('tickets');
+      const rssAllowed = isTabAllowed('rss');
+      const redditAllowed = isTabAllowed('reddit');
+      const freegamesAllowed = isTabAllowed('freegames');
+      const streamsAllowed = isTabAllowed('streamalerts');
+      const manageFeedsAllowed = isTabAllowed('manage-feeds');
+
+      setElementVisible('tab-btn-welcome', welcomeAllowed);
+      setElementVisible('tab-btn-tickets', ticketsAllowed);
+      setElementVisible('tab-btn-rss', rssAllowed);
+      setElementVisible('tab-btn-reddit', redditAllowed);
+      setElementVisible('tab-btn-freegames', freegamesAllowed);
+      setElementVisible('tab-btn-streamalerts', streamsAllowed);
+      setElementVisible('tab-btn-manage-feeds', manageFeedsAllowed);
+
+      // Section headers
+      const anyFeedsSection = manageFeedsAllowed || rssAllowed || redditAllowed || freegamesAllowed || streamsAllowed;
+      setElementVisible('nav-section-feeds', anyFeedsSection);
+
+      // Stream alerts platform select
+      const ytEnabled = isCommandEnabled('youtube');
+      const twEnabled = isCommandEnabled('twitch');
+      const streamPlatformSelect = document.getElementById('add-streamalerts-platform');
+      if (streamPlatformSelect) {
+        const ytOpt = streamPlatformSelect.querySelector('option[value="youtube"]');
+        const twOpt = streamPlatformSelect.querySelector('option[value="twitch"]');
+        if (ytOpt) ytOpt.hidden = !ytEnabled;
+        if (twOpt) twOpt.hidden = !twEnabled;
+        if (!ytEnabled && twEnabled && streamPlatformSelect.value === 'youtube') {
+          streamPlatformSelect.value = 'twitch';
+          if (typeof handleStreamAlertsPlatformChange === 'function') handleStreamAlertsPlatformChange('twitch');
+        } else if (ytEnabled && !twEnabled && streamPlatformSelect.value === 'twitch') {
+          streamPlatformSelect.value = 'youtube';
+          if (typeof handleStreamAlertsPlatformChange === 'function') handleStreamAlertsPlatformChange('youtube');
+        }
+      }
+
+      // If active tab was hidden, redirect to overview
+      if (activeTabName && !isTabAllowed(activeTabName)) {
+        switchTab('overview');
+      }
+    }
+
     // Tab Switching
     function switchTab(tabId) {
+      if (!isTabAllowed(tabId)) {
+        switchTab('overview');
+        return;
+      }
       activeTabName = tabId;
       currentFeedDetailId = null;
       document.querySelectorAll('#dashboard-view main > .tab-pane, #dashboard-view .tab-pane, #feed-detail-view').forEach(el => el.classList.remove('active'));
@@ -258,7 +348,10 @@ export function renderClientScript(): string {
       }
 
       try {
-        const res = await fetch('/api/guilds/' + encodeURIComponent(currentGuildId) + '/channels', { signal: AbortSignal.timeout(6000) });
+        const [res, settingsRes] = await Promise.all([
+          fetch('/api/guilds/' + encodeURIComponent(currentGuildId) + '/channels', { signal: AbortSignal.timeout(6000) }),
+          fetch('/api/guilds/' + encodeURIComponent(currentGuildId) + '/settings', { signal: AbortSignal.timeout(6000) }).catch(() => null),
+        ]);
         if (res.status === 401) {
           checkAuth(res);
           return;
@@ -269,6 +362,10 @@ export function renderClientScript(): string {
           return;
         }
         cachedCategories = await res.json();
+        if (settingsRes && settingsRes.ok) {
+          cachedGuildSettings = await settingsRes.json();
+          applyTabVisibility(cachedGuildSettings);
+        }
         currentGuild = { guildId: cachedCategories.guildId, name: cachedCategories.name, icon: cachedCategories.icon };
         setupGuildHeader();
         setSidebarManage(true);
@@ -1266,6 +1363,9 @@ export function renderClientScript(): string {
         }
         const data = await res.json();
 
+        cachedGuildSettings = data;
+        applyTabVisibility(cachedGuildSettings);
+
         populateRoleSelect('admin-admin-role', data.guildRoles || [], data.roles && data.roles.adminRoleId, '-- No Admin role --');
 
         const featuresEl = document.getElementById('admin-features-list');
@@ -1274,7 +1374,7 @@ export function renderClientScript(): string {
             const enabled = !!(data.features && data.features[f.key]);
             return '<div class="feed-pill" style="cursor: default;">' +
               '<label style="flex: 1; cursor: pointer; display: flex; align-items: center; gap: 0.75rem;">' +
-                '<input type="checkbox" data-feature="' + f.key + '"' + (enabled ? ' checked' : '') + '>' +
+                '<input type="checkbox" data-feature="' + f.key + '"' + (enabled ? ' checked' : '') + ' onchange="onAdminToggleChange()">' +
                 '<div class="feed-details">' +
                   '<div class="feed-name" style="font-weight: 600;">' + esc(f.label) + '</div>' +
                   '<div class="feed-meta">' + esc(f.desc) + '</div>' +
@@ -1293,7 +1393,7 @@ export function renderClientScript(): string {
               const enabled = !cmd.disabled;
               return '<div class="feed-pill" style="cursor: default; padding: 0.5rem 0.75rem;">' +
                 '<label style="flex: 1; cursor: pointer; display: flex; align-items: center; gap: 0.625rem;">' +
-                  '<input type="checkbox" data-command="' + esc(cmd.name) + '"' + (enabled ? ' checked' : '') + '>' +
+                  '<input type="checkbox" data-command="' + esc(cmd.name) + '"' + (enabled ? ' checked' : '') + ' onchange="onAdminToggleChange()">' +
                   '<div class="feed-details" style="overflow: hidden;">' +
                     '<div class="feed-name" style="font-weight: 600; font-size: 0.875rem;">/' + esc(cmd.name) + ' <span style="font-size: 0.7rem; font-weight: 400; opacity: 0.7;">(' + esc(cmd.category) + ')</span></div>' +
                     '<div class="feed-meta" style="font-size: 0.75rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">' + esc(cmd.description || '') + '</div>' +
@@ -1314,6 +1414,35 @@ export function renderClientScript(): string {
         const commandsEl = document.getElementById('admin-commands-list');
         if (commandsEl) commandsEl.innerHTML = '<div class="empty-state">Failed to load commands.</div>';
       }
+    }
+
+    let adminAutoSaveTimer = null;
+    function onAdminToggleChange() {
+      if (!cachedGuildSettings) cachedGuildSettings = {};
+      if (!cachedGuildSettings.features) cachedGuildSettings.features = {};
+      if (!cachedGuildSettings.commands) cachedGuildSettings.commands = [];
+
+      document.querySelectorAll('#admin-features-list input[data-feature]').forEach(chk => {
+        const feat = chk.getAttribute('data-feature');
+        cachedGuildSettings.features[feat] = chk.checked;
+      });
+
+      document.querySelectorAll('#admin-commands-list input[data-command]').forEach(chk => {
+        const cmdName = chk.getAttribute('data-command');
+        const existing = cachedGuildSettings.commands.find(c => c.name.toLowerCase() === cmdName.toLowerCase());
+        if (existing) {
+          existing.disabled = !chk.checked;
+        } else {
+          cachedGuildSettings.commands.push({ name: cmdName, disabled: !chk.checked });
+        }
+      });
+
+      applyTabVisibility(cachedGuildSettings);
+
+      if (adminAutoSaveTimer) clearTimeout(adminAutoSaveTimer);
+      adminAutoSaveTimer = setTimeout(() => {
+        saveGuildAdmin(true);
+      }, 400);
     }
 
     async function loadWelcomeTab() {
@@ -1372,10 +1501,10 @@ export function renderClientScript(): string {
       } catch {}
     }
 
-    async function saveGuildAdmin() {
+    async function saveGuildAdmin(silent = false) {
       if (!currentGuildId) return;
       const statusEl = document.getElementById('admin-save-status');
-      if (statusEl) statusEl.style.display = 'none';
+      if (statusEl && !silent) statusEl.style.display = 'none';
 
       const adminRoleId = document.getElementById('admin-admin-role') ? document.getElementById('admin-admin-role').value || null : null;
 
@@ -1402,13 +1531,22 @@ export function renderClientScript(): string {
         });
         if (!checkAuth(res)) return;
         if (res.ok) {
-          if (statusEl) {
+          if (statusEl && !silent) {
             statusEl.style.display = 'inline';
             statusEl.textContent = 'Settings saved successfully.';
             setTimeout(() => { statusEl.style.display = 'none'; }, 4000);
           }
-          refreshCurrentTab();
-        } else {
+          if (cachedGuildSettings) {
+            cachedGuildSettings.features = features;
+            if (Array.isArray(cachedGuildSettings.commands)) {
+              for (const [cmdName, enabled] of Object.entries(commands)) {
+                const found = cachedGuildSettings.commands.find(c => c.name.toLowerCase() === cmdName.toLowerCase());
+                if (found) found.disabled = !enabled;
+              }
+            }
+            applyTabVisibility(cachedGuildSettings);
+          }
+        } else if (!silent) {
           let msg = 'Failed to save settings.';
           try {
             const j = await res.json();
@@ -1417,7 +1555,7 @@ export function renderClientScript(): string {
           alert(msg);
         }
       } catch {
-        alert('Failed to save settings.');
+        if (!silent) alert('Failed to save settings.');
       }
     }
 

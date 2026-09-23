@@ -13,4 +13,5 @@ export async function handleGuildCreate(guild: Guild, bot: DiscordBot, deps: App
   } catch (err) {
     logger.debug('Failed to sync guild name on GuildCreate', { guildId: guild.id, err: (err as Error).message });
   }
+  void bot.syncGuildCommands(guild.id);
 }

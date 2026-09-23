@@ -84,7 +84,53 @@ export class FeedWatcher {
     return 60_000;
   }
 
+  private isFeedDisabled(feed: Feed): boolean {
+    const guildId = feed.guildId;
+    if (!guildId) return false;
+
+    // 1. Feature flags check
+    if (['rss', 'scrape', 'reddit'].includes(feed.feedType) || feed.feedType.startsWith('free_games')) {
+      if (this.repo.getGuildSetting(guildId, 'feature_feeds') === '0') {
+        return true;
+      }
+    } else if (['youtube', 'twitch'].includes(feed.feedType)) {
+      if (this.repo.getGuildSetting(guildId, 'feature_streamalerts') === '0') {
+        return true;
+      }
+    }
+
+    // 2. Command toggles check
+    let cmdName: string | null = null;
+    if (feed.feedType === 'rss' || feed.feedType === 'scrape') {
+      cmdName = 'rss';
+    } else if (feed.feedType === 'reddit') {
+      cmdName = 'reddit';
+    } else if (feed.feedType.startsWith('free_games')) {
+      cmdName = 'free-games';
+    } else if (feed.feedType === 'youtube') {
+      cmdName = 'youtube';
+    } else if (feed.feedType === 'twitch') {
+      cmdName = 'twitch';
+    }
+
+    if (cmdName && this.repo.getGuildSetting(guildId, `cmd_disabled_${cmdName}`) === '1') {
+      return true;
+    }
+
+    return false;
+  }
+
   private async pollFeedLocked(userId: number, feed: Feed, force = false): Promise<void> {
+    if (this.isFeedDisabled(feed)) {
+      this.logger.debug('Skipping feed poll; command or feature is disabled for guild', {
+        feedId: feed.id,
+        feedName: feed.name,
+        guildId: feed.guildId,
+        feedType: feed.feedType,
+      });
+      return;
+    }
+
     const minElapsed = this.getFeedPollIntervalMs(userId);
     if (!force && feed.lastCheckedAt) {
       const lastCheck = new Date(feed.lastCheckedAt).getTime();
@@ -298,6 +344,15 @@ export class FeedWatcher {
   }
 
   private async deliverEntry(feed: Feed, payload: { content?: string; embeds?: unknown[] }): Promise<boolean> {
+    if (this.isFeedDisabled(feed)) {
+      this.logger.debug('Skipping feed delivery; command or feature is disabled for guild', {
+        feedId: feed.id,
+        feedName: feed.name,
+        guildId: feed.guildId,
+      });
+      return false;
+    }
+
     if (this.threads && feed.channelId) {
       const outcome = await this.threads.deliver(feed, payload);
       if (outcome.mode === 'thread') {

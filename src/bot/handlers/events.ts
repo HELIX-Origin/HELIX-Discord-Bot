@@ -103,7 +103,71 @@ export function registerBotEvents(client: Client, bot: DiscordBot, deps: AppDeps
 
   // Slash commands and interaction dispatch
   client.on(Events.InteractionCreate, async (interaction: Interaction) => {
-    if (!interaction.isChatInputCommand() && !interaction.isAutocomplete()) return;
+    if (!interaction.isChatInputCommand() && !interaction.isAutocomplete() && !interaction.isButton()) return;
+
+    if (interaction.isButton()) {
+      bot.logger.debug('Received button interaction', {
+        customId: interaction.customId,
+        guildId: interaction.guildId,
+        user: interaction.user?.username,
+      });
+
+      try {
+        const member = interaction.member
+          ? {
+              user: {
+                id: interaction.user.id,
+                username: interaction.user.username,
+                global_name: interaction.user.globalName ?? undefined,
+                avatar: interaction.user.avatar,
+              },
+              permissions: interaction.memberPermissions?.bitfield.toString() ?? '0',
+            }
+          : undefined;
+
+        const user = {
+          id: interaction.user.id,
+          username: interaction.user.username,
+          global_name: interaction.user.globalName ?? undefined,
+          avatar: interaction.user.avatar,
+        };
+
+        const discordInteraction: DiscordInteraction = {
+          id: interaction.id,
+          application_id: interaction.applicationId,
+          type: 3, // MESSAGE_COMPONENT
+          guild_id: interaction.guildId ?? undefined,
+          guild_name: interaction.guild?.name ?? undefined,
+          channel_id: interaction.channelId ?? undefined,
+          member,
+          user,
+          token: interaction.token,
+          version: interaction.version ?? 1,
+          data: {
+            custom_id: interaction.customId,
+            component_type: 2, // BUTTON
+          },
+        };
+
+        const response = await dispatchInteraction(discordInteraction, deps, bot.rest);
+        const data = (response as unknown as { data?: Record<string, unknown> }).data ?? {};
+        const replyPayload = {
+          ...data,
+          ephemeral: (data as { flags?: number }).flags === 64,
+        };
+        if (interaction.replied || interaction.deferred) {
+          await interaction.followUp(replyPayload);
+        } else {
+          await interaction.reply(replyPayload);
+        }
+      } catch (err) {
+        bot.logger.error('Error handling button interaction', {
+          err: (err as Error).message,
+          customId: interaction.customId,
+        });
+      }
+      return;
+    }
 
     if (interaction.isAutocomplete()) {
       try {

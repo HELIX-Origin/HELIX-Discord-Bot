@@ -213,6 +213,7 @@ function handleSetFeature(
   const name = rawName as (typeof SET_FEATURE_NAMES)[number];
   const enabled = Boolean(enabledOption);
   deps.repo.setGuildSetting(guildId, `feature_${name}`, enabled ? '1' : '0');
+  void deps.bot?.syncGuildCommands(guildId);
 
   deps.repo.logActivity(
     userId,
@@ -298,7 +299,7 @@ function handleSetView(userId: number, guildId: string, deps: AppDeps): Interact
   const guildName = (binding?.name || '').trim() || 'this server';
 
   const featureLines = SET_FEATURE_NAMES.map(
-    (name) => `${deps.repo.getGuildSetting(guildId, `feature_${name}`) === '1' ? '✅' : '⬜'} ${FEATURE_LABELS[name]}`,
+    (name) => `${deps.repo.getGuildSetting(guildId, `feature_${name}`) !== '0' ? '✅' : '⬜'} ${FEATURE_LABELS[name]}`,
   );
 
   deps.repo.logActivity(userId, 'info', 'bot', `Viewed guild config for ${guildId} via /set view`);

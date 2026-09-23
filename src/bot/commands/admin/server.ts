@@ -164,6 +164,7 @@ export async function handleServerCommand(
 
     const key = `cmd_disabled_${cmdName}`;
     deps.repo.setGuildSetting(guildId, key, enabled ? '0' : '1');
+    void deps.bot?.syncGuildCommands(guildId);
 
     return EmbedHandler.for(deps)
       .success()

@@ -122,6 +122,16 @@ export function getEnabledCommands(deps: AppDeps): ApplicationCommand[] {
   return enabled;
 }
 
+export function getGuildEnabledCommands(guildId: string, deps: AppDeps): ApplicationCommand[] {
+  const enabled: ApplicationCommand[] = [];
+  for (const cmd of commandRegistry.values()) {
+    if (!isCommandDisabled(guildId, cmd.def.name, deps)) {
+      enabled.push(cmd.def);
+    }
+  }
+  return enabled;
+}
+
 export function registerCommandMetadata(metadata: CommandHelpMetadata): void {
   metadataRegistry.set(metadata.name.toLowerCase(), metadata);
 }
@@ -166,7 +176,7 @@ export function isCommandDisabled(guildId: string | null | undefined, commandNam
   if (!cmd) return true;
 
   // 1. Global / feature flag check
-  if (cmd.isEnabled && !cmd.isEnabled(deps)) {
+  if (cmd.isEnabled && deps?.config && !cmd.isEnabled(deps)) {
     return true;
   }
 
@@ -174,6 +184,16 @@ export function isCommandDisabled(guildId: string | null | undefined, commandNam
   if (guildId) {
     if (deps.repo.getGuildSetting(guildId, `cmd_disabled_${normalized}`) === '1') {
       return true;
+    }
+    if (['rss', 'reddit', 'free-games'].includes(normalized)) {
+      if (deps.repo.getGuildSetting(guildId, 'feature_feeds') === '0') {
+        return true;
+      }
+    }
+    if (['youtube', 'twitch'].includes(normalized)) {
+      if (deps.repo.getGuildSetting(guildId, 'feature_streamalerts') === '0') {
+        return true;
+      }
     }
   }
 

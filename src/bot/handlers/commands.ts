@@ -18,6 +18,15 @@ export async function dispatchInteraction(
   if (interaction.type === 3) {
     const customId = interaction.data?.custom_id?.toLowerCase() ?? '';
     if (customId === 'ticket_open') {
+      if (isCommandDisabled(guildId, 'ticket', deps)) {
+        return {
+          type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+          data: {
+            content: 'The ticket system is currently disabled in this server.',
+            flags: 64,
+          },
+        };
+      }
       return handleTicketButton(interaction, deps, rest);
     }
     return EmbedHandler.for(deps)
@@ -55,14 +64,13 @@ export async function dispatchInteraction(
   }
 
   if (isCommandDisabled(guildId, commandName, deps)) {
-    const isGuildDisabled = Boolean(
-      guildId && deps.repo.getGuildSetting(guildId, `cmd_disabled_${commandName}`) === '1',
-    );
-    const desc = isGuildDisabled
-      ? `The command \`/${commandName}\` is disabled in this server.`
-      : `The command \`/${commandName}\` is currently disabled on this bot.`;
-
-    return EmbedHandler.for(deps).error().title('Command Disabled').description(desc).respond(true);
+    return {
+      type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+      data: {
+        content: `Command \`/${commandName}\` is disabled in this server.`,
+        flags: 64,
+      },
+    };
   }
 
   return cmd.execute(interaction, deps, rest);

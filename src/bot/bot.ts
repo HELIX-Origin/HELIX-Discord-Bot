@@ -2,7 +2,7 @@ import type http from 'node:http';
 import { Client, REST, Routes, type Guild } from 'discord.js';
 import type { AppDeps } from '../app.js';
 import { createLogger, type Logger } from '../util/logger.js';
-import { getEnabledCommands } from './handlers/registry.js';
+import { getGuildEnabledCommands } from './handlers/registry.js';
 import { registerBotEvents } from './handlers/events.js';
 import { loadAllCommands } from './handlers/loader.js';
 import { DiscordRestClient } from './rest.js';
@@ -62,16 +62,11 @@ export class DiscordBot {
 
       if (this.options.clientId) {
         try {
-          const enabledCommands = getEnabledCommands(this.deps);
-          this.logger.info('Registering global slash commands with Discord...', {
-            commandsCount: enabledCommands.length,
-            clientId: this.options.clientId,
-          });
           const rest = new REST({ version: '10' }).setToken(this.options.token);
-          await rest.put(Routes.applicationCommands(this.options.clientId), { body: enabledCommands });
-          this.logger.info('Global slash commands registered successfully');
+          await rest.put(Routes.applicationCommands(this.options.clientId), { body: [] });
+          this.logger.info('Cleared global slash commands in favor of per-guild registrations');
         } catch (err) {
-          this.logger.error('Failed to register global slash commands', {
+          this.logger.warn('Failed to clear global slash commands on start', {
             err: (err as Error).message,
           });
         }
@@ -244,6 +239,44 @@ export class DiscordBot {
       }
     } catch (err) {
       this.logger.debug('Failed to sync guild names to repository', { err: (err as Error).message });
+    }
+  }
+
+  async syncGuildCommands(guildId: string): Promise<void> {
+    if (!this.options.token || !this.options.clientId) return;
+    try {
+      await loadAllCommands();
+      const enabledCommands = getGuildEnabledCommands(guildId, this.deps);
+      this.logger.info(`Syncing slash commands for guild ${guildId}...`, {
+        guildId,
+        commandsCount: enabledCommands.length,
+      });
+      const rest = new REST({ version: '10' }).setToken(this.options.token);
+      await rest.put(Routes.applicationGuildCommands(this.options.clientId, guildId), {
+        body: enabledCommands,
+      });
+      this.logger.info(`Slash commands for guild ${guildId} synced successfully.`);
+    } catch (err) {
+      this.logger.error(`Failed to sync slash commands for guild ${guildId}`, {
+        guildId,
+        err: (err as Error).message,
+      });
+    }
+  }
+
+  async syncAllGuildCommands(): Promise<void> {
+    if (!this.options.token || !this.options.clientId) return;
+    try {
+      const rest = new REST({ version: '10' }).setToken(this.options.token);
+      await rest.put(Routes.applicationCommands(this.options.clientId), { body: [] });
+      this.logger.info('Cleared global slash commands in favor of per-guild command registrations.');
+
+      const guilds = await this.client.guilds.fetch().catch(() => this.client.guilds.cache);
+      for (const [guildId] of guilds) {
+        await this.syncGuildCommands(guildId);
+      }
+    } catch (err) {
+      this.logger.error('Failed to sync all guild commands', { err: (err as Error).message });
     }
   }
 
