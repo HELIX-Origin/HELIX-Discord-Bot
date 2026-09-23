@@ -91,8 +91,13 @@ export function renderClientScript(): string {
       else if (tabId === 'guildadmin') loadGuildAdminTab();
       else if (tabId === 'settings') loadSettingsTab();
       else if (tabId === 'commands') loadCommandsTab();
-      else if (tabId === 'welcome') loadWelcomeTab();
-      else if (tabId === 'tickets') loadTicketsTab();
+      else if (tabId === 'welcome') {
+        updateWelcomePreview();
+        loadWelcomeTab();
+      } else if (tabId === 'tickets') {
+        updateTicketPreview();
+        loadTicketsTab();
+      }
       else if (tabId === 'logs') loadLogsTab();
     }
 
@@ -1495,9 +1500,9 @@ export function renderClientScript(): string {
     function formatDiscordMarkdown(text) {
       if (!text) return '';
       let s = esc(text);
-      s = s.replace(new RegExp('\\*\\*([^*]+)\\*\\*', 'g'), '<strong>$1</strong>');
-      s = s.replace(new RegExp('\\*([^*]+)\\*', 'g'), '<em>$1</em>');
-      s = s.replace(/\`([^\`]+)\`/g, '<code style="background: rgba(0,0,0,0.3); padding: 0.15rem 0.35rem; border-radius: 0.25rem; font-family: monospace;">$1</code>');
+      s = s.replace(/\\*\\*([^*]+)\\*\\*/g, '<strong>$1</strong>');
+      s = s.replace(/\\*([^*]+)\\*/g, '<em>$1</em>');
+      s = s.replace(/\\\`([^\\\`]+)\\\`/g, '<code style="background: rgba(0,0,0,0.3); padding: 0.15rem 0.35rem; border-radius: 0.25rem; font-family: monospace;">$1</code>');
       return s;
     }
 
@@ -1508,13 +1513,12 @@ export function renderClientScript(): string {
       const rawMsg = document.getElementById('admin-welcome-message')?.value || 'Welcome {mention} to **{server}**! We are now {membercount} members. 🎉';
       const guildName = (currentGuild && currentGuild.name) ? currentGuild.name : 'My Server';
 
-      let rendered = rawMsg
+      let formatted = formatDiscordMarkdown(rawMsg)
         .replace(/{mention}/g, '<span class="discord-mention">@NewMember</span>')
         .replace(/{user}/g, 'NewMember')
         .replace(/{server}/g, esc(guildName))
         .replace(/{membercount}/g, '128');
 
-      const formatted = formatDiscordMarkdown(rendered);
       const botName = esc((currentGuild && currentGuild.botName) ? currentGuild.botName : 'HELIX');
       const botIcon = (currentGuild && currentGuild.icon) ? guildIconUrl(currentGuildId, currentGuild.icon) : null;
       const avatarHtml = botIcon
@@ -1594,6 +1598,9 @@ export function renderClientScript(): string {
           '</div>';
       }
     }
+
+    window.updateWelcomePreview = updateWelcomePreview;
+    window.updateTicketPreview = updateTicketPreview;
 
     async function saveLogsTab() {
       if (!currentGuildId) return;

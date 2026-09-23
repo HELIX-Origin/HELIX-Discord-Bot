@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { renderDashboardHtml } from '../../../src/dashboard/views/dashboard.js';
+import { renderClientScript } from '../../../src/dashboard/views/dashboard/clientScript.js';
 import type { AppDeps } from '../../../src/app.js';
 
 function makeDeps(): AppDeps {
@@ -113,5 +114,21 @@ describe('renderDashboardHtml', () => {
     expect(html).toContain('id="admin-ticket-embed"');
     expect(html).toContain('updateWelcomePreview()');
     expect(html).toContain('updateTicketPreview()');
+  });
+
+  it('client script formatDiscordMarkdown executes and parses markdown without regex SyntaxErrors', () => {
+    const script = renderClientScript();
+    const start = script.indexOf('function formatDiscordMarkdown');
+    const end = script.indexOf('function updateWelcomePreview');
+    const code = script.slice(start, end);
+
+    const fn = new Function('esc', `${code}; return formatDiscordMarkdown;`)(
+      (s: string) => s,
+    ) as (text: string) => string;
+    const result = fn('**bold** *italic* `code`');
+    expect(result).toContain('<strong>bold</strong>');
+    expect(result).toContain('<em>italic</em>');
+    expect(result).toContain('<code');
+    expect(result).toContain('code</code>');
   });
 });
