@@ -391,3 +391,23 @@ Railway provides seamless Dockerfile support and persistent volume attachments:
    ```bash
    fly deploy
    ```
+
+---
+
+## 🌍 Project Website (GitHub Pages)
+
+The static project site lives in [`docs/`](https://github.com/HELIX-Origin/HELIX-Discord-Bot/tree/main/docs) and is published as a subpage of the [HELIX Origin GitHub Pages profile](https://helix-origin.github.io/) at **https://helix-origin.github.io/HELIX-Discord-Bot/**. It is a hosting-independent landing page for the project — it does not run the bot or the dashboard.
+
+- **Design**: Based on [vCard – Personal Portfolio](https://github.com/codewithsadee/vcard-personal-portfolio) (MIT, see `docs/assets/LICENSE-vcard.txt`), matching the profile site. `docs/assets/css/style.css` is the unmodified template stylesheet; project-specific overrides live in `docs/assets/css/site.css`.
+- **No build step / no frontend dependencies**: Plain HTML, CSS, and a small vanilla `docs/assets/js/script.js` for sidebar and page navigation.
+- **Relative paths only**: All assets use `./assets/...` so they resolve beneath `/HELIX-Discord-Bot/`.
+- **Deployment**: The [`Deploy GitHub Pages`](https://github.com/HELIX-Origin/HELIX-Discord-Bot/actions/workflows/pages.yml) workflow (`.github/workflows/pages.yml`) uploads `docs/` and deploys it on every push to `main` that touches `docs/**`, or manually via **Run workflow**.
+
+**One-time setup**: In the repository's **Settings → Pages**, set **Source** to **GitHub Actions**.
+
+**Local preview**:
+```bash
+cd docs
+python3 -m http.server 8000
+# open http://localhost:8000/
+```

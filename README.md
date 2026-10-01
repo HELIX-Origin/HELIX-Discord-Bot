@@ -23,6 +23,8 @@
 
 It ships with a built-in web dashboard, Discord OAuth2 authentication, no frontend npm dependencies, SQLite persistence, and optional Redis clustering. For detailed information, see the [**Project Wiki**](../../wiki/HOME).
 
+Visit the project site at [**helix-origin.github.io/HELIX-Discord-Bot**](https://helix-origin.github.io/HELIX-Discord-Bot/), part of the [HELIX Origin GitHub Pages profile](https://helix-origin.github.io/).
+
 ---
 
 ## ✨ Features
