@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="HELIX Discord Bot: a self-hosted Discord bot for RSS/Atom, Reddit, and free-games feeds, YouTube and Twitch alerts, guild administration, and a built-in web dashboard.">
+  <meta name="theme-color" content="#081426">
   <title>HELIX Discord Bot | HELIX Origin</title>
   <!--
     Layout and styles based on vCard – Personal Portfolio by codewithsadee
@@ -22,7 +23,7 @@
     <aside class="sidebar" data-sidebar>
       <div class="sidebar-info">
         <figure class="avatar-box">
-          <img src="./assets/images/icon.png" alt="HELIX Discord Bot icon" width="80">
+          <img src="./assets/images/icon.png" alt="HELIX Discord Bot icon" width="80" height="80">
         </figure>
 
         <div class="info-content">
@@ -30,13 +31,13 @@
           <p class="title">Self-hosted Discord bot</p>
         </div>
 
-        <button class="info_more-btn" type="button" data-sidebar-btn aria-expanded="false">
-          <span>Show Links</span>
+        <button class="info_more-btn" type="button" aria-expanded="false" aria-controls="sidebar-more" data-sidebar-btn>
+          <span>Show Info</span>
           <span class="chevron" aria-hidden="true">▾</span>
         </button>
       </div>
 
-      <div class="sidebar-info_more">
+      <div class="sidebar-info_more" id="sidebar-more">
         <div class="separator"></div>
 
         <ul class="contacts-list">
@@ -57,7 +58,7 @@
           </li>
 
           <li class="contact-item">
-            <div class="icon-box" aria-hidden="true">🚀</div>
+            <div class="icon-box" aria-hidden="true">🏷️</div>
             <div class="contact-info">
               <p class="contact-title">Releases</p>
               <a href="https://github.com/HELIX-Origin/HELIX-Discord-Bot/releases" class="contact-link">Latest release</a>
@@ -65,17 +66,29 @@
           </li>
 
           <li class="contact-item">
-            <div class="icon-box" aria-hidden="true">💬</div>
+            <div class="icon-box" aria-hidden="true">⚖️</div>
             <div class="contact-info">
-              <p class="contact-title">Community</p>
-              <a href="https://discord.gg/Ww3XBZC2HV" class="contact-link">Discord server</a>
+              <p class="contact-title">License</p>
+              <a href="https://github.com/HELIX-Origin/HELIX-Discord-Bot/blob/main/LICENSE.md" class="contact-link">BSD-3-Clause</a>
+            </div>
+          </li>
+
+          <li class="contact-item">
+            <div class="icon-box" aria-hidden="true">🧬</div>
+            <div class="contact-info">
+              <p class="contact-title">Organization</p>
+              <a href="https://helix-origin.github.io/" class="contact-link">HELIX Origin</a>
             </div>
           </li>
         </ul>
 
         <div class="separator"></div>
 
-        <a class="profile-link" href="https://helix-origin.github.io/">← All HELIX Origin projects</a>
+        <ul class="social-list">
+          <li class="social-item"><a class="social-link" href="https://discord.gg/Ww3XBZC2HV">💬 Discord Server</a></li>
+          <li class="social-item"><a class="social-link" href="https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues">🐛 Issues</a></li>
+          <li class="social-item"><a class="social-link" href="https://github.com/HELIX-Origin/HELIX-Discord-Bot/discussions">💬 Discussions</a></li>
+        </ul>
       </div>
     </aside>
 
@@ -83,16 +96,41 @@
       <nav class="navbar" aria-label="Main navigation">
         <ul class="navbar-list">
           <li class="navbar-item">
-            <button class="navbar-link active" type="button" data-nav-link="about">About</button>
+            <a class="navbar-link active" href="#about" aria-current="page" data-nav-link="about">About</a>
           </li>
           <li class="navbar-item">
-            <button class="navbar-link" type="button" data-nav-link="features">Features</button>
+            <a class="navbar-link" href="#features" data-nav-link="features">Features</a>
           </li>
           <li class="navbar-item">
-            <button class="navbar-link" type="button" data-nav-link="get-started">Get Started</button>
+            <a class="navbar-link" href="#get-started" data-nav-link="get-started">Get Started</a>
           </li>
           <li class="navbar-item">
-            <button class="navbar-link" type="button" data-nav-link="docs">Docs</button>
+            <a class="navbar-link" href="#docs" data-nav-link="docs">Docs</a>
+          </li>
+          <li class="navbar-item">
+            <div class="translate-control notranslate" translate="no">
+              <label for="translate-select">🌐 <span class="visually-hidden">Language</span></label>
+              <select id="translate-select" aria-label="Translate this page" disabled>
+                <option value="en" lang="en">English</option>
+                <option value="ja" lang="ja">日本語</option>
+                <option value="zh-CN" lang="zh-CN">简体中文</option>
+                <option value="zh-TW" lang="zh-TW">繁體中文</option>
+                <option value="ko" lang="ko">한국어</option>
+                <option value="es" lang="es">Español</option>
+                <option value="fr" lang="fr">Français</option>
+                <option value="de" lang="de">Deutsch</option>
+                <option value="ru" lang="ru">Русский</option>
+                <option value="pt" lang="pt">Português</option>
+                <option value="it" lang="it">Italiano</option>
+                <option value="th" lang="th">ไทย</option>
+                <option value="vi" lang="vi">Tiếng Việt</option>
+                <option value="id" lang="id">Bahasa Indonesia</option>
+                <option value="pl" lang="pl">Polski</option>
+                <option value="nl" lang="nl">Nederlands</option>
+                <option value="tr" lang="tr">Türkçe</option>
+                <option value="ar" lang="ar">العربية</option>
+              </select>
+            </div>
           </li>
         </ul>
       </nav>
@@ -318,11 +356,15 @@ npm start</code></pre>
           </ul>
         </section>
 
-        <p class="license-note">HELIX Discord Bot is licensed under the <a href="https://github.com/HELIX-Origin/HELIX-Discord-Bot/blob/main/LICENSE.md">BSD 3-Clause License</a>. Site design based on <a href="https://github.com/codewithsadee/vcard-personal-portfolio">vCard – Personal Portfolio</a> (<a href="./assets/LICENSE-vcard.txt">MIT</a>).</p>
+        <footer class="site-footer">
+          <p>HELIX Discord Bot is licensed under the <a href="https://github.com/HELIX-Origin/HELIX-Discord-Bot/blob/main/LICENSE.md">BSD 3-Clause License</a> · Site layout from <a href="https://github.com/codewithsadee/vcard-personal-portfolio">vCard</a> (MIT)</p>
+          <p><a href="https://helix-origin.github.io/">← Back to HELIX Origin</a></p>
+        </footer>
       </article>
     </div>
   </main>
 
   <script src="./assets/js/script.js"></script>
+  <script src="./assets/js/translate.js"></script>
 </body>
 </html>
