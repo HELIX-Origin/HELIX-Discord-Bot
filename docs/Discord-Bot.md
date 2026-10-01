@@ -1,3 +1,8 @@
+﻿---
+layout: documentation
+title: "Discord Bot & Commands"
+---
+
 # 🤖 Discord Bot & Commands
 
 HELIX Discord Bot operates as a Discord application adhering strictly to **discord.js v14** standards. It delivers notifications directly to channels or dedicated threads, eliminating the need to manage external webhooks.
@@ -69,7 +74,7 @@ Instead of delivering into a regular channel, a server can enable **thread deliv
 - Adding a feed into a channel posts a short confirmation message there: `📡 **feed** configured — updates will be posted here.` (best-effort; never surfaces as a command error).
 - Servers without thread delivery enabled behave exactly as before (direct channel delivery).
 
-See [Configuration → Thread Delivery](Configuration) for the full variable reference.
+See [Configuration → Thread Delivery](Configuration.html) for the full variable reference.
 
 ---
 

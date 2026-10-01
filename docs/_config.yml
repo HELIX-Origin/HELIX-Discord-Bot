@@ -1,0 +1,12 @@
+url: https://helix-origin.github.io
+baseurl: /HELIX-Discord-Bot
+defaults:
+  - scope:
+      path: ""
+      type: pages
+    values:
+      layout: documentation
+relative_links:
+  enabled: true
+optional_front_matter:
+  remove_originals: true

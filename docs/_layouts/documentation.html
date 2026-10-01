@@ -1,0 +1,172 @@
+{%- assign site_paths = site.pages | map: "path" -%}
+{%- assign doc_pages = "" | split: "" -%}
+{%- for group in site.data.navigation -%}
+  {%- for entry in group.pages -%}
+    {%- if site_paths contains entry.path -%}
+      {%- assign doc_pages = doc_pages | push: entry -%}
+    {%- endif -%}
+  {%- endfor -%}
+{%- endfor -%}
+{%- assign current_entry = nil -%}
+{%- assign previous_entry = nil -%}
+{%- assign next_entry = nil -%}
+{%- for entry in doc_pages -%}
+  {%- if entry.path == page.path -%}
+    {%- assign current_entry = entry -%}
+    {%- unless forloop.first -%}
+      {%- assign previous_index = forloop.index0 | minus: 1 -%}
+      {%- assign previous_entry = doc_pages[previous_index] -%}
+    {%- endunless -%}
+    {%- unless forloop.last -%}
+      {%- assign next_entry = doc_pages[forloop.index] -%}
+    {%- endunless -%}
+  {%- endif -%}
+{%- endfor -%}
+{%- assign page_title = page.title | default: current_entry.title | default: "Documentation" -%}
+{%- if page.source_path -%}
+  {%- assign edit_path = page.source_path -%}
+{%- else -%}
+  {%- assign edit_path = page.path | prepend: "docs/" -%}
+{%- endif -%}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="HELIX Discord Bot documentation: {{ page_title | escape }}">
+  <meta name="theme-color" content="#081426">
+  <title>{{ page_title | escape }} | HELIX Discord Bot</title>
+  <link rel="icon" type="image/png" href="{{ '/assets/images/icon.png' | relative_url }}">
+  <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
+  <link rel="stylesheet" href="{{ '/assets/css/site.css' | relative_url }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <main>
+    <!-- #SIDEBAR -->
+    <aside class="sidebar" data-sidebar>
+      <div class="sidebar-info">
+        <figure class="avatar-box">
+          <img src="{{ '/assets/images/icon.png' | relative_url }}" alt="HELIX Discord Bot icon" width="80" height="80">
+        </figure>
+
+        <div class="info-content">
+          <h1 class="name" title="HELIX Discord Bot">HELIX Discord Bot</h1>
+          <p class="title">Documentation</p>
+        </div>
+
+        <button class="info_more-btn" type="button" aria-expanded="false" aria-controls="sidebar-more" data-sidebar-btn>
+          <span>Show Info</span>
+          <span class="chevron" aria-hidden="true">▾</span>
+        </button>
+      </div>
+
+      <div class="sidebar-info_more" id="sidebar-more">
+        <div class="separator"></div>
+
+        <nav class="docs-nav" aria-label="Documentation pages">
+          {%- for group in site.data.navigation %}
+          {%- assign group_pages = group.pages | where_exp: "entry", "site_paths contains entry.path" %}
+          {%- if group_pages.size > 0 %}
+          <h2 class="docs-nav-heading">{{ group.section }}</h2>
+          <ul>
+            {%- for entry in group_pages %}
+            {%- assign entry_url = entry.path | replace: ".md", ".html" | prepend: "/" | relative_url %}
+            <li><a href="{{ entry_url }}"{% if entry.path == page.path %} aria-current="page"{% endif %}>{{ entry.title | escape }}</a></li>
+            {%- endfor %}
+          </ul>
+          {%- endif %}
+          {%- endfor %}
+        </nav>
+
+        <div class="separator"></div>
+
+        <ul class="contacts-list">
+          <li class="contact-item">
+            <div class="icon-box" aria-hidden="true">🏠</div>
+            <div class="contact-info">
+              <p class="contact-title">Project</p>
+              <a class="contact-link" href="{{ '/' | relative_url }}">Bot Home</a>
+            </div>
+          </li>
+
+          <li class="contact-item">
+            <div class="icon-box" aria-hidden="true">✏️</div>
+            <div class="contact-info">
+              <p class="contact-title">Edit</p>
+              <a class="contact-link" href="https://github.com/HELIX-Origin/HELIX-Discord-Bot/blob/main/{{ edit_path }}">Edit on GitHub ↗</a>
+            </div>
+          </li>
+
+          <li class="contact-item">
+            <div class="icon-box" aria-hidden="true">🧬</div>
+            <div class="contact-info">
+              <p class="contact-title">Organization</p>
+              <a class="contact-link" href="https://helix-origin.github.io/">HELIX Origin</a>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </aside>
+
+    <!-- #MAIN-CONTENT -->
+    <div class="main-content">
+      <!-- #NAVBAR -->
+      <nav class="navbar" aria-label="Site navigation">
+        <ul class="navbar-list">
+          <li class="navbar-item">
+            <a class="navbar-link" href="{{ '/' | relative_url }}">Project</a>
+          </li>
+          <li class="navbar-item">
+            <a class="navbar-link active" href="{{ '/README.html' | relative_url }}" aria-current="page">All Docs</a>
+          </li>
+          <li class="navbar-item">
+            <a class="navbar-link" href="https://github.com/HELIX-Origin/HELIX-Discord-Bot/releases">Releases ↗</a>
+          </li>
+          <li class="navbar-item">
+            <div class="translate-control notranslate" translate="no">
+              <label for="translate-select">🌐 <span class="visually-hidden">Language</span></label>
+              <select id="translate-select" aria-label="Translate this page" disabled>
+                {%- for language in site.data.languages %}
+                <option value="{{ language.code }}" lang="{{ language.code }}">{{ language.name }}</option>
+                {%- endfor %}
+              </select>
+            </div>
+          </li>
+        </ul>
+      </nav>
+
+      <article class="about active">
+        <header>
+          <h2 class="h2 article-title">{{ page_title | escape }}</h2>
+        </header>
+
+        <section class="documentation-content">
+          {{ content }}
+        </section>
+
+        {%- if previous_entry or next_entry %}
+        <nav class="pager" aria-label="Previous and next pages">
+          {%- if previous_entry %}
+          <a class="pager-previous" href="{{ previous_entry.path | replace: '.md', '.html' | prepend: '/' | relative_url }}"><span>Previous</span>{{ previous_entry.title | escape }}</a>
+          {%- endif %}
+          {%- if next_entry %}
+          <a class="pager-next" href="{{ next_entry.path | replace: '.md', '.html' | prepend: '/' | relative_url }}"><span>Next</span>{{ next_entry.title | escape }}</a>
+          {%- endif %}
+        </nav>
+        {%- endif %}
+      </article>
+
+      <footer class="site-footer">
+        <p>HELIX Discord Bot is an open-source project by <a href="https://helix-origin.github.io/">HELIX Origin</a> · Site layout from <a href="https://github.com/codewithsadee/vcard-personal-portfolio">vCard</a> (MIT)</p>
+        <p><a href="{{ '/' | relative_url }}">← Back to HELIX Discord Bot home</a></p>
+      </footer>
+    </div>
+  </main>
+
+  <script src="{{ '/assets/js/script.js' | relative_url }}"></script>
+  <script src="{{ '/assets/js/translate.js' | relative_url }}"></script>
+</body>
+</html>

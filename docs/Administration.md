@@ -1,3 +1,8 @@
+﻿---
+layout: documentation
+title: "Guild Administration"
+---
+
 # 🛡️ Guild Administration
 
 HELIX Discord Bot includes a comprehensive administration system for server moderation, role management, and voice controls — all with Discord's native permission guards.
@@ -193,6 +198,6 @@ The web dashboard organizes server management into dedicated, permission-gated t
 
 ## 🔗 Related
 
-- [Discord Bot & Commands](Discord-Bot) — Full command reference table
-- [Configuration → Feature Flags](Configuration) — `ADMINISTRATION_ENABLED`, `ADMIN_PANEL_ENABLED`
-- [Integrations & Security → RBAC](Integrations-and-Security) — Permission model details
+- [Discord Bot & Commands](Discord-Bot.html) — Full command reference table
+- [Configuration → Feature Flags](Configuration.html) — `ADMINISTRATION_ENABLED`, `ADMIN_PANEL_ENABLED`
+- [Integrations & Security → RBAC](Integrations-and-Security.html) — Permission model details

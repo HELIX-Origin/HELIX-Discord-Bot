@@ -1,3 +1,8 @@
+﻿---
+layout: documentation
+title: "Troubleshooting & FAQ"
+---
+
 # 🩺 Troubleshooting & Frequently Asked Questions
 
 This guide provides diagnostic steps and solutions for common issues encountered when running, deploying, or configuring HELIX Discord Bot.

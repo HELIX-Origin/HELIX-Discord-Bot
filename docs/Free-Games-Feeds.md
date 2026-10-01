@@ -1,3 +1,8 @@
+﻿---
+layout: documentation
+title: "Free Games & Giveaways"
+---
+
 # 🎮 Free Games & Giveaways Feeds
 
 HELIX Discord Bot includes a multi-platform giveaway and promotion engine that automatically tracks and announces 100% free PC and console games across all major digital game distribution platforms.

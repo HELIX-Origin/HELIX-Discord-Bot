@@ -1,3 +1,8 @@
+﻿---
+layout: documentation
+title: "REST API Reference"
+---
+
 # 🔌 REST API Reference
 
 The HELIX Discord Bot dashboard exposes a JSON REST API for managing feeds, presets, server settings, diagnostics, and triggering manual operations.

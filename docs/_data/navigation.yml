@@ -1,0 +1,36 @@
+- section: Overview
+  pages:
+    - title: Documentation Home
+      path: README.md
+    - title: Discord Bot & Commands
+      path: Discord-Bot.md
+- section: Feeds & Content
+  pages:
+    - title: Feeds & Scrapers Engine
+      path: Feeds-and-Scrapers.md
+    - title: Free Games & Giveaways
+      path: Free-Games-Feeds.md
+    - title: Reddit Feeds
+      path: Reddit-Feeds.md
+- section: Administration
+  pages:
+    - title: Guild Administration
+      path: Administration.md
+    - title: Integrations & Security
+      path: Integrations-and-Security.md
+- section: Architecture & Reference
+  pages:
+    - title: Architecture & Design
+      path: Architecture-and-Design.md
+    - title: Configuration Guide
+      path: Configuration.md
+    - title: REST API Reference
+      path: API-Reference.md
+- section: Operations & Development
+  pages:
+    - title: Deployment & Hosting
+      path: Deployment-and-Hosting.md
+    - title: Development & Testing
+      path: Development-and-Testing.md
+    - title: Troubleshooting & FAQ
+      path: Troubleshooting.md

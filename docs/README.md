@@ -1,25 +1,30 @@
-# 📖 HELIX Discord Bot Documentation Wiki
+---
+layout: documentation
+title: "Documentation Home"
+---
 
-Welcome to the comprehensive technical and operational wiki for **HELIX Discord Bot** — the modern, high-performance RSS & web scraping feed delivery bot and web management dashboard for Discord communities.
+# 📖 HELIX Discord Bot Documentation
+
+Welcome to the comprehensive technical and operational documentation for **HELIX Discord Bot** — the modern, high-performance RSS & web scraping feed delivery bot and web management dashboard for Discord communities.
 
 ---
 
-## 🧭 Wiki Table of Contents
+## 🧭 Table of Contents
 
 | Section | Description |
 | :--- | :--- |
-| [**📡 Feeds & Scrapers Engine**](Feeds-and-Scrapers) | Deep dive into XML/RSS/Atom parsing, Reddit, Free Games, and custom scrapers. |
-| [**🎮 Free Games & Giveaways**](Free-Games-Feeds) | Multi-store aggregation (Epic Games, Steam, GOG, Humble, etc.), Monday cron scheduler, and store branding. |
-| [**🤖 Reddit Feeds & Pure Image Mode**](Reddit-Feeds) | Reddit scraping, Pure Image Mode vs Standard RSS Mode, animated GIF/gifv banners, and subreddit filtering. |
-| [**🤖 Discord Bot & Commands**](Discord-Bot) | Slash commands (`/rss`, `/youtube`, `/twitch`, `/free-games`, `/reddit`, `/welcome`, `/ticket`, `/set`, `/stats`, `/about`, `/help`), direct channel + dedicated thread delivery, embed formatting, and Discord permissions. |
-| [**🛡️ Guild Administration**](Administration) | Moderation (`/warn`, `/kick`, `/ban`, `/lock`, `/purge`, `/slowmode`, `/announce`), Welcome Announcements, Support Tickets, role management, voice controls, permission guards. |
-| [**🔌 REST API Reference**](API-Reference) | Complete documentation of all REST endpoints, request/response schemas, and query params. |
-| [**🏗️ Architecture & Design**](Architecture-and-Design) | System components, data flow diagrams, background polling engine, caching, and state management. |
-| [**⚙️ Configuration Guide**](Configuration) | Exhaustive reference of all `.env` variables, timeouts, polling, dashboard themes, and hosting settings. |
-| [**🚀 Deployment & Hosting**](Deployment-and-Hosting) | Deployment guides for Docker, Linux VPS/systemd, Windows, and manual Cloud PaaS (Railway, Render, Fly.io). |
-| [**🧪 Development & Testing**](Development-and-Testing) | Local environment setup, test runner commands, TypeScript checking, and code style standards. |
-| [**🔒 Integrations & Security**](Integrations-and-Security) | Discord OAuth2, Owner ID resolution, CSRF/XSS protection, rate limiting, and database security. |
-| [**🩺 Troubleshooting & FAQ**](Troubleshooting) | Diagnostic flows for feed delivery failures, permission errors, Reddit 429s, and database locks. |
+| [**📡 Feeds & Scrapers Engine**](Feeds-and-Scrapers.html) | Deep dive into XML/RSS/Atom parsing, Reddit, Free Games, and custom scrapers. |
+| [**🎮 Free Games & Giveaways**](Free-Games-Feeds.html) | Multi-store aggregation (Epic Games, Steam, GOG, Humble, etc.), Monday cron scheduler, and store branding. |
+| [**🤖 Reddit Feeds & Pure Image Mode**](Reddit-Feeds.html) | Reddit scraping, Pure Image Mode vs Standard RSS Mode, animated GIF/gifv banners, and subreddit filtering. |
+| [**🤖 Discord Bot & Commands**](Discord-Bot.html) | Slash commands (`/rss`, `/youtube`, `/twitch`, `/free-games`, `/reddit`, `/welcome`, `/ticket`, `/set`, `/stats`, `/about`, `/help`), direct channel + dedicated thread delivery, embed formatting, and Discord permissions. |
+| [**🛡️ Guild Administration**](Administration.html) | Moderation (`/warn`, `/kick`, `/ban`, `/lock`, `/purge`, `/slowmode`, `/announce`), Welcome Announcements, Support Tickets, role management, voice controls, permission guards. |
+| [**🔌 REST API Reference**](API-Reference.html) | Complete documentation of all REST endpoints, request/response schemas, and query params. |
+| [**🏗️ Architecture & Design**](Architecture-and-Design.html) | System components, data flow diagrams, background polling engine, caching, and state management. |
+| [**⚙️ Configuration Guide**](Configuration.html) | Exhaustive reference of all `.env` variables, timeouts, polling, dashboard themes, and hosting settings. |
+| [**🚀 Deployment & Hosting**](Deployment-and-Hosting.html) | Deployment guides for Docker, Linux VPS/systemd, Windows, and manual Cloud PaaS (Railway, Render, Fly.io). |
+| [**🧪 Development & Testing**](Development-and-Testing.html) | Local environment setup, test runner commands, TypeScript checking, and code style standards. |
+| [**🔒 Integrations & Security**](Integrations-and-Security.html) | Discord OAuth2, Owner ID resolution, CSRF/XSS protection, rate limiting, and database security. |
+| [**🩺 Troubleshooting & FAQ**](Troubleshooting.html) | Diagnostic flows for feed delivery failures, permission errors, Reddit 429s, and database locks. |
 
 ---
 

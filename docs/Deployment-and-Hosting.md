@@ -1,3 +1,8 @@
+﻿---
+layout: documentation
+title: "Deployment & Hosting"
+---
+
 # 🚀 Deployment & Hosting Guide
 
 HELIX Discord Bot is optimized for self-hosted deployments on **Docker**, **Linux VPS**, and bare metal, with support for manual hosting on container-enabled cloud PaaS platforms (Railway, Render, Fly.io). One-click deployment buttons are intentionally not provided.

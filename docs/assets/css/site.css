@@ -227,6 +227,238 @@ body > .skiptranslate,
   box-shadow: none !important;
 }
 
+/* Documentation navigation in sidebar */
+.docs-nav {
+  display: grid;
+  gap: 6px;
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.docs-nav-heading {
+  margin: 10px 0 0;
+  font-size: var(--fs-8);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--light-gray-70);
+  font-weight: var(--fw-600);
+}
+
+.docs-nav ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.docs-nav a {
+  display: block;
+  padding: 4px 10px;
+  border-radius: 8px;
+  color: var(--light-gray);
+  font-size: var(--fs-7);
+}
+
+.docs-nav a:hover,
+.docs-nav a:focus-visible {
+  color: var(--white-1);
+  background: var(--onyx);
+}
+
+.docs-nav a[aria-current="page"] {
+  background: var(--onyx);
+  color: var(--orange-yellow-crayola);
+  font-weight: var(--fw-600);
+  border: 1px solid var(--jet);
+}
+
+/* Pager */
+.pager {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
+  gap: 16px;
+  margin: 40px 0 30px;
+}
+
+.pager a {
+  display: grid;
+  padding: 16px 20px;
+  border: 1px solid var(--jet);
+  border-radius: 14px;
+  background: var(--onyx);
+  color: var(--white-1);
+}
+
+.pager a:hover {
+  border-color: var(--orange-yellow-crayola);
+}
+
+.pager span {
+  color: var(--light-gray-70);
+  font-size: var(--fs-8);
+}
+
+.pager-next {
+  text-align: right;
+  grid-column: -2;
+}
+
+/* Documentation markdown content */
+.documentation-content {
+  overflow-wrap: anywhere;
+  color: var(--light-gray);
+  font-size: var(--fs-6);
+  line-height: 1.8;
+}
+
+.documentation-content h1,
+.documentation-content h2,
+.documentation-content h3,
+.documentation-content h4 {
+  color: var(--white-1);
+  margin-top: 30px;
+  margin-bottom: 12px;
+}
+
+.documentation-content h2::after {
+  content: "";
+  display: block;
+  width: 40px;
+  height: 5px;
+  margin-top: 10px;
+  border-radius: 5px;
+  background: var(--text-gradient-yellow);
+}
+
+.documentation-content p,
+.documentation-content li {
+  color: var(--light-gray);
+}
+
+.documentation-content a {
+  color: var(--orange-yellow-crayola);
+  overflow-wrap: anywhere;
+}
+
+.documentation-content a:hover {
+  color: var(--white-1);
+}
+
+.documentation-content pre,
+.documentation-content table {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.documentation-content pre {
+  margin: 16px 0;
+  padding: 16px;
+  border-radius: 12px;
+  background: var(--smoky-black);
+  border: 1px solid var(--jet);
+  color: var(--white-2);
+  font-family: monospace;
+  font-size: var(--fs-7);
+}
+
+.documentation-content table {
+  display: block;
+  border-collapse: collapse;
+  margin: 16px 0;
+}
+
+.documentation-content th,
+.documentation-content td {
+  padding: 8px 12px;
+  border: 1px solid var(--jet);
+  text-align: left;
+}
+
+.documentation-content th {
+  background: var(--onyx);
+  color: var(--white-2);
+}
+
+.documentation-content img {
+  max-width: 100%;
+  border-radius: 12px;
+  border: 1px solid var(--jet);
+}
+
+.documentation-directory {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  gap: 20px;
+  margin-top: 24px;
+}
+
+.documentation-directory > div {
+  padding: 20px;
+  border: 1px solid var(--jet);
+  border-radius: 14px;
+  background: var(--onyx);
+}
+
+.documentation-directory h3 {
+  color: var(--white-1);
+  margin-bottom: 12px;
+  font-size: var(--fs-5);
+}
+
+.documentation-directory ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.documentation-directory li {
+  margin-top: 8px;
+}
+
+.documentation-directory li a {
+  color: var(--orange-yellow-crayola);
+  font-size: var(--fs-6);
+}
+
+.documentation-directory li a:hover {
+  color: var(--white-1);
+}
+
+code {
+  color: var(--orange-yellow-crayola);
+  font-family: monospace;
+  overflow-wrap: anywhere;
+}
+
+.documentation-content :not(pre) > code {
+  background: var(--onyx);
+  padding: 2px 6px;
+  border-radius: 6px;
+  border: 1px solid var(--jet);
+  font-size: 0.9em;
+}
+
+@media (min-width: 1024px) {
+  .navbar-list {
+    flex-wrap: nowrap;
+  }
+
+  article {
+    padding-top: 100px;
+  }
+
+  .site-footer {
+    margin-bottom: 15px;
+  }
+}
+
 @media (min-width: 1250px) {
+  .avatar-box {
+    width: 150px;
+    height: 150px;
+  }
+
   .sidebar.active { max-height: none; }
 }

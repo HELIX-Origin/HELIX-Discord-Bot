@@ -1,3 +1,8 @@
+﻿---
+layout: documentation
+title: "Architecture & Design"
+---
+
 # 🏗️ Architecture & System Design
 
 HELIX Discord Bot is engineered as a modular, asynchronous TypeScript (ESM) application combining a background polling daemon, a native Node.js HTTP dashboard & REST API, and a Discord bot client connected over the official Gateway WebSocket and REST API.

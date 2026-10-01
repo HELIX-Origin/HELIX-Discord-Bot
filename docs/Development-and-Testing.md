@@ -1,3 +1,8 @@
+﻿---
+layout: documentation
+title: "Development & Testing"
+---
+
 # 🧪 Development & Testing Guide
 
 This guide covers local development workflows, debugging techniques, TypeScript compilation checks, and verification commands for HELIX Discord Bot.
