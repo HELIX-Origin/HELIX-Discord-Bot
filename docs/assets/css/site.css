@@ -1,0 +1,104 @@
+/* HELIX Discord Bot overrides for the vCard template (./style.css). */
+
+.info_more-btn .chevron {
+  display: block;
+  font-size: 14px;
+  line-height: 1;
+  transition: var(--transition-1);
+}
+
+.sidebar.active .info_more-btn .chevron {
+  transform: rotate(0.5turn);
+}
+
+.contact-info .contact-link,
+.profile-link,
+.about-text a,
+.timeline-text a,
+.license-note a {
+  color: var(--orange-yellow-crayola);
+}
+
+.contact-info .contact-link:hover,
+.profile-link:hover,
+.about-text a:hover,
+.timeline-text a:hover,
+.license-note a:hover {
+  color: var(--white-1);
+}
+
+.profile-link {
+  display: block;
+  font-size: var(--fs-6);
+  text-align: center;
+}
+
+.service-icon-box {
+  font-size: 32px;
+  line-height: 1;
+  text-align: center;
+}
+
+.timeline-item code,
+.about-text code,
+.project-category code {
+  color: var(--orange-yellow-crayola);
+  overflow-wrap: anywhere;
+}
+
+.code-block {
+  margin: 10px 0;
+  padding: 12px 15px;
+  border: 1px solid var(--jet);
+  border-radius: 10px;
+  background: var(--eerie-black-1);
+  color: var(--light-gray);
+  font-size: var(--fs-7);
+  line-height: 1.6;
+  overflow-x: auto;
+}
+
+.project-list {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+}
+
+.project-img {
+  display: grid;
+  place-items: center;
+  height: 140px;
+  background: var(--bg-gradient-onyx);
+  border: 1px solid var(--jet);
+  font-size: 48px;
+}
+
+.project-item > a:hover .project-img::before {
+  background: hsla(0, 0%, 0%, 0.15);
+}
+
+.project-title,
+.project-category {
+  text-transform: none;
+  overflow-wrap: anywhere;
+}
+
+.project-category {
+  margin-top: 8px;
+  line-height: 1.6;
+}
+
+.license-note {
+  margin-top: 30px;
+  color: var(--light-gray-70);
+  font-size: var(--fs-7);
+  line-height: 1.7;
+}
+
+@media (min-width: 580px) {
+  .info_more-btn .chevron {
+    display: none;
+  }
+
+  .service-icon-box {
+    font-size: 40px;
+  }
+}
