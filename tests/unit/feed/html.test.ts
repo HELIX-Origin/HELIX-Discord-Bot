@@ -48,6 +48,11 @@ describe('decodeHtmlEntities()', () => {
     expect(decodeHtmlEntities('&#x41;&#x42;&#x43;')).toBe('ABC');
   });
 
+  it('does not decode entities exposed by decoding &amp;', () => {
+    expect(decodeHtmlEntities('&amp;amp;')).toBe('&amp;');
+    expect(decodeHtmlEntities('&amp;#65;')).toBe('&#65;');
+  });
+
   it('decodes mixed entities in a single string', () => {
     expect(decodeHtmlEntities('Hello &amp; World &mdash; it&rsquo;s great')).toBe(
       "Hello & World — it\u2019s great",
