@@ -260,7 +260,14 @@ export class FeedWatcher {
       }
     }
 
-    const isReddit = feed.feedType === 'reddit' || feed.url.toLowerCase().includes('reddit.com');
+    let isRedditHost = false;
+    try {
+      const hostname = new URL(feed.url).hostname.toLowerCase();
+      isRedditHost = hostname === 'reddit.com' || hostname.endsWith('.reddit.com');
+    } catch {
+      isRedditHost = false;
+    }
+    const isReddit = feed.feedType === 'reddit' || isRedditHost;
 
     // Filter out persistent static "Community Home" posts from Reddit feeds so they
     // never block real incoming posts or get mistakenly delivered.
