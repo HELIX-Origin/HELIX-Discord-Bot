@@ -38,10 +38,14 @@
 
 ## 🚧 Investigating
 
-### 1. Free Game Alerts Fail or Are Hit-or-Miss on Individual Storefronts
+*No active investigations currently in progress.*
+
+## ✅ Closed
+
+### 2026-10-02 — Free Game Alerts Fail or Are Hit-or-Miss on Individual Storefronts
 
 - **Severity**: 🟠 High (Feed Delivery / Free Games)
-- **Status**: 🚧 investigating (in verification)
+- **Status**: ✅ resolved
 - **Reported Issue**: "free game alerts only seem to work when all platfroms is chosen. individual platforms are hit or miss."
 - **Root Cause**:
   1. GamerPower upstream endpoint does not accept platform-specific queries for several storefronts (`platform=indiegala`, `platform=humble`, `platform=prime` return HTTP 404).
@@ -58,21 +62,10 @@
   - [`src/bot/commands/feeds/free-games.ts`](file:///d:/Projects/HELIX-Discord-Bot/src/bot/commands/feeds/free-games.ts)
   - [`tests/unit/feed/freegames.test.ts`](file:///d:/Projects/HELIX-Discord-Bot/tests/unit/feed/freegames.test.ts)
 
-```mermaid
-flowchart TD
-    A["GamerPower Query"] -->|"platform=pc&type=game"| B["Giveaways Ingestion"]
-    B --> C{"Specific Platform in Giveaway?"}
-    C -->|"Yes (Steam/Epic/GOG)"| D["Assign Platform Branding"]
-    C -->|"Generic (PC, DRM-Free)"| E["detectGamerPowerPlatform: URL/Title/Description Scan"]
-    E --> D
-    D --> F["Match against feed.feedType & freegames:// platformSlug"]
-    F --> G["Deliver to Discord Target Channel/Thread"]
-```
-
-### 2. Free Game Embed Overwrites Storefront Platform Information When All Platforms Selected
+### 2026-10-02 — Free Game Embed Overwrites Storefront Platform Information When All Platforms Selected
 
 - **Severity**: 🟡 Medium (Embed Formatting)
-- **Status**: 🚧 investigating (in verification)
+- **Status**: ✅ resolved
 - **Reported Issue**: "the all platforms one shouldn't replace the platform information in the embeds. right now it's replacing the footer information."
 - **Root Cause**: `freeGameEmbed` in `src/bot/utils/embeds.ts` always overrode the footer text with `${feedTitle} · Weekly Free Games` whenever `feedTitle` was provided. When the feed title was "Free Games (All Stores & Giveaways)", this replaced the game's actual platform name and icon.
 - **Resolution**:
@@ -82,10 +75,10 @@ flowchart TD
   - [`src/bot/utils/embeds.ts`](file:///d:/Projects/HELIX-Discord-Bot/src/bot/utils/embeds.ts)
   - [`tests/unit/feed/freegames.test.ts`](file:///d:/Projects/HELIX-Discord-Bot/tests/unit/feed/freegames.test.ts)
 
-### 3. Dashboard Free Games & Reddit Tabs Lack One-Click Pill Catalog Options
+### 2026-10-02 — Dashboard Free Games & Reddit Tabs Lack One-Click Pill Catalog Options
 
 - **Severity**: 🟡 Medium (Dashboard Usability)
-- **Status**: 🚧 investigating (in verification)
+- **Status**: ✅ resolved
 - **Reported Issue**: "we should adjust the page to use pill sections to enable the options as well, just like the reddit and news feed tabs."
 - **Root Cause**: The Free Games and Reddit tabs on the web dashboard required manual input and lacked quick one-click catalog activation sections (`feed-pill`), unlike the News feeds catalog.
 - **Resolution**:
@@ -98,10 +91,10 @@ flowchart TD
   - [`src/dashboard/views/dashboard/clientScript.ts`](file:///d:/Projects/HELIX-Discord-Bot/src/dashboard/views/dashboard/clientScript.ts)
   - [`tests/unit/dashboard/views.test.ts`](file:///d:/Projects/HELIX-Discord-Bot/tests/unit/dashboard/views.test.ts)
 
-### 4. Ticket Setup Message Placeholder Displays "this server" Instead of Guild Name
+### 2026-10-02 — Ticket Setup Message Placeholder Displays "this server" Instead of Guild Name
 
 - **Severity**: 🟡 Medium (Placeholders / Config)
-- **Status**: 🚧 investigating (in verification)
+- **Status**: ✅ resolved
 - **Reported Issue**: "also the ticket message needs to support placeholders... issue with the placholder output.s instead of displaying the server name `{server}` is showin `this server`. that is wrong... discord js can get the guild name by using guild.name so it is not incorrect to assume that the bot can get it's own name"
 - **Root Cause**: Placeholder substitution in `src/bot/utils/placeholders.ts` defaulted to static string `'this server'` instead of inspecting `guild.name`.
 - **Resolution**:
@@ -112,8 +105,6 @@ flowchart TD
   - [`src/bot/commands/admin/ticket.ts`](file:///d:/Projects/HELIX-Discord-Bot/src/bot/commands/admin/ticket.ts)
   - [`src/dashboard/views/dashboard/clientScript.ts`](file:///d:/Projects/HELIX-Discord-Bot/src/dashboard/views/dashboard/clientScript.ts)
   - [`tests/unit/bot/placeholders.test.ts`](file:///d:/Projects/HELIX-Discord-Bot/tests/unit/bot/placeholders.test.ts)
-
-## ✅ Closed
 
 ### 2026-10-02 — GitHub Push Webhook Delivery Fails (Cloudflare WAF / Managed Rule Block)
 
