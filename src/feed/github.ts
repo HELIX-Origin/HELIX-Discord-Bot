@@ -207,6 +207,7 @@ export function parseAtomEntry(
 /**
  * Parses a GitHub public API event object into a GitHubFeedItem.
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function parseApiEvent(event: Record<string, any>, slug: GitHubSlug): GitHubFeedItem | null {
   const type = event['type'];
   const actor = event['actor'] || {};
@@ -228,8 +229,9 @@ export function parseApiEvent(event: Record<string, any>, slug: GitHubSlug): Git
       const head = String(payload['head'] || event['id']);
       const commits = Array.isArray(payload['commits']) ? payload['commits'] : [];
       const commitCount = commits.length || (payload['size'] ? Number(payload['size']) : 1);
-      const shortHead = head.slice(0, 7);
+      const _shortHead = head.slice(0, 7);
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const commitDetails: GitHubCommitDetail[] = commits.map((c: any) => ({
         sha: String(c.sha || ''),
         shortSha: String(c.sha || '').slice(0, 7),
@@ -332,7 +334,9 @@ export function parseApiEvent(event: Record<string, any>, slug: GitHubSlug): Git
       const statusLabel = action === 'closed' ? 'Closed' : action === 'reopened' ? 'Reopened' : 'Opened';
       const icon = action === 'closed' ? '🟣' : '🟢';
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const labels = Array.isArray(issue['labels'])
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         ? issue['labels'].map((l: any) => (typeof l === 'string' ? l : l.name)).filter(Boolean)
         : [];
 
@@ -364,8 +368,10 @@ export function parseApiEvent(event: Record<string, any>, slug: GitHubSlug): Git
 /**
  * Parses an incoming GitHub webhook payload into a GitHubFeedItem.
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function parseGitHubWebhook(
   eventHeader: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   payload: Record<string, any>,
 ): GitHubFeedItem | null {
   const repo = payload['repository'] || {};
@@ -389,6 +395,7 @@ export function parseGitHubWebhook(
       const commits = Array.isArray(payload['commits']) ? payload['commits'] : [];
       const commitCount = commits.length || 1;
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const commitDetails: GitHubCommitDetail[] = commits.map((c: any) => ({
         sha: String(c.id || c.sha || ''),
         shortSha: String(c.id || c.sha || '').slice(0, 7),
@@ -486,7 +493,9 @@ export function parseGitHubWebhook(
       const statusLabel = action === 'closed' ? 'Closed' : action === 'reopened' ? 'Reopened' : 'Opened';
       const icon = action === 'closed' ? '🟣' : '🟢';
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const labels = Array.isArray(issue['labels'])
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         ? issue['labels'].map((l: any) => (typeof l === 'string' ? l : l.name)).filter(Boolean)
         : [];
 

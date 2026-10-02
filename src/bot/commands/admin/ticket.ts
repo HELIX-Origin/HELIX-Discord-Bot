@@ -8,7 +8,6 @@ import {
   type InteractionResponse,
 } from '../../utils/types.js';
 import { createEmbed, EMBED_COLORS, successEmbed } from '../../utils/embeds.js';
-import { registerCommandMetadata, type BotCommand } from '../../handlers/registry.js';
 import { dispatchAuditLog } from '../../lib/admin/auditlog.js';
 
 import { ticketOptions, TICKET_ACTIONS, type TicketAction } from '../../lib/options/ticket.js';

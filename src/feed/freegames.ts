@@ -2,7 +2,19 @@ import { fetchRaw } from './fetch.js';
 import { decodeHtmlEntities, stripHtml } from './parser.js';
 
 export type FreeGamePlatformKey =
-  'gamerpower' | 'epic' | 'steam' | 'gog' | 'indiegala' | 'humble' | 'itchio' | 'ubisoft' | 'ea' | 'prime' | 'battlenet' | 'all';
+  | 'gamerpower'
+  | 'epic'
+  | 'steam'
+  | 'gog'
+  | 'indiegala'
+  | 'humble'
+  | 'itchio'
+  | 'ubisoft'
+  | 'ea'
+  | 'prime'
+  | 'battlenet'
+  | 'stove'
+  | 'all';
 
 export interface FreeGameItem {
   id: string;
@@ -19,6 +31,7 @@ export interface FreeGameItem {
     | 'EA App'
     | 'Prime Gaming'
     | 'Battle.net'
+    | 'Stove'
     | 'PC';
   platformKey: FreeGamePlatformKey;
   url: string;
@@ -92,6 +105,12 @@ export const PLATFORM_BRANDING: Record<string, { name: string; color: number; ic
     iconUrl:
       'https://images.weserv.nl/?url=raw.githubusercontent.com/simple-icons/simple-icons/develop/icons/battledotnet.svg&w=128&h=128&output=png',
     tag: 'Battle.net',
+  },
+  stove: {
+    name: 'Stove',
+    color: 0xff6b00, // Stove orange
+    iconUrl: 'https://images.weserv.nl/?url=page.onstove.com/favicon.ico&w=128&h=128&output=png',
+    tag: 'Stove',
   },
   gamerpower: {
     name: 'GamerPower',
@@ -215,7 +234,200 @@ async function fetchEpicGamesPromotions(): Promise<FreeGameItem[]> {
 }
 
 /**
- * Fetch giveaways from GamerPower API covering Steam, GOG, and Epic Games Store
+ * Resolves any redirect or aggregator URLs to the direct destination store page of the free game.
+ * Follows HTTP 3xx redirects (up to maxHops) with manual redirect handling and timeout protection.
+ */
+export async function resolveDirectGiveawayUrl(
+  rawUrl: string,
+  maxHops = 5,
+  timeoutMs = 5000,
+): Promise<string> {
+  if (!rawUrl || !rawUrl.startsWith('http')) return rawUrl;
+  let currentUrl = rawUrl;
+
+  for (let hop = 0; hop < maxHops; hop++) {
+    try {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+      const res = await fetch(currentUrl, {
+        method: 'GET',
+        redirect: 'manual',
+        signal: controller.signal,
+        headers: {
+          'User-Agent':
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+          Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        },
+      });
+      clearTimeout(timer);
+
+      if ([301, 302, 303, 307, 308].includes(res.status)) {
+        const location = res.headers.get('location');
+        if (!location) break;
+        currentUrl = new URL(location, currentUrl).toString();
+      } else {
+        break;
+      }
+    } catch {
+      break;
+    }
+  }
+
+  return currentUrl;
+}
+
+/**
+ * Accurately detects the storefront platform and key from the direct giveaway URL,
+ * platform metadata, title, instructions, and description.
+ */
+export function detectStorePlatform(
+  item: {
+    platforms?: string;
+    open_giveaway_url?: string;
+    gamerpower_url?: string;
+    title?: string;
+    instructions?: string;
+    description?: string;
+  },
+  directUrl?: string,
+): { platform: FreeGameItem['platform']; platformKey: FreeGamePlatformKey } {
+  const platformsStr = (item.platforms || '').toLowerCase();
+  const titleStr = (item.title || '').toLowerCase();
+  const instrStr = (item.instructions || '').toLowerCase();
+  const descStr = (item.description || '').toLowerCase();
+  const urlStr = (directUrl || item.open_giveaway_url || item.gamerpower_url || '').toLowerCase();
+
+  // 1. Epic Games Store
+  if (
+    urlStr.includes('epicgames.com') ||
+    platformsStr.includes('epic') ||
+    titleStr.includes('(epic') ||
+    titleStr.includes('[epic') ||
+    titleStr.includes('epic games')
+  ) {
+    return { platform: 'Epic Games Store', platformKey: 'epic' };
+  }
+
+  // 2. GOG
+  if (
+    urlStr.includes('gog.com') ||
+    platformsStr.includes('gog') ||
+    titleStr.includes('(gog') ||
+    titleStr.includes('[gog') ||
+    titleStr.includes(' gog ')
+  ) {
+    return { platform: 'GOG', platformKey: 'gog' };
+  }
+
+  // 3. Stove
+  if (
+    urlStr.includes('onstove.com') ||
+    platformsStr.includes('stove') ||
+    titleStr.includes('(stove') ||
+    titleStr.includes('[stove') ||
+    titleStr.includes('stove')
+  ) {
+    return { platform: 'Stove', platformKey: 'stove' };
+  }
+
+  // 4. IndieGala
+  if (
+    urlStr.includes('indiegala.com') ||
+    platformsStr.includes('indiegala') ||
+    titleStr.includes('(indiegala') ||
+    titleStr.includes('[indiegala') ||
+    titleStr.includes('indiegala')
+  ) {
+    return { platform: 'IndieGala', platformKey: 'indiegala' };
+  }
+
+  // 5. Itch.io
+  if (
+    urlStr.includes('itch.io') ||
+    platformsStr.includes('itch') ||
+    titleStr.includes('(itch') ||
+    titleStr.includes('[itch') ||
+    titleStr.includes('itch.io')
+  ) {
+    return { platform: 'Itch.io', platformKey: 'itchio' };
+  }
+
+  // 6. Humble Bundle
+  if (
+    urlStr.includes('humblebundle.com') ||
+    platformsStr.includes('humble') ||
+    titleStr.includes('(humble') ||
+    titleStr.includes('[humble') ||
+    titleStr.includes('humble')
+  ) {
+    return { platform: 'Humble Bundle', platformKey: 'humble' };
+  }
+
+  // 7. Ubisoft
+  if (
+    urlStr.includes('ubisoft.com') ||
+    platformsStr.includes('ubisoft') ||
+    platformsStr.includes('uplay') ||
+    titleStr.includes('ubisoft') ||
+    titleStr.includes('uplay')
+  ) {
+    return { platform: 'Ubisoft', platformKey: 'ubisoft' };
+  }
+
+  // 8. EA App / Origin
+  if (
+    urlStr.includes('ea.com') ||
+    urlStr.includes('origin.com') ||
+    platformsStr.includes('origin') ||
+    platformsStr.includes('ea app') ||
+    titleStr.includes('ea app') ||
+    titleStr.includes('origin')
+  ) {
+    return { platform: 'EA App', platformKey: 'ea' };
+  }
+
+  // 9. Prime Gaming
+  if (
+    urlStr.includes('gaming.amazon.com') ||
+    urlStr.includes('amazon.com') ||
+    platformsStr.includes('prime') ||
+    platformsStr.includes('twitch prime') ||
+    titleStr.includes('prime gaming')
+  ) {
+    return { platform: 'Prime Gaming', platformKey: 'prime' };
+  }
+
+  // 10. Battle.net
+  if (
+    urlStr.includes('battle.net') ||
+    urlStr.includes('blizzard.com') ||
+    platformsStr.includes('battlenet') ||
+    platformsStr.includes('blizzard') ||
+    titleStr.includes('battle.net')
+  ) {
+    return { platform: 'Battle.net', platformKey: 'battlenet' };
+  }
+
+  // 11. Steam (including Steam key giveaways on partner sites like Alienware Arena)
+  if (
+    urlStr.includes('steampowered.com') ||
+    urlStr.includes('steamcommunity.com') ||
+    urlStr.includes('steam') ||
+    platformsStr.includes('steam') ||
+    titleStr.includes('steam') ||
+    instrStr.includes('steam') ||
+    descStr.includes('steam')
+  ) {
+    return { platform: 'Steam', platformKey: 'steam' };
+  }
+
+  // 12. Fallback: PC DRM-Free / GamerPower
+  return { platform: 'PC', platformKey: 'gamerpower' };
+}
+
+/**
+ * Fetch giveaways from GamerPower API covering all PC storefronts
  */
 async function fetchGamerPowerGiveaways(platformKey: FreeGamePlatformKey = 'all'): Promise<FreeGameItem[]> {
   // Always query GamerPower with type=game to retrieve all active game giveaways in a single call.
@@ -228,97 +440,56 @@ async function fetchGamerPowerGiveaways(platformKey: FreeGamePlatformKey = 'all'
     const data = JSON.parse(res.text);
     if (!Array.isArray(data)) return [];
 
-    const items: FreeGameItem[] = [];
-    for (const item of data) {
-      if (item.status !== 'Active') continue;
+    const activeData = data.filter((item) => item.status === 'Active');
 
-      const platformsStr = (item.platforms || '').toLowerCase();
-      const giveawayUrl = (item.open_giveaway_url || item.gamerpower_url || '').toLowerCase();
+    // Concurrently resolve direct giveaway URLs and assign accurate store platforms
+    const resolvedItems = await Promise.all(
+      activeData.map(async (item) => {
+        const rawUrl = item.open_giveaway_url || item.gamerpower_url || '';
+        const directUrl = await resolveDirectGiveawayUrl(rawUrl);
+        const { platform: detectedPlatform, platformKey: detectedKey } = detectStorePlatform(item, directUrl);
 
-      let detectedPlatform: FreeGameItem['platform'] = 'PC';
-      let detectedKey: FreeGamePlatformKey = 'steam';
-
-      if (platformsStr.includes('epic') || giveawayUrl.includes('epicgames.com')) {
-        detectedPlatform = 'Epic Games Store';
-        detectedKey = 'epic';
-      } else if (platformsStr.includes('gog') || giveawayUrl.includes('gog.com')) {
-        detectedPlatform = 'GOG';
-        detectedKey = 'gog';
-      } else if (platformsStr.includes('indiegala') || giveawayUrl.includes('indiegala.com')) {
-        detectedPlatform = 'IndieGala';
-        detectedKey = 'indiegala';
-      } else if (platformsStr.includes('humble') || giveawayUrl.includes('humblebundle.com')) {
-        detectedPlatform = 'Humble Bundle';
-        detectedKey = 'humble';
-      } else if (platformsStr.includes('itch') || giveawayUrl.includes('itch.io')) {
-        detectedPlatform = 'Itch.io';
-        detectedKey = 'itchio';
-      } else if (
-        platformsStr.includes('ubisoft') ||
-        platformsStr.includes('uplay') ||
-        giveawayUrl.includes('ubisoft.com')
-      ) {
-        detectedPlatform = 'Ubisoft';
-        detectedKey = 'ubisoft';
-      } else if (platformsStr.includes('origin') || platformsStr.includes('ea') || giveawayUrl.includes('ea.com')) {
-        detectedPlatform = 'EA App';
-        detectedKey = 'ea';
-      } else if (
-        platformsStr.includes('prime') ||
-        platformsStr.includes('twitch') ||
-        giveawayUrl.includes('amazon.com')
-      ) {
-        detectedPlatform = 'Prime Gaming';
-        detectedKey = 'prime';
-      } else if (
-        platformsStr.includes('battlenet') ||
-        platformsStr.includes('blizzard') ||
-        giveawayUrl.includes('battle.net')
-      ) {
-        detectedPlatform = 'Battle.net';
-        detectedKey = 'battlenet';
-      } else if (platformsStr.includes('steam') || giveawayUrl.includes('steampowered.com')) {
-        detectedPlatform = 'Steam';
-        detectedKey = 'steam';
-      }
-
-      if (platformKey !== 'all' && detectedKey !== platformKey) continue;
-
-      const branding = PLATFORM_BRANDING[detectedKey] || PLATFORM_BRANDING['steam'];
-      const title = decodeHtmlEntities(item.title || 'Free Game Giveaway');
-      const desc = stripHtml(item.description || item.instructions || '') || '';
-      const worth = item.worth && item.worth !== 'N/A' ? `${item.worth} (100% OFF)` : 'Free to Keep';
-
-      let endDateStr: string | null = null;
-      if (item.end_date && item.end_date !== 'N/A') {
-        try {
-          const d = new Date(item.end_date);
-          endDateStr = d.toLocaleDateString('en-US', {
-            weekday: 'short',
-            month: 'short',
-            day: 'numeric',
-          });
-        } catch {
-          endDateStr = item.end_date;
+        if (platformKey !== 'all' && platformKey !== 'gamerpower' && detectedKey !== platformKey) {
+          return null;
         }
-      }
 
-      items.push({
-        id: `${detectedKey}:${item.id || title}`,
-        title,
-        description: desc,
-        platform: detectedPlatform,
-        platformKey: detectedKey,
-        url: item.open_giveaway_url || item.gamerpower_url || '',
-        worth,
-        imageUrl: item.image || item.thumbnail || null,
-        thumbnailUrl: branding.iconUrl,
-        endDate: endDateStr,
-        publishedAt: item.published_date || null,
-      });
-    }
+        const branding =
+          PLATFORM_BRANDING[detectedKey] || PLATFORM_BRANDING['gamerpower'] || PLATFORM_BRANDING['steam'];
+        const title = decodeHtmlEntities(item.title || 'Free Game Giveaway');
+        const desc = stripHtml(item.description || item.instructions || '') || '';
+        const worth = item.worth && item.worth !== 'N/A' ? `${item.worth} (100% OFF)` : 'Free to Keep';
 
-    return items;
+        let endDateStr: string | null = null;
+        if (item.end_date && item.end_date !== 'N/A') {
+          try {
+            const d = new Date(item.end_date);
+            endDateStr = d.toLocaleDateString('en-US', {
+              weekday: 'short',
+              month: 'short',
+              day: 'numeric',
+            });
+          } catch {
+            endDateStr = item.end_date;
+          }
+        }
+
+        return {
+          id: `${detectedKey}:${item.id || title}`,
+          title,
+          description: desc,
+          platform: detectedPlatform,
+          platformKey: detectedKey,
+          url: directUrl || rawUrl,
+          worth,
+          imageUrl: item.image || item.thumbnail || null,
+          thumbnailUrl: branding.iconUrl,
+          endDate: endDateStr,
+          publishedAt: item.published_date || null,
+        } as FreeGameItem;
+      }),
+    );
+
+    return resolvedItems.filter((item): item is FreeGameItem => item !== null);
   } catch {
     return [];
   }
@@ -329,13 +500,13 @@ async function fetchGamerPowerGiveaways(platformKey: FreeGamePlatformKey = 'all'
  */
 function normalizeGameTitle(title: string): string {
   let cleaned = decodeHtmlEntities(title);
-  cleaned = cleaned.replace(/\s*[-–—]\s*(?:Steam|Epic|GOG|Ubisoft|PC).*$/i, '');
+  cleaned = cleaned.replace(/\s*[-–—]\s*(?:Steam|Epic|GOG|Ubisoft|PC|Stove).*$/i, '');
   cleaned = cleaned.replace(
-    /\s*\([^)]*(?:epic|steam|gog|ubisoft|origin|ea|indie|humble|itch|prime|blizzard|battle\.net|pc|giveaway|free)[^)]*\)/gi,
+    /\s*\([^)]*(?:epic|steam|gog|ubisoft|origin|ea|indie|humble|itch|prime|blizzard|battle\.net|pc|stove|giveaway|free)[^)]*\)/gi,
     '',
   );
   cleaned = cleaned.replace(
-    /\s*\[[^\]]*(?:epic|steam|gog|ubisoft|origin|ea|indie|humble|itch|prime|blizzard|battle\.net|pc|giveaway|free)[^\]]*\]/gi,
+    /\s*\[[^\]]*(?:epic|steam|gog|ubisoft|origin|ea|indie|humble|itch|prime|blizzard|battle\.net|pc|stove|giveaway|free)[^\]]*\]/gi,
     '',
   );
   cleaned = cleaned.replace(/\b(?:giveaway|free to keep|free key|key giveaway|free)\b/gi, '');
@@ -376,6 +547,15 @@ export async function fetchFreeGames(platform: FreeGamePlatformKey = 'gamerpower
     }
     uniqueItems.push(item);
   }
+
+  // Universal Redirect Rule: every giveaway url MUST link to the actual store page
+  await Promise.all(
+    uniqueItems.map(async (item) => {
+      if (item.url && (item.url.includes('gamerpower.com/open') || item.url.includes('bit.ly') || item.url.includes('t.co'))) {
+        item.url = await resolveDirectGiveawayUrl(item.url);
+      }
+    }),
+  );
 
   return uniqueItems;
 }

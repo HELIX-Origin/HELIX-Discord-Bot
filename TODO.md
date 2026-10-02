@@ -193,35 +193,75 @@
 
 ### Workstream: Free Games Reliability, Embed Platform Branding & Dashboard Pill Catalogs
 
+### Workstream: Free Games Provider-Based Architecture & Direct Store URL Resolution
+
 **Locked user directives:**
-- "free game alerts only seem to work when all platfroms is chosen. individual platforms are hit or miss."
-- "the all platforms one shouldn't replace the platform information in the embeds. right now it's replacing the footer information."
-- "we should adjust the page to use pill sections to enable the options as well, just like the reddit and news feed tabs."
+- Restructure Free Game feeds around genuine providers (GamerPower Free Game Alerts & Epic Games Store Official) rather than splitting GamerPower into fake platform feeds.
+- Embed footer must be completely removed from free game embeds.
+- The platform the alert is for must be prominently displayed in the `🏷️ Platform` embed field so users redeem on the correct platform.
+- Universal Redirect Rule: for EVERY Free Game alert, regardless of platform, the giveaway URL in the embed must link directly to the actual page for the game being given away, resolving intermediate redirect links.
+- When recording user-reported issues in `BUGS.md`, fix any typos so the recorded messages are clean and error-free.
 
 **Implementation checklist:**
-- [x] `src/feed/freegames.ts`: Overhaul storefront fetching and detection
-  - Use `platform=pc&type=game` on GamerPower to prevent HTTP 404 errors for IndieGala, Humble, and Prime Gaming
-  - Implement `detectGamerPowerPlatform` to inspect titles, URLs, and descriptions, resolving storefront even when GamerPower marks as `PC, DRM-Free`
-  - Add `'pc'` to `PLATFORM_BRANDING`
-- [x] `src/feed/watcher.ts`: Fix platform key resolution in `pollFreeGamesLocked`
-  - Removed early `lowerUrl.includes('epic')` check that erroneously forced all feeds with store.epicgames.com to Epic, ignoring `free_games_steam`, `free_games_gog`, etc.
-  - Strict matching against `feed.feedType` and `freegames://` URLs
-- [x] `src/bot/commands/feeds/free-games.ts`: Modernize `/free-games` slash command
-  - Store `url: freegames://${platformSlug}` instead of hardcoded Epic URL
-  - Expand choices for IndieGala, Itch.io, EA App, and Battle.net
-- [x] `src/bot/utils/embeds.ts`: Preserve individual platform branding in embed footer
-  - When "All Platforms" / "All Stores & Giveaways" is configured, preserve individual game platform name and icon in footer instead of overwriting with all-platforms feed title
-- [x] `src/dashboard/views/dashboard/sources.ts`: Add pill catalog UI
-  - Add `#freegames-options-container` catalog card to Free Games tab
-  - Add `#reddit-presets-container` catalog card to Reddit tab
-- [x] `src/dashboard/views/dashboard/clientScript.ts`: Dynamic pill rendering and one-click enablement
-  - Implement `renderFreeGamesOptions` and `enableFreeGamesOption`
-  - Implement `renderRedditPresets` and `enableRedditPreset`
-  - Update add/delete handlers to refresh option pill catalogs seamlessly
-- [x] `tests/unit/feed/freegames.test.ts`: Comprehensive unit tests for multi-storefront fetching and embed footer branding preservation
-- [x] `tests/unit/dashboard/views.test.ts` & `tests/unit/feed/watcher.test.ts`: Tests for catalog containers, client functions, and watcher platform resolution
-- [ ] Export `FetchResult` interface in `src/feed/fetch.ts` and pass full validation gate (`npm run check` and `npm run build`)
-- [ ] Commit, push, and sync release notes / documentation
+- [x] `src/bot/utils/embeds.ts`: Remove `footer` property completely from `freeGameEmbed`
+- [x] `src/feed/freegames.ts`: Implement `resolveDirectGiveawayUrl` to follow 3xx redirects (up to 5 hops with timeout protection)
+- [x] `src/feed/freegames.ts`: Implement `detectStorePlatform` inspecting resolved direct URLs, titles, instructions, and metadata
+- [x] `src/feed/freegames.ts`: Add `stove` platform branding and `'free_games_stove'` feed type support
+- [x] `src/feed/freegames.ts`: Update `fetchGamerPowerGiveaways` to concurrently resolve direct URLs and accurately identify platforms
+- [x] `src/feed/freegames.ts`: Update `fetchFreeGames` to apply direct store URL resolution universally across all free game items
+- [x] `src/dashboard/views/dashboard/sources.ts` & `clientScript.ts`: Update available feed choices to genuine providers (`gamerpower`, `epic`, `all`)
+- [x] `src/bot/commands/feeds/free-games.ts`: Align choices to genuine providers (`free_games_gamerpower`, `free_games_epic`, `free_games`)
+- [x] `tests/unit/feed/freegames.test.ts`: Add unit tests for `resolveDirectGiveawayUrl`, `detectStorePlatform`, and Stove platform branding (387 passing tests)
+- [x] Clean up all unused imports from command files
+- [x] Clean up user typos in `BUGS.md` and log verified resolution
+
+---
+
+### Workstream: Game Feeds Tab Evolution (Free Games, Deals & Promotions, Patch Notes)
+
+**Locked user directives:**
+- The Free Games tab will become a **Game Feeds** tab.
+- It will support **three** distinct types of feeds from the provided feed sources:
+  1. **Free Game Alerts**: Games that are being given away for free (100% off / free to keep).
+  2. **Deals and Promotions**: Games that are on sale / discounted, but not given away for free.
+  3. **Patch Notes**: Game updates, changelogs, and patch notes.
+
+**Implementation checklist:**
+- [ ] **Architecture & Schema Planning**:
+  - [ ] Define feed type keys: `free_games_*`, `game_deals_*`, `game_patchnotes_*` in `src/state/types.ts`
+  - [ ] Add data provider adapters for Deals and Patch Notes (e.g. Steam Community announcements/patch notes API, CheapShark / IsThereAnyDeal / GamerPower Deals API, RSS game update feeds)
+- [ ] **Feed Fetchers & Parser Engine**:
+  - [ ] Implement `src/feed/gamedeals.ts`: fetch discounted game promotions with discount %, original price, sale price, and direct storefront links
+  - [ ] Implement `src/feed/patchnotes.ts`: parse game patch notes, versions, changelogs, and summary highlights
+  - [ ] Ensure universal direct store URL resolution applies to all game deals and patch notes
+- [ ] **Discord Embed Handlers**:
+  - [ ] `gameDealsEmbed`: showcase game title, platform, discount badge (`🏷️ -75%`), current/original price, savings, and direct claim/buy button
+  - [ ] `patchNotesEmbed`: showcase game title, patch/version number, update summary, key changes, and direct changelog link
+- [ ] **Dashboard UI Redesign (`sources.ts`, `sidebar.ts`, `clientScript.ts`)**:
+  - [ ] Rename sidebar tab from "Free Games" to "Game Feeds" with game controller icon (`fa-gamepad`)
+  - [ ] Sub-category filter / tabs: "Free Games", "Deals & Promotions", "Patch Notes"
+  - [ ] One-click catalog pill sections for each of the three categories
+  - [ ] Form dropdown to add feeds under each specific game feed type
+- [ ] **Discord Slash Commands (`src/bot/commands/feeds/`)**:
+  - [ ] Add `/game-feeds` (or expand `/free-games` into `/game-deals` and `/patch-notes`)
+- [ ] **Test Coverage & Validation**:
+  - [ ] Unit tests for deals fetcher, patch notes fetcher, and custom embeds
+  - [ ] Full validation gate (`npm run check` and `npm run build`) passing 100%
+
+---
+
+### Workstream: Stream Alerts (YouTube & Twitch) Manual Trigger Delivery Fix
+
+**Locked user directives:**
+- "When YouTube and Twitch alerts are manually triggered, they should get the last stream/video posted. Right now they post nothing and it makes me think they aren't working at all."
+
+**Implementation checklist:**
+- [ ] In `src/feed/watcher.ts`: Pass `force: boolean` parameter into `pollStreamAlertFeed(userId, feed, force)`
+- [ ] When `force === true`:
+  - If no unposted entries exist in `toSend`: fetch the single most recent video (YouTube) or most recent stream/VOD status (Twitch)
+  - Deliver this most recent item with an indicator (or as the active stream alert) so the user receives immediate confirmation that the integration and channel handle are working
+- [ ] In `src/dashboard/routes/feeds.ts`: Ensure `/api/feeds/:id/poll` returns delivery status in response JSON
+- [ ] Unit test: Verify manual force poll delivers latest entry even when previously sent
 
 ---
 
@@ -229,9 +269,8 @@
 
 ```
 npm run check               # typecheck + format:check + lint + tests (must pass)
-pnpm build                  # tsc compile to dist/ (must pass)
+npm run build               # tsc compile to dist/ (must pass)
 npm test                    # vitest run
-npx prettier --write src    # only when format:check complains
 ```
 
 ---

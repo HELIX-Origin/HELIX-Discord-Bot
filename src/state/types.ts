@@ -61,6 +61,7 @@ export type FeedType =
   | 'free_games_ea'
   | 'free_games_prime'
   | 'free_games_battlenet'
+  | 'free_games_stove'
   | 'youtube'
   | 'twitch'
   | 'github';
@@ -81,6 +82,7 @@ const FEED_TYPES: readonly FeedType[] = [
   'free_games_ea',
   'free_games_prime',
   'free_games_battlenet',
+  'free_games_stove',
   'youtube',
   'twitch',
   'github',

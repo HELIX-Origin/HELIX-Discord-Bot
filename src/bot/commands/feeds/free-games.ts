@@ -8,7 +8,6 @@ import {
 } from '../../utils/types.js';
 import { EmbedHandler } from '../../lib/embeds/builder.js';
 import { notifyFeedAdded } from '../../lib/feeds/notify.js';
-import { registerCommandMetadata, type BotCommand } from '../../handlers/registry.js';
 import type { FeedType } from '../../../state/types.js';
 
 export const freeGamesCommandDef: ApplicationCommand = {

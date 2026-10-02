@@ -461,6 +461,7 @@ export function registerFeedsRoutes(router: Router<AppDeps>): void {
     }
 
     try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const body = (await readBodyJson(req)) as Record<string, any>;
       const item = parseGitHubWebhook(eventHeader, body);
       if (!item) {
