@@ -51,7 +51,7 @@ describe('Command Toggles & Feature Module Enforcement', () => {
   });
 
   describe('handleGuildMemberAdd()', () => {
-    it('aborts sending welcome messages when welcome command is disabled for the guild', async () => {
+    it('aborts sending welcome messages when welcome feature is disabled for the guild', async () => {
       const sendSpy = vi.spyOn(welcomeModule, 'sendWelcomeMessage').mockResolvedValue(true);
       vi.spyOn(welcomeModule, 'getWelcomeConfig').mockReturnValue({
         enabled: true,
@@ -65,7 +65,7 @@ describe('Command Toggles & Feature Module Enforcement', () => {
 
       const mockDeps = {
         repo: {
-          getGuildSetting: (gId: string, k: string) => (k === 'cmd_disabled_welcome' ? '1' : null),
+          getGuildSetting: (gId: string, k: string) => (k === 'feature_welcome' ? '0' : null),
         },
       } as unknown as AppDeps;
 
@@ -83,7 +83,7 @@ describe('Command Toggles & Feature Module Enforcement', () => {
       expect(sendSpy).not.toHaveBeenCalled();
     });
 
-    it('sends welcome messages when welcome command is enabled', async () => {
+    it('sends welcome messages when welcome feature is enabled', async () => {
       const sendSpy = vi.spyOn(welcomeModule, 'sendWelcomeMessage').mockResolvedValue(true);
       vi.spyOn(welcomeModule, 'getWelcomeConfig').mockReturnValue({
         enabled: true,
@@ -96,11 +96,6 @@ describe('Command Toggles & Feature Module Enforcement', () => {
       });
 
       const mockDeps = {
-        config: {
-          features: {
-            administrationEnabled: true,
-          },
-        },
         repo: {
           getGuildSetting: () => null,
         },
@@ -158,13 +153,8 @@ describe('Command Toggles & Feature Module Enforcement', () => {
       const ticketSpy = vi.spyOn(ticketModule, 'handleTicketButton').mockResolvedValue({ type: 4 });
 
       const mockDeps = {
-        config: {
-          features: {
-            administrationEnabled: true,
-          },
-        },
         repo: {
-          getGuildSetting: (gId: string, k: string) => (k === 'cmd_disabled_ticket' ? '1' : null),
+          getGuildSetting: (gId: string, k: string) => (k === 'feature_ticket' ? '0' : null),
         },
       } as unknown as AppDeps;
 
@@ -189,32 +179,7 @@ describe('Command Toggles & Feature Module Enforcement', () => {
     });
   });
 
-  describe('FeedWatcher guild command & feature toggles', () => {
-    it('skips polling when the corresponding feed command is disabled for the guild', async () => {
-      const { Database } = await import('../../../src/db/database.js');
-      const { Repository } = await import('../../../src/db/repository.js');
-      const { FeedWatcher } = await import('../../../src/feed/watcher.js');
-      const fetchModule = await import('../../../src/feed/fetch.js');
-
-      const db = Database.open(':memory:');
-      const userRow = db.raw
-        .prepare("INSERT INTO users (email, password_hash, display_name, role, created_at) VALUES (?, ?, ?, 'member', ?)")
-        .run('test@helix.local', 'x', 'Test', new Date().toISOString());
-      const uId = Number(userRow.lastInsertRowid);
-      const repo = new Repository(db);
-
-      const feed = repo.addFeed(uId, 'Tech News', 'https://example.com/rss', 'chan-1', 'rss', null, 'guild-100');
-      repo.setGuildSetting('guild-100', 'cmd_disabled_rss', '1');
-
-      const fetchSpy = vi.spyOn(fetchModule, 'fetchRaw');
-      const watcher = new FeedWatcher(repo, null, 'error');
-
-      await watcher.pollFeed(uId, feed.id, true);
-      expect(fetchSpy).not.toHaveBeenCalled();
-
-      db.close();
-    });
-
+  describe('FeedWatcher guild feature toggles', () => {
     it('skips polling when feature_feeds is disabled (0) for the guild', async () => {
       const { Database } = await import('../../../src/db/database.js');
       const { Repository } = await import('../../../src/db/repository.js');

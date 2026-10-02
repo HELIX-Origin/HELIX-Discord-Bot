@@ -14,14 +14,8 @@ import type { AppDeps } from '../../../src/app.js';
 
 function makeMockDeps(
   guildSettings: Record<string, string> = {},
-  featureFlags: { adminEnabled?: boolean } = {},
 ): AppDeps {
   return {
-    config: {
-      features: {
-        administrationEnabled: featureFlags.adminEnabled ?? true,
-      },
-    },
     repo: {
       getGuildSetting(guildId: string, key: string) {
         return guildSettings[`${guildId}:${key}`] ?? null;
@@ -43,10 +37,9 @@ describe('isCommandDisabled()', () => {
   const mockAdminCmd: BotCommand = {
     def: {
       name: 'testadmincmd',
-      description: 'An admin command gated by feature flag',
+      description: 'An admin command',
     },
     category: 'admin',
-    isEnabled: (deps) => Boolean(deps.config.features.administrationEnabled),
     execute: async () => ({ type: 4 }),
   };
 
@@ -68,16 +61,6 @@ describe('isCommandDisabled()', () => {
   it('is case-insensitive for command name', () => {
     const deps = makeMockDeps();
     expect(isCommandDisabled('guild-1', 'TestCommand', deps)).toBe(false);
-  });
-
-  it('returns true when command is disabled globally via isEnabled', () => {
-    const deps = makeMockDeps({}, { adminEnabled: false });
-    expect(isCommandDisabled('guild-1', 'testadmincmd', deps)).toBe(true);
-  });
-
-  it('returns false when command is enabled globally via isEnabled', () => {
-    const deps = makeMockDeps({}, { adminEnabled: true });
-    expect(isCommandDisabled('guild-1', 'testadmincmd', deps)).toBe(false);
   });
 
   it('returns true when command is explicitly disabled for a guild in repo', () => {
@@ -105,36 +88,5 @@ describe('isCommandDisabled()', () => {
     const deps = makeMockDeps();
     expect(isCommandDisabled(null, 'testcommand', deps)).toBe(false);
     expect(isCommandDisabled(undefined, 'testcommand', deps)).toBe(false);
-  });
-
-  it('disables feed commands when feature_feeds is 0 for guild', () => {
-    const mockRssCmd: BotCommand = {
-      def: { name: 'rss', description: 'RSS command' },
-      category: 'feeds',
-      execute: async () => ({ type: 4 }),
-    };
-    registerCommand(mockRssCmd);
-
-    const depsEnabled = makeMockDeps({});
-    expect(isCommandDisabled('guild-1', 'rss', depsEnabled)).toBe(false);
-
-    const depsDisabled = makeMockDeps({ 'guild-1:feature_feeds': '0' });
-    expect(isCommandDisabled('guild-1', 'rss', depsDisabled)).toBe(true);
-    expect(isCommandDisabled('guild-2', 'rss', depsDisabled)).toBe(false);
-  });
-
-  it('disables stream commands when feature_streamalerts is 0 for guild', () => {
-    const mockYtCmd: BotCommand = {
-      def: { name: 'youtube', description: 'YouTube command' },
-      category: 'feeds',
-      execute: async () => ({ type: 4 }),
-    };
-    registerCommand(mockYtCmd);
-
-    const depsEnabled = makeMockDeps({});
-    expect(isCommandDisabled('guild-1', 'youtube', depsEnabled)).toBe(false);
-
-    const depsDisabled = makeMockDeps({ 'guild-1:feature_streamalerts': '0' });
-    expect(isCommandDisabled('guild-1', 'youtube', depsDisabled)).toBe(true);
   });
 });

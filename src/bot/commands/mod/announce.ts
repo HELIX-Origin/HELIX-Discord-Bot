@@ -113,6 +113,5 @@ registerCommandMetadata({
 export const announceCommand: BotCommand = {
   def: announceCommandDef,
   category: 'mod',
-  isEnabled: (deps) => Boolean(deps.config.features.administrationEnabled),
   execute: handleAnnounceCommand,
 };

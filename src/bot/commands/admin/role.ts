@@ -245,6 +245,5 @@ registerCommandMetadata({
 export const roleCommand: BotCommand = {
   def: roleCommandDef,
   category: 'admin',
-  isEnabled: (deps) => Boolean(deps.config.features.administrationEnabled),
   execute: handleRoleCommand,
 };

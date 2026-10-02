@@ -136,6 +136,5 @@ registerCommandMetadata({
 export const purgeCommand: BotCommand = {
   def: purgeCommandDef,
   category: 'mod',
-  isEnabled: (deps) => Boolean(deps.config.features.administrationEnabled),
   execute: handlePurgeCommand,
 };

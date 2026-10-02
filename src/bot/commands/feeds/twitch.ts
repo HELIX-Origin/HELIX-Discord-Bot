@@ -363,25 +363,5 @@ export async function handleTwitchCommand(
     .respond();
 }
 
-registerCommandMetadata({
-  name: 'twitch',
-  description: 'Manage Twitch livestream alerts for this server',
-  category: 'feeds',
-  emoji: '🟣',
-  usage: '/twitch <add|list|remove|toggle|check>',
-  options: twitchCommandDef.options,
-  examples: [
-    '/twitch add streamer:ninja',
-    '/twitch add streamer:https://twitch.tv/shroud',
-    '/twitch list',
-    '/twitch toggle id:1 enabled:false',
-    '/twitch check',
-  ],
-});
+// Slash command registration removed — Twitch alerts are configured exclusively via Web Dashboard
 
-export const twitchCommand: BotCommand = {
-  def: twitchCommandDef,
-  category: 'feeds',
-  isEnabled: (deps) => Boolean(deps.config.features.streamAlertsEnabled),
-  execute: handleTwitchCommand,
-};

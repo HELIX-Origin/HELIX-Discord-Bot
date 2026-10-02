@@ -382,25 +382,5 @@ export async function handleYouTubeCommand(
     .respond();
 }
 
-registerCommandMetadata({
-  name: 'youtube',
-  description: 'Manage YouTube upload and livestream alerts for this server',
-  category: 'feeds',
-  emoji: '▶️',
-  usage: '/youtube <add|list|remove|toggle|check>',
-  options: youtubeCommandDef.options,
-  examples: [
-    '/youtube add channel_id:@veritasium',
-    '/youtube add channel_id:UCsXVk37bltHxD1rDPwtNM8Q name:"Kurzgesagt"',
-    '/youtube list',
-    '/youtube toggle id:1 enabled:false',
-    '/youtube check',
-  ],
-});
+// Slash command registration removed — YouTube alerts are configured exclusively via Web Dashboard
 
-export const youtubeCommand: BotCommand = {
-  def: youtubeCommandDef,
-  category: 'feeds',
-  isEnabled: (deps) => Boolean(deps.config.features.streamAlertsEnabled),
-  execute: handleYouTubeCommand,
-};

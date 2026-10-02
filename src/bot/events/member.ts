@@ -1,7 +1,6 @@
 import type { AppDeps } from '../../app.js';
 import type { DiscordBot } from '../bot.js';
 import { getWelcomeConfig, sendWelcomeMessage } from '../commands/admin/welcome.js';
-import { isCommandDisabled } from '../handlers/registry.js';
 
 export async function handleGuildMemberAdd(
   member: import('discord.js').GuildMember,
@@ -9,7 +8,7 @@ export async function handleGuildMemberAdd(
   deps: AppDeps,
 ): Promise<void> {
   const guildId = member.guild.id;
-  if (isCommandDisabled(guildId, 'welcome', deps)) return;
+  if (deps.repo.getGuildSetting(guildId, 'feature_welcome') === '0') return;
 
   const config = getWelcomeConfig(deps, guildId);
   if (!config.enabled || !config.channelId) return;

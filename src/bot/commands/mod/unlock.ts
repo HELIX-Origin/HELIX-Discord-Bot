@@ -142,6 +142,5 @@ registerCommandMetadata({
 export const unlockCommand: BotCommand = {
   def: unlockCommandDef,
   category: 'mod',
-  isEnabled: (deps) => Boolean(deps.config.features.administrationEnabled),
   execute: handleUnlockCommand,
 };

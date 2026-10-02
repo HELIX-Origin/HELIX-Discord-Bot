@@ -27,7 +27,6 @@ export interface CommandHelpMetadata {
 export interface BotCommand {
   readonly def: ApplicationCommand;
   readonly category: CommandCategory;
-  readonly isEnabled?: (deps: AppDeps) => boolean;
   readonly execute: (
     interaction: DiscordInteraction,
     deps: AppDeps,
@@ -112,14 +111,8 @@ export function getAllCommands(): BotCommand[] {
   return [...commandRegistry.values()];
 }
 
-export function getEnabledCommands(deps: AppDeps): ApplicationCommand[] {
-  const enabled: ApplicationCommand[] = [];
-  for (const cmd of commandRegistry.values()) {
-    if (!cmd.isEnabled || cmd.isEnabled(deps)) {
-      enabled.push(cmd.def);
-    }
-  }
-  return enabled;
+export function getEnabledCommands(_deps?: AppDeps): ApplicationCommand[] {
+  return [...commandRegistry.values()].map((cmd) => cmd.def);
 }
 
 export function getGuildEnabledCommands(guildId: string, deps: AppDeps): ApplicationCommand[] {
@@ -167,34 +160,16 @@ export function getCategorizedCommands(): CategorizedCommands {
 }
 
 /**
- * Checks whether a command is disabled either globally (via feature flags)
- * or for a specific guild (via guild administration settings).
+ * Checks whether a command is disabled for a specific guild (via guild administration settings).
  */
 export function isCommandDisabled(guildId: string | null | undefined, commandName: string, deps: AppDeps): boolean {
   const normalized = commandName.toLowerCase();
   const cmd = getCommand(normalized);
   if (!cmd) return true;
 
-  // 1. Global / feature flag check
-  if (cmd.isEnabled && deps?.config && !cmd.isEnabled(deps)) {
+  // Guild-level command disabled setting
+  if (guildId && deps?.repo && deps.repo.getGuildSetting(guildId, `cmd_disabled_${normalized}`) === '1') {
     return true;
-  }
-
-  // 2. Guild-level command disabled setting
-  if (guildId) {
-    if (deps.repo.getGuildSetting(guildId, `cmd_disabled_${normalized}`) === '1') {
-      return true;
-    }
-    if (['rss', 'reddit', 'free-games'].includes(normalized)) {
-      if (deps.repo.getGuildSetting(guildId, 'feature_feeds') === '0') {
-        return true;
-      }
-    }
-    if (['youtube', 'twitch'].includes(normalized)) {
-      if (deps.repo.getGuildSetting(guildId, 'feature_streamalerts') === '0') {
-        return true;
-      }
-    }
   }
 
   return false;

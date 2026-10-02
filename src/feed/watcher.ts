@@ -88,7 +88,7 @@ export class FeedWatcher {
     const guildId = feed.guildId;
     if (!guildId) return false;
 
-    // 1. Feature flags check
+    // Feature toggles check (managed exclusively via dashboard)
     if (['rss', 'scrape', 'reddit'].includes(feed.feedType) || feed.feedType.startsWith('free_games')) {
       if (this.repo.getGuildSetting(guildId, 'feature_feeds') === '0') {
         return true;
@@ -97,24 +97,6 @@ export class FeedWatcher {
       if (this.repo.getGuildSetting(guildId, 'feature_streamalerts') === '0') {
         return true;
       }
-    }
-
-    // 2. Command toggles check
-    let cmdName: string | null = null;
-    if (feed.feedType === 'rss' || feed.feedType === 'scrape') {
-      cmdName = 'rss';
-    } else if (feed.feedType === 'reddit') {
-      cmdName = 'reddit';
-    } else if (feed.feedType.startsWith('free_games')) {
-      cmdName = 'free-games';
-    } else if (feed.feedType === 'youtube') {
-      cmdName = 'youtube';
-    } else if (feed.feedType === 'twitch') {
-      cmdName = 'twitch';
-    }
-
-    if (cmdName && this.repo.getGuildSetting(guildId, `cmd_disabled_${cmdName}`) === '1') {
-      return true;
     }
 
     return false;

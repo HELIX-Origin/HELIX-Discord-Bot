@@ -6,7 +6,6 @@ import { getThemeCss, resolveThemeAndScheme } from './theme.js';
 export function renderAdminHtml(deps: AppDeps, userId: number | null): string {
   const appName = appDisplayName(deps);
   const appIconUrl = deps.bot?.getAppIconUrl() || null;
-  const features = deps.config.features;
   const { theme } = resolveThemeAndScheme(deps);
 
   return `<!DOCTYPE html>
@@ -109,7 +108,7 @@ export function renderAdminHtml(deps: AppDeps, userId: number | null): string {
       <div id="admin-logs" class="log-container">Loading logs...</div>
     </div>
   </div>
-  ${renderFooter(deps, { dashboardEnabled: features.dashboardEnabled })}
+  ${renderFooter(deps, { dashboardEnabled: true })}
   <script>
     async function loadStats() {
       try {

@@ -13,9 +13,6 @@ function makeDeps(): AppDeps {
       internalUrl: 'http://localhost:3000',
       ownerIds: [1],
       adminIds: [1],
-      features: {
-        adminPanelEnabled: true,
-      },
     },
     bot: {
       getAppName: () => 'HELIX',

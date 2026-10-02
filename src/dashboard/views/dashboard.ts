@@ -137,7 +137,7 @@ export function renderDashboardHtml(
         <div class="user-menu-list" id="user-menu-list" role="menu">
           <a href="/guilds" role="menuitem" class="user-menu-item"><i class="fa-solid fa-server"></i> <span>Servers</span></a>
           ${
-            isOwner && deps.config.features.adminPanelEnabled
+            isOwner
               ? `<a href="/admin" role="menuitem" class="user-menu-item"><i class="fa-solid fa-screwdriver-wrench"></i> <span>Developer Tools</span></a>`
               : ''
           }

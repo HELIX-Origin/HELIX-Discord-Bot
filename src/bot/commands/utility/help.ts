@@ -93,7 +93,21 @@ export async function handleHelpCommand(interaction: DiscordInteraction, deps: A
   const query = options.find((opt) => opt.name === 'command')?.value;
 
   if (typeof query === 'string' && query.trim()) {
-    const targetMeta = getCommandMetadata(query.trim().replace(/^\/+/, '').toLowerCase());
+    const cleanQuery = query.trim().replace(/^\/+/, '').toLowerCase();
+    const DASHBOARD_CONFIGURED = ['rss', 'reddit', 'youtube', 'twitch', 'free-games', 'welcome', 'ticket', 'set', 'server', 'feeds'];
+
+    if (DASHBOARD_CONFIGURED.includes(cleanQuery)) {
+      return EmbedHandler.for(deps)
+        .info()
+        .title('Configured via Web Dashboard', '🖥️')
+        .description(
+          `**${cleanQuery.toUpperCase()}** configuration is managed exclusively through the Web Dashboard.\n\nPlease log in to the dashboard to set up feeds, alerts, channels, welcome announcements, support tickets, and server settings with live previews and full options.`,
+        )
+        .footer('Web Dashboard Configuration')
+        .respond();
+    }
+
+    const targetMeta = getCommandMetadata(cleanQuery);
     if (targetMeta) {
       return buildCommandDetail(EmbedHandler.for(deps), targetMeta).respond();
     }

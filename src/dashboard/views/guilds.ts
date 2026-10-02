@@ -6,7 +6,6 @@ import { getThemeCss, resolveThemeAndScheme } from './theme.js';
 export function renderGuildsHtml(deps: AppDeps, userId: number | null): string {
   const appName = appDisplayName(deps);
   const appIconUrl = deps.bot?.getAppIconUrl() || null;
-  const features = deps.config.features;
   const { theme } = resolveThemeAndScheme(deps);
 
   return `<!DOCTYPE html>
@@ -48,7 +47,7 @@ export function renderGuildsHtml(deps: AppDeps, userId: number | null): string {
   <div class="guild-grid" id="guild-grid">
     <div class="empty-state">Loading servers...</div>
   </div>
-  ${renderFooter(deps, { dashboardEnabled: features.dashboardEnabled })}
+  ${renderFooter(deps, { dashboardEnabled: true })}
   <script>
     function guildIconUrl(id, icon) {
       return icon ? 'https://cdn.discordapp.com/icons/' + id + '/' + icon + '.png' : '';

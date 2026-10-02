@@ -1,4 +1,4 @@
-﻿---
+---
 layout: documentation
 title: "Guild Administration"
 ---
@@ -22,7 +22,7 @@ HELIX Discord Bot includes a comprehensive administration system for server mode
 | `/slowmode` | `seconds: <number>` (0–21600), `channel: <channel?>` | `Manage Channels` | Set slowmode delay on a channel. |
 | `/announce` | `channel: <channel>`, `message: <string>`, `title: <string?>` | `Manage Channels` | Send an announcement embed to a channel. |
 
-> All moderation actions are logged to the configured mod log channel (set via `/set mod-log-channel` or dashboard).
+> All moderation actions are logged to the configured mod log channel (set via web dashboard).
 
 ---
 
@@ -53,12 +53,7 @@ HELIX Discord Bot includes a comprehensive administration system for server mode
 
 ## 👋 Welcome Message System
 
-HELIX Discord Bot provides a fully customizable welcome announcement system triggered automatically when a new member joins the server.
-
-### Commands & Options
-| Command | Options | Required Permission | Description |
-| :--- | :--- | :--- | :--- |
-| `/welcome` | `action: setup\|channel\|message\|view\|test\|disable`, `channel: <channel?>`, `content: <string?>`, `embed: <bool?>`, `color: <string?>`, `thumbnail: <bool?>`, `banner: <string?>` | `Manage Guild` | Configure and test the welcome announcement system. |
+HELIX Discord Bot provides a fully customizable welcome announcement system triggered automatically when a new member joins the server. Configuration is managed exclusively via the **Web Dashboard** (**General → Welcome Message**).
 
 ### Dynamic Placeholders
 Welcome messages support the following dynamic variables in both plain text and embed descriptions:
@@ -82,10 +77,7 @@ Configurable under **General → Welcome Message** on the web dashboard:
 
 HELIX Discord Bot includes a native thread-based support ticket system. A sticky prompt message containing an interactive **[🎫 Open Ticket]** button is posted to your configured ticket channel. When a member clicks the button, the bot automatically creates a dedicated private thread and pings the support manager role.
 
-### Commands & Options
-| Command | Options | Required Permission | Description |
-| :--- | :--- | :--- | :--- |
-| `/ticket` | `action: setup\|disable\|view\|create\|close\|add\|remove\|claim\|transcript`, `channel: <channel?>`, `manager_role: <role?>`, `transcript_channel: <channel?>`, `log_channel: <channel?>`, `message: <string?>`, `embed: <bool?>`, `color: <string?>`, `reason: <string?>`, `user: <user?>` | `Manage Channels` | Configure, manage, and handle support tickets. |
+Configuration is managed exclusively via the **Web Dashboard** (**General → Support Tickets**).
 
 ### Workflow Architecture
 1. **Host Message**: Bot posts the configured ticket prompt and `[🎫 Open Ticket]` button to the ticket channel. Supports both **Plain Text** and **Rich Embed** formats (`embed: true` or Format dropdown on dashboard).
@@ -98,7 +90,7 @@ HELIX Discord Bot includes a native thread-based support ticket system. A sticky
    - `{mention}`: User mention ping (`<@user>`)
 3. **Ticket Creation**: Clicking the button creates a new thread in the channel (e.g. `ticket-username`) and adds the member.
 4. **Manager Role Alert**: If a Support Manager role is configured, the bot mentions/adds the role to the thread for rapid staff response.
-5. **Ticket Operations**: Staff and users can add members (`/ticket action:add`), close the ticket (`/ticket action:close`), or archive transcripts.
+5. **Ticket Operations**: Staff and users interact directly within the created thread to resolve support requests.
 
 ### Dashboard Tickets Tab
 Configurable under **General → Support Tickets** on the web dashboard:
@@ -107,12 +99,9 @@ Configurable under **General → Support Tickets** on the web dashboard:
 
 ---
 
-## ⚙️ Server Configuration Commands
+## ⚙️ Server Configuration & Management
 
-| Command | Options | Required Permission | Description |
-| :--- | :--- | :--- | :--- |
-| `/set` | `action: mod-log\|welcome\|tickets\|prefix`, `channel: <channel?>`, `role: <role?>`, `value: <string?>` | `Administrator` | Set server-wide settings and channels. |
-| `/server` | `action: export\|import\|command`, `command_name: <string?>`, `enabled: <bool?>` | `Administrator` | Export/import server settings or enable/disable specific bot commands. |
+Server settings (roles, command toggles, prefix, audit logging, export/import) are managed exclusively through the **Web Dashboard** (**Guild Settings** tab).
 
 ---
 
@@ -129,39 +118,25 @@ All administration commands respect Discord's native permission system:
 
 | Permission | Purpose |
 | :--- | :--- |
-| `Kick Members` | `/admin kick` |
-| `Ban Members` | `/admin ban` |
-| `Moderate Members` | `/admin warn`, timeout (future) |
-| `Manage Channels` | `/admin lock`, `/admin unlock`, `/admin slowmode`, `/admin announce` |
-| `Manage Messages` | `/admin purge` |
-| `Manage Roles` | `/admin role` |
-| `Mute Members` | `/admin voice mute/unmute` |
-| `Deafen Members` | `/admin voice deafen/undeafen` |
-| `Move Members` | `/admin voice move/disconnect` |
+| `Kick Members` | `/kick` |
+| `Ban Members` | `/ban` |
+| `Moderate Members` | `/warn` |
+| `Manage Channels` | `/lock`, `/unlock`, `/slowmode`, `/announce` |
+| `Manage Messages` | `/purge` |
+| `Manage Roles` | `/role` |
+| `Mute Members` | `/voice mute/unmute` |
+| `Deafen Members` | `/voice deafen/undeafen` |
+| `Move Members` | `/voice move/disconnect` |
 | `View Channel` | All channel-targeted commands |
 | `Send Messages` | All response embeds |
 | `Embed Links` | Rich embed responses |
 
 ---
 
-## 📋 Configuration
-
-Administration commands are gated by the `ADMINISTRATION_ENABLED` feature flag (default: `true`).
-
-```env
-# Disable all admin commands
-ADMINISTRATION_ENABLED=false
-```
+## 📋 Mod Log Configuration
 
 ### Mod Log Channel
-Set a dedicated channel for moderation action logs:
-
-**Via Slash Command**:
-```
-/set mod-log-channel #mod-logs
-```
-
-**Via Dashboard**: Guild Settings → Mod Log Channel dropdown.
+Set a dedicated channel for moderation action logs via the **Web Dashboard** (**Guild Settings → Mod Log Channel**).
 
 When configured, all warn/kick/ban/purge/lock/unlock/slowmode actions post an embed to this channel with:
 - Action type

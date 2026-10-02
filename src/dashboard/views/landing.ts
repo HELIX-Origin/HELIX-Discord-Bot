@@ -11,7 +11,7 @@ export function renderLandingHtml(deps: AppDeps, userId: number | null = null): 
     : null;
   const repoUrl = deps.config.repoUrl || 'https://github.com/HELIX-Origin/HELIX-Discord-Bot';
   const dbStats = deps.db.stats();
-  const dashboardEnabled = deps.config.features.dashboardEnabled;
+  const dashboardEnabled = true;
 
   return `<!DOCTYPE html>
 <html lang="en" class="${theme.id}">

@@ -281,6 +281,5 @@ registerCommandMetadata({
 export const voiceCommand: BotCommand = {
   def: voiceCommandDef,
   category: 'admin',
-  isEnabled: (deps) => Boolean(deps.config.features.administrationEnabled),
   execute: handleVoiceCommand,
 };

@@ -34,9 +34,7 @@ function makeDeps(initialSettings: Record<string, string> = {}): {
   } as unknown as DiscordRestClient;
 
   const deps = {
-    config: {
-      features: { administrationEnabled: true },
-    },
+    config: {},
     repo: {
       getGuildSetting(guildId: string, key: string) {
         return settings[`${guildId}:${key}`] ?? null;

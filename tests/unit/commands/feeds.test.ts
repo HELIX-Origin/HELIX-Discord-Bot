@@ -26,10 +26,6 @@ function makeDeps(): { deps: AppDeps; feeds: Feed[]; polledIds: number[] } {
   const deps = {
     config: {
       publicBaseUrl: 'https://helix.example.com',
-      features: {
-        feedsEnabled: true,
-        streamalertsEnabled: true,
-      },
     },
     bot: {
       getAppName: () => 'HELIX Bot',

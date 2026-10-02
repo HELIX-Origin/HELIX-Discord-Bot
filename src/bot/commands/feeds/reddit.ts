@@ -388,25 +388,5 @@ export async function handleRedditCommand(
     .respond();
 }
 
-registerCommandMetadata({
-  name: 'reddit',
-  description: 'Manage Reddit subreddit feeds and image posts for this server',
-  category: 'feeds',
-  emoji: '👽',
-  usage: '/reddit <add|list|remove|toggle|poll>',
-  options: redditCommandDef.options,
-  examples: [
-    '/reddit add subreddit:memes',
-    '/reddit add subreddit:wallpapers channel:#wallpapers',
-    '/reddit list',
-    '/reddit toggle id:1 enabled:false',
-    '/reddit poll',
-  ],
-});
+// Slash command registration removed — Reddit feeds are configured exclusively via Web Dashboard
 
-export const redditCommand: BotCommand = {
-  def: redditCommandDef,
-  category: 'feeds',
-  isEnabled: (deps) => Boolean(deps.config.features.feedsEnabled) && (deps.reddit ?? createRedditFeeds()).available(),
-  execute: handleRedditCommand,
-};

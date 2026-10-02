@@ -178,6 +178,5 @@ registerCommandMetadata({
 export const kickCommand: BotCommand = {
   def: kickCommandDef,
   category: 'mod',
-  isEnabled: (deps) => Boolean(deps.config.features.administrationEnabled),
   execute: handleKickCommand,
 };

@@ -18,11 +18,11 @@ export async function dispatchInteraction(
   if (interaction.type === 3) {
     const customId = interaction.data?.custom_id?.toLowerCase() ?? '';
     if (customId === 'ticket_open') {
-      if (isCommandDisabled(guildId, 'ticket', deps)) {
+      if (guildId && deps.repo.getGuildSetting(guildId, 'feature_ticket') === '0') {
         return {
           type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
           data: {
-            content: 'The ticket system is currently disabled in this server.',
+            content: 'The ticket system is currently disabled.',
             flags: 64,
           },
         };
@@ -54,16 +54,25 @@ export async function dispatchInteraction(
     };
   }
 
-  const cmd = getCommand(commandName);
-  if (!cmd) {
-    return EmbedHandler.for(deps)
-      .error()
-      .title('Unknown Command')
-      .description(`Unknown command: \`/${commandName}\``)
-      .respond(true);
-  }
+  const DASHBOARD_CONFIGURED_COMMANDS = ['rss', 'reddit', 'youtube', 'twitch', 'free-games', 'welcome', 'ticket', 'set', 'server'];
 
-  if (isCommandDisabled(guildId, commandName, deps)) {
+  if (!cmd || DASHBOARD_CONFIGURED_COMMANDS.includes(commandName) || isCommandDisabled(guildId, commandName, deps)) {
+    if (DASHBOARD_CONFIGURED_COMMANDS.includes(commandName)) {
+      return EmbedHandler.for(deps)
+        .info()
+        .title('Configured via Web Dashboard', '🖥️')
+        .description(
+          `**/${commandName}** is configured exclusively through the Web Dashboard.\n\nPlease log in to the dashboard to configure feeds, channels, stream alerts, welcome announcements, support tickets, and server settings with live previews and full options.`,
+        )
+        .respond(true);
+    }
+    if (!cmd) {
+      return EmbedHandler.for(deps)
+        .error()
+        .title('Unknown Command')
+        .description(`Unknown command: \`/${commandName}\``)
+        .respond(true);
+    }
     return {
       type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
       data: {

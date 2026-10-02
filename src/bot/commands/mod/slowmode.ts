@@ -153,6 +153,5 @@ registerCommandMetadata({
 export const slowmodeCommand: BotCommand = {
   def: slowmodeCommandDef,
   category: 'mod',
-  isEnabled: (deps) => Boolean(deps.config.features.administrationEnabled),
   execute: handleSlowmodeCommand,
 };

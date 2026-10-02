@@ -269,25 +269,5 @@ export async function handleFreeGamesCommand(
     .respond();
 }
 
-registerCommandMetadata({
-  name: 'free-games',
-  description: 'Manage weekly free game notifications (Epic Games, Steam, GOG, etc.)',
-  category: 'feeds',
-  emoji: '🎮',
-  usage: '/free-games <enable|status|disable|check>',
-  options: freeGamesCommandDef.options,
-  examples: [
-    '/free-games enable channel:#giveaways',
-    '/free-games enable platform:Epic Games Store channel:#freebies',
-    '/free-games status',
-    '/free-games check',
-    '/free-games disable',
-  ],
-});
+// Slash command registration removed — Free Games alerts are configured exclusively via Web Dashboard
 
-export const freeGamesCommand: BotCommand = {
-  def: freeGamesCommandDef,
-  category: 'feeds',
-  isEnabled: (deps) => Boolean(deps.config.features.feedsEnabled),
-  execute: handleFreeGamesCommand,
-};

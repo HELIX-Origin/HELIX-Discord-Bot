@@ -4,15 +4,6 @@ import type { LogLevel } from './util/logger.js';
 import type { FeedCategory } from './state/types.js';
 import { FEED_CATEGORY_LIMITS } from './state/types.js';
 
-interface FeatureFlags {
-  feedsEnabled: boolean;
-  streamAlertsEnabled: boolean;
-  threadsEnabled: boolean;
-  administrationEnabled: boolean;
-  dashboardEnabled: boolean;
-  adminPanelEnabled: boolean;
-}
-
 export interface AppConfig {
   host: string;
   port: number;
@@ -43,7 +34,6 @@ export interface AppConfig {
   youtubeClientSecret: string | null;
   twitchClientId: string | null;
   twitchClientSecret: string | null;
-  features: FeatureFlags;
   feedCategoryLimits: Readonly<Partial<Record<FeedCategory, number>>>;
 }
 
@@ -177,18 +167,6 @@ export function defaultConfig(): AppConfig {
   const twitchClientId = process.env['TWITCH_CLIENT_ID']?.trim() || null;
   const twitchClientSecret = process.env['TWITCH_CLIENT_SECRET']?.trim() || null;
 
-  // Global feature master-switches. Every feature defaults to enabled when the
-  // env key is unset. Disabled features are not registered as slash commands,
-  // not rendered in the dashboard, and their wiring is not started.
-  const features: FeatureFlags = {
-    feedsEnabled: parseEnvFlag(process.env['FEEDS_ENABLED'], true),
-    streamAlertsEnabled: parseEnvFlag(process.env['STREAM_ALERTS_ENABLED'], true),
-    threadsEnabled: parseEnvFlag(process.env['THREADS_ENABLED'], true),
-    administrationEnabled: parseEnvFlag(process.env['ADMINISTRATION_ENABLED'], true),
-    dashboardEnabled: parseEnvFlag(process.env['DASHBOARD_ENABLED'], true),
-    adminPanelEnabled: parseEnvFlag(process.env['ADMIN_PANEL_ENABLED'], true),
-  };
-
   const feedCategoryLimits = parseFeedCategoryLimits(process.env['FEED_CATEGORY_LIMITS']);
 
   return {
@@ -221,7 +199,6 @@ export function defaultConfig(): AppConfig {
     youtubeClientSecret,
     twitchClientId,
     twitchClientSecret,
-    features,
     feedCategoryLimits,
   };
 }
@@ -239,12 +216,6 @@ function parsePositiveInt(raw: string | undefined, fallback: number): number {
     throw new Error(`Invalid integer value: ${raw}`);
   }
   return value;
-}
-
-function parseEnvFlag(raw: string | undefined, defaultEnabled: boolean): boolean {
-  if (raw === undefined) return defaultEnabled;
-  const v = raw.trim().toLowerCase();
-  return v === 'true' || v === '1' || v === 'yes' || v === 'on';
 }
 
 const FEED_CATEGORY_KEYS: ReadonlySet<string> = new Set(['rss', 'reddit', 'freegames', 'streamalerts']);

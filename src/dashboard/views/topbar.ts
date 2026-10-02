@@ -26,8 +26,7 @@ export function renderTopBar(deps: AppDeps, userId: number | null, opts: TopBarO
   const showInvite = opts.active !== 'login' && botInviteUrl !== null;
   const userBadge = userId !== null;
   const isOwner = isOwnerUser(userId, deps);
-  const features = deps.config.features;
-  const homeHref = userBadge && features.dashboardEnabled ? '/guilds' : '/';
+  const homeHref = userBadge ? '/guilds' : '/';
 
   const brandMark = appIconUrl
     ? `<img src="${appIconUrl}" alt="${appName}" class="topbar-brand-img">`
@@ -39,18 +38,17 @@ export function renderTopBar(deps: AppDeps, userId: number | null, opts: TopBarO
       </a>`
     : '';
 
-  const guildsMenuItem = features.dashboardEnabled
+  const guildsMenuItem = userBadge
     ? `<a href="/guilds" role="menuitem" class="topbar-menu-item${opts.active === 'guilds' ? ' active' : ''}">
         <i class="fa-solid fa-server"></i> <span>Guilds</span>
       </a>`
     : '';
 
-  const adminMenuItem =
-    features.adminPanelEnabled && isOwner
-      ? `<a href="/admin" role="menuitem" class="topbar-menu-item${opts.active === 'admin' ? ' active' : ''}">
+  const adminMenuItem = isOwner
+    ? `<a href="/admin" role="menuitem" class="topbar-menu-item${opts.active === 'admin' ? ' active' : ''}">
         <i class="fa-solid fa-screwdriver-wrench"></i> <span>Admin</span>
       </a>`
-      : '';
+    : '';
 
   const right: string = userBadge
     ? `<div class="topbar-user" id="topbar-user">
@@ -70,13 +68,12 @@ export function renderTopBar(deps: AppDeps, userId: number | null, opts: TopBarO
         <i class="fa-brands fa-discord"></i> <span class="topbar-btn-text">Log In with Discord</span>
       </a>`;
 
-  const guildPill =
-    opts.showGuildPill && features.dashboardEnabled
-      ? `<div id="current-guild-pill" class="topbar-guild-pill hidden">
+  const guildPill = opts.showGuildPill
+    ? `<div id="current-guild-pill" class="topbar-guild-pill hidden">
         <img id="current-guild-icon" src="" alt="">
         <span id="current-guild-name">Server</span>
       </div>`
-      : '';
+    : '';
 
   return `<style>
     .topbar { position: sticky; top: 0; z-index: 50; background: var(--card-bg); backdrop-filter: blur(16px); border-bottom: 1px solid var(--border); padding: 0.75rem 1rem; display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; }

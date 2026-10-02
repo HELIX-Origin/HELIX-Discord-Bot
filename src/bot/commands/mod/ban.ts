@@ -184,6 +184,5 @@ registerCommandMetadata({
 export const banCommand: BotCommand = {
   def: banCommandDef,
   category: 'mod',
-  isEnabled: (deps) => Boolean(deps.config.features.administrationEnabled),
   execute: handleBanCommand,
 };

@@ -1,4 +1,4 @@
-﻿---
+---
 layout: documentation
 title: "Discord Bot & Commands"
 ---
@@ -13,15 +13,10 @@ HELIX Discord Bot operates as a Discord application adhering strictly to **disco
 
 All commands register through Discord's native interaction model and use ephemeral response flags where appropriate (e.g. errors), with owner/team detection for elevated bot features.
 
+> 🖥️ **Web Dashboard Configuration**: Feed subscriptions (RSS, Atom, Scrapers, YouTube, Twitch, Free Games, Reddit), welcome announcements, support ticket systems, and guild settings (roles, prefix, feature toggles) are managed and configured directly through the **Web Dashboard** with real-time preview, role targeting, and interactive controls. In-chat slash commands are focused on moderation, administration, and server utilities.
+
 | Command | Subcommands / Options | Permissions Required | Description |
 | :--- | :--- | :--- | :--- |
-| `/rss` | `add`, `list`, `remove`, `toggle`, `poll` | `Manage Channels` | Manage RSS, Atom, and web scraper feeds, or trigger manual polling. |
-| `/youtube` | `add`, `list`, `remove`, `toggle`, `check` | `Manage Channels` | Manage YouTube video and livestream alerts, or trigger manual checks. |
-| `/twitch` | `add`, `list`, `remove`, `toggle`, `check` | `Manage Channels` | Manage Twitch livestream alerts, or trigger manual live checks. |
-| `/free-games` | `enable`, `status`, `disable`, `check` | `Manage Channels` | Manage weekly free game notifications and trigger manual giveaway checks. |
-| `/reddit` | `add`, `list`, `remove`, `toggle`, `poll` | `Manage Channels` | Manage Reddit subreddit image and news feeds, or trigger immediate checks. |
-| `/welcome` | `action: setup\|channel\|message\|view\|test\|disable`, `channel`, `content`, `embed`, `color`, `thumbnail`, `banner` | `Manage Guild` | Configure and test welcome announcements for new arrivals. |
-| `/ticket` | `action: setup\|disable\|view\|create\|close\|add\|remove\|claim\|transcript`, `channel`, `manager_role`, `message`, `embed`, `color`, etc. | `Manage Channels` | Configure and manage the support ticket system and thread dispatch. |
 | `/warn` | `user: <user>`, `reason: <string>` | `Moderate Members` | Warn a member. |
 | `/kick` | `user: <user>`, `reason: <string>` | `Kick Members` | Kick a member. |
 | `/ban` | `user: <user>`, `reason: <string>` | `Ban Members` | Ban a member. |
@@ -32,8 +27,6 @@ All commands register through Discord's native interaction model and use ephemer
 | `/announce` | `channel: <channel>`, `message: <string>` | `Manage Channels` | Send an announcement. |
 | `/role` | `add`, `remove`, `list` | `Manage Roles` | Assign, remove, or list roles. |
 | `/voice` | `mute`, `unmute`, `deafen`, `undeafen`, `move`, `disconnect` | `Mute/Deafen/Move Members` | Voice channel member management. |
-| `/set` | `action: mod-log\|welcome\|tickets\|prefix`, `channel`, `role`, `value` | `Administrator` | Quick-set guild settings, channels, and prefix. |
-| `/server` | `export`, `import`, `command` | `Administrator` | Guild configurations and per-server command toggles. |
 | `/stats` | *None* | Everyone | Displays bot uptime, memory usage, and delivery analytics. |
 | `/about` | `bot`, `user [@user]`, `guild` | Everyone | View bot, user, or guild information and stats. |
 | `/help` | `command: <string?>` | Everyone | Interactive documentation browser with command usage tips. |
@@ -70,7 +63,7 @@ Instead of delivering into a regular channel, a server can enable **thread deliv
 - The first feed entry becomes the thread's **first post**; subsequent entries land as messages inside the same thread.
 - Threads are **kept open** by a keepalive pass that posts a tiny message whenever a thread is within ~24h of Discord's auto-archive. (Disabled with `THREAD_KEEPALIVE_ENABLED=false`.)
 - When a thread reaches `THREAD_MAX_MESSAGES` (default `100`) entries, the large thread is **archived + locked** and a **fresh thread** opens automatically in its place.
-- Feed threads are **public**; an optional **per-feed role** can be attached when adding a feed (`/rss add`, `/reddit add`, `/youtube add`, `/twitch add`, `/free-games enable`, or from the dashboard add/detail forms). That role is **auto-subscribed to the feed's dedicated thread** on creation/rotation, so members with the role can follow updates.
+- Feed threads are **public**; an optional **per-feed role** can be attached when adding a feed from the dashboard add/detail forms. That role is **auto-subscribed to the feed's dedicated thread** on creation/rotation, so members with the role can follow updates.
 - Adding a feed into a channel posts a short confirmation message there: `📡 **feed** configured — updates will be posted here.` (best-effort; never surfaces as a command error).
 - Servers without thread delivery enabled behave exactly as before (direct channel delivery).
 

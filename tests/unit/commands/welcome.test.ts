@@ -9,9 +9,7 @@ function makeDeps(initialSettings: Record<string, string> = {}): { deps: AppDeps
   const sentMessages: { channelId: string; payload: unknown }[] = [];
 
   const deps = {
-    config: {
-      features: { administrationEnabled: true },
-    },
+    config: {},
     repo: {
       getGuildSetting(guildId: string, key: string) {
         return settings[`${guildId}:${key}`] ?? null;

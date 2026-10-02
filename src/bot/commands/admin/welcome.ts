@@ -421,58 +421,5 @@ async function handleTest(
   );
 }
 
-registerCommandMetadata({
-  name: 'welcome',
-  description: 'Configure welcome system for new members',
-  category: 'admin',
-  emoji: '🛡️',
-  usage: '/welcome <action> [options]',
-  options: [
-    {
-      name: 'action',
-      description: 'What to configure',
-      type: 3,
-      required: true,
-      choices: [
-        { name: 'Configure welcome system', value: 'setup' },
-        { name: 'Set the welcome channel', value: 'channel' },
-        { name: 'Set the welcome message', value: 'message' },
-        { name: 'View current configuration', value: 'view' },
-        { name: 'Send a test message', value: 'test' },
-        { name: 'Disable the welcome system', value: 'disable' },
-      ],
-    },
-    {
-      name: 'channel',
-      description: 'Channel to send welcome messages (setup / channel)',
-      type: 7,
-      required: false,
-      channel_types: [0, 5],
-    },
-    {
-      name: 'content',
-      description: 'Welcome message template, supports placeholders (setup / message)',
-      type: 3,
-      required: false,
-    },
-    { name: 'embed', description: 'Use embed format (setup / message)', type: 5, required: false },
-    { name: 'color', description: 'Embed color hex, e.g. #06b6d4 (setup / message)', type: 3, required: false },
-    { name: 'thumbnail', description: 'Show user avatar as thumbnail (setup / message)', type: 5, required: false },
-    { name: 'banner', description: 'Banner image URL for embed (setup / message)', type: 3, required: false },
-  ],
-  examples: [
-    '/welcome action:setup channel:#welcome content:"Welcome {mention} to {server}!" embed:True',
-    '/welcome action:channel channel:#welcome',
-    '/welcome action:message content:"Welcome {mention} to {server}!" embed:True',
-    '/welcome action:test',
-    '/welcome action:view',
-    '/welcome action:disable',
-  ],
-});
+// Slash command registration removed — welcome system is configured exclusively via Web Dashboard
 
-export const welcomeCommand: BotCommand = {
-  def: welcomeCommandDef,
-  category: 'admin',
-  isEnabled: (deps) => Boolean(deps.config.features.administrationEnabled),
-  execute: handleWelcomeCommand,
-};

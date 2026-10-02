@@ -125,6 +125,5 @@ registerCommandMetadata({
 export const warnCommand: BotCommand = {
   def: warnCommandDef,
   category: 'mod',
-  isEnabled: (deps) => Boolean(deps.config.features.administrationEnabled),
   execute: handleWarnCommand,
 };

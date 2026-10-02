@@ -348,26 +348,5 @@ export async function handleRssCommand(
     .respond();
 }
 
-registerCommandMetadata({
-  name: 'rss',
-  description: 'Manage RSS, Atom, and web scraper feeds for this server',
-  category: 'feeds',
-  emoji: '📰',
-  usage: '/rss <add|list|poll|remove|toggle>',
-  options: rssCommandDef.options,
-  examples: [
-    '/rss add url:https://news.ycombinator.com/rss name:"Hacker News"',
-    '/rss list',
-    '/rss poll',
-    '/rss poll id:1',
-    '/rss toggle id:1 enabled:false',
-    '/rss remove id:1',
-  ],
-});
+// Slash command registration removed — RSS feeds are configured exclusively via Web Dashboard
 
-export const rssCommand: BotCommand = {
-  def: rssCommandDef,
-  category: 'feeds',
-  isEnabled: (deps) => Boolean(deps.config.features.feedsEnabled),
-  execute: handleRssCommand,
-};
