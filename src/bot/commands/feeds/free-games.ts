@@ -35,6 +35,10 @@ export const freeGamesCommandDef: ApplicationCommand = {
             { name: 'GamerPower Free Game Alerts', value: 'free_games_gamerpower' },
             { name: 'Epic Games Store Official', value: 'free_games_epic' },
             { name: 'All Free Game Drops', value: 'free_games' },
+            { name: 'All Top PC Game Deals', value: 'game_deals_all' },
+            { name: 'Steam Deals & Sales', value: 'game_deals_steam' },
+            { name: 'Counter-Strike 2 Patch Notes', value: 'game_patchnotes_cs2' },
+            { name: 'Helldivers 2 Patch Notes', value: 'game_patchnotes_helldivers2' },
           ],
         },
         {
@@ -47,17 +51,17 @@ export const freeGamesCommandDef: ApplicationCommand = {
     },
     {
       name: 'status',
-      description: 'Check the free games alert status and active channel for this server',
+      description: 'Check the game alert status and active channels for this server',
       type: ApplicationCommandOptionType.SUB_COMMAND,
     },
     {
       name: 'disable',
-      description: 'Disable free game notifications for this server',
+      description: 'Disable game notifications for this server',
       type: ApplicationCommandOptionType.SUB_COMMAND,
     },
     {
       name: 'check',
-      description: 'Trigger an immediate check for active free games and giveaways',
+      description: 'Trigger an immediate check for active free games, deals, and patch notes',
       type: ApplicationCommandOptionType.SUB_COMMAND,
     },
   ],
@@ -66,7 +70,20 @@ export const freeGamesCommandDef: ApplicationCommand = {
 const PLATFORM_NAMES: Record<string, string> = {
   free_games: 'All Free Game Drops',
   free_games_gamerpower: 'GamerPower Free Game Alerts',
-  free_games_epic: 'Epic Games Store',
+  free_games_epic: 'Epic Games Store Official Free Games',
+  game_deals_all: 'All Top PC Game Deals',
+  game_deals_steam: 'Steam Deals & Sales',
+  game_deals_gog: 'GOG Discounts',
+  game_deals_epic: 'Epic Games Store Deals',
+  game_deals_humble: 'Humble Store Deals',
+  game_patchnotes_cs2: 'Counter-Strike 2 Patch Notes',
+  game_patchnotes_dota2: 'Dota 2 Update Notes',
+  game_patchnotes_rust: 'Rust Changelogs',
+  game_patchnotes_helldivers2: 'Helldivers 2 Patch Notes',
+  game_patchnotes_apex: 'Apex Legends Updates',
+  game_patchnotes_cyberpunk: 'Cyberpunk 2077 Patch Notes',
+  game_patchnotes_bg3: "Baldur's Gate 3 Updates",
+  game_patchnotes_warframe: 'Warframe Update Notes',
 };
 
 export async function handleFreeGamesCommand(
@@ -99,6 +116,12 @@ export async function handleFreeGamesCommand(
     const allFeeds = deps.repo.listFeeds(user.id);
     const existing = allFeeds.find((f) => f.feedType === feedType || f.feedType.startsWith('free_games'));
 
+    const defaultUrl = feedType.startsWith('game_deals')
+      ? `gamedeals://${feedType.replace('game_deals_', '')}`
+      : feedType.startsWith('game_patchnotes')
+        ? `patchnotes://${feedType.replace('game_patchnotes_', '')}`
+        : `freegames://${feedType.replace('free_games_', '')}`;
+
     try {
       const roleId = (opts.find((o) => o.name === 'role')?.value as string | undefined) ?? null;
       if (existing) {
@@ -106,20 +129,21 @@ export async function handleFreeGamesCommand(
           channelId,
           enabled: 1,
           feedType,
-          name: `Free Games (${storeName})`,
+          name: storeName,
           roleId,
+          url: defaultUrl,
         });
         deps.repo.logActivity(
           user.id,
           'info',
           'bot',
-          `Updated Free Games alert to channel ${channelId} via Discord bot`,
+          `Updated Game Feed alert to channel ${channelId} via Discord bot`,
         );
       } else {
         deps.repo.addFeed(
           user.id,
-          `Free Games (${storeName})`,
-          'https://store.epicgames.com',
+          storeName,
+          defaultUrl,
           channelId,
           feedType,
           null,
@@ -127,23 +151,23 @@ export async function handleFreeGamesCommand(
           undefined,
           roleId,
         );
-        deps.repo.logActivity(user.id, 'info', 'bot', `Enabled Free Games alerts via Discord bot`);
+        deps.repo.logActivity(user.id, 'info', 'bot', `Enabled Game Feed alerts via Discord bot`);
       }
       if (channelId) {
-        await notifyFeedAdded(deps.bot, channelId, `Free Games (${storeName})`).catch(() => {});
+        await notifyFeedAdded(deps.bot, channelId, storeName).catch(() => {});
       }
 
       const h = EmbedHandler.for(deps)
         .success()
         .title('Free Games Alerts Enabled', '🎮')
-        .description(`Weekly free game alerts are now **active** in this server.`)
+        .description(`Free game and deal alerts are now **active** in this server.`)
         .field('Store / Platform', storeName, true)
         .field('Delivery Channel', channelId ? `<#${channelId}>` : 'Default Channel', true)
-        .field('Schedule', 'Weekly on Sundays (UTC)', true);
+        .field('Schedule', 'Hourly / Polled', true);
       if (roleId) {
         h.field('Subscribed Role', `<@&${roleId}>`, true);
       }
-      return h.footer(`${appDisplayName(deps)} • Never miss a free game drop`).respond();
+      return h.footer(`${appDisplayName(deps)} • Never miss a free game or deal`).respond();
     } catch (err) {
       return EmbedHandler.for(deps)
         .error()
@@ -153,9 +177,15 @@ export async function handleFreeGamesCommand(
     }
   }
 
+  const isGameFeed = (f: { feedType: string }) =>
+    f.feedType === 'free_games' ||
+    f.feedType.startsWith('free_games') ||
+    f.feedType.startsWith('game_deals') ||
+    f.feedType.startsWith('game_patchnotes');
+
   if (subName === 'status') {
     const allFeeds = deps.repo.listFeeds(user.id);
-    const freeGameFeeds = allFeeds.filter((f) => f.feedType === 'free_games' || f.feedType.startsWith('free_games'));
+    const freeGameFeeds = allFeeds.filter(isGameFeed);
 
     if (freeGameFeeds.length === 0 || !freeGameFeeds.some((f) => f.enabled)) {
       return EmbedHandler.for(deps)
@@ -170,7 +200,7 @@ export async function handleFreeGamesCommand(
     const h = EmbedHandler.for(deps)
       .primary()
       .title('Free Games Alerts Status', '🎮')
-      .description('Free game drop notifications are currently **active**.');
+      .description('Free game and deal notifications are currently **active**.');
 
     for (const f of freeGameFeeds) {
       const storeName = PLATFORM_NAMES[f.feedType] ?? f.name;
@@ -180,10 +210,10 @@ export async function handleFreeGamesCommand(
         : f.channelId
           ? `<#${f.channelId}>`
           : 'None';
-      const lastCheck = f.lastCheckedAt ? new Date(f.lastCheckedAt).toLocaleDateString() : 'Pending Sunday poll';
+      const lastCheck = f.lastCheckedAt ? new Date(f.lastCheckedAt).toLocaleDateString() : 'Pending poll';
       h.field(
         `${storeName} (${status})`,
-        `**Channel:** ${target}\n**Schedule:** Every Sunday\n**Last Checked:** ${lastCheck}`,
+        `**Channel:** ${target}\n**Schedule:** Every Sunday / Polled\n**Last Checked:** ${lastCheck}`,
         true,
       );
     }
@@ -193,7 +223,7 @@ export async function handleFreeGamesCommand(
 
   if (subName === 'disable') {
     const allFeeds = deps.repo.listFeeds(user.id);
-    const freeGameFeeds = allFeeds.filter((f) => f.feedType === 'free_games' || f.feedType.startsWith('free_games'));
+    const freeGameFeeds = allFeeds.filter(isGameFeed);
 
     if (freeGameFeeds.length === 0) {
       return EmbedHandler.for(deps)
@@ -220,7 +250,7 @@ export async function handleFreeGamesCommand(
 
   if (subName === 'check') {
     const allFeeds = deps.repo.listFeeds(user.id);
-    const freeGamesFeeds = allFeeds.filter((f) => f.feedType === 'free_games' || f.feedType?.startsWith('free_games'));
+    const freeGamesFeeds = allFeeds.filter(isGameFeed);
     if (!freeGamesFeeds.length) {
       return EmbedHandler.for(deps)
         .info()

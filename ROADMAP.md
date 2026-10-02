@@ -70,16 +70,11 @@ Evolve the Free Games tab into a comprehensive **Game Feeds** hub supporting thr
 
 #### 🧭 Architecture & Implementation Phases
 
-1. **Feed Types & Schema Extension**:
-    - Add feed types `free_games_*`, `game_deals_*`, and `game_patchnotes_*` in `src/state/types.ts`.
-    - Extend database schema and migrations for category filtering and provider metadata.
-2. **Deals & Patch Notes Ingestion Engines**:
-    - Implement `src/feed/gamedeals.ts` for discounted PC games (original price, sale price, discount %).
-    - Implement `src/feed/patchnotes.ts` for game update changelogs and release notes.
-    - Enforce the Universal Direct Store URL Rule across all game deals and patch notes.
-3. **Embed Layouts & Dashboard UI**:
-    - Create `gameDealsEmbed` and `patchNotesEmbed` with matching author icons and zero footers.
-    - Redesign dashboard tab from "Free Games" to "Game Feeds" (`fa-gamepad`) with sub-category tabs.
+1. ✅ **Feed Types & Schema Extension** — Added `game_deals_*` and `game_patchnotes_*` to `FeedType` in `src/state/types.ts`. `feedCategory()` and `rowToGuildCategory()` updated to handle all three categories.
+2. ✅ **Deals & Patch Notes Ingestion Engines** — `src/feed/gamedeals.ts` (CheapShark API, redirect-resolved direct storefront URLs) and `src/feed/patchnotes.ts` (Steam News API for 11 preset games + custom AppIDs) fully implemented and wired into `FeedWatcher`.
+3. ✅ **Embed Layouts & Dashboard UI** — `gameDealsEmbed` and `patchNotesEmbed` created with zero footers and branding author lines. Dashboard sidebar renamed to "Game Feeds", dropdown optgroups added, `GAME_FEEDS_OPTIONS` catalog wired into `submitAddFreeGamesFeed`. `/free-games` slash command expanded to all 16 game feed types.
+4. ✅ **Test Coverage** — `tests/unit/feed/gameFeeds.test.ts` written and passing. **395/395 Vitest tests green**.
+5. ✅ **Build Gate & Branch Push** — `npm run build` clean. Committed and pushed to `feat/game-feeds-w11`. Ready for review and merge to `main`.
 
 ---
 

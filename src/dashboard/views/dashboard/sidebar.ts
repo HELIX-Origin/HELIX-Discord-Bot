@@ -64,7 +64,7 @@ export function renderSidebar(options: SidebarOptions): string {
               }
             </button>
             <button onclick="switchTab('freegames')" id="tab-btn-freegames" class="tab-btn">
-              <i class="fa-solid fa-gift" style="color: #10b981;"></i> <span>Free Games</span>
+              <i class="fa-solid fa-gamepad" style="color: #10b981;"></i> <span>Game Feeds</span>
             </button>
             <button onclick="switchTab('streamalerts')" id="tab-btn-streamalerts" class="tab-btn">
               <i class="fa-solid fa-satellite-dish" style="color: #9146ff;"></i> <span>Stream Alerts</span>

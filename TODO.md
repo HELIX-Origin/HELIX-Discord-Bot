@@ -42,26 +42,35 @@ flowchart TD
   3. **Patch Notes**: Game updates, changelogs, and patch notes.
 
 **Implementation checklist:**
-- [ ] **Architecture & Schema Planning**:
-  - [ ] Define feed type keys: `free_games_*`, `game_deals_*`, `game_patchnotes_*` in `src/state/types.ts`
-  - [ ] Add data provider adapters for Deals and Patch Notes (e.g. Steam Community announcements/patch notes API, CheapShark / IsThereAnyDeal / GamerPower Deals API, RSS game update feeds)
-- [ ] **Feed Fetchers & Parser Engine**:
-  - [ ] Implement `src/feed/gamedeals.ts`: fetch discounted game promotions with discount %, original price, sale price, and direct storefront links
-  - [ ] Implement `src/feed/patchnotes.ts`: parse game patch notes, versions, changelogs, and summary highlights
-  - [ ] Ensure universal direct store URL resolution applies to all game deals and patch notes
-- [ ] **Discord Embed Handlers**:
-  - [ ] `gameDealsEmbed`: showcase game title, platform, discount badge (`🏷️ -75%`), current/original price, savings, and direct claim/buy button
-  - [ ] `patchNotesEmbed`: showcase game title, patch/version number, update summary, key changes, and direct changelog link
-- [ ] **Dashboard UI Redesign (`sources.ts`, `sidebar.ts`, `clientScript.ts`)**:
-  - [ ] Rename sidebar tab from "Free Games" to "Game Feeds" with game controller icon (`fa-gamepad`)
-  - [ ] Sub-category filter / tabs: "Free Games", "Deals & Promotions", "Patch Notes"
-  - [ ] One-click catalog pill sections for each of the three categories
-  - [ ] Form dropdown to add feeds under each specific game feed type
-- [ ] **Discord Slash Commands (`src/bot/commands/feeds/`)**:
-  - [ ] Add `/game-feeds` (or expand `/free-games` into `/game-deals` and `/patch-notes`)
-- [ ] **Test Coverage & Validation**:
-  - [ ] Unit tests for deals fetcher, patch notes fetcher, and custom embeds
-  - [ ] Full validation gate (`npm run check` and `npm run build`) passing 100%
+- [x] **Architecture & Schema Planning**:
+  - [x] Define feed type keys: `free_games_*`, `game_deals_*`, `game_patchnotes_*` in `src/state/types.ts`
+  - [x] Add data provider adapters for Deals and Patch Notes (CheapShark API, Steam News API)
+- [x] **Feed Fetchers & Parser Engine**:
+  - [x] Implement `src/feed/gamedeals.ts`: fetch discounted game promotions with discount %, original/sale price, and direct storefront links via CheapShark API
+  - [x] Implement `src/feed/patchnotes.ts`: parse Steam Community patch notes, version numbers, and summary highlights
+  - [x] Ensure universal direct store URL resolution applies to all game deals
+- [x] **Discord Embed Handlers**:
+  - [x] `gameDealsEmbed`: showcase game title, store platform, discount badge (`🏷️ -75%`), current/original price, and direct deal link
+  - [x] `patchNotesEmbed`: showcase game title, patch/version number, update summary, and direct changelog link
+- [x] **Dashboard UI Redesign (`sources.ts`, `sidebar.ts`, `clientScript.ts`)**:
+  - [x] Rename sidebar tab from "Free Games" to "Game Feeds" with game controller icon (`fa-gamepad`)
+  - [x] Form dropdown redesigned with optgroups for Free Games, Deals & Promotions, and Patch Notes
+  - [x] `submitAddFreeGamesFeed` updated to `GAME_FEEDS_OPTIONS` catalog mapping all 16 feed types to correct `feedType` and `url`
+  - [x] `categoryForFeed` updated to route `game_deals_*` and `game_patchnotes_*` to the freegames tab
+  - [x] `feedTopicOf` updated to include `game_deals_*` and `game_patchnotes_*` topic categorization
+  - [x] `renderFeedPill` updated with styled badges for Deals (`🏷️`) and Patch Notes (`📄`)
+- [x] **Discord Slash Commands (`src/bot/commands/feeds/free-games.ts`)**:
+  - [x] Expanded `/free-games enable` platform choices to include `game_deals_*` and `game_patchnotes_*` types
+  - [x] Updated `PLATFORM_NAMES` map with all 16 game feed types
+  - [x] Updated status/disable/check handlers to operate on all game feed types (free games + deals + patch notes)
+  - [x] `isGameFeed` predicate covers `free_games`, `game_deals`, and `game_patchnotes` prefixes
+  - [x] `defaultUrl` auto-generated from feedType (e.g. `gamedeals://steam`, `patchnotes://cs2`)
+- [x] **Test Coverage & Validation**:
+  - [x] `tests/unit/feed/gameFeeds.test.ts` created — embed structure, footer absence, field format, category mapping, and preset validation
+  - [x] 395/395 Vitest tests passing
+- [x] **Build Verification & Push**:
+  - [x] `npm run build` — TypeScript compilation clean ✅
+  - [x] Committed and pushed to `feat/game-feeds-w11` branch
 
 ---
 

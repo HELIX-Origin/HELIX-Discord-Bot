@@ -496,3 +496,112 @@ export function streamAlertEmbed(args: {
 
   return embed;
 }
+
+export function gameDealsEmbed(args: {
+  title: string;
+  url: string;
+  description?: string | null;
+  store: string;
+  salePrice: string;
+  normalPrice: string;
+  savings: string;
+  discountPercent: number;
+  imageUrl?: string | null;
+  publishedAt?: string | null;
+  brandIconUrl?: string | null;
+}): DiscordEmbed {
+  const {
+    title,
+    url,
+    description,
+    store,
+    salePrice,
+    normalPrice,
+    savings,
+    discountPercent,
+    imageUrl,
+    publishedAt,
+    brandIconUrl,
+  } = args;
+  const storeKey = store.toLowerCase().replace(/[\s.-]+/g, '');
+  const branding = PLATFORM_BRANDING[storeKey] ?? {
+    name: store,
+    color: 0xf59e0b,
+    iconUrl: 'https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons@main/png/steam.png',
+    tag: store,
+  };
+
+  const embed: DiscordEmbed = {
+    title: cleanTitle(title),
+    url,
+    color: branding.color || 0xf59e0b,
+    author: {
+      name: `🏷️ ${branding.name} Deal — ${savings} OFF`,
+      icon_url: brandIconUrl || branding.iconUrl,
+    },
+    fields: [
+      { name: '🏷️ Platform', value: branding.name, inline: true },
+      { name: '💰 Sale Price', value: `$${salePrice} ~($${normalPrice})~`, inline: true },
+      { name: '🔥 Discount', value: `**-${discountPercent}%**`, inline: true },
+      { name: '🔗 Store Page', value: `[Claim Deal on ${branding.name} ↗](${url})`, inline: false },
+    ],
+  };
+
+  if (description) {
+    const cleanDesc = description.slice(0, 300);
+    embed.description = cleanDesc;
+  }
+
+  if (publishedAt) {
+    embed.timestamp = normalizeTimestamp(publishedAt);
+  }
+
+  if (imageUrl && isValidEmbedImageUrl(imageUrl)) {
+    embed.image = { url: imageUrl.trim() };
+  }
+
+  return embed;
+}
+
+export function patchNotesEmbed(args: {
+  gameTitle: string;
+  patchTitle: string;
+  url: string;
+  summary?: string | null;
+  version?: string | null;
+  imageUrl?: string | null;
+  publishedAt?: string | null;
+  brandIconUrl?: string | null;
+}): DiscordEmbed {
+  const { gameTitle, patchTitle, url, summary, version, imageUrl, publishedAt, brandIconUrl } = args;
+
+  const embed: DiscordEmbed = {
+    title: cleanTitle(`${gameTitle} — ${patchTitle}`),
+    url,
+    color: 0x3b82f6,
+    author: {
+      name: `🛠️ ${gameTitle} Patch Notes${version ? ` (v${version})` : ''}`,
+      icon_url: brandIconUrl || 'https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons@main/png/steam.png',
+    },
+    fields: [
+      { name: '🎮 Game', value: gameTitle, inline: true },
+      ...(version ? [{ name: '📦 Version', value: `\`${version}\``, inline: true }] : []),
+      { name: '🔗 Changelog', value: `[Read Full Patch Notes ↗](${url})`, inline: false },
+    ],
+  };
+
+  if (summary) {
+    embed.description = summary.slice(0, 400);
+  }
+
+  if (publishedAt) {
+    embed.timestamp = normalizeTimestamp(publishedAt);
+  }
+
+  if (imageUrl && isValidEmbedImageUrl(imageUrl)) {
+    embed.image = { url: imageUrl.trim() };
+  }
+
+  return embed;
+}
+

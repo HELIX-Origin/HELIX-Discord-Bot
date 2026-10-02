@@ -351,7 +351,7 @@ export function renderClientScript(): string {
       const t = feed.feedType;
       if (t === 'reddit') return 'reddit';
       if (t === 'rss' || t === 'scrape') return 'rss';
-      if (t && t.startsWith('free_games')) return 'freegames';
+      if (t && (t.startsWith('free_games') || t.startsWith('game_deals') || t.startsWith('game_patchnotes'))) return 'freegames';
       if (t === 'youtube' || t === 'twitch') return 'streamalerts';
       if (t === 'github') return 'github';
       return null;
@@ -371,12 +371,16 @@ export function renderClientScript(): string {
     function renderFeedPill(f) {
       const isReddit = f.feedType === 'reddit';
       const isFreeGames = f.feedType === 'free_games' || (f.feedType && f.feedType.startsWith('free_games'));
+      const isGameDeals = f.feedType && f.feedType.startsWith('game_deals');
+      const isPatchNotes = f.feedType && f.feedType.startsWith('game_patchnotes');
       const isScrape = f.feedType === 'scrape';
       const isStreamAlert = f.feedType === 'youtube' || f.feedType === 'twitch';
       const isGitHub = f.feedType === 'github';
       let typeBadge = '<span class="badge badge-gray"><i class="fa-solid fa-rss"></i> RSS</span>';
       if (isReddit) typeBadge = '<span class="badge" style="background: rgba(255,69,0,0.15); color: #ff4500; border: 1px solid rgba(255,69,0,0.3);"><i class="fa-brands fa-reddit"></i> Reddit</span>';
-      else if (isFreeGames) typeBadge = '<span class="badge" style="background: rgba(16,185,129,0.15); color: #10b981; border: 1px solid rgba(16,185,129,0.3);"><i class="fa-solid fa-gift"></i> Free Games</span>';
+      else if (isFreeGames) typeBadge = '<span class="badge" style="background: rgba(16,185,129,0.15); color: #10b981; border: 1px solid rgba(16,185,129,0.3);"><i class="fa-solid fa-gift"></i> Free Game</span>';
+      else if (isGameDeals) typeBadge = '<span class="badge" style="background: rgba(245,158,11,0.15); color: #f59e0b; border: 1px solid rgba(245,158,11,0.3);"><i class="fa-solid fa-tags"></i> Deal</span>';
+      else if (isPatchNotes) typeBadge = '<span class="badge" style="background: rgba(59,130,246,0.15); color: #3b82f6; border: 1px solid rgba(59,130,246,0.3);"><i class="fa-solid fa-file-lines"></i> Patch</span>';
       else if (isScrape) typeBadge = '<span class="badge badge-amber"><i class="fa-solid fa-code"></i> Scraper</span>';
       else if (isStreamAlert) typeBadge = '<span class="badge" style="background: rgba(145,70,255,0.15); color: #9146ff; border: 1px solid rgba(145,70,255,0.3);"><i class="fa-solid fa-video"></i> Stream</span>';
       else if (isGitHub) typeBadge = '<span class="badge" style="background: rgba(240,246,252,0.15); color: #f0f6fc; border: 1px solid rgba(240,246,252,0.3);"><i class="fa-brands fa-github"></i> GitHub</span>';
@@ -497,7 +501,7 @@ export function renderClientScript(): string {
       }
       const t = f.feedType || 'rss';
       if (t === 'reddit') return 'Reddit';
-      if (t.indexOf('free_games') === 0) return 'Free Games';
+      if (t.indexOf('free_games') === 0 || t.indexOf('game_deals') === 0 || t.indexOf('game_patchnotes') === 0) return 'Free Games';
       if (t === 'youtube' || t === 'twitch') return 'Stream Alerts';
       if (t === 'github') return 'GitHub';
       return 'Other';
@@ -1002,18 +1006,31 @@ export function renderClientScript(): string {
       }
     }
 
-    // Free Games
-    const FREEGAMES_PLATFORMS = [
-      { key: 'gamerpower', name: 'GamerPower Free Game Alerts' },
-      { key: 'epic', name: 'Epic Games Store Free Games' },
-      { key: 'all', name: 'All Free Game Alerts' }
-    ];
+    // Game Feeds
+    const GAME_FEEDS_OPTIONS = {
+      gamerpower: { name: 'GamerPower Free Game Alerts', type: 'free_games_gamerpower', url: 'freegames://gamerpower' },
+      epic: { name: 'Epic Games Store Official Free Games', type: 'free_games_epic', url: 'freegames://epic' },
+      all: { name: 'All Free Games (GamerPower + Epic Official)', type: 'free_games', url: 'freegames://all' },
+      deals_all: { name: 'All Top PC Game Deals', type: 'game_deals_all', url: 'gamedeals://all' },
+      deals_steam: { name: 'Steam Specials & Sales', type: 'game_deals_steam', url: 'gamedeals://steam' },
+      deals_gog: { name: 'GOG Discounts', type: 'game_deals_gog', url: 'gamedeals://gog' },
+      deals_epic: { name: 'Epic Games Store Deals', type: 'game_deals_epic', url: 'gamedeals://epic' },
+      deals_humble: { name: 'Humble Store Deals', type: 'game_deals_humble', url: 'gamedeals://humble' },
+      patch_cs2: { name: 'Counter-Strike 2 Patch Notes', type: 'game_patchnotes_cs2', url: 'patchnotes://cs2' },
+      patch_dota2: { name: 'Dota 2 Update Notes', type: 'game_patchnotes_dota2', url: 'patchnotes://dota2' },
+      patch_rust: { name: 'Rust Changelogs', type: 'game_patchnotes_rust', url: 'patchnotes://rust' },
+      patch_helldivers2: { name: 'Helldivers 2 Patch Notes', type: 'game_patchnotes_helldivers2', url: 'patchnotes://helldivers2' },
+      patch_apex: { name: 'Apex Legends Updates', type: 'game_patchnotes_apex', url: 'patchnotes://apex' },
+      patch_cyberpunk: { name: 'Cyberpunk 2077 Patch Notes', type: 'game_patchnotes_cyberpunk', url: 'patchnotes://cyberpunk' },
+      patch_bg3: { name: "Baldur's Gate 3 Updates", type: 'game_patchnotes_bg3', url: 'patchnotes://bg3' },
+      patch_warframe: { name: 'Warframe Update Notes', type: 'game_patchnotes_warframe', url: 'patchnotes://warframe' }
+    };
 
     function handleFreeGamesPlatformChange(val) {
       const nameInput = document.getElementById('add-freegames-name');
       if (!nameInput) return;
-      const found = FREEGAMES_PLATFORMS.find(p => p.key === val);
-      if (found && (!nameInput.value || nameInput.value.startsWith('Free Games ·') || nameInput.value.startsWith('GamerPower') || nameInput.value.startsWith('All Free'))) {
+      const found = GAME_FEEDS_OPTIONS[val];
+      if (found) {
         nameInput.placeholder = found.name;
       }
     }
@@ -1023,17 +1040,13 @@ export function renderClientScript(): string {
       const platSelect = document.getElementById('add-freegames-platform');
       const nameInput = document.getElementById('add-freegames-name');
       const platformKey = platSelect ? platSelect.value : 'gamerpower';
+      const opt = GAME_FEEDS_OPTIONS[platformKey] || { name: 'GamerPower Free Game Alerts', type: 'free_games_gamerpower', url: 'freegames://gamerpower' };
       let name = nameInput ? nameInput.value.trim() : '';
       if (!name) {
-        const found = FREEGAMES_PLATFORMS.find(p => p.key === platformKey);
-        name = found ? found.name : 'GamerPower Free Game Alerts';
+        name = opt.name;
       }
-      const feedType = platformKey === 'all'
-        ? 'free_games'
-        : platformKey === 'gamerpower'
-          ? 'free_games_gamerpower'
-          : ('free_games_' + platformKey);
-      const url = 'freegames://' + platformKey;
+      const feedType = opt.type;
+      const url = opt.url;
       const targetSel = document.getElementById('add-freegames-target');
       const target = targetFieldsFromValue(targetSel ? targetSel.value : '');
       const roleSel = document.getElementById('add-freegames-role');
@@ -1051,10 +1064,10 @@ export function renderClientScript(): string {
           if (nameInput) nameInput.value = '';
           renderCategoryFeeds('freegames');
         } else {
-          alert(data.error || 'Failed to add Free Games feed');
+          alert(data.error || 'Failed to add game feed');
         }
       } catch (err) {
-        alert('Network error adding Free Games feed: ' + (err && err.message ? err.message : String(err)));
+        alert('Network error adding game feed: ' + (err && err.message ? err.message : String(err)));
       }
     }
 

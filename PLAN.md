@@ -39,20 +39,21 @@ flowchart TD
     E --> F["Deliver canonical embed without footer"]
 ```
 
-1. **Data Model & Type Registry**:
-    - Extend FeedType union: Add `game_deals_*` and `game_patchnotes_*` to `src/state/types.ts`.
-        - Database migration: Prepare category filter columns if necessary.
-    - Preset definitions: Define catalog presets for top PC games and storefronts.
+**Progress as of 2026-10-02 session:**
 
-2. **Feed Fetchers & Direct URL Engine**:
-    - Implement `src/feed/gamedeals.ts`: Query game sales with discount %, original price, sale price, and direct storefront links.
-        - Universal Direct Store URL: Follow 3xx redirects to the final storefront URL.
-    - Implement `src/feed/patchnotes.ts`: Query Steam Community announcements and game RSS changelogs.
-        - Formatter: Extract patch version, update highlights, and direct changelog links.
+1. ✅ **Data Model & Type Registry** — `game_deals_*` and `game_patchnotes_*` feed types added to `src/state/types.ts`. `feedCategory()` and `rowToGuildCategory()` updated.
 
-3. **Discord Embeds & Web Dashboard UI**:
-    - Embed formatters: Create `gameDealsEmbed` and `patchNotesEmbed` with matching author icons and zero footers.
-        - Dashboard redesign: Rename "Free Games" tab to "Game Feeds" (`fa-gamepad`) with sub-category tabs.
+2. ✅ **Feed Fetchers & Direct URL Engine** — `src/feed/gamedeals.ts` (CheapShark API, redirect resolution) and `src/feed/patchnotes.ts` (Steam News API, 11 preset games) implemented. Pollers wired into `FeedWatcher.pollFeed`.
+
+3. ✅ **Embed Layouts** — `gameDealsEmbed` (pricing, discount badge, no footer) and `patchNotesEmbed` (version, summary, no footer) implemented in `src/bot/utils/embeds.ts`.
+
+4. ✅ **Dashboard UI** — Sidebar tab renamed to "Game Feeds" (`fa-gamepad`). Sources dropdown redesigned with optgroups. `GAME_FEEDS_OPTIONS` catalog added to `clientScript.ts`. `submitAddFreeGamesFeed`, `categoryForFeed`, `feedTopicOf`, and `renderFeedPill` all updated.
+
+5. ✅ **Slash Command** — `/free-games` expanded to cover all game feed types. `PLATFORM_NAMES` now maps all 16 feed keys. `isGameFeed` predicate covers all three categories.
+
+6. ✅ **Tests** — `tests/unit/feed/gameFeeds.test.ts` added. **395/395 tests passing**.
+
+7. ✅ **Build gate + branch push** — `npm run build` clean. Pushed to `feat/game-feeds-w11`. Awaiting merge to `main`.
 
 ---
 

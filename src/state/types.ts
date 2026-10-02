@@ -35,7 +35,7 @@ export interface OAuthState {
   createdAt: string;
 }
 
-export type FeedCategory = 'rss' | 'reddit' | 'freegames' | 'streamalerts' | 'github';
+export type FeedCategory = 'rss' | 'reddit' | 'freegames' | 'gamedeals' | 'patchnotes' | 'streamalerts' | 'github';
 
 export interface GuildCategory {
   guildId: string;
@@ -62,6 +62,15 @@ export type FeedType =
   | 'free_games_prime'
   | 'free_games_battlenet'
   | 'free_games_stove'
+  | 'game_deals'
+  | 'game_deals_steam'
+  | 'game_deals_gog'
+  | 'game_deals_epic'
+  | 'game_deals_humble'
+  | 'game_deals_gamerpower'
+  | 'game_patchnotes'
+  | 'game_patchnotes_steam'
+  | 'game_patchnotes_rss'
   | 'youtube'
   | 'twitch'
   | 'github';
@@ -83,6 +92,15 @@ const FEED_TYPES: readonly FeedType[] = [
   'free_games_prime',
   'free_games_battlenet',
   'free_games_stove',
+  'game_deals',
+  'game_deals_steam',
+  'game_deals_gog',
+  'game_deals_epic',
+  'game_deals_humble',
+  'game_deals_gamerpower',
+  'game_patchnotes',
+  'game_patchnotes_steam',
+  'game_patchnotes_rss',
   'youtube',
   'twitch',
   'github',
@@ -236,6 +254,8 @@ export const rowToGuildCategory = (r: Row | undefined): GuildCategory | null => 
     category !== 'rss' &&
     category !== 'reddit' &&
     category !== 'freegames' &&
+    category !== 'gamedeals' &&
+    category !== 'patchnotes' &&
     category !== 'streamalerts' &&
     category !== 'github'
   )
@@ -251,9 +271,12 @@ export const rowToGuildCategory = (r: Row | undefined): GuildCategory | null => 
 };
 
 export function feedCategory(feedType: FeedType): FeedCategory | null {
+  if (!feedType) return null;
   if (feedType === 'reddit') return 'reddit';
   if (feedType === 'rss' || feedType === 'scrape') return 'rss';
   if (feedType.startsWith('free_games')) return 'freegames';
+  if (feedType.startsWith('game_deals')) return 'gamedeals';
+  if (feedType.startsWith('game_patchnotes')) return 'patchnotes';
   if (feedType === 'youtube' || feedType === 'twitch') return 'streamalerts';
   if (feedType === 'github') return 'github';
   return null;

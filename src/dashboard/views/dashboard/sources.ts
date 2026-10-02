@@ -62,25 +62,44 @@ export function renderSourcesTabs(redditAvailable: boolean): string {
       </div>
     </section>
 
-    <!-- TAB: FREE GAMES -->
+    <!-- TAB: GAME FEEDS -->
     <section id="tab-freegames" class="tab-pane">
       <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
         <div>
-          <div class="section-title"><i class="fa-solid fa-gift" style="color: #10b981;"></i> Free Games</div>
-          <div class="section-desc">Automated giveaway alerts powered by GamerPower covering Epic Games Store, Steam, GOG, and more.</div>
+          <div class="section-title"><i class="fa-solid fa-gamepad" style="color: #10b981;"></i> Game Feeds</div>
+          <div class="section-desc">Free game giveaways, discounted PC game deals &amp; promotions, and official game patch notes.</div>
         </div>
         <button onclick="triggerGuildPoll()" class="btn btn-ghost btn-sm"><i class="fa-solid fa-bolt"></i> Check Now</button>
       </div>
 
       <div class="card">
-        <div class="card-title" style="font-size: 0.9375rem;"><i class="fa-solid fa-gift" style="color: #10b981;"></i> Add Free Games Feed</div>
+        <div class="card-title" style="font-size: 0.9375rem;"><i class="fa-solid fa-plus" style="color: #10b981;"></i> Add Game Feed</div>
         <div class="form-grid" style="margin-top: 0.75rem;">
           <div class="form-group">
-            <label class="form-label">Feed Provider</label>
+            <label class="form-label">Feed Type &amp; Provider</label>
             <select id="add-freegames-platform" onchange="handleFreeGamesPlatformChange(this.value)">
-              <option value="gamerpower">GamerPower Free Game Alerts</option>
-              <option value="epic">Epic Games Store Official</option>
-              <option value="all">All Free Games (GamerPower + Epic Official)</option>
+              <optgroup label="🎮 Free Game Alerts (100% Off)">
+                <option value="gamerpower">GamerPower Free Game Alerts</option>
+                <option value="epic">Epic Games Store Official Free Games</option>
+                <option value="all">All Free Games (GamerPower + Epic Official)</option>
+              </optgroup>
+              <optgroup label="🏷️ Deals &amp; Promotions (Discounts)">
+                <option value="deals_all">All Top PC Game Deals</option>
+                <option value="deals_steam">Steam Specials &amp; Sales</option>
+                <option value="deals_gog">GOG Discounts</option>
+                <option value="deals_epic">Epic Games Store Deals</option>
+                <option value="deals_humble">Humble Store Deals</option>
+              </optgroup>
+              <optgroup label="🛠️ Patch Notes &amp; Updates">
+                <option value="patch_cs2">Counter-Strike 2 Patch Notes</option>
+                <option value="patch_dota2">Dota 2 Update Notes</option>
+                <option value="patch_rust">Rust Changelogs</option>
+                <option value="patch_helldivers2">Helldivers 2 Patch Notes</option>
+                <option value="patch_apex">Apex Legends Updates</option>
+                <option value="patch_cyberpunk">Cyberpunk 2077 Patch Notes</option>
+                <option value="patch_bg3">Baldur's Gate 3 Updates</option>
+                <option value="patch_warframe">Warframe Update Notes</option>
+              </optgroup>
             </select>
           </div>
           <div class="form-group">
@@ -101,11 +120,11 @@ export function renderSourcesTabs(redditAvailable: boolean): string {
             </select>
           </div>
         </div>
-        <button onclick="submitAddFreeGamesFeed()" class="btn btn-primary btn-sm btn-block" style="margin-top: 0.75rem; background: #10b981; border-color: #10b981;"><i class="fa-solid fa-gift"></i> Add Free Games Feed</button>
+        <button onclick="submitAddFreeGamesFeed()" class="btn btn-primary btn-sm btn-block" style="margin-top: 0.75rem; background: #10b981; border-color: #10b981;"><i class="fa-solid fa-gamepad"></i> Add Game Feed</button>
       </div>
 
       <div class="card">
-        <div class="card-title" style="font-size: 0.9375rem;"><i class="fa-solid fa-list-check" style="color: #10b981;"></i> Free Games Feeds</div>
+        <div class="card-title" style="font-size: 0.9375rem;"><i class="fa-solid fa-list-check" style="color: #10b981;"></i> Active Game Feeds</div>
         <div id="freegames-feeds-list" class="feed-list" style="margin-top: 0.75rem;">
           <div class="empty-state">Loading feeds...</div>
         </div>

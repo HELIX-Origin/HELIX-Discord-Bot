@@ -5,10 +5,12 @@ import type { Feed } from '../state/types.js';
 import { resolveFeedTargets } from './targets.js';
 import { fetchRaw, isCloudflareChallenge } from './fetch.js';
 import { fetchFreeGames, type FreeGameItem, type FreeGamePlatformKey } from './freegames.js';
+import { fetchGameDeals, type GameDealItem } from './gamedeals.js';
+import { fetchPatchNotes, type PatchNoteItem } from './patchnotes.js';
 import { parseHtml } from './html.js';
 import { parseFeed, withGuid, type FeedEntry } from './parser.js';
 import { scrapeItems, absoluteUrl } from './scraper.js';
-import { feedEmbed, freeGameEmbed, streamAlertEmbed } from '../bot/utils/embeds.js';
+import { feedEmbed, freeGameEmbed, streamAlertEmbed, gameDealsEmbed, patchNotesEmbed } from '../bot/utils/embeds.js';
 import { createLogger, type LogLevel } from '../util/logger.js';
 import { FeedThreadManager } from './threads.js';
 import { isRedditCommunityHomePost } from './reddit.js';
@@ -138,6 +140,8 @@ export class FeedWatcher {
     }
 
     const isFreeGamesFeed = feed.feedType === 'free_games' || feed.feedType?.startsWith('free_games');
+    const isGameDealsFeed = feed.feedType === 'game_deals' || feed.feedType?.startsWith('game_deals');
+    const isPatchNotesFeed = feed.feedType === 'game_patchnotes' || feed.feedType?.startsWith('game_patchnotes');
     const isYouTubeFeed = feed.feedType === 'youtube';
     const isTwitchFeed = feed.feedType === 'twitch';
     const isGitHubFeed = feed.feedType === 'github';
@@ -168,6 +172,16 @@ export class FeedWatcher {
       }
 
       await this.pollFreeGamesLocked(userId, feed);
+      return;
+    }
+
+    if (isGameDealsFeed) {
+      await this.pollGameDealsLocked(userId, feed, force);
+      return;
+    }
+
+    if (isPatchNotesFeed) {
+      await this.pollPatchNotesLocked(userId, feed, force);
       return;
     }
 
@@ -465,6 +479,151 @@ export class FeedWatcher {
 
     this.repo.setFeedChecked(userId, feed.id, games.length ? games[0].id : feed.lastEntryId);
     this.logger.info('Free games feed polled', { feedId: feed.id, feedName: feed.name, newEntries: toSend.length });
+  }
+
+  private async pollGameDealsLocked(userId: number, feed: Feed, force = false): Promise<void> {
+    const { channelId } = resolveFeedTargets(feed);
+    if (!channelId) {
+      this.logger.warn('Game deals feed has no configured Discord delivery target; skipping poll', {
+        feedId: feed.id,
+        feedName: feed.name,
+      });
+      return;
+    }
+
+    let deals: GameDealItem[];
+    try {
+      deals = await fetchGameDeals(feed.url);
+    } catch (err) {
+      this.logger.error('Failed to fetch game deals', { feedId: feed.id }, err);
+      return;
+    }
+
+    const toSend: GameDealItem[] = [];
+    for (const deal of deals) {
+      if (this.repo.isEntrySent(feed.id, deal.id)) continue;
+      if (this.redis && (await this.redis.isEntrySent(feed.id, deal.id))) continue;
+      toSend.push(deal);
+    }
+
+    const itemToDeliver = toSend.length > 0 ? toSend[0] : force && deals.length > 0 ? deals[0] : null;
+
+    if (itemToDeliver) {
+      const embed = gameDealsEmbed({
+        title: itemToDeliver.title,
+        url: itemToDeliver.directUrl,
+        description: itemToDeliver.description,
+        store: itemToDeliver.store,
+        salePrice: itemToDeliver.salePrice,
+        normalPrice: itemToDeliver.normalPrice,
+        savings: itemToDeliver.savings,
+        discountPercent: itemToDeliver.discountPercent,
+        imageUrl: itemToDeliver.imageUrl,
+        publishedAt: itemToDeliver.publishedAt,
+        brandIconUrl: this.bot?.getAppIconUrl?.() ?? null,
+      });
+
+      let delivered = false;
+      let errorDetail: string | null = null;
+      try {
+        delivered = await this.deliverEntry(feed, { embeds: [embed] });
+      } catch (err) {
+        errorDetail = err instanceof Error ? err.message : String(err);
+      }
+
+      if (delivered) {
+        this.repo.markEntrySent(feed.id, itemToDeliver.id);
+        await this.redis?.markEntrySent(feed.id, itemToDeliver.id);
+        this.repo.setFeedPosted(userId, feed.id);
+
+        for (let i = 1; i < toSend.length; i++) {
+          const older = toSend[i];
+          this.repo.markEntrySent(feed.id, older.id);
+          await this.redis?.markEntrySent(feed.id, older.id);
+        }
+      } else {
+        this.logger.warn('Delivery failed for game deal entry', {
+          feedId: feed.id,
+          dealId: itemToDeliver.id,
+          title: itemToDeliver.title,
+          error: errorDetail,
+        });
+      }
+    }
+
+    this.repo.setFeedChecked(userId, feed.id, deals.length ? deals[0].id : feed.lastEntryId);
+    this.logger.info('Game deals feed polled', { feedId: feed.id, feedName: feed.name, newEntries: toSend.length, forced: force });
+  }
+
+  private async pollPatchNotesLocked(userId: number, feed: Feed, force = false): Promise<void> {
+    const { channelId } = resolveFeedTargets(feed);
+    if (!channelId) {
+      this.logger.warn('Patch notes feed has no configured Discord delivery target; skipping poll', {
+        feedId: feed.id,
+        feedName: feed.name,
+      });
+      return;
+    }
+
+    let notes: PatchNoteItem[];
+    try {
+      notes = await fetchPatchNotes(feed.url);
+    } catch (err) {
+      this.logger.error('Failed to fetch patch notes', { feedId: feed.id }, err);
+      return;
+    }
+
+    const toSend: PatchNoteItem[] = [];
+    for (const note of notes) {
+      if (this.repo.isEntrySent(feed.id, note.id)) continue;
+      if (this.redis && (await this.redis.isEntrySent(feed.id, note.id))) continue;
+      toSend.push(note);
+    }
+
+    const itemToDeliver = toSend.length > 0 ? toSend[0] : force && notes.length > 0 ? notes[0] : null;
+
+    if (itemToDeliver) {
+      const embed = patchNotesEmbed({
+        gameTitle: itemToDeliver.gameTitle,
+        patchTitle: itemToDeliver.patchTitle,
+        url: itemToDeliver.url,
+        summary: itemToDeliver.summary,
+        version: itemToDeliver.version,
+        imageUrl: itemToDeliver.imageUrl,
+        publishedAt: itemToDeliver.publishedAt,
+        brandIconUrl: this.bot?.getAppIconUrl?.() ?? null,
+      });
+
+      let delivered = false;
+      let errorDetail: string | null = null;
+      try {
+        delivered = await this.deliverEntry(feed, { embeds: [embed] });
+      } catch (err) {
+        errorDetail = err instanceof Error ? err.message : String(err);
+      }
+
+      if (delivered) {
+        this.repo.markEntrySent(feed.id, itemToDeliver.id);
+        await this.redis?.markEntrySent(feed.id, itemToDeliver.id);
+        this.repo.setFeedPosted(userId, feed.id);
+
+        for (let i = 1; i < toSend.length; i++) {
+          const older = toSend[i];
+          this.repo.markEntrySent(feed.id, older.id);
+          await this.redis?.markEntrySent(feed.id, older.id);
+        }
+      } else {
+        this.logger.warn('Delivery failed for patch notes entry', {
+          feedId: feed.id,
+          noteId: itemToDeliver.id,
+          title: itemToDeliver.patchTitle,
+          error: errorDetail,
+        });
+      }
+    }
+
+    this.repo.setFeedChecked(userId, feed.id, notes.length ? notes[0].id : feed.lastEntryId);
+    this.logger.info('Patch notes feed polled', { feedId: feed.id, feedName: feed.name, newEntries: toSend.length, forced: force });
   }
 
   private async pollStreamAlertFeed(userId: number, feed: Feed, force = false): Promise<void> {
