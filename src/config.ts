@@ -218,7 +218,7 @@ function parsePositiveInt(raw: string | undefined, fallback: number): number {
   return value;
 }
 
-const FEED_CATEGORY_KEYS: ReadonlySet<string> = new Set(['rss', 'reddit', 'freegames', 'streamalerts']);
+const FEED_CATEGORY_KEYS: ReadonlySet<string> = new Set(['rss', 'reddit', 'freegames', 'streamalerts', 'github']);
 
 /**
  * Parse FEED_CATEGORY_LIMITS as a comma-separated `category=number` list, e.g.

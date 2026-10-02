@@ -7,6 +7,7 @@ import { renderOverviewTab } from './dashboard/overview.js';
 import { renderFeedsTab } from './dashboard/feeds.js';
 import { renderManageFeedsTab } from './dashboard/manageFeeds.js';
 import { renderSourcesTabs } from './dashboard/sources.js';
+import { renderGitHubTab } from './dashboard/github.js';
 import { renderGuildAdminTab } from './dashboard/admin.js';
 import { renderSettingsTab } from './dashboard/settings.js';
 import { renderWelcomeTab } from './dashboard/welcome.js';
@@ -179,6 +180,7 @@ export function renderDashboardHtml(
         ${renderManageFeedsTab()}
         ${renderFeedsTab()}
         ${renderSourcesTabs(redditAvailable)}
+        ${renderGitHubTab()}
         ${renderWelcomeTab()}
         ${renderTicketsTab()}
         ${renderLogsTab()}

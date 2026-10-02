@@ -7,6 +7,7 @@ import { authedUserId, canUserManageGuild, isValidHttpUrl, requireDashboardUser 
 import { FeedListener } from '../../feed/listener.js';
 import { createRedditFeeds } from '../../feed/reddit.js';
 import { notifyFeedAdded } from '../../bot/lib/feeds/notify.js';
+import { parseGitHubWebhook, parseGitHubSlug, parseGitHubEvents, buildGitHubEmbed } from '../../feed/github.js';
 import type { IncomingMessage } from 'node:http';
 
 export function registerFeedsRoutes(router: Router<AppDeps>): void {
@@ -71,10 +72,11 @@ export function registerFeedsRoutes(router: Router<AppDeps>): void {
     const url = body.url?.trim();
     if (!name || !url) return sendError(res, 400, 'name and url are required');
 
-    // Support YouTube and Twitch URLs
+    // Support YouTube, Twitch, and GitHub URLs
     const isYoutube = url.includes('youtube.com') || url.includes('youtu.be');
     const isTwitch = url.includes('twitch.tv');
-    const isValidUrl = isValidHttpUrl(url) || url.startsWith('freegames://') || isYoutube || isTwitch;
+    const isGitHub = url.includes('github.com') || body.feedType === 'github';
+    const isValidUrl = isValidHttpUrl(url) || url.startsWith('freegames://') || isYoutube || isTwitch || isGitHub;
 
     if (!isValidUrl) {
       return sendError(res, 400, 'Invalid URL');
@@ -108,12 +110,14 @@ export function registerFeedsRoutes(router: Router<AppDeps>): void {
     try {
       let rawType = body.feedType || 'rss';
 
-      // Auto-detect YouTube and Twitch from URL
+      // Auto-detect YouTube, Twitch, and GitHub from URL
       if (!body.feedType) {
         if (url.includes('youtube.com') || url.includes('youtu.be')) {
           rawType = 'youtube';
         } else if (url.includes('twitch.tv')) {
           rawType = 'twitch';
+        } else if (url.includes('github.com')) {
+          rawType = 'github';
         }
       }
 
@@ -126,9 +130,11 @@ export function registerFeedsRoutes(router: Router<AppDeps>): void {
               ? 'youtube'
               : rawType === 'twitch'
                 ? 'twitch'
-                : rawType.startsWith('free_games')
-                  ? (rawType as FeedType)
-                  : 'rss';
+                : rawType === 'github'
+                  ? 'github'
+                  : rawType.startsWith('free_games')
+                    ? (rawType as FeedType)
+                    : 'rss';
       const scrape =
         body.scrape && body.scrape.item && body.scrape.title && body.scrape.link
           ? {
@@ -439,5 +445,71 @@ export function registerFeedsRoutes(router: Router<AppDeps>): void {
         sendError(res, 500, 'Webhook processing failed');
       }
     });
+  });
+
+  // GitHub Webhook for real-time repository pushes, releases, PRs, and issues
+  router.add('POST', '/api/feeds/webhooks/github', async (req: IncomingMessage, res, _ctx, d) => {
+    const eventHeader = String(req.headers['x-github-event'] || '');
+    if (!eventHeader) {
+      sendError(res, 400, 'Missing X-GitHub-Event header');
+      return;
+    }
+
+    if (eventHeader === 'ping') {
+      sendJson(res, 200, { ok: true, pong: true });
+      return;
+    }
+
+    try {
+      const body = (await readBodyJson(req)) as Record<string, any>;
+      const item = parseGitHubWebhook(eventHeader, body);
+      if (!item) {
+        sendJson(res, 200, { ok: true, ignored: true });
+        return;
+      }
+
+      const allFeeds = d.repo.listFeedsForAllUsers();
+      const matchingFeeds = allFeeds.filter((f) => {
+        if (f.feedType !== 'github' || !f.enabled) return false;
+        const slug = parseGitHubSlug(f.url);
+        return slug && slug.slug.toLowerCase() === item.repoFullName.toLowerCase();
+      });
+
+      if (!matchingFeeds.length) {
+        sendJson(res, 200, { ok: true, matchedFeeds: 0 });
+        return;
+      }
+
+      let deliveredCount = 0;
+      for (const feed of matchingFeeds) {
+        const allowed = parseGitHubEvents(feed.scrape?.description);
+        if (!allowed.includes(item.eventType)) continue;
+
+        if (d.repo.isEntrySent(feed.id, item.id)) continue;
+        if (d.redis && (await d.redis.isEntrySent(feed.id, item.id))) continue;
+
+        const embed = buildGitHubEmbed(item, d.bot?.getAppIconUrl?.() ?? null);
+        const content = feed.roleId ? `<@&${feed.roleId}>` : undefined;
+
+        const delivered = await d.feeds.deliverCustomEntry(feed, { content, embeds: [embed] });
+        if (delivered) {
+          d.repo.markEntrySent(feed.id, item.id);
+          await d.redis?.markEntrySent(feed.id, item.id);
+          d.repo.setFeedPosted(feed.userId, feed.id);
+          deliveredCount++;
+        }
+      }
+
+      d.repo.logActivity(
+        0,
+        'info',
+        'github-webhook',
+        `Received ${eventHeader} for ${item.repoFullName} (delivered to ${deliveredCount} feeds)`,
+      );
+      sendJson(res, 200, { ok: true, deliveredCount });
+    } catch (err) {
+      d.repo.logActivity(0, 'error', 'github-webhook', `GitHub webhook error: ${(err as Error).message}`);
+      sendError(res, 500, 'Webhook processing failed');
+    }
   });
 }

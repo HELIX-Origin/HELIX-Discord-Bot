@@ -69,6 +69,9 @@ export function renderSidebar(options: SidebarOptions): string {
             <button onclick="switchTab('streamalerts')" id="tab-btn-streamalerts" class="tab-btn">
               <i class="fa-solid fa-satellite-dish" style="color: #9146ff;"></i> <span>Stream Alerts</span>
             </button>
+            <button onclick="switchTab('github')" id="tab-btn-github" class="tab-btn">
+              <i class="fa-brands fa-github" style="color: #f0f6fc;"></i> <span>GitHub Feeds</span>
+            </button>
           </div>
         </div>
 

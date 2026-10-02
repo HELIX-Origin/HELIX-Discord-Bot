@@ -17,10 +17,12 @@ graph LR
     B -->|rss / atom / json| C[Standard Feed Engine]
     B -->|reddit| D[Reddit Engine]
     B -->|freegames| E[Free Games Engine]
+    B -->|github| F[GitHub GitLog Engine]
 
     C --> I[Unified Normalizer]
     D --> I
     E --> I
+    F --> I
     I --> J[Composite Deduplication Engine]
     J --> K[Discord Embed Dispatcher]
 ```
@@ -51,6 +53,11 @@ graph LR
   - **Twitch Helix API**: Polls streamer status using App Access tokens via `TWITCH_CLIENT_ID` and `TWITCH_CLIENT_SECRET`.
   - **Live Metadata Presentation**: Embeds feature streamer status, live title, `🎮 Category` (`game_name`), formatted live viewer count `👥 Viewers` (`viewer_count`), and live preview screenshots (1280x720).
 
+### 5. GitHub Feeds Engine
+- **Developer-Grade GitLog Embeds**: Formats repository commits, release tags, pull requests, and issues with author avatars, short SHAs, branch badges, and diff statistics.
+- **Zero API Keys Required**: Ingests public Atom feeds (`commits.atom`, `releases.atom`) and the public Events API with zero rate limits or tokens required.
+- **Real-Time Webhook Support**: Includes an incoming webhook endpoint (`/api/feeds/webhooks/github`) for instant 0-second notifications from repository webhooks.
+- See [GitHub Feeds Documentation](GitHub-Feeds.html) for full details.
 
 ---
 
@@ -62,6 +69,7 @@ Each dashboard **tab** maps to a feed category. Feeds are counted per category, 
 | :--- | :--- | :--- |
 | **News & RSS** | `rss`, `scrape` | **10** |
 | **Reddit** | `reddit` | **10** |
+| **GitHub Feeds** | `github` | **10** |
 | **Free Games** | `free_games` (all stores) | Unlimited |
 | **Stream Alerts** | `youtube`, `twitch` | Unlimited |
 
@@ -105,7 +113,7 @@ While all feeds and alerts poll automatically according to background schedules,
 
 ### 1. Dashboard UI Triggers
 - **Server Overview**: Click **Check Feeds & Alerts Now** at the top of the Overview tab to poll all active feeds and alerts for the selected guild.
-- **Category Tabs**: Click **Check All Now** on the **News & RSS Feeds**, **Reddit Streams**, **Free Games Drops**, or **Stream Alerts** tabs to poll that specific category.
+- **Category Tabs**: Click **Check All Now** on the **News & RSS Feeds**, **Reddit Streams**, **GitHub Feeds**, **Free Games Drops**, or **Stream Alerts** tabs to poll that specific category.
 - **Individual Feeds**: Click the ⚡ (**Check Now**) icon next to any feed in the feed list or within the feed edit modal.
 
 ### 2. Web Dashboard Configuration

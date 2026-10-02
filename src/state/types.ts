@@ -35,7 +35,7 @@ export interface OAuthState {
   createdAt: string;
 }
 
-export type FeedCategory = 'rss' | 'reddit' | 'freegames' | 'streamalerts';
+export type FeedCategory = 'rss' | 'reddit' | 'freegames' | 'streamalerts' | 'github';
 
 export interface GuildCategory {
   guildId: string;
@@ -61,7 +61,8 @@ export type FeedType =
   | 'free_games_prime'
   | 'free_games_battlenet'
   | 'youtube'
-  | 'twitch';
+  | 'twitch'
+  | 'github';
 
 const FEED_TYPES: readonly FeedType[] = [
   'rss',
@@ -80,6 +81,7 @@ const FEED_TYPES: readonly FeedType[] = [
   'free_games_battlenet',
   'youtube',
   'twitch',
+  'github',
 ];
 
 function isFeedType(value: unknown): value is FeedType {
@@ -226,11 +228,17 @@ export const rowToDiscordGuild = (r: Row | undefined): DiscordGuild | null => {
 export const rowToGuildCategory = (r: Row | undefined): GuildCategory | null => {
   if (!r) return null;
   const category = String(r.category);
-  if (category !== 'rss' && category !== 'reddit' && category !== 'freegames' && category !== 'streamalerts')
+  if (
+    category !== 'rss' &&
+    category !== 'reddit' &&
+    category !== 'freegames' &&
+    category !== 'streamalerts' &&
+    category !== 'github'
+  )
     return null;
   return {
     guildId: String(r.guild_id),
-    category,
+    category: category as FeedCategory,
     channelId: r.channel_id === null || r.channel_id === undefined ? null : String(r.channel_id),
     threadChannelId:
       r.thread_channel_id === null || r.thread_channel_id === undefined ? null : String(r.thread_channel_id),
@@ -243,6 +251,7 @@ export function feedCategory(feedType: FeedType): FeedCategory | null {
   if (feedType === 'rss' || feedType === 'scrape') return 'rss';
   if (feedType.startsWith('free_games')) return 'freegames';
   if (feedType === 'youtube' || feedType === 'twitch') return 'streamalerts';
+  if (feedType === 'github') return 'github';
   return null;
 }
 
@@ -253,4 +262,5 @@ export function feedCategory(feedType: FeedType): FeedCategory | null {
 export const FEED_CATEGORY_LIMITS: Readonly<Partial<Record<FeedCategory, number>>> = {
   rss: 10,
   reddit: 10,
+  github: 10,
 };

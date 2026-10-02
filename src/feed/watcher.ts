@@ -13,6 +13,7 @@ import { createLogger, type LogLevel } from '../util/logger.js';
 import { FeedThreadManager } from './threads.js';
 import { isRedditCommunityHomePost } from './reddit.js';
 import { resolveYouTubeXmlUrl, resolveYouTubeChannelId, parseYouTubeAtomXml } from './youtube.js';
+import { fetchGitHubFeed, buildGitHubEmbed, type GitHubFeedItem } from './github.js';
 
 interface YouTubeItem {
   id?: { videoId?: string };
@@ -89,7 +90,7 @@ export class FeedWatcher {
     if (!guildId) return false;
 
     // Feature toggles check (managed exclusively via dashboard)
-    if (['rss', 'scrape', 'reddit'].includes(feed.feedType) || feed.feedType.startsWith('free_games')) {
+    if (['rss', 'scrape', 'reddit', 'github'].includes(feed.feedType) || feed.feedType.startsWith('free_games')) {
       if (this.repo.getGuildSetting(guildId, 'feature_feeds') === '0') {
         return true;
       }
@@ -139,6 +140,7 @@ export class FeedWatcher {
     const isFreeGamesFeed = feed.feedType === 'free_games' || feed.feedType?.startsWith('free_games');
     const isYouTubeFeed = feed.feedType === 'youtube';
     const isTwitchFeed = feed.feedType === 'twitch';
+    const isGitHubFeed = feed.feedType === 'github';
 
     // For Free Games feeds: automated polling runs weekly at the start of every Sunday (UTC).
     // Manual force trigger bypasses the Sunday schedule.
@@ -173,6 +175,11 @@ export class FeedWatcher {
     // But we also poll periodically as a fallback
     if (isYouTubeFeed || isTwitchFeed) {
       await this.pollStreamAlertFeed(userId, feed);
+      return;
+    }
+
+    if (isGitHubFeed) {
+      await this.pollGitHubFeed(userId, feed);
       return;
     }
 
@@ -357,6 +364,10 @@ export class FeedWatcher {
     return true;
   }
 
+  async deliverCustomEntry(feed: Feed, payload: { content?: string; embeds?: unknown[] }): Promise<boolean> {
+    return this.deliverEntry(feed, payload);
+  }
+
   private async pollFreeGamesLocked(userId: number, feed: Feed): Promise<void> {
     let platformKey: FreeGamePlatformKey = 'all';
     const lowerName = feed.name.toLowerCase();
@@ -533,6 +544,74 @@ export class FeedWatcher {
 
     this.repo.setFeedChecked(userId, feed.id, entries.length ? entries[0].id : feed.lastEntryId);
     this.logger.info('Stream alert feed polled', { feedId: feed.id, feedName: feed.name, newEntries: toSend.length });
+  }
+
+  private async pollGitHubFeed(userId: number, feed: Feed): Promise<void> {
+    this.logger.debug('Polling GitHub feed', { feedId: feed.id, feedName: feed.name, url: feed.url });
+
+    const { channelId } = resolveFeedTargets(feed);
+    if (!channelId) {
+      this.logger.warn('GitHub feed has no configured Discord delivery target; skipping poll', {
+        feedId: feed.id,
+        feedName: feed.name,
+      });
+      return;
+    }
+
+    let items: GitHubFeedItem[] = [];
+    try {
+      items = await fetchGitHubFeed(feed);
+    } catch (err) {
+      this.logger.error('Failed to fetch GitHub feed', { feedId: feed.id, feedName: feed.name, url: feed.url }, err);
+      return;
+    }
+
+    const seen = new Set<string>();
+    const toSend: GitHubFeedItem[] = [];
+    for (const item of items) {
+      if (seen.has(item.id)) continue;
+      seen.add(item.id);
+      if (this.repo.isEntrySent(feed.id, item.id)) continue;
+      if (this.redis && (await this.redis.isEntrySent(feed.id, item.id))) continue;
+      toSend.push(item);
+    }
+
+    if (toSend.length > 0) {
+      const item = toSend[0];
+      const embed = buildGitHubEmbed(item, this.bot?.getAppIconUrl?.() ?? null);
+      const content = feed.roleId ? `<@&${feed.roleId}>` : undefined;
+
+      let delivered = false;
+      let errorDetail: string | null = null;
+      try {
+        delivered = await this.deliverEntry(feed, { content, embeds: [embed] });
+      } catch (err) {
+        errorDetail = err instanceof Error ? err.message : String(err);
+      }
+
+      if (delivered) {
+        this.repo.markEntrySent(feed.id, item.id);
+        await this.redis?.markEntrySent(feed.id, item.id);
+        this.repo.setFeedPosted(userId, feed.id);
+
+        // Drain backlog
+        for (let i = 1; i < toSend.length; i++) {
+          const older = toSend[i];
+          this.repo.markEntrySent(feed.id, older.id);
+          await this.redis?.markEntrySent(feed.id, older.id);
+        }
+      } else {
+        this.logger.warn('Delivery failed for GitHub feed entry', {
+          feedId: feed.id,
+          feedName: feed.name,
+          itemId: item.id,
+          error: errorDetail,
+        });
+      }
+    }
+
+    this.repo.setFeedChecked(userId, feed.id, items.length ? items[0].id : feed.lastEntryId);
+    this.logger.info('GitHub feed polled', { feedId: feed.id, feedName: feed.name, newEntries: toSend.length });
   }
 
   private async fetchYouTubeFeed(feed: Feed): Promise<

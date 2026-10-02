@@ -28,7 +28,7 @@ GET /api/feeds
 ```
 **Query Parameters**:
 - `guildId` (optional): Filter feeds for a specific Discord server.
-- `type` (optional): Filter by feed type (`rss`, `reddit`, `freegames`).
+- `type` (optional): Filter by feed type (`rss`, `reddit`, `github`, `freegames`).
 
 **Response**:
 ```json
@@ -136,6 +136,29 @@ Content-Type: application/json
   "success": true,
   "message": "Triggered poll for 5 feed(s)",
   "polledCount": 5
+}
+```
+
+---
+
+### 7. GitHub Real-Time Webhook Receiver
+```http
+POST /api/feeds/webhooks/github
+Content-Type: application/json
+X-GitHub-Event: push
+```
+Incoming webhook receiver for real-time GitHub notifications. Matches incoming repository activity against active `github` feeds by repository slug, filters by subscribed event types, and dispatches rich GitLog embeds immediately to target channels or threads.
+
+**Headers**:
+- `X-GitHub-Event` (required): Event name (`push`, `release`, `pull_request`, `issues`, or `ping`).
+- `Content-Type`: `application/json`
+
+**Response**:
+```json
+{
+  "success": true,
+  "action": "delivered",
+  "delivered": 1
 }
 ```
 

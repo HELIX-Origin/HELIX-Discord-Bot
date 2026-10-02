@@ -32,6 +32,7 @@ Visit the project site at [**helix-origin.github.io/HELIX-Discord-Bot**](https:/
 | Feature | Details |
 |:---|:---|
 | 🎮 **Free Games Alerts** | Automated free-game giveaways from Epic Games, Steam, GOG, Humble, Itch.io, and more — with rich store embeds and deduplication. → [Docs](https://helix-origin.github.io/HELIX-Discord-Bot/Free-Games-Feeds.html) |
+| 🐙 **GitHub Repository Feeds** | Developer-grade GitLog activity feeds (commits, releases, PRs, issues) with zero API keys and optional real-time webhooks. → [Docs](https://helix-origin.github.io/HELIX-Discord-Bot/GitHub-Feeds.html) |
 | 🤖 **Reddit Feeds** | Subreddit/user feeds with Pure Image & Standard RSS modes, animated GIF support, community home post filtering, and NSFW age-restriction enforcement. Needs a Reddit session cookie (`cookies.json`/`cookies.txt`). → [Docs](https://helix-origin.github.io/HELIX-Discord-Bot/Reddit-Feeds.html) |
 | 📰 **RSS, Web Scrapers & News Catalog** | RSS/Atom/JSON feeds, CSS-selector scrapers for sites without RSS, and a 700+ preset news catalog. Features single-newest-post delivery and rate-limit shield. → [Docs](https://helix-origin.github.io/HELIX-Discord-Bot/Feeds-and-Scrapers.html) |
 | 📢 **Stream Alerts** | YouTube & Twitch live/upload alerts delivered via webhooks with polling fallback. → [Docs](https://helix-origin.github.io/HELIX-Discord-Bot/Feeds-and-Scrapers.html) |
@@ -92,6 +93,7 @@ Comprehensive guides, configuration references, architecture breakdowns, and API
 | Documentation Page | Description |
 |---|---|
 | [🏠 Documentation Home](https://helix-origin.github.io/HELIX-Discord-Bot/README.html) | Central documentation index and quick reference. |
+| [🐙 GitHub Feeds](https://helix-origin.github.io/HELIX-Discord-Bot/GitHub-Feeds.html) | Developer GitLog embeds, commits, releases, PRs, issues, zero API keys, webhooks. |
 | [🎁 Free Games Feeds](https://helix-origin.github.io/HELIX-Discord-Bot/Free-Games-Feeds.html) | Supported platforms, polling schedule, and embed schemas. |
 | [🤖 Reddit Feeds](https://helix-origin.github.io/HELIX-Discord-Bot/Reddit-Feeds.html) | Image vs RSS modes, animated GIFs, session cookies, NSFW enforcement. |
 | [📰 Feeds & Web Scraper](https://helix-origin.github.io/HELIX-Discord-Bot/Feeds-and-Scrapers.html) | RSS/Atom parsing, CSS scrapers, and the news catalog. |

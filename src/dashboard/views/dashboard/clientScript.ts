@@ -93,6 +93,7 @@ export function renderClientScript(): string {
       else if (tabId === 'reddit') loadSourceTab('reddit');
       else if (tabId === 'freegames') loadSourceTab('freegames');
       else if (tabId === 'streamalerts') loadSourceTab('streamalerts');
+      else if (tabId === 'github') loadSourceTab('github');
       else if (tabId === 'overview') loadOverviewTab();
       else if (tabId === 'guildadmin') loadGuildAdminTab();
       else if (tabId === 'settings') loadSettingsTab();
@@ -337,7 +338,7 @@ export function renderClientScript(): string {
     }
 
     function populateAddRoleSelects() {
-      ['rss', 'reddit', 'freegames', 'streamalerts'].forEach(function(cat) {
+      ['rss', 'reddit', 'freegames', 'streamalerts', 'github'].forEach(function(cat) {
         populateRoleSelect('add-' + cat + '-role', cachedRoles || [], '', '-- No role --');
       });
     }
@@ -352,6 +353,7 @@ export function renderClientScript(): string {
       if (t === 'rss' || t === 'scrape') return 'rss';
       if (t && t.startsWith('free_games')) return 'freegames';
       if (t === 'youtube' || t === 'twitch') return 'streamalerts';
+      if (t === 'github') return 'github';
       return null;
     }
 
@@ -371,11 +373,13 @@ export function renderClientScript(): string {
       const isFreeGames = f.feedType === 'free_games' || (f.feedType && f.feedType.startsWith('free_games'));
       const isScrape = f.feedType === 'scrape';
       const isStreamAlert = f.feedType === 'youtube' || f.feedType === 'twitch';
+      const isGitHub = f.feedType === 'github';
       let typeBadge = '<span class="badge badge-gray"><i class="fa-solid fa-rss"></i> RSS</span>';
       if (isReddit) typeBadge = '<span class="badge" style="background: rgba(255,69,0,0.15); color: #ff4500; border: 1px solid rgba(255,69,0,0.3);"><i class="fa-brands fa-reddit"></i> Reddit</span>';
       else if (isFreeGames) typeBadge = '<span class="badge" style="background: rgba(16,185,129,0.15); color: #10b981; border: 1px solid rgba(16,185,129,0.3);"><i class="fa-solid fa-gift"></i> Free Games</span>';
       else if (isScrape) typeBadge = '<span class="badge badge-amber"><i class="fa-solid fa-code"></i> Scraper</span>';
       else if (isStreamAlert) typeBadge = '<span class="badge" style="background: rgba(145,70,255,0.15); color: #9146ff; border: 1px solid rgba(145,70,255,0.3);"><i class="fa-solid fa-video"></i> Stream</span>';
+      else if (isGitHub) typeBadge = '<span class="badge" style="background: rgba(240,246,252,0.15); color: #f0f6fc; border: 1px solid rgba(240,246,252,0.3);"><i class="fa-brands fa-github"></i> GitHub</span>';
       const statusBadge = f.enabled
         ? '<span class="badge badge-green">Active</span>'
         : '<span class="badge badge-gray">Paused</span>';
@@ -474,10 +478,16 @@ export function renderClientScript(): string {
     async function loadSourceTab(category) {
       await ensureChannels();
       populateAddTargetSelect('add-' + category + '-target', true);
+      if (category === 'github') {
+        const webhookUrlEl = document.getElementById('github-webhook-url');
+        if (webhookUrlEl) {
+          webhookUrlEl.textContent = window.location.origin + '/api/feeds/webhooks/github';
+        }
+      }
       await renderCategoryFeeds(category);
     }
 
-    const FEED_TOPIC_ORDER = ['News', 'Technology', 'Entertainment', 'Gaming', 'Programming', 'Science & Space', 'Artificial Intelligence', 'Cybersecurity', 'Cryptocurrency', 'Business & Finance', 'Sports', 'Reddit', 'Free Games', 'Stream Alerts'];
+    const FEED_TOPIC_ORDER = ['News', 'Technology', 'Entertainment', 'Gaming', 'Programming', 'Science & Space', 'Artificial Intelligence', 'Cybersecurity', 'Cryptocurrency', 'Business & Finance', 'Sports', 'Reddit', 'Free Games', 'Stream Alerts', 'GitHub'];
 
     function feedTopicOf(f) {
       if (f.topic && String(f.topic).trim()) {
@@ -489,6 +499,7 @@ export function renderClientScript(): string {
       if (t === 'reddit') return 'Reddit';
       if (t.indexOf('free_games') === 0) return 'Free Games';
       if (t === 'youtube' || t === 'twitch') return 'Stream Alerts';
+      if (t === 'github') return 'GitHub';
       return 'Other';
     }
 
@@ -507,7 +518,8 @@ export function renderClientScript(): string {
         'Sports': 'fa-futbol',
         'Reddit': 'fa-brands fa-reddit',
         'Free Games': 'fa-gift',
-        'Stream Alerts': 'fa-tower-broadcast'
+        'Stream Alerts': 'fa-tower-broadcast',
+        'GitHub': 'fa-brands fa-github'
       };
       return map[topic] || 'fa-rss';
     }
@@ -527,7 +539,8 @@ export function renderClientScript(): string {
         'Sports': '#22c55e',
         'Reddit': '#ff4500',
         'Free Games': '#16a34a',
-        'Stream Alerts': '#9146ff'
+        'Stream Alerts': '#9146ff',
+        'GitHub': '#f0f6fc'
       };
       return map[topic] || 'var(--text-dim)';
     }
@@ -1098,6 +1111,85 @@ export function renderClientScript(): string {
         }
       } catch (err) {
         alert('Network error adding stream alert feed: ' + (err && err.message ? err.message : String(err)));
+      }
+    }
+
+    function handleGitHubSlugInput(val) {
+      const nameInput = document.getElementById('add-github-name');
+      if (!nameInput) return;
+      const clean = val.replace(/^(?:https?:\/\/)?(?:www\.)?github\.com\//i, '').replace(/\.git$/i, '').replace(/^\/+|\/+$/g, '').trim();
+      if (clean && !nameInput.value) {
+        nameInput.placeholder = 'GitHub · ' + clean;
+      }
+    }
+
+    async function submitAddGitHubFeed() {
+      if (!currentGuildId) return;
+      const slugInput = document.getElementById('add-github-slug');
+      const nameInput = document.getElementById('add-github-name');
+      const rawSlug = (slugInput ? slugInput.value : '').trim();
+      const clean = rawSlug.replace(/^(?:https?:\/\/)?(?:www\.)?github\.com\//i, '').replace(/\.git$/i, '').replace(/^\/+|\/+$/g, '').trim();
+      if (!clean || !clean.includes('/')) {
+        return alert('Please enter a valid GitHub repository in "owner/repo" format (e.g. facebook/react).');
+      }
+
+      const parts = clean.split('/');
+      if (parts.length < 2 || !parts[0] || !parts[1]) {
+        return alert('Please enter a valid GitHub repository in "owner/repo" format.');
+      }
+      const owner = parts[0].trim();
+      const repo = parts[1].trim();
+      const slug = owner + '/' + repo;
+
+      const events = [];
+      if (document.getElementById('add-github-event-push') && document.getElementById('add-github-event-push').checked) events.push('push');
+      if (document.getElementById('add-github-event-release') && document.getElementById('add-github-event-release').checked) events.push('release');
+      if (document.getElementById('add-github-event-pr') && document.getElementById('add-github-event-pr').checked) events.push('pull_request');
+      if (document.getElementById('add-github-event-issues') && document.getElementById('add-github-event-issues').checked) events.push('issues');
+
+      if (!events.length) {
+        return alert('Please select at least one event type to follow (Commits, Releases, Pull Requests, or Issues).');
+      }
+
+      let name = nameInput ? nameInput.value.trim() : '';
+      if (!name) name = 'GitHub · ' + slug;
+
+      const url = 'https://github.com/' + slug;
+      const targetSel = document.getElementById('add-github-target');
+      const target = targetFieldsFromValue(targetSel ? targetSel.value : '');
+      const roleSel = document.getElementById('add-github-role');
+      const roleId = roleSel ? (roleSel.value || null) : null;
+
+      try {
+        const res = await fetch('/api/feeds', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name,
+            url,
+            feedType: 'github',
+            guildId: currentGuildId,
+            channelId: target.channelId,
+            roleId,
+            scrape: {
+              item: 'github',
+              title: owner,
+              link: repo,
+              description: events.join(','),
+            },
+          }),
+        });
+        if (!checkAuth(res)) return;
+        const data = await res.json();
+        if (res.ok) {
+          if (slugInput) slugInput.value = '';
+          if (nameInput) nameInput.value = '';
+          renderCategoryFeeds('github');
+        } else {
+          alert(data.error || 'Failed to add GitHub feed');
+        }
+      } catch (err) {
+        alert('Network error adding GitHub feed: ' + (err && err.message ? err.message : String(err)));
       }
     }
 

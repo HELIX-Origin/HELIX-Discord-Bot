@@ -14,6 +14,7 @@ Welcome to the comprehensive technical and operational documentation for **HELIX
 | Section | Description |
 | :--- | :--- |
 | [**📡 Feeds & Scrapers Engine**](Feeds-and-Scrapers.html) | Deep dive into XML/RSS/Atom parsing, Reddit, Free Games, and custom scrapers. |
+| [**🐙 GitHub Feeds**](GitHub-Feeds.html) | Developer-grade GitLog activity feeds (commits, releases, PRs, issues) with zero API keys and optional real-time webhook receiver. |
 | [**🎮 Free Games & Giveaways**](Free-Games-Feeds.html) | Multi-store aggregation (Epic Games, Steam, GOG, Humble, etc.), Monday cron scheduler, and store branding. |
 | [**🤖 Reddit Feeds & Pure Image Mode**](Reddit-Feeds.html) | Reddit scraping, Pure Image Mode vs Standard RSS Mode, animated GIF/gifv banners, and subreddit filtering. |
 | [**🤖 Discord Bot & Commands**](Discord-Bot.html) | Slash commands (`/warn`, `/kick`, `/ban`, `/purge`, `/lock`, `/unlock`, `/slowmode`, `/announce`, `/role`, `/voice`, `/stats`, `/about`, `/help`), direct channel + dedicated thread delivery, embed formatting, and Discord permissions. |
@@ -35,6 +36,7 @@ flowchart TD
     subgraph Sources["External Content Sources"]
         RSS["Standard RSS / Atom / JSON Feeds"]
         News["News Feeds Catalog (700+ Presets)"]
+        GitHub["GitHub (Commits, Releases, PRs, Issues)"]
         Games["Free Games (Epic, Steam, GOG, Humble, Prime...)"]
         Social["Reddit"]
         YouTube["YouTube Live & Upload Alerts"]
@@ -81,3 +83,4 @@ flowchart TD
 8. **Glassmorphism Web Dashboard**: Real-time management interface with Discord OAuth2 login, responsive window-fitting layouts, live simulated Discord previews, feed analytics, log streaming, and preset browsing.
 9. **Welcome & Ticket Systems**: Web dashboard configuration for welcome announcements and support ticket system (channel button prompt with optional embeds, auto-creating threads with support manager role alerts, live Discord previews, and dynamic `{server}`, `{role}`, `{channel}`, `{membercount}`, `{user}`, `{mention}` placeholder interpolation).
 10. **Guild Administration**: Moderation (`/warn`, `/kick`, `/ban`, `/lock`, `/purge`, `/slowmode`, `/announce`), role management, voice controls (mute/deafen/move/disconnect), all with Discord permission guards.
+11. **GitHub Repository Feeds**: Developer-grade GitLog activity feeds (commits/pushes, releases & tags, pull requests, issues) with short SHAs, branch badges, and diff stats. Zero API keys required, with optional incoming webhook receiver for 0-second instant updates.
