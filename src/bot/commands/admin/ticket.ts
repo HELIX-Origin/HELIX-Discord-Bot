@@ -841,4 +841,3 @@ async function buildTranscript(rest: DiscordRestClient, channelId: string): Prom
 }
 
 // Slash command registration removed — ticket system is configured exclusively via Web Dashboard
-

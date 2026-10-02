@@ -382,4 +382,3 @@ export async function handleYouTubeCommand(
 }
 
 // Slash command registration removed — YouTube alerts are configured exclusively via Web Dashboard
-

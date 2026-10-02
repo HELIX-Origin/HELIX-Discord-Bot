@@ -55,7 +55,17 @@ export async function dispatchInteraction(
     };
   }
 
-  const DASHBOARD_CONFIGURED_COMMANDS = ['rss', 'reddit', 'youtube', 'twitch', 'free-games', 'welcome', 'ticket', 'set', 'server'];
+  const DASHBOARD_CONFIGURED_COMMANDS = [
+    'rss',
+    'reddit',
+    'youtube',
+    'twitch',
+    'free-games',
+    'welcome',
+    'ticket',
+    'set',
+    'server',
+  ];
 
   if (DASHBOARD_CONFIGURED_COMMANDS.includes(commandName)) {
     return EmbedHandler.for(deps)

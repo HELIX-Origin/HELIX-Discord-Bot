@@ -387,7 +387,11 @@ export class FeedWatcher {
     const lowerName = feed.name.toLowerCase();
     const lowerUrl = feed.url.toLowerCase();
 
-    if (feed.feedType === 'free_games_epic' || (lowerName.includes('epic') && !lowerName.includes('gamerpower')) || (lowerUrl.includes('epic') && !lowerUrl.includes('gamerpower'))) {
+    if (
+      feed.feedType === 'free_games_epic' ||
+      (lowerName.includes('epic') && !lowerName.includes('gamerpower')) ||
+      (lowerUrl.includes('epic') && !lowerUrl.includes('gamerpower'))
+    ) {
       platformKey = 'epic';
     } else if (
       feed.feedType === 'free_games_gamerpower' ||
@@ -552,7 +556,12 @@ export class FeedWatcher {
     }
 
     this.repo.setFeedChecked(userId, feed.id, deals.length ? deals[0].id : feed.lastEntryId);
-    this.logger.info('Game deals feed polled', { feedId: feed.id, feedName: feed.name, newEntries: toSend.length, forced: force });
+    this.logger.info('Game deals feed polled', {
+      feedId: feed.id,
+      feedName: feed.name,
+      newEntries: toSend.length,
+      forced: force,
+    });
   }
 
   private async pollPatchNotesLocked(userId: number, feed: Feed, force = false): Promise<void> {
@@ -623,7 +632,12 @@ export class FeedWatcher {
     }
 
     this.repo.setFeedChecked(userId, feed.id, notes.length ? notes[0].id : feed.lastEntryId);
-    this.logger.info('Patch notes feed polled', { feedId: feed.id, feedName: feed.name, newEntries: toSend.length, forced: force });
+    this.logger.info('Patch notes feed polled', {
+      feedId: feed.id,
+      feedName: feed.name,
+      newEntries: toSend.length,
+      forced: force,
+    });
   }
 
   private async pollStreamAlertFeed(userId: number, feed: Feed, force = false): Promise<void> {

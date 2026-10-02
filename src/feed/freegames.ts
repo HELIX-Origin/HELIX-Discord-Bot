@@ -237,11 +237,7 @@ async function fetchEpicGamesPromotions(): Promise<FreeGameItem[]> {
  * Resolves any redirect or aggregator URLs to the direct destination store page of the free game.
  * Follows HTTP 3xx redirects (up to maxHops) with manual redirect handling and timeout protection.
  */
-export async function resolveDirectGiveawayUrl(
-  rawUrl: string,
-  maxHops = 5,
-  timeoutMs = 5000,
-): Promise<string> {
+export async function resolveDirectGiveawayUrl(rawUrl: string, maxHops = 5, timeoutMs = 5000): Promise<string> {
   if (!rawUrl || !rawUrl.startsWith('http')) return rawUrl;
   let currentUrl = rawUrl;
 
@@ -551,7 +547,10 @@ export async function fetchFreeGames(platform: FreeGamePlatformKey = 'gamerpower
   // Universal Redirect Rule: every giveaway url MUST link to the actual store page
   await Promise.all(
     uniqueItems.map(async (item) => {
-      if (item.url && (item.url.includes('gamerpower.com/open') || item.url.includes('bit.ly') || item.url.includes('t.co'))) {
+      if (
+        item.url &&
+        (item.url.includes('gamerpower.com/open') || item.url.includes('bit.ly') || item.url.includes('t.co'))
+      ) {
         item.url = await resolveDirectGiveawayUrl(item.url);
       }
     }),

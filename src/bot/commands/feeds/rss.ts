@@ -348,4 +348,3 @@ export async function handleRssCommand(
 }
 
 // Slash command registration removed — RSS feeds are configured exclusively via Web Dashboard
-

@@ -24,7 +24,7 @@ export interface GitHubSlug {
   owner: string;
   repo: string;
   slug: string; // "owner/repo"
-  url: string;  // "https://github.com/owner/repo"
+  url: string; // "https://github.com/owner/repo"
 }
 
 export interface GitHubCommitDetail {
@@ -143,15 +143,21 @@ export function parseAtomEntry(
 
   if (isPush) {
     // Extract commit SHA from URL or ID
-    const shaMatch = entry.link.match(/\/commit\/([0-9a-fA-F]+)/) || (entry.id ? entry.id.match(/\/([0-9a-fA-F]{7,40})/) : null);
-    const sha = shaMatch ? shaMatch[1] : (entry.id || entry.link);
+    const shaMatch =
+      entry.link.match(/\/commit\/([0-9a-fA-F]+)/) || (entry.id ? entry.id.match(/\/([0-9a-fA-F]{7,40})/) : null);
+    const sha = shaMatch ? shaMatch[1] : entry.id || entry.link;
     const shortSha = sha.slice(0, 7);
     const authorName = entry.author?.trim() || 'GitHub';
     const commitUrl = entry.link;
 
     // Clean description (strip HTML tags)
     const rawDesc = entry.description ? entry.description.replace(/<[^>]+>/g, '').trim() : '';
-    const lines = rawDesc ? rawDesc.split('\n').map((l) => l.trim()).filter(Boolean) : [];
+    const lines = rawDesc
+      ? rawDesc
+          .split('\n')
+          .map((l) => l.trim())
+          .filter(Boolean)
+      : [];
     const firstLine = entry.title.replace(/\s+/g, ' ').trim();
     const bodyLines = lines.slice(1).join('\n');
 
@@ -240,9 +246,10 @@ export function parseApiEvent(event: Record<string, any>, slug: GitHubSlug): Git
         url: `https://github.com/${repoFullName}/commit/${c.sha}`,
       }));
 
-      const title = commitCount === 1
-        ? `🔨 [${repoFullName}:${branch}] New commit by ${user.login}`
-        : `🔨 [${repoFullName}:${branch}] ${commitCount} new commits by ${user.login}`;
+      const title =
+        commitCount === 1
+          ? `🔨 [${repoFullName}:${branch}] New commit by ${user.login}`
+          : `🔨 [${repoFullName}:${branch}] ${commitCount} new commits by ${user.login}`;
 
       const compareUrl = `https://github.com/${repoFullName}/compare/${payload['before'] || ''}...${head}`;
 
@@ -334,10 +341,9 @@ export function parseApiEvent(event: Record<string, any>, slug: GitHubSlug): Git
       const statusLabel = action === 'closed' ? 'Closed' : action === 'reopened' ? 'Reopened' : 'Opened';
       const icon = action === 'closed' ? '🟣' : '🟢';
 
-       
       const labels = Array.isArray(issue['labels'])
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        ? issue['labels'].map((l: any) => (typeof l === 'string' ? l : l.name)).filter(Boolean)
+        ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          issue['labels'].map((l: any) => (typeof l === 'string' ? l : l.name)).filter(Boolean)
         : [];
 
       return {
@@ -368,7 +374,7 @@ export function parseApiEvent(event: Record<string, any>, slug: GitHubSlug): Git
 /**
  * Parses an incoming GitHub webhook payload into a GitHubFeedItem.
  */
- 
+
 export function parseGitHubWebhook(
   eventHeader: string,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -404,9 +410,10 @@ export function parseGitHubWebhook(
         url: String(c.url || `https://github.com/${slug.slug}/commit/${c.id || c.sha}`),
       }));
 
-      const title = commitCount === 1
-        ? `🔨 [${slug.slug}:${branch}] New commit by ${user.login}`
-        : `🔨 [${slug.slug}:${branch}] ${commitCount} new commits by ${user.login}`;
+      const title =
+        commitCount === 1
+          ? `🔨 [${slug.slug}:${branch}] New commit by ${user.login}`
+          : `🔨 [${slug.slug}:${branch}] ${commitCount} new commits by ${user.login}`;
 
       return {
         id: `github:push:${slug.slug}:${head}`,
@@ -493,10 +500,9 @@ export function parseGitHubWebhook(
       const statusLabel = action === 'closed' ? 'Closed' : action === 'reopened' ? 'Reopened' : 'Opened';
       const icon = action === 'closed' ? '🟣' : '🟢';
 
-       
       const labels = Array.isArray(issue['labels'])
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        ? issue['labels'].map((l: any) => (typeof l === 'string' ? l : l.name)).filter(Boolean)
+        ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          issue['labels'].map((l: any) => (typeof l === 'string' ? l : l.name)).filter(Boolean)
         : [];
 
       return {
@@ -527,7 +533,9 @@ export function parseGitHubWebhook(
  * Fetches feed items for a GitHub feed using public Events API or Atom feeds (zero key required).
  */
 export async function fetchGitHubFeed(feed: Feed): Promise<GitHubFeedItem[]> {
-  const slug = parseGitHubSlug(feed.url) || parseGitHubSlug(feed.scrape?.title ? `${feed.scrape.title}/${feed.scrape.link}` : null);
+  const slug =
+    parseGitHubSlug(feed.url) ||
+    parseGitHubSlug(feed.scrape?.title ? `${feed.scrape.title}/${feed.scrape.link}` : null);
   if (!slug) return [];
 
   const allowedEvents = parseGitHubEvents(feed.scrape?.description);

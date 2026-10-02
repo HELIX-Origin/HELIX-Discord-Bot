@@ -99,7 +99,10 @@ async function fetchCheapSharkDeals(storeId?: string): Promise<GameDealItem[]> {
  * Main game deals dispatcher.
  */
 export async function fetchGameDeals(feedUrl: string): Promise<GameDealItem[]> {
-  const clean = feedUrl.replace(/^gamedeals:\/\//i, '').trim().toLowerCase();
+  const clean = feedUrl
+    .replace(/^gamedeals:\/\//i, '')
+    .trim()
+    .toLowerCase();
   if (clean === 'steam') {
     return fetchCheapSharkDeals('1');
   }

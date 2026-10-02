@@ -363,4 +363,3 @@ export async function handleTwitchCommand(
 }
 
 // Slash command registration removed — Twitch alerts are configured exclusively via Web Dashboard
-

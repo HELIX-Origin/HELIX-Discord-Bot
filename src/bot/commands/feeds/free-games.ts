@@ -140,17 +140,7 @@ export async function handleFreeGamesCommand(
           `Updated Game Feed alert to channel ${channelId} via Discord bot`,
         );
       } else {
-        deps.repo.addFeed(
-          user.id,
-          storeName,
-          defaultUrl,
-          channelId,
-          feedType,
-          null,
-          guildId,
-          undefined,
-          roleId,
-        );
+        deps.repo.addFeed(user.id, storeName, defaultUrl, channelId, feedType, null, guildId, undefined, roleId);
         deps.repo.logActivity(user.id, 'info', 'bot', `Enabled Game Feed alerts via Discord bot`);
       }
       if (channelId) {
@@ -291,4 +281,3 @@ export async function handleFreeGamesCommand(
 }
 
 // Slash command registration removed — Free Games alerts are configured exclusively via Web Dashboard
-

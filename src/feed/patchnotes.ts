@@ -61,12 +61,20 @@ async function fetchSteamPatchNotes(appId: string, gameName?: string): Promise<P
     const resolvedGameName = gameName || `Steam App ${appId}`;
 
     return items.map((item) => {
-      const cleanContents = decodeHtmlEntities(stripHtml(item.contents) ?? '').replace(/\{STEAM_CLAN_IMAGE\}[^\s]+/g, '').trim();
+      const cleanContents = decodeHtmlEntities(stripHtml(item.contents) ?? '')
+        .replace(/\{STEAM_CLAN_IMAGE\}[^\s]+/g, '')
+        .trim();
       const summary = cleanContents.length > 300 ? `${cleanContents.slice(0, 297)}...` : cleanContents;
 
       // Extract image URL from BBCode or HTML if present
-      const imgMatch = /\{STEAM_CLAN_IMAGE\}\/([^\s]+)/.exec(item.contents) || /https?:\/\/[^\s"']+\.(?:png|jpg|jpeg|webp)/i.exec(item.contents);
-      const imageUrl = imgMatch ? (imgMatch[0].startsWith('{STEAM_CLAN_IMAGE}') ? `https://clan.akamai.steamstatic.com/images/${imgMatch[1]}` : imgMatch[0]) : null;
+      const imgMatch =
+        /\{STEAM_CLAN_IMAGE\}\/([^\s]+)/.exec(item.contents) ||
+        /https?:\/\/[^\s"']+\.(?:png|jpg|jpeg|webp)/i.exec(item.contents);
+      const imageUrl = imgMatch
+        ? imgMatch[0].startsWith('{STEAM_CLAN_IMAGE}')
+          ? `https://clan.akamai.steamstatic.com/images/${imgMatch[1]}`
+          : imgMatch[0]
+        : null;
 
       // Version number regex match if present in title
       const versionMatch = /\bv?(\d+\.\d+(?:\.\d+)?(?:[a-zA-Z0-9_-]+)?)\b/.exec(item.title);
@@ -91,7 +99,10 @@ async function fetchSteamPatchNotes(appId: string, gameName?: string): Promise<P
  * Main patch notes dispatcher.
  */
 export async function fetchPatchNotes(feedUrl: string): Promise<PatchNoteItem[]> {
-  const clean = feedUrl.replace(/^patchnotes:\/\//i, '').trim().toLowerCase();
+  const clean = feedUrl
+    .replace(/^patchnotes:\/\//i, '')
+    .trim()
+    .toLowerCase();
 
   // Preset match
   const preset = POPULAR_STEAM_GAMES[clean];

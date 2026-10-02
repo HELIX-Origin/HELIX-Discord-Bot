@@ -421,4 +421,3 @@ async function handleTest(
 }
 
 // Slash command registration removed — welcome system is configured exclusively via Web Dashboard
-

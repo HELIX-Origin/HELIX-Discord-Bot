@@ -94,7 +94,18 @@ export async function handleHelpCommand(interaction: DiscordInteraction, deps: A
 
   if (typeof query === 'string' && query.trim()) {
     const cleanQuery = query.trim().replace(/^\/+/, '').toLowerCase();
-    const DASHBOARD_CONFIGURED = ['rss', 'reddit', 'youtube', 'twitch', 'free-games', 'welcome', 'ticket', 'set', 'server', 'feeds'];
+    const DASHBOARD_CONFIGURED = [
+      'rss',
+      'reddit',
+      'youtube',
+      'twitch',
+      'free-games',
+      'welcome',
+      'ticket',
+      'set',
+      'server',
+      'feeds',
+    ];
 
     if (DASHBOARD_CONFIGURED.includes(cleanQuery)) {
       return EmbedHandler.for(deps)

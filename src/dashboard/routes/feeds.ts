@@ -400,7 +400,12 @@ export function registerFeedsRoutes(router: Router<AppDeps>): void {
         const listener = new FeedListener(d);
         const result = await listener.handleTwitchEventSub(req as unknown as Request);
         if (result && 'payload' in result) {
-          d.repo.logActivity(null, 'info', 'feed-listener', `Twitch EventSub received: ${JSON.stringify(result.payload)}`);
+          d.repo.logActivity(
+            null,
+            'info',
+            'feed-listener',
+            `Twitch EventSub received: ${JSON.stringify(result.payload)}`,
+          );
         }
         sendJson(res, 200, { ok: true });
       } catch (err) {
