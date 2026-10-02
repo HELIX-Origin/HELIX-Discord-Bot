@@ -1117,7 +1117,7 @@ export function renderClientScript(): string {
     function handleGitHubSlugInput(val) {
       const nameInput = document.getElementById('add-github-name');
       if (!nameInput) return;
-      const clean = val.replace(/^(?:https?:\/\/)?(?:www\.)?github\.com\//i, '').replace(/\.git$/i, '').replace(/^\/+|\/+$/g, '').trim();
+      const clean = val.replace(/^(?:https?:[/][/])?(?:www[.])?github[.]com[/]/i, '').replace(/[.]git$/i, '').replace(/^[/]+|[/]+$/g, '').trim();
       if (clean && !nameInput.value) {
         nameInput.placeholder = 'GitHub · ' + clean;
       }
@@ -1128,7 +1128,7 @@ export function renderClientScript(): string {
       const slugInput = document.getElementById('add-github-slug');
       const nameInput = document.getElementById('add-github-name');
       const rawSlug = (slugInput ? slugInput.value : '').trim();
-      const clean = rawSlug.replace(/^(?:https?:\/\/)?(?:www\.)?github\.com\//i, '').replace(/\.git$/i, '').replace(/^\/+|\/+$/g, '').trim();
+      const clean = rawSlug.replace(/^(?:https?:[/][/])?(?:www[.])?github[.]com[/]/i, '').replace(/[.]git$/i, '').replace(/^[/]+|[/]+$/g, '').trim();
       if (!clean || !clean.includes('/')) {
         return alert('Please enter a valid GitHub repository in "owner/repo" format (e.g. facebook/react).');
       }

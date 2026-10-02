@@ -72,6 +72,7 @@ describe('renderDashboardHtml', () => {
       'tab-reddit',
       'tab-freegames',
       'tab-streamalerts',
+      'tab-github',
       'tab-welcome',
       'tab-tickets',
       'tab-logs',
@@ -143,5 +144,10 @@ describe('renderDashboardHtml', () => {
     expect(script).toContain('.replace(/{role}/g, roleDisplay)');
     expect(script).toContain('.replace(/{channel}/g, channelDisplay)');
     expect(script).toContain('.replace(/{membercount}/g, \'128\')');
+  });
+
+  it('client script compiles into valid JavaScript with zero syntax errors', () => {
+    const script = renderClientScript();
+    expect(() => new Function(script)).not.toThrow();
   });
 });
