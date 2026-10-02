@@ -1,113 +1,57 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="HELIX Discord Bot: a self-hosted Discord bot for RSS/Atom, Reddit, and free-games feeds, YouTube and Twitch alerts, guild administration, and a built-in web dashboard.">
-  <meta name="theme-color" content="#081426">
-  <title>HELIX Discord Bot | HELIX Origin</title>
-  <!--
-    Layout and styles based on vCard – Personal Portfolio by codewithsadee
-    (https://github.com/codewithsadee/vcard-personal-portfolio), MIT License.
-    See ./assets/LICENSE-vcard.txt.
-  -->
-  <link rel="icon" href="./assets/images/icon.png" type="image/png">
-  <link rel="stylesheet" href="./assets/css/style.css">
-  <link rel="stylesheet" href="./assets/css/site.css">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
-</head>
-<body>
-  <main>
-    <aside class="sidebar" data-sidebar>
-      <div class="sidebar-info">
-        <figure class="avatar-box">
-          <img src="./assets/images/icon.png" alt="HELIX Discord Bot icon" width="80" height="80">
-        </figure>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="HELIX Discord Bot: a self-hosted Discord bot for RSS/Atom, Reddit, and free-games feeds, YouTube and Twitch alerts, guild administration, and a built-in web dashboard.">
+    <meta name="theme-color" content="#081426">
+    <title>HELIX Discord Bot | HELIX Origin</title>
+    <link rel="icon" href="./assets/images/icon.png" type="image/png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./assets/css/site.css">
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <div class="site-shell">
 
-        <div class="info-content">
-          <h1 class="name" title="HELIX Discord Bot">HELIX Discord Bot</h1>
-          <p class="title">Self-hosted Discord bot</p>
+      <aside class="sidebar" aria-label="Project information">
+        <a class="brand" href="#about" aria-label="HELIX Discord Bot home">
+          <span class="brand__mark" aria-hidden="true">
+            <img src="./assets/images/icon.png" alt="" width="150" height="150">
+          </span>
+          <span>
+            <strong>HELIX Discord Bot</strong>
+            <small>Self-hosted Discord bot</small>
+          </span>
+        </a>
+        <div class="separator" aria-hidden="true"></div>
+        <p class="sidebar__summary">
+          Lightweight feed syndication engine, stream alerts, moderation, and web
+          dashboard built natively in TypeScript ESM with SQLite.
+        </p>
+        <div class="sidebar__footer">
+          <a href="https://github.com/HELIX-Origin/HELIX-Discord-Bot">📦 GitHub repository</a>
+          <a href="./README.html">📖 Documentation</a>
+          <a href="https://github.com/HELIX-Origin/HELIX-Discord-Bot/releases">🏷️ Latest release</a>
+          <a href="https://github.com/HELIX-Origin/HELIX-Discord-Bot/blob/main/LICENSE.md">⚖️ BSD-3-Clause</a>
+          <a href="https://discord.gg/Ww3XBZC2HV">💬 Discord Server</a>
+          <a href="https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues">🐛 Issues</a>
+          <a href="https://github.com/HELIX-Origin/HELIX-Discord-Bot/discussions">💬 Discussions</a>
+          <a href="https://helix-origin.github.io/">🧬 HELIX Origin</a>
         </div>
+      </aside>
 
-        <button class="info_more-btn" type="button" aria-expanded="false" aria-controls="sidebar-more" data-sidebar-btn>
-          <span>Show Info</span>
-          <span class="chevron" aria-hidden="true">▾</span>
-        </button>
-      </div>
-
-      <div class="sidebar-info_more" id="sidebar-more">
-        <div class="separator"></div>
-
-        <ul class="contacts-list">
-          <li class="contact-item">
-            <div class="icon-box" aria-hidden="true">📦</div>
-            <div class="contact-info">
-              <p class="contact-title">Source</p>
-              <a href="https://github.com/HELIX-Origin/HELIX-Discord-Bot" class="contact-link">GitHub repository</a>
-            </div>
-          </li>
-
-          <li class="contact-item">
-            <div class="icon-box" aria-hidden="true">📖</div>
-            <div class="contact-info">
-              <p class="contact-title">Documentation</p>
-              <a href="./README.html" class="contact-link">Documentation</a>
-            </div>
-          </li>
-
-          <li class="contact-item">
-            <div class="icon-box" aria-hidden="true">🏷️</div>
-            <div class="contact-info">
-              <p class="contact-title">Releases</p>
-              <a href="https://github.com/HELIX-Origin/HELIX-Discord-Bot/releases" class="contact-link">Latest release</a>
-            </div>
-          </li>
-
-          <li class="contact-item">
-            <div class="icon-box" aria-hidden="true">⚖️</div>
-            <div class="contact-info">
-              <p class="contact-title">License</p>
-              <a href="https://github.com/HELIX-Origin/HELIX-Discord-Bot/blob/main/LICENSE.md" class="contact-link">BSD-3-Clause</a>
-            </div>
-          </li>
-
-          <li class="contact-item">
-            <div class="icon-box" aria-hidden="true">🧬</div>
-            <div class="contact-info">
-              <p class="contact-title">Organization</p>
-              <a href="https://helix-origin.github.io/" class="contact-link">HELIX Origin</a>
-            </div>
-          </li>
-        </ul>
-
-        <div class="separator"></div>
-
-        <ul class="social-list">
-          <li class="social-item"><a class="social-link" href="https://discord.gg/Ww3XBZC2HV">💬 Discord Server</a></li>
-          <li class="social-item"><a class="social-link" href="https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues">🐛 Issues</a></li>
-          <li class="social-item"><a class="social-link" href="https://github.com/HELIX-Origin/HELIX-Discord-Bot/discussions">💬 Discussions</a></li>
-        </ul>
-      </div>
-    </aside>
-
-    <div class="main-content">
-      <nav class="navbar" aria-label="Main navigation">
-        <ul class="navbar-list">
-          <li class="navbar-item">
-            <a class="navbar-link active" href="#about" aria-current="page" data-nav-link="about">About</a>
-          </li>
-          <li class="navbar-item">
-            <a class="navbar-link" href="#features" data-nav-link="features">Features</a>
-          </li>
-          <li class="navbar-item">
-            <a class="navbar-link" href="#get-started" data-nav-link="get-started">Get Started</a>
-          </li>
-          <li class="navbar-item">
-            <a class="navbar-link" href="#docs" data-nav-link="docs">Docs</a>
-          </li>
-          <li class="navbar-item">
+      <main id="main" class="main-content">
+        <header class="page-header">
+          <nav class="navbar" aria-label="Main navigation">
+            <ul class="navbar-list">
+              <li><a class="navbar-link active" href="#about" aria-current="location">About</a></li>
+              <li><a class="navbar-link" href="#features">Features</a></li>
+              <li><a class="navbar-link" href="#get-started">Get Started</a></li>
+              <li><a class="navbar-link" href="#docs">Docs</a></li>
+            </ul>
             <div class="translate-control notranslate" translate="no">
               <label for="translate-select">🌐 <span class="visually-hidden">Language</span></label>
               <select id="translate-select" aria-label="Translate this page" disabled>
@@ -131,240 +75,211 @@
                 <option value="ar" lang="ar">العربية</option>
               </select>
             </div>
-          </li>
-        </ul>
-      </nav>
+          </nav>
 
-      <article class="about active" data-page="about">
-        <header>
-          <h2 class="h2 article-title">About</h2>
+          <p class="eyebrow">Self-hosted Discord bot</p>
+          <h1>Feeds, stream alerts, guild tools, and a built-in web dashboard.</h1>
+          <p class="lead">
+            HELIX Discord Bot is a lightweight, self-hosted feed syndication engine
+            built in TypeScript ESM. It delivers RSS/Atom feeds, custom CSS web
+            scrapers, subreddit streams, and free games straight to Discord channels.
+          </p>
+          <div class="header-actions">
+            <a class="button button--primary" href="#get-started">Get started</a>
+            <a class="button button--secondary" href="./README.html">Read documentation</a>
+          </div>
         </header>
 
-        <section class="about-text">
-          <p>HELIX Discord Bot is a lightweight, self-hosted feed syndication engine and Discord bot built natively in TypeScript ESM. It monitors RSS/Atom feeds, custom CSS web scrapers, subreddit streams, and free-game promotions, and delivers rich Discord embeds straight to your server channels and threads.</p>
-          <p>It ships with a built-in web dashboard with Discord OAuth2 sign-in, SQLite persistence, Light/Dark themes, and zero frontend npm dependencies.</p>
+        <section id="about" class="doc-section">
+          <div class="section-heading">
+            <span class="section-number">01</span>
+            <div>
+              <p class="eyebrow">Overview</p>
+              <h2>What it does</h2>
+            </div>
+          </div>
+          <p>
+            HELIX Discord Bot monitors RSS/Atom feeds, custom CSS web scrapers,
+            subreddit streams, and free-game promotions, and delivers rich Discord
+            embeds straight to your server channels and threads.
+          </p>
+          <p>
+            It ships with a built-in web dashboard with Discord OAuth2 sign-in,
+            SQLite persistence, Light/Dark themes, and zero frontend npm dependencies.
+          </p>
+          <div class="feature-grid">
+            <article class="feature-card">
+              <span class="feature-card__icon" aria-hidden="true">📰</span>
+              <h3>Feeds &amp; scrapers</h3>
+              <p>RSS, Atom, and JSON feeds, CSS-selector scrapers, and a 700+ preset news catalog.</p>
+            </article>
+            <article class="feature-card">
+              <span class="feature-card__icon" aria-hidden="true">🎮</span>
+              <h3>Free games</h3>
+              <p>Giveaways from Epic Games, Steam, GOG, Humble, Itch.io, and more.</p>
+            </article>
+            <article class="feature-card">
+              <span class="feature-card__icon" aria-hidden="true">📢</span>
+              <h3>Stream alerts</h3>
+              <p>YouTube and Twitch live and upload alerts for your community.</p>
+            </article>
+            <article class="feature-card">
+              <span class="feature-card__icon" aria-hidden="true">🛡️</span>
+              <h3>Guild administration</h3>
+              <p>Moderation, welcome messages, support tickets, roles, and voice controls.</p>
+            </article>
+          </div>
         </section>
 
-        <section class="service">
-          <h3 class="h3 service-title">What it does</h3>
-
-          <ul class="service-list">
-            <li class="service-item">
-              <div class="service-icon-box" aria-hidden="true">📰</div>
-              <div class="service-content-box">
-                <h4 class="h4 service-item-title">Feeds &amp; scrapers</h4>
-                <p class="service-item-text">RSS, Atom, and JSON feeds, CSS-selector scrapers, and a 700+ preset news catalog.</p>
-              </div>
-            </li>
-
-            <li class="service-item">
-              <div class="service-icon-box" aria-hidden="true">🎮</div>
-              <div class="service-content-box">
-                <h4 class="h4 service-item-title">Free games</h4>
-                <p class="service-item-text">Giveaways from Epic Games, Steam, GOG, Humble, Itch.io, and more.</p>
-              </div>
-            </li>
-
-            <li class="service-item">
-              <div class="service-icon-box" aria-hidden="true">📢</div>
-              <div class="service-content-box">
-                <h4 class="h4 service-item-title">Stream alerts</h4>
-                <p class="service-item-text">YouTube and Twitch live and upload alerts for your community.</p>
-              </div>
-            </li>
-
-            <li class="service-item">
-              <div class="service-icon-box" aria-hidden="true">🛡️</div>
-              <div class="service-content-box">
-                <h4 class="h4 service-item-title">Guild administration</h4>
-                <p class="service-item-text">Moderation, welcome messages, support tickets, roles, and voice controls.</p>
-              </div>
-            </li>
-          </ul>
-        </section>
-      </article>
-
-      <article class="resume" data-page="features">
-        <header>
-          <h2 class="h2 article-title">Features</h2>
-        </header>
-
-        <section class="timeline">
-          <div class="title-wrapper">
-            <div class="icon-box" aria-hidden="true">📡</div>
-            <h3 class="h3">Content delivery</h3>
+        <section id="features" class="doc-section">
+          <div class="section-heading">
+            <span class="section-number">02</span>
+            <div>
+              <p class="eyebrow">Capabilities</p>
+              <h2>Feature breakdown</h2>
+            </div>
           </div>
 
-          <ol class="timeline-list">
-            <li class="timeline-item">
-              <h4 class="h4 timeline-item-title">RSS, web scrapers &amp; news catalog</h4>
-              <p class="timeline-text">RSS/Atom/JSON feeds, CSS-selector scrapers for sites without RSS, single-newest-post delivery, and a rate-limit shield.</p>
+          <h3>📡 Content delivery</h3>
+          <ol class="timeline">
+            <li>
+              <strong>RSS, web scrapers &amp; news catalog</strong>
+              <p>RSS/Atom/JSON feeds, CSS-selector scrapers for sites without RSS, single-newest-post delivery, and rate-limit shield.</p>
             </li>
-            <li class="timeline-item">
-              <h4 class="h4 timeline-item-title">Reddit feeds</h4>
-              <p class="timeline-text">Subreddit and user feeds with Pure Image and Standard RSS modes, animated GIF support, and NSFW age-restriction enforcement.</p>
+            <li>
+              <strong>Reddit feeds</strong>
+              <p>Subreddit and user feeds with Pure Image and Standard RSS modes, animated GIF support, and NSFW age-restriction enforcement.</p>
             </li>
-            <li class="timeline-item">
-              <h4 class="h4 timeline-item-title">Thread delivery</h4>
-              <p class="timeline-text">Deliver each feed into its own dedicated thread, auto-created in the feed's channel.</p>
+            <li>
+              <strong>Thread delivery</strong>
+              <p>Deliver each feed into its own dedicated thread, auto-created in the feed's channel.</p>
+            </li>
+          </ol>
+
+          <h3>🤖 Community tools</h3>
+          <ol class="timeline">
+            <li>
+              <strong>Moderation</strong>
+              <p>Slash commands such as <code>/warn</code>, <code>/kick</code>, <code>/ban</code>, <code>/purge</code>, <code>/lock</code>, and <code>/slowmode</code>.</p>
+            </li>
+            <li>
+              <strong>Welcome system</strong>
+              <p>Customizable welcome announcements with placeholders, plain text or embed format, and live preview.</p>
+            </li>
+            <li>
+              <strong>Ticket system</strong>
+              <p>A button prompt that opens dedicated support threads and pings your support role.</p>
+            </li>
+          </ol>
+
+          <h3>🖥️ Web dashboard</h3>
+          <ol class="timeline">
+            <li>
+              <strong>Discord OAuth2 sign-in</strong>
+              <p>Guild administrators manage feeds, alerts, and settings for the servers they administer.</p>
+            </li>
+            <li>
+              <strong>Live Discord previews</strong>
+              <p>Preview embeds, welcome messages, and ticket prompts before posting, with Light/Dark themes.</p>
             </li>
           </ol>
         </section>
 
-        <section class="timeline">
-          <div class="title-wrapper">
-            <div class="icon-box" aria-hidden="true">🤖</div>
-            <h3 class="h3">Community tools</h3>
+        <section id="get-started" class="doc-section">
+          <div class="section-heading">
+            <span class="section-number">03</span>
+            <div>
+              <p class="eyebrow">Deployment</p>
+              <h2>Get started</h2>
+            </div>
           </div>
 
-          <ol class="timeline-list">
-            <li class="timeline-item">
-              <h4 class="h4 timeline-item-title">Moderation</h4>
-              <p class="timeline-text">Slash commands such as <code>/warn</code>, <code>/kick</code>, <code>/ban</code>, <code>/purge</code>, <code>/lock</code>, and <code>/slowmode</code>.</p>
+          <h3>Prerequisites</h3>
+          <ol class="timeline">
+            <li>
+              <strong>Node.js 22.9.0 or higher</strong> <span class="item-badge">Required</span>
+              <p>Required for the native <code>node:sqlite</code> module.</p>
             </li>
-            <li class="timeline-item">
-              <h4 class="h4 timeline-item-title">Welcome system</h4>
-              <p class="timeline-text">Customizable welcome announcements with placeholders, plain text or embed format, and live preview.</p>
-            </li>
-            <li class="timeline-item">
-              <h4 class="h4 timeline-item-title">Ticket system</h4>
-              <p class="timeline-text">A button prompt that opens dedicated support threads and pings your support role.</p>
+            <li>
+              <strong>A Discord application</strong> <span class="item-badge">Required</span>
+              <p>Register one on the <a href="https://discord.com/developers/applications">Discord Developer Portal</a>.</p>
             </li>
           </ol>
-        </section>
 
-        <section class="timeline">
-          <div class="title-wrapper">
-            <div class="icon-box" aria-hidden="true">🖥️</div>
-            <h3 class="h3">Web dashboard</h3>
-          </div>
-
-          <ol class="timeline-list">
-            <li class="timeline-item">
-              <h4 class="h4 timeline-item-title">Discord OAuth2 sign-in</h4>
-              <p class="timeline-text">Guild administrators manage feeds, alerts, and settings for the servers they administer.</p>
-            </li>
-            <li class="timeline-item">
-              <h4 class="h4 timeline-item-title">Live Discord previews</h4>
-              <p class="timeline-text">Preview embeds, welcome messages, and ticket prompts before they are posted, with Light/Dark themes.</p>
-            </li>
-          </ol>
-        </section>
-      </article>
-
-      <article class="get-started" data-page="get-started">
-        <header>
-          <h2 class="h2 article-title">Get Started</h2>
-        </header>
-
-        <section class="timeline">
-          <div class="title-wrapper">
-            <div class="icon-box" aria-hidden="true">✅</div>
-            <h3 class="h3">Prerequisites</h3>
-          </div>
-
-          <ol class="timeline-list">
-            <li class="timeline-item">
-              <h4 class="h4 timeline-item-title">Node.js 22.9.0 or higher</h4>
-              <p class="timeline-text">Required for the native <code>node:sqlite</code> module.</p>
-            </li>
-            <li class="timeline-item">
-              <h4 class="h4 timeline-item-title">A Discord application</h4>
-              <p class="timeline-text">Register one on the <a href="https://discord.com/developers/applications">Discord Developer Portal</a>.</p>
-            </li>
-          </ol>
-        </section>
-
-        <section class="timeline">
-          <div class="title-wrapper">
-            <div class="icon-box" aria-hidden="true">⚙️</div>
-            <h3 class="h3">Install &amp; run</h3>
-          </div>
-
-          <ol class="timeline-list">
-            <li class="timeline-item">
-              <h4 class="h4 timeline-item-title">1. Clone &amp; configure</h4>
-              <pre class="code-block"><code>git clone https://github.com/HELIX-Origin/HELIX-Discord-Bot.git
+          <h3>Install &amp; run</h3>
+          <ol class="timeline">
+            <li>
+              <strong>1. Clone &amp; configure</strong>
+              <pre><code>git clone https://github.com/HELIX-Origin/HELIX-Discord-Bot.git
 cd HELIX-Discord-Bot
 cp .env.example .env</code></pre>
-              <p class="timeline-text">Fill in <code>DISCORD_TOKEN</code>, <code>DISCORD_CLIENT_ID</code>, and <code>DISCORD_CLIENT_SECRET</code> in <code>.env</code>.</p>
+              <p>Fill in <code>DISCORD_TOKEN</code>, <code>DISCORD_CLIENT_ID</code>, and <code>DISCORD_CLIENT_SECRET</code> in <code>.env</code>.</p>
             </li>
-            <li class="timeline-item">
-              <h4 class="h4 timeline-item-title">2. Build &amp; start</h4>
-              <pre class="code-block"><code>npm install
+            <li>
+              <strong>2. Build &amp; start</strong>
+              <pre><code>npm install
 npm run build
 npm start</code></pre>
-              <p class="timeline-text">Open <code>http://localhost:3131</code> and select <strong>Log In with Discord</strong>.</p>
+              <p>Open <code>http://localhost:3131</code> and select <strong>Log In with Discord</strong>.</p>
             </li>
-            <li class="timeline-item">
-              <h4 class="h4 timeline-item-title">3. Deploy</h4>
-              <p class="timeline-text">See <a href="./Deployment-and-Hosting.html">Deployment &amp; Hosting</a> for Docker Compose, Linux systemd, Windows, and cloud PaaS guides.</p>
+            <li>
+              <strong>3. Production deployment</strong>
+              <p>See <a href="./Deployment-and-Hosting.html">Deployment &amp; Hosting</a> for Docker Compose, Linux systemd, Windows, and cloud PaaS guides.</p>
             </li>
           </ol>
         </section>
-      </article>
 
-      <article class="docs" data-page="docs">
-        <header>
-          <h2 class="h2 article-title">Docs</h2>
-        </header>
-
-        <section class="projects">
-          <ul class="project-list">
-            <li class="project-item active">
-              <a href="./README.html">
-                <div class="project-img" aria-hidden="true"><span>🏠</span></div>
-                <h3 class="project-title">Documentation home</h3>
-                <p class="project-category">Full documentation index and quick reference.</p>
-              </a>
-            </li>
-            <li class="project-item active">
-              <a href="./Discord-Bot.html">
-                <div class="project-img" aria-hidden="true"><span>🤖</span></div>
-                <h3 class="project-title">Discord bot &amp; commands</h3>
-                <p class="project-category">Developer Portal setup, slash commands, and delivery.</p>
-              </a>
-            </li>
-            <li class="project-item active">
-              <a href="./Configuration.html">
-                <div class="project-img" aria-hidden="true"><span>⚙️</span></div>
-                <h3 class="project-title">Configuration</h3>
-                <p class="project-category">Reference for every <code>.env</code> variable.</p>
-              </a>
-            </li>
-            <li class="project-item active">
-              <a href="./API-Reference.html">
-                <div class="project-img" aria-hidden="true"><span>🔌</span></div>
-                <h3 class="project-title">REST API reference</h3>
-                <p class="project-category">Dashboard and feed REST endpoints.</p>
-              </a>
-            </li>
-            <li class="project-item active">
-              <a href="./Troubleshooting.html">
-                <div class="project-img" aria-hidden="true"><span>🩺</span></div>
-                <h3 class="project-title">Troubleshooting</h3>
-                <p class="project-category">Diagnostics for delivery, permission, and network errors.</p>
-              </a>
-            </li>
-            <li class="project-item active">
-              <a href="https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues">
-                <div class="project-img" aria-hidden="true"><span>🐛</span></div>
-                <h3 class="project-title">Issue tracker</h3>
-                <p class="project-category">Report bugs and request features.</p>
-              </a>
-            </li>
-          </ul>
+        <section id="docs" class="doc-section">
+          <div class="section-heading">
+            <span class="section-number">04</span>
+            <div>
+              <p class="eyebrow">Reference</p>
+              <h2>Project documentation</h2>
+            </div>
+          </div>
+          <div class="feature-grid">
+            <a class="feature-card" href="./README.html" style="text-decoration:none;">
+              <span class="feature-card__icon" aria-hidden="true">🏠</span>
+              <h3>Documentation Home</h3>
+              <p>Full documentation index and quick reference.</p>
+            </a>
+            <a class="feature-card" href="./Discord-Bot.html" style="text-decoration:none;">
+              <span class="feature-card__icon" aria-hidden="true">🤖</span>
+              <h3>Discord Bot &amp; Commands</h3>
+              <p>Developer Portal setup, slash commands, and delivery.</p>
+            </a>
+            <a class="feature-card" href="./Configuration.html" style="text-decoration:none;">
+              <span class="feature-card__icon" aria-hidden="true">⚙️</span>
+              <h3>Configuration</h3>
+              <p>Reference for every <code>.env</code> variable.</p>
+            </a>
+            <a class="feature-card" href="./API-Reference.html" style="text-decoration:none;">
+              <span class="feature-card__icon" aria-hidden="true">🔌</span>
+              <h3>REST API Reference</h3>
+              <p>Dashboard and feed REST endpoints.</p>
+            </a>
+            <a class="feature-card" href="./Troubleshooting.html" style="text-decoration:none;">
+              <span class="feature-card__icon" aria-hidden="true">🩺</span>
+              <h3>Troubleshooting</h3>
+              <p>Diagnostics for delivery, permission, and network errors.</p>
+            </a>
+            <a class="feature-card" href="https://github.com/HELIX-Origin/HELIX-Discord-Bot/issues" style="text-decoration:none;">
+              <span class="feature-card__icon" aria-hidden="true">🐛</span>
+              <h3>Issue Tracker</h3>
+              <p>Report bugs and request features.</p>
+            </a>
+          </div>
         </section>
 
         <footer class="site-footer">
-          <p>HELIX Discord Bot is licensed under the <a href="https://github.com/HELIX-Origin/HELIX-Discord-Bot/blob/main/LICENSE.md">BSD 3-Clause License</a> · Site layout from <a href="https://github.com/codewithsadee/vcard-personal-portfolio">vCard</a> (MIT)</p>
-          <p><a href="https://helix-origin.github.io/">← Back to HELIX Origin</a></p>
+          <span>HELIX Discord Bot · BSD-3-Clause License · Built by HELIX Origin</span>
+          <a href="https://helix-origin.github.io/">HELIX Origin projects</a>
         </footer>
-      </article>
-    </div>
-  </main>
+      </main>
 
-  <script src="./assets/js/script.js"></script>
-  <script src="./assets/js/translate.js"></script>
-</body>
+    </div>
+    <div id="google_translate_element" class="translation-host" hidden></div>
+    <script type="module" src="./assets/js/mermaid-init.js"></script>
+    <script src="./assets/js/translate.js" defer></script>
+  </body>
 </html>
