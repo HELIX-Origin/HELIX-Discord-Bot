@@ -114,6 +114,29 @@ flowchart TD
 
 ---
 
+### 6. GitHub Push Webhook Delivery Fails or Does Not Post into Feed Channel 🟥 Open
+
+- **Reported Issue**: GitHub organization push webhook (`https://helix-bot.helix-origin.club/api/feeds/webhooks/github`) fails to deliver or does not trigger a message in `#github-feeds`. In GitHub's Recent Deliveries, `push` events show an error/warning (`500 Internal Server Error`), while `ping` and `pull_request.synchronize` succeed (`200 OK`).
+- **Observed Delivery**:
+  - **Delivery ID**: `48fd9042-be2b-11f1-9cd4-54beb7e770e1`
+  - **Event**: `push`
+  - **Hook Installation Target ID**: `322256733` (`HELIX-Origin`)
+  - **Target URL**: `https://helix-bot.helix-origin.club/api/feeds/webhooks/github`
+  - **Payload Summary**: Push to `refs/heads/main` (`HELIX-Origin/HELIX-Discord-Bot`) comparing `05d8952b4169...41cb717096b3`.
+- **Root Cause & Investigation**:
+  1. *Foreign Key Constraint in `activity_log`*: In `src/dashboard/routes/feeds.ts:503` and `511`, `d.repo.logActivity` was invoked with `userId = 0`. With SQLite `PRAGMA foreign_keys = ON;`, `0` is not a valid user ID in `users(id)`, throwing `SqliteError: FOREIGN KEY constraint failed` and returning `500 Internal Server Error`. Sanitization was added in `src/db/repositories/settings.ts` and `null` passed in `feeds.ts` (commit `41cb717`).
+  2. *Verification & Webhook Processing*:
+     - Verify VPS live deployment status (`git pull` & `systemctl restart`).
+     - Check feed matching in `src/dashboard/routes/feeds.ts`: ensuring `f.feedType === 'github'`, `parseGitHubSlug(f.url)` matches `HELIX-Origin/HELIX-Discord-Bot` (or case-insensitive org/repo), and `parseGitHubEvents(feed.scrape?.description)` includes `'push'`.
+     - Inspect deduplication logic (`d.repo.isEntrySent` / `d.redis?.isEntrySent`) to confirm whether redelivered commit SHAs are filtered or if fresh commits are processed.
+     - Review live logs via `journalctl -u helix-discord-bot -n 100` on the VPS to capture the exact stack trace if errors persist.
+- **Affected Files**:
+  - [`src/dashboard/routes/feeds.ts`](file:///d:/Projects/HELIX-Discord-Bot/src/dashboard/routes/feeds.ts)
+  - [`src/db/repositories/settings.ts`](file:///d:/Projects/HELIX-Discord-Bot/src/db/repositories/settings.ts)
+  - [`src/feed/github.ts`](file:///d:/Projects/HELIX-Discord-Bot/src/feed/github.ts)
+
+---
+
 ## 🛠️ Verification Gate
 
 Before closing any bug or merging to remote, the unified verification gate must pass:
