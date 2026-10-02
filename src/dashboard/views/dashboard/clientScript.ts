@@ -1004,22 +1004,16 @@ export function renderClientScript(): string {
 
     // Free Games
     const FREEGAMES_PLATFORMS = [
-      { key: 'all', name: 'Free Games · All Stores' },
-      { key: 'epic', name: 'Free Games · Epic Games Store' },
-      { key: 'steam', name: 'Free Games · Steam Giveaways' },
-      { key: 'gog', name: 'Free Games · GOG Promotions' },
-      { key: 'indiegala', name: 'Free Games · IndieGala Freebies' },
-      { key: 'humble', name: 'Free Games · Humble Bundle' },
-      { key: 'itchio', name: 'Free Games · Itch.io Freebies' },
-      { key: 'ubisoft', name: 'Free Games · Ubisoft Giveaways' },
-      { key: 'prime', name: 'Free Games · Prime Gaming' }
+      { key: 'gamerpower', name: 'GamerPower Free Game Alerts' },
+      { key: 'epic', name: 'Epic Games Store Free Games' },
+      { key: 'all', name: 'All Free Game Alerts' }
     ];
 
     function handleFreeGamesPlatformChange(val) {
       const nameInput = document.getElementById('add-freegames-name');
       if (!nameInput) return;
       const found = FREEGAMES_PLATFORMS.find(p => p.key === val);
-      if (found && (!nameInput.value || nameInput.value.startsWith('Free Games ·'))) {
+      if (found && (!nameInput.value || nameInput.value.startsWith('Free Games ·') || nameInput.value.startsWith('GamerPower') || nameInput.value.startsWith('All Free'))) {
         nameInput.placeholder = found.name;
       }
     }
@@ -1028,13 +1022,17 @@ export function renderClientScript(): string {
       if (!currentGuildId) return;
       const platSelect = document.getElementById('add-freegames-platform');
       const nameInput = document.getElementById('add-freegames-name');
-      const platformKey = platSelect ? platSelect.value : 'all';
+      const platformKey = platSelect ? platSelect.value : 'gamerpower';
       let name = nameInput ? nameInput.value.trim() : '';
       if (!name) {
         const found = FREEGAMES_PLATFORMS.find(p => p.key === platformKey);
-        name = found ? found.name : 'Free Games · All Stores';
+        name = found ? found.name : 'GamerPower Free Game Alerts';
       }
-      const feedType = platformKey === 'all' ? 'free_games' : ('free_games_' + platformKey);
+      const feedType = platformKey === 'all'
+        ? 'free_games'
+        : platformKey === 'gamerpower'
+          ? 'free_games_gamerpower'
+          : ('free_games_' + platformKey);
       const url = 'freegames://' + platformKey;
       const targetSel = document.getElementById('add-freegames-target');
       const target = targetFieldsFromValue(targetSel ? targetSel.value : '');

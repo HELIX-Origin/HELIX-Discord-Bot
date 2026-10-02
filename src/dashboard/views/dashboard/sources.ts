@@ -67,7 +67,7 @@ export function renderSourcesTabs(redditAvailable: boolean): string {
       <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
         <div>
           <div class="section-title"><i class="fa-solid fa-gift" style="color: #10b981;"></i> Free Games</div>
-          <div class="section-desc">Automated giveaway alerts from Epic Games Store, Steam, GOG, and more.</div>
+          <div class="section-desc">Automated giveaway alerts powered by GamerPower covering Epic Games Store, Steam, GOG, and more.</div>
         </div>
         <button onclick="triggerGuildPoll()" class="btn btn-ghost btn-sm"><i class="fa-solid fa-bolt"></i> Check Now</button>
       </div>
@@ -76,22 +76,16 @@ export function renderSourcesTabs(redditAvailable: boolean): string {
         <div class="card-title" style="font-size: 0.9375rem;"><i class="fa-solid fa-gift" style="color: #10b981;"></i> Add Free Games Feed</div>
         <div class="form-grid" style="margin-top: 0.75rem;">
           <div class="form-group">
-            <label class="form-label">Platform</label>
+            <label class="form-label">Feed Provider</label>
             <select id="add-freegames-platform" onchange="handleFreeGamesPlatformChange(this.value)">
-              <option value="all">All Platforms</option>
-              <option value="epic">Epic Games Store</option>
-              <option value="steam">Steam Giveaways</option>
-              <option value="gog">GOG Promotions</option>
-              <option value="indiegala">IndieGala Freebies</option>
-              <option value="humble">Humble Bundle</option>
-              <option value="itchio">Itch.io Freebies</option>
-              <option value="ubisoft">Ubisoft Giveaways</option>
-              <option value="prime">Prime Gaming</option>
+              <option value="gamerpower">GamerPower Free Game Alerts</option>
+              <option value="epic">Epic Games Store Official</option>
+              <option value="all">All Free Games (GamerPower + Epic Official)</option>
             </select>
           </div>
           <div class="form-group">
             <label class="form-label">Display Name (optional)</label>
-            <input type="text" id="add-freegames-name" placeholder="Free Games · All Stores">
+            <input type="text" id="add-freegames-name" placeholder="GamerPower Free Game Alerts">
           </div>
           <div class="form-group">
             <label class="form-label">Delivery Target</label>

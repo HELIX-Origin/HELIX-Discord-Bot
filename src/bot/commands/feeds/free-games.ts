@@ -33,13 +33,9 @@ export const freeGamesCommandDef: ApplicationCommand = {
           type: ApplicationCommandOptionType.STRING,
           required: false,
           choices: [
-            { name: 'All Stores & Giveaways', value: 'free_games' },
-            { name: 'Epic Games Store', value: 'free_games_epic' },
-            { name: 'Steam', value: 'free_games_steam' },
-            { name: 'GOG.com', value: 'free_games_gog' },
-            { name: 'Prime Gaming', value: 'free_games_prime' },
-            { name: 'Ubisoft Connect', value: 'free_games_ubisoft' },
-            { name: 'Humble Bundle', value: 'free_games_humble' },
+            { name: 'GamerPower Free Game Alerts', value: 'free_games_gamerpower' },
+            { name: 'Epic Games Store Official', value: 'free_games_epic' },
+            { name: 'All Free Game Drops', value: 'free_games' },
           ],
         },
         {
@@ -69,13 +65,9 @@ export const freeGamesCommandDef: ApplicationCommand = {
 };
 
 const PLATFORM_NAMES: Record<string, string> = {
-  free_games: 'All Stores & Giveaways',
+  free_games: 'All Free Game Drops',
+  free_games_gamerpower: 'GamerPower Free Game Alerts',
   free_games_epic: 'Epic Games Store',
-  free_games_steam: 'Steam',
-  free_games_gog: 'GOG.com',
-  free_games_prime: 'Prime Gaming',
-  free_games_ubisoft: 'Ubisoft Connect',
-  free_games_humble: 'Humble Bundle',
 };
 
 export async function handleFreeGamesCommand(

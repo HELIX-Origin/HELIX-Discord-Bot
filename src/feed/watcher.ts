@@ -373,8 +373,16 @@ export class FeedWatcher {
     const lowerName = feed.name.toLowerCase();
     const lowerUrl = feed.url.toLowerCase();
 
-    if (feed.feedType === 'free_games_epic' || lowerName.includes('epic') || lowerUrl.includes('epic')) {
+    if (feed.feedType === 'free_games_epic' || (lowerName.includes('epic') && !lowerName.includes('gamerpower')) || (lowerUrl.includes('epic') && !lowerUrl.includes('gamerpower'))) {
       platformKey = 'epic';
+    } else if (
+      feed.feedType === 'free_games_gamerpower' ||
+      lowerName.includes('gamerpower') ||
+      lowerUrl.includes('gamerpower')
+    ) {
+      platformKey = 'gamerpower';
+    } else if (feed.feedType === 'free_games' || lowerName.includes('all') || lowerUrl.includes('all')) {
+      platformKey = 'all';
     } else if (feed.feedType === 'free_games_steam' || lowerName.includes('steam') || lowerUrl.includes('steam')) {
       platformKey = 'steam';
     } else if (feed.feedType === 'free_games_gog' || lowerName.includes('gog') || lowerUrl.includes('gog')) {

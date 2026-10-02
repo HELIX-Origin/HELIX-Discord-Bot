@@ -2,7 +2,7 @@ import { fetchRaw } from './fetch.js';
 import { decodeHtmlEntities, stripHtml } from './parser.js';
 
 export type FreeGamePlatformKey =
-  'epic' | 'steam' | 'gog' | 'indiegala' | 'humble' | 'itchio' | 'ubisoft' | 'ea' | 'prime' | 'battlenet' | 'all';
+  'gamerpower' | 'epic' | 'steam' | 'gog' | 'indiegala' | 'humble' | 'itchio' | 'ubisoft' | 'ea' | 'prime' | 'battlenet' | 'all';
 
 export interface FreeGameItem {
   id: string;
@@ -93,10 +93,16 @@ export const PLATFORM_BRANDING: Record<string, { name: string; color: number; ic
       'https://images.weserv.nl/?url=raw.githubusercontent.com/simple-icons/simple-icons/develop/icons/battledotnet.svg&w=128&h=128&output=png',
     tag: 'Battle.net',
   },
-  all: {
-    name: 'Free Games',
+  gamerpower: {
+    name: 'GamerPower',
     color: 0x10b981,
-    iconUrl: 'https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons@main/png/epic-games.png',
+    iconUrl: 'https://images.weserv.nl/?url=www.gamerpower.com/favicon.ico&w=128&h=128&output=png',
+    tag: 'GamerPower',
+  },
+  all: {
+    name: 'GamerPower Free Game Alerts',
+    color: 0x10b981,
+    iconUrl: 'https://images.weserv.nl/?url=www.gamerpower.com/favicon.ico&w=128&h=128&output=png',
     tag: 'All Platforms',
   },
 };
@@ -212,30 +218,9 @@ async function fetchEpicGamesPromotions(): Promise<FreeGameItem[]> {
  * Fetch giveaways from GamerPower API covering Steam, GOG, and Epic Games Store
  */
 async function fetchGamerPowerGiveaways(platformKey: FreeGamePlatformKey = 'all'): Promise<FreeGameItem[]> {
-  const platformParam =
-    platformKey === 'epic'
-      ? 'epic-games-store'
-      : platformKey === 'steam'
-        ? 'steam'
-        : platformKey === 'gog'
-          ? 'gog'
-          : platformKey === 'indiegala'
-            ? 'indiegala'
-            : platformKey === 'humble'
-              ? 'humble-bundle'
-              : platformKey === 'itchio'
-                ? 'itchio'
-                : platformKey === 'ubisoft'
-                  ? 'ubisoft'
-                  : platformKey === 'ea'
-                    ? 'origin'
-                    : platformKey === 'prime'
-                      ? 'prime-gaming'
-                      : platformKey === 'battlenet'
-                        ? 'battlenet'
-                        : 'pc';
-
-  const url = `https://www.gamerpower.com/api/giveaways?platform=${platformParam}&type=game`;
+  // Always query GamerPower with type=game to retrieve all active game giveaways in a single call.
+  // Upstream GamerPower returns 404 on individual platform queries like indiegala, humble, prime, etc.
+  const url = 'https://www.gamerpower.com/api/giveaways?type=game';
   try {
     const res = await fetchRaw(url);
     if (res.status >= 400 || !res.text) return [];
@@ -361,14 +346,18 @@ function normalizeGameTitle(title: string): string {
 /**
  * Fetch unified free games list for any requested platform
  */
-export async function fetchFreeGames(platform: FreeGamePlatformKey = 'all'): Promise<FreeGameItem[]> {
+export async function fetchFreeGames(platform: FreeGamePlatformKey = 'gamerpower'): Promise<FreeGameItem[]> {
   const fetchers: Array<Promise<FreeGameItem[]>> = [];
 
-  if (platform === 'all' || platform === 'epic') {
+  if (platform === 'epic' || platform === 'all') {
     fetchers.push(fetchEpicGamesPromotions());
   }
 
-  fetchers.push(fetchGamerPowerGiveaways(platform));
+  if (platform === 'gamerpower' || platform === 'all') {
+    fetchers.push(fetchGamerPowerGiveaways('all'));
+  } else if (platform !== 'epic') {
+    fetchers.push(fetchGamerPowerGiveaways(platform));
+  }
 
   const results = await Promise.all(fetchers);
   const allItems = results.flat();

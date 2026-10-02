@@ -42,37 +42,28 @@
 
 ## ✅ Closed
 
-### 2026-10-02 — Free Game Alerts Fail or Are Hit-or-Miss on Individual Storefronts
+### 2026-10-02 — Free Game Alerts Fail on Platform Split & Embed Footer Mismatch
 
 - **Severity**: 🟠 High (Feed Delivery / Free Games)
 - **Status**: ✅ resolved
-- **Reported Issue**: "free game alerts only seem to work when all platfroms is chosen. individual platforms are hit or miss."
+- **Reported Issue**: "The GamerPower Free Games should use a GamerPower Free Game Alerts feed with the platform mentioned in a field so it doesn't post to the wrong embeds. This will be a much better fix than what was done. Especially since manny free game feeds still arne't working unless done in the all games alerts. We should also reove the footer from the embeds since the alerts keep getting the info in them wrong when set to all games feed."
 - **Root Cause**:
-  1. GamerPower upstream endpoint does not accept platform-specific queries for several storefronts (`platform=indiegala`, `platform=humble`, `platform=prime` return HTTP 404).
-  2. In `src/feed/watcher.ts`, `pollFreeGamesLocked` evaluated `lowerUrl.includes('epic')` in its very first condition before inspecting `feed.feedType`. Since feeds created via Discord slash commands had default fallback `url: 'https://store.epicgames.com'`, all feeds were coerced to `platformKey = 'epic'`, ignoring Steam, GOG, Prime, and IndieGala entirely.
-  3. GamerPower categorizes many giveaways under a generic `platforms: 'PC, DRM-Free'` string without the specific storefront name in the platform property.
+  1. GamerPower's upstream API does not support platform-specific query parameters for many storefronts (returning HTTP 404 on `platform=indiegala`, `platform=humble`, `platform=prime`, etc.). Splitting GamerPower into multiple individual platform feeds caused delivery failures.
+  2. Embed footer text (`footer: { text: ... }`) caused inaccurate or conflicting storefront branding on all-games feeds.
 - **Resolution**:
-  - Queried `platform=pc&type=game` on GamerPower (returns all active giveaways with zero 404 errors).
-  - Added `detectGamerPowerPlatform` in `src/feed/freegames.ts` analyzing titles, giveaway URLs, and instructions.
-  - Fixed `watcher.ts` platformKey resolution to check `feedType` and `freegames://` URLs first.
-  - Updated `/free-games` slash command in `src/bot/commands/feeds/free-games.ts` to store `url: freegames://${platformSlug}` and added choices for IndieGala, Itch.io, EA App, and Battle.net.
+  - Restructured Free Game feeds around genuine providers instead of split platforms:
+    - **GamerPower Free Game Alerts** (`free_games_gamerpower` / `freegames://gamerpower`): Aggregates all active PC giveaways from GamerPower in a single reliable call (`type=game`).
+    - **Epic Games Store Official** (`free_games_epic`): Directly queries Epic Games Store promotional API.
+    - **All Free Game Drops** (`free_games`): Combines both official Epic promotions and GamerPower giveaways.
+  - Removed the `footer` property completely from `freeGameEmbed` in `src/bot/utils/embeds.ts`.
+  - Guaranteed that the storefront platform is prominently and explicitly presented in the `🏷️ Platform` embed field, with matching author title and icon.
 - **Affected Files**:
   - [`src/feed/freegames.ts`](file:///d:/Projects/HELIX-Discord-Bot/src/feed/freegames.ts)
   - [`src/feed/watcher.ts`](file:///d:/Projects/HELIX-Discord-Bot/src/feed/watcher.ts)
-  - [`src/bot/commands/feeds/free-games.ts`](file:///d:/Projects/HELIX-Discord-Bot/src/bot/commands/feeds/free-games.ts)
-  - [`tests/unit/feed/freegames.test.ts`](file:///d:/Projects/HELIX-Discord-Bot/tests/unit/feed/freegames.test.ts)
-
-### 2026-10-02 — Free Game Embed Overwrites Storefront Platform Information When All Platforms Selected
-
-- **Severity**: 🟡 Medium (Embed Formatting)
-- **Status**: ✅ resolved
-- **Reported Issue**: "the all platforms one shouldn't replace the platform information in the embeds. right now it's replacing the footer information."
-- **Root Cause**: `freeGameEmbed` in `src/bot/utils/embeds.ts` always overrode the footer text with `${feedTitle} · Weekly Free Games` whenever `feedTitle` was provided. When the feed title was "Free Games (All Stores & Giveaways)", this replaced the game's actual platform name and icon.
-- **Resolution**:
-  - Added `isGenericOrAllTitle` check in `src/bot/utils/embeds.ts`.
-  - When the feed title is generic or represents "All Stores & Giveaways" / "All Platforms", the embed footer strictly retains the game's individual storefront platform name (`${branding.name} · Free Games`) and icon (`branding.iconUrl`).
-- **Affected Files**:
   - [`src/bot/utils/embeds.ts`](file:///d:/Projects/HELIX-Discord-Bot/src/bot/utils/embeds.ts)
+  - [`src/dashboard/views/dashboard/sources.ts`](file:///d:/Projects/HELIX-Discord-Bot/src/dashboard/views/dashboard/sources.ts)
+  - [`src/dashboard/views/dashboard/clientScript.ts`](file:///d:/Projects/HELIX-Discord-Bot/src/dashboard/views/dashboard/clientScript.ts)
+  - [`src/bot/commands/feeds/free-games.ts`](file:///d:/Projects/HELIX-Discord-Bot/src/bot/commands/feeds/free-games.ts)
   - [`tests/unit/feed/freegames.test.ts`](file:///d:/Projects/HELIX-Discord-Bot/tests/unit/feed/freegames.test.ts)
 
 ### 2026-10-02 — Dashboard Free Games & Reddit Tabs Lack One-Click Pill Catalog Options

@@ -50,6 +50,7 @@ export type FeedType =
   | 'scrape'
   | 'reddit'
   | 'free_games'
+  | 'free_games_gamerpower'
   | 'free_games_epic'
   | 'free_games_steam'
   | 'free_games_gog'
@@ -69,6 +70,7 @@ const FEED_TYPES: readonly FeedType[] = [
   'scrape',
   'reddit',
   'free_games',
+  'free_games_gamerpower',
   'free_games_epic',
   'free_games_steam',
   'free_games_gog',

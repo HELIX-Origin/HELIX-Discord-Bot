@@ -328,12 +328,12 @@ export function feedEmbed(args: {
   return embed;
 }
 
-export function freeGameEmbed(game: FreeGameItem, feedTitle = 'Free Games'): DiscordEmbed {
+export function freeGameEmbed(game: FreeGameItem, _feedTitle = 'Free Games'): DiscordEmbed {
   const branding = PLATFORM_BRANDING[game.platformKey] ||
     PLATFORM_BRANDING['epic'] || {
       name: game.platform,
       color: 0x10b981,
-      iconUrl: 'https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons@main/png/epic-games.png',
+      iconUrl: 'https://images.weserv.nl/?url=www.gamerpower.com/favicon.ico&w=128&h=128&output=png',
     };
 
   const cleanT = cleanTitle(game.title);
@@ -342,11 +342,8 @@ export function freeGameEmbed(game: FreeGameItem, feedTitle = 'Free Games'): Dis
     url: game.url,
     color: branding.color,
     author: {
-      name: `${branding.name} · Free Game`,
+      name: `${game.platform} · Free Game`,
       icon_url: branding.iconUrl,
-    },
-    footer: {
-      text: `${feedTitle} · Weekly Free Games`,
     },
   };
 
