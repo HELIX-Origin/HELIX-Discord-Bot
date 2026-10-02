@@ -1,24 +1,68 @@
-# BUGS — Bug & Issue Tracker
+# 🐛 BUGS
 
-> This file is the **bug & issue tracker** for HELIX Discord Bot. It tracks active bugs
-> and issues being addressed. Complements `PLAN` (roadmap) and `TODO`
-> (task checklist). Remote, user-facing work is tracked as GitHub issues/roadmaps per
-> Rule 04 (`remote-issue-protocol`).
+> [!IMPORTANT]
+> All known bugs are listed here. Keep in mind, that if a bug is missing, it may not have been discovered or reported yet.
+>
+> The repository maintainers (and contributors) actively search for new bugs and update this document accordingly. In some cases, a bug will be spotted and fixed without this page being immediately updated. This page is primarily a living index and may not always reflect the most current state of the codebase.
+>
+> AI agents are strongly advised to update this page first and push it to the remote before working on any new bug fixes or features. This way the remote repository always has the most up-to-date list of known issues.
 
-## Status Legend
+## 📖 Legend
 
-| Status | Meaning |
-|---|---|
-| 🟥 Open | Actively being worked on / unverified |
-| 🟨 In Verification | Fix implemented, undergoing verification gate & testing |
-| 🟩 Resolved | Verified passing `npm run check` and committed |
+### 🚦 Status
 
----
+- ⚠️ **open** — reproducible, needs fixing *(Detailed lists with possible fixes encouraged. Attempt to include steps to reproduce, expected behavior, and actual behavior. An estimate of how long it might take to fix is also helpful.)*
+- 🚧 **investigating** — repro/root-cause in progress *(List of issues currently being worked on. Used for tracking active work. must reference an existing bug from the open section.)*
+- 🚫 **wontfix** — accepted limitations *(features that can't be fixed at this time without significant changes or trade-offs)*
+- ✅ **resolved** — verified and fixed *(moved to closed with the corresponding release version or commit)*
 
-## 🐛 Open / In Progress Bugs
+### 🚨 Severity
 
-### 1. Free Game Alerts Fail or Are Hit-or-Miss on Individual Storefronts 🟨 In Verification
+- 🔴 **Critical**: *Bugs that cause crashes or major functionality loss.*
+- 🟠 **High**: *Bugs that significantly impact usability but do not crash the app.*
+- 🟡 **Medium**: *Bugs that affect certain features or have minor usability issues.*
+- 🟢 **Low**: *Minor bugs or visual glitches that do not significantly impact the user experience.*
 
+## 🚫 Known quirks & external limitations (wontfix bucket)
+
+- 🐢 **External Feed Throttling & Rate Limits:** Upstream APIs (Reddit, YouTube, Twitch, GamerPower) enforce rate limits. Handlers and background workers throttle requests and implement exponential backoff rather than spam-retrying.
+- **Discord API Gateway & Rate Limits:** Discord enforces global and route-specific rate limits on interaction responses, guild command syncs, and embeds. Guild command updates must be debounced.
+
+## 💡 Explicitly not bugs
+
+- Disabled features intentionally hide their corresponding dashboard navigation links and unregister their slash commands from Discord guilds rather than rendering disabled error embeds.
+
+## ⚠️ Open
+
+### GitHub Push Webhook Delivery Fails or Does Not Post into Feed Channel
+
+- **Severity**: 🟠 High (Feed Delivery / Webhooks)
+- **Status**: ⚠️ open
+- **Reported Issue**: GitHub organization push webhook (`https://helix-bot.helix-origin.club/api/feeds/webhooks/github`) fails to deliver or does not trigger a message in `#github-feeds`. In GitHub's Recent Deliveries, `push` events show an error/warning (`500 Internal Server Error`), while `ping` and `pull_request.synchronize` succeed (`200 OK`).
+- **Observed Delivery**:
+  - **Delivery ID**: `48fd9042-be2b-11f1-9cd4-54beb7e770e1`
+  - **Event**: `push`
+  - **Hook Installation Target ID**: `322256733` (`HELIX-Origin`)
+  - **Target URL**: `https://helix-bot.helix-origin.club/api/feeds/webhooks/github`
+  - **Payload Summary**: Push to `refs/heads/main` (`HELIX-Origin/HELIX-Discord-Bot`) comparing `05d8952b4169...41cb717096b3`.
+- **Root Cause & Investigation**:
+  1. *Foreign Key Constraint in `activity_log`*: In `src/dashboard/routes/feeds.ts:503` and `511`, `d.repo.logActivity` was invoked with `userId = 0`. With SQLite `PRAGMA foreign_keys = ON;`, `0` is not a valid user ID in `users(id)`, throwing `SqliteError: FOREIGN KEY constraint failed` and returning `500 Internal Server Error`. Sanitization was added in `src/db/repositories/settings.ts` and `null` passed in `feeds.ts` (commit `41cb717`).
+  2. *Verification & Webhook Processing*:
+     - Verify VPS live deployment status (`git pull` & `systemctl restart`).
+     - Check feed matching in `src/dashboard/routes/feeds.ts`: ensuring `f.feedType === 'github'`, `parseGitHubSlug(f.url)` matches `HELIX-Origin/HELIX-Discord-Bot` (or case-insensitive org/repo), and `parseGitHubEvents(feed.scrape?.description)` includes `'push'`.
+     - Inspect deduplication logic (`d.repo.isEntrySent` / `d.redis?.isEntrySent`) to confirm whether redelivered commit SHAs are filtered or if fresh commits are processed.
+     - Review live logs via `journalctl -u helix-discord-bot -n 100` on the VPS to capture the exact stack trace if errors persist.
+- **Affected Files**:
+  - [`src/dashboard/routes/feeds.ts`](file:///d:/Projects/HELIX-Discord-Bot/src/dashboard/routes/feeds.ts)
+  - [`src/db/repositories/settings.ts`](file:///d:/Projects/HELIX-Discord-Bot/src/db/repositories/settings.ts)
+  - [`src/feed/github.ts`](file:///d:/Projects/HELIX-Discord-Bot/src/feed/github.ts)
+
+## 🚧 Investigating
+
+### 1. Free Game Alerts Fail or Are Hit-or-Miss on Individual Storefronts
+
+- **Severity**: 🟠 High (Feed Delivery / Free Games)
+- **Status**: 🚧 investigating (in verification)
 - **Reported Issue**: "free game alerts only seem to work when all platfroms is chosen. individual platforms are hit or miss."
 - **Root Cause**:
   1. GamerPower upstream endpoint does not accept platform-specific queries for several storefronts (`platform=indiegala`, `platform=humble`, `platform=prime` return HTTP 404).
@@ -46,10 +90,10 @@ flowchart TD
     F --> G["Deliver to Discord Target Channel/Thread"]
 ```
 
----
+### 2. Free Game Embed Overwrites Storefront Platform Information When All Platforms Selected
 
-### 2. Free Game Embed Overwrites Storefront Platform Information When All Platforms Selected 🟨 In Verification
-
+- **Severity**: 🟡 Medium (Embed Formatting)
+- **Status**: 🚧 investigating (in verification)
 - **Reported Issue**: "the all platforms one shouldn't replace the platform information in the embeds. right now it's replacing the footer information."
 - **Root Cause**: `freeGameEmbed` in `src/bot/utils/embeds.ts` always overrode the footer text with `${feedTitle} · Weekly Free Games` whenever `feedTitle` was provided. When the feed title was "Free Games (All Stores & Giveaways)", this replaced the game's actual platform name and icon.
 - **Resolution**:
@@ -59,10 +103,10 @@ flowchart TD
   - [`src/bot/utils/embeds.ts`](file:///d:/Projects/HELIX-Discord-Bot/src/bot/utils/embeds.ts)
   - [`tests/unit/feed/freegames.test.ts`](file:///d:/Projects/HELIX-Discord-Bot/tests/unit/feed/freegames.test.ts)
 
----
+### 3. Dashboard Free Games & Reddit Tabs Lack One-Click Pill Catalog Options
 
-### 3. Dashboard Free Games & Reddit Tabs Lack One-Click Pill Catalog Options 🟨 In Verification
-
+- **Severity**: 🟡 Medium (Dashboard Usability)
+- **Status**: 🚧 investigating (in verification)
 - **Reported Issue**: "we should adjust the page to use pill sections to enable the options as well, just like the reddit and news feed tabs."
 - **Root Cause**: The Free Games and Reddit tabs on the web dashboard required manual input and lacked quick one-click catalog activation sections (`feed-pill`), unlike the News feeds catalog.
 - **Resolution**:
@@ -75,10 +119,10 @@ flowchart TD
   - [`src/dashboard/views/dashboard/clientScript.ts`](file:///d:/Projects/HELIX-Discord-Bot/src/dashboard/views/dashboard/clientScript.ts)
   - [`tests/unit/dashboard/views.test.ts`](file:///d:/Projects/HELIX-Discord-Bot/tests/unit/dashboard/views.test.ts)
 
----
+### 4. Command Toggles Ineffective & Do Not Unregister Commands or Gate Dashboard Pages
 
-### 4. Command Toggles Ineffective & Do Not Unregister Commands or Gate Dashboard Pages 🟨 In Verification
-
+- **Severity**: 🟠 High (Dashboard & Command Management)
+- **Status**: 🚧 investigating (in verification)
 - **Reported Issue**: "the command toggles have absolutley no effect. they are suppose to enable or disabled the selected commands and their related features... when i say features i mean that any command that has it's own dashboard page should also have it's dashboard page hidden when the command is disabled... no error embed if command disabled. the command should be unregistered if it is disabled and the registration should be automatically applied to the guild."
 - **Root Cause**: Disabled command settings were stored in database settings, but the bot never re-registered guild commands to prune disabled commands from Discord's guild registration, and the dashboard navigation never hid pages corresponding to disabled features.
 - **Resolution**:
@@ -97,10 +141,10 @@ flowchart TD
   - [`src/dashboard/views/dashboard/clientScript.ts`](file:///d:/Projects/HELIX-Discord-Bot/src/dashboard/views/dashboard/clientScript.ts)
   - [`tests/unit/admin/commandToggles.test.ts`](file:///d:/Projects/HELIX-Discord-Bot/tests/unit/admin/commandToggles.test.ts)
 
----
+### 5. Ticket Setup Message Placeholder Displays "this server" Instead of Guild Name
 
-### 5. Ticket Setup Message Placeholder Displays "this server" Instead of Guild Name 🟨 In Verification
-
+- **Severity**: 🟡 Medium (Placeholders / Config)
+- **Status**: 🚧 investigating (in verification)
 - **Reported Issue**: "also the ticket message needs to support placeholders... issue with the placholder output.s instead of displaying the server name `{server}` is showin `this server`. that is wrong... discord js can get the guild name by using guild.name so it is not incorrect to assume that the bot can get it's own name"
 - **Root Cause**: Placeholder substitution in `src/bot/utils/placeholders.ts` defaulted to static string `'this server'` instead of inspecting `guild.name`.
 - **Resolution**:
@@ -112,30 +156,9 @@ flowchart TD
   - [`src/dashboard/views/dashboard/clientScript.ts`](file:///d:/Projects/HELIX-Discord-Bot/src/dashboard/views/dashboard/clientScript.ts)
   - [`tests/unit/bot/placeholders.test.ts`](file:///d:/Projects/HELIX-Discord-Bot/tests/unit/bot/placeholders.test.ts)
 
----
+## ✅ Closed
 
-### 6. GitHub Push Webhook Delivery Fails or Does Not Post into Feed Channel 🟥 Open
-
-- **Reported Issue**: GitHub organization push webhook (`https://helix-bot.helix-origin.club/api/feeds/webhooks/github`) fails to deliver or does not trigger a message in `#github-feeds`. In GitHub's Recent Deliveries, `push` events show an error/warning (`500 Internal Server Error`), while `ping` and `pull_request.synchronize` succeed (`200 OK`).
-- **Observed Delivery**:
-  - **Delivery ID**: `48fd9042-be2b-11f1-9cd4-54beb7e770e1`
-  - **Event**: `push`
-  - **Hook Installation Target ID**: `322256733` (`HELIX-Origin`)
-  - **Target URL**: `https://helix-bot.helix-origin.club/api/feeds/webhooks/github`
-  - **Payload Summary**: Push to `refs/heads/main` (`HELIX-Origin/HELIX-Discord-Bot`) comparing `05d8952b4169...41cb717096b3`.
-- **Root Cause & Investigation**:
-  1. *Foreign Key Constraint in `activity_log`*: In `src/dashboard/routes/feeds.ts:503` and `511`, `d.repo.logActivity` was invoked with `userId = 0`. With SQLite `PRAGMA foreign_keys = ON;`, `0` is not a valid user ID in `users(id)`, throwing `SqliteError: FOREIGN KEY constraint failed` and returning `500 Internal Server Error`. Sanitization was added in `src/db/repositories/settings.ts` and `null` passed in `feeds.ts` (commit `41cb717`).
-  2. *Verification & Webhook Processing*:
-     - Verify VPS live deployment status (`git pull` & `systemctl restart`).
-     - Check feed matching in `src/dashboard/routes/feeds.ts`: ensuring `f.feedType === 'github'`, `parseGitHubSlug(f.url)` matches `HELIX-Origin/HELIX-Discord-Bot` (or case-insensitive org/repo), and `parseGitHubEvents(feed.scrape?.description)` includes `'push'`.
-     - Inspect deduplication logic (`d.repo.isEntrySent` / `d.redis?.isEntrySent`) to confirm whether redelivered commit SHAs are filtered or if fresh commits are processed.
-     - Review live logs via `journalctl -u helix-discord-bot -n 100` on the VPS to capture the exact stack trace if errors persist.
-- **Affected Files**:
-  - [`src/dashboard/routes/feeds.ts`](file:///d:/Projects/HELIX-Discord-Bot/src/dashboard/routes/feeds.ts)
-  - [`src/db/repositories/settings.ts`](file:///d:/Projects/HELIX-Discord-Bot/src/db/repositories/settings.ts)
-  - [`src/feed/github.ts`](file:///d:/Projects/HELIX-Discord-Bot/src/feed/github.ts)
-
----
+*No closed bugs recorded yet in this cycle.*
 
 ## 🛠️ Verification Gate
 
