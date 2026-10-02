@@ -13,9 +13,9 @@
 
 ---
 
-## 🎯 Active Sprint
+## 🎯 Sprint S.{{N}}
 
-### Goal 1: Stream Alerts (YouTube & Twitch) Manual Trigger Delivery Fix
+### Goal {{N}}: Stream Alerts (YouTube & Twitch) Manual Trigger Delivery Fix
 
 **User directive**: "Also the YouTube and Twitch Alerts. When manually triggered, they should get the last stream/video posted. Right now they post nothing and it makes me think they aren't working at all."
 
@@ -32,7 +32,7 @@
 
 ---
 
-### Goal 2: Game Feeds Tab Evolution (Planning & Architecture)
+### Goal {{N}}: Game Feeds Tab Evolution (Planning & Architecture)
 
 **User directive**: "We also need to plan an upgrade to the Free Games tab. It will become a Game Feeds tab and will support three types of feeds from the provided feed sources: Free Game Alerts, Deals and Promotions, Patch Notes."
 
@@ -51,7 +51,7 @@
 
 ---
 
-## ✅ Completed in Recent Sprint
+## ✅ Completed in Sprint S.{{N}}
 
 ### Free Games Provider-Based Architecture & Direct Store URL Resolution
 - Restructured Free Game feeds around genuine providers (`GamerPower Free Game Alerts`, `Epic Games Store Official`, `All Free Game Drops`).

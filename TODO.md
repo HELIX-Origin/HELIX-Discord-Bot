@@ -6,7 +6,7 @@
 
 ## 🔥 Active Tasks
 
-### Workstream: Real-Time Single-Newest-Post Feed Delivery & Rate-Limit Shield
+### {{emoji}} Workstream W.{{N}}: Real-Time Single-Newest-Post Feed Delivery & Rate-Limit Shield
 
 **Locked user directives:**
 
@@ -28,7 +28,7 @@
 - [x] `tests/unit/feed/watcher.test.ts`: Create test suite verifying single-newest-post delivery, backlog drain, and zero artificial time gating
 - [x] `npm run check` + `pnpm build` green
 
-### Workstream: Guild Admin Sections, Dedicated Feature Tabs & Permission-Gated Dashboard
+### {{emoji}} Workstream W.{{N}}: Guild Admin Sections, Dedicated Feature Tabs & Permission-Gated Dashboard
 
 **Locked user directives:**
 
@@ -64,7 +64,7 @@
 - [x] Feed-add channel notification: `notifyFeedAdded` (`src/bot/lib/feeds/notify.ts`) posts a confirmation into the feed's target channel on slash-command adds and dashboard POST /api/feeds
 - [x] `npm run check` + `pnpm build` green (779e4bb)
 
-### Workstream: Dashboard UI Window-Fitting, Live Discord Previews & Reddit Filter
+### {{emoji}} Workstream W.{{N}}: Dashboard UI Window-Fitting, Live Discord Previews & Reddit Filter
 
 **Locked user directives:**
 - Filter out Reddit community home posts: "The community home post should always be ignored in reddit feeds since it is a persistent static post that could cause reddit feeds to miss actual new posts."
@@ -86,7 +86,7 @@
 
 **Status:** dashboard phase (`627d783`), ticket redesign (`cf6c6c3`), forum→thread refactor (`21a4734`), docs sync + THREADS_ENABLED gate (`536e992`), and role-subscription + add-notification (`779e4bb`) committed + pushed — each ran green `npm run check` + `pnpm build`. Remaining: final docs/wiki/issue sync (roadmap issue #27 Phase 9/10 checkboxes + new Phase 11 role/notification row). Progress mirrored on roadmap issue #27.
 
-### Workstream: Theme System — Single Source of Truth (`themes/*.ts`)
+### {{emoji}} Workstream W.{{N}}: Theme System — Single Source of Truth (`themes/*.ts`)
 
 **Locked user directives:**
 
@@ -102,7 +102,7 @@
 - [x] Docs: `.env.example`, `wiki/Configuration`, `wiki/Architecture-and-Design`, `.agents/rules/dashboard-standards`, `.agents/agents/engineering/sub-agents/dashboard-engineer`
 - [x] `npm run check` + `pnpm build` green
 
-### Workstream: Dead Code Cleanup + Vitest Scan Guard
+### {{emoji}} Workstream W.{{N}}: Dead Code Cleanup + Vitest Scan Guard
 
 **Locked user directives:**
 
@@ -119,7 +119,7 @@
 - [x] `npx vitest run tests/unit/quality/dead-code.test.ts` → PASS (2 tests)
 - [x] `npm run check` + `pnpm build` green (52 files, +82/−1013)
 
-### Workstream: Stream Alerts Audit, Zero-Config YouTube Ingestion & Rich Twitch Metadata
+### {{emoji}} Workstream W.{{N}}: Stream Alerts Audit, Zero-Config YouTube Ingestion & Rich Twitch Metadata
 
 **Locked user directives:**
 - "ok we need to audit our stream alert support. I don't know if they work or not, but we should check just in case."
@@ -137,7 +137,7 @@
 - [x] `npm run check` + `npm run build` green (22/22 test files, 348/348 tests passing)
 - [x] Repository documentation sync (`README.md`, `wiki/Feeds-and-Scrapers.md`, `wiki/Configuration.md`, `.env.example`, `TODO.md`)
 
-### Workstream: Optional Embed Support for Ticket Message Setup
+### {{emoji}} Workstream W.{{N}}: Optional Embed Support for Ticket Message Setup
 
 **Locked user directives:**
 - "ok let's add optional embed support to the ticket message setup"
@@ -156,7 +156,7 @@
 - [x] `wiki/*`: Document embed options in `Administration.md`, `Discord-Bot.md`, and `API-Reference.md`
 - [x] `npm run check` + `npm run build` green (22/22 test files, 350/350 tests passing)
 
-### Workstream: Ticket Message Placeholders & Dynamic Guild Resolution
+### {{emoji}} Workstream W.{{N}}: Ticket Message Placeholders & Dynamic Guild Resolution
 
 **Locked user directives:**
 - "also the ticket message needs to support placeholders."
@@ -170,7 +170,7 @@
 - [x] Unit test coverage for placeholder replacement in `tests/unit/bot/placeholders.test.ts`
 - [x] `npm run check` + `npm run build` green
 
-### Workstream: Command Toggles, Feature Gating & Dynamic Guild Command Registration
+### {{emoji}} Workstream W.{{N}}: Command Toggles, Feature Gating & Dynamic Guild Command Registration
 
 **Locked user directives:**
 - "the command toggles have absolutley no effect. they are suppose to enable or disabled the selected commands and their related features."
@@ -191,9 +191,9 @@
 - [x] Unit test coverage in `tests/unit/admin/commandToggles.test.ts`
 - [x] `npm run check` + `npm run build` green
 
-### Workstream: Free Games Reliability, Embed Platform Branding & Dashboard Pill Catalogs
+### {{emoji}} Workstream W.{{N}}: Free Games Reliability, Embed Platform Branding & Dashboard Pill Catalogs
 
-### Workstream: Free Games Provider-Based Architecture & Direct Store URL Resolution
+### {{emoji}} Workstream W.{{N}}: Free Games Provider-Based Architecture & Direct Store URL Resolution
 
 **Locked user directives:**
 - Restructure Free Game feeds around genuine providers (GamerPower Free Game Alerts & Epic Games Store Official) rather than splitting GamerPower into fake platform feeds.
@@ -217,7 +217,7 @@
 
 ---
 
-### Workstream: Game Feeds Tab Evolution (Free Games, Deals & Promotions, Patch Notes)
+### {{emoji}} Workstream W.{{N}}: Game Feeds Tab Evolution (Free Games, Deals & Promotions, Patch Notes)
 
 **Locked user directives:**
 - The Free Games tab will become a **Game Feeds** tab.
@@ -250,7 +250,7 @@
 
 ---
 
-### Workstream: Stream Alerts (YouTube & Twitch) Manual Trigger Delivery Fix
+### {{emoji}} Workstream W.{{N}}: Stream Alerts (YouTube & Twitch) Manual Trigger Delivery Fix
 
 **Locked user directives:**
 - "When YouTube and Twitch alerts are manually triggered, they should get the last stream/video posted. Right now they post nothing and it makes me think they aren't working at all."
@@ -263,11 +263,91 @@
 - [ ] In `src/dashboard/routes/feeds.ts`: Ensure `/api/feeds/:id/poll` returns delivery status in response JSON
 - [ ] Unit test: Verify manual force poll delivers latest entry even when previously sent
 
+
+---
+
+### {{emoji}} Workstream W.{{N}}: Prefix Commands
+**Locked user directives:**
+- "Prefix commands should be added to replace the failed slash action commands without having to worry about the slash command registration limits."
+
+**Implementation checklist:**
+- [ ] Update our command handler to support both slash commands and prefix commands
+- [ ] Create the following new `[prefix]` commands for users with the required permissions:
+  - `[prefix]set prefix <new_prefix>`: Update the bot's command prefix per guild.
+  - `[prefix]set manager_role <role_id: role_id>`: Update the manager role for the guild. This will affect which users have permission to manage the bot's settings via the commands and the dashboard. This simply allows for configuring the bot's features and settings, it does not grant any additional permissions beyond managing the bot.
+  - `[prefix]set <feature_id: news_feeds|game_feeds|reddit_feeds|patch_notes_feeds|stream_alerts|youtube_feeds|twitch_feeds|voice_hub|etc> <choice: enabled|disabled>`: Enable or disable feed types per guild. This will not remove them from the dashboard. Instead it toggles them per guild (The dashoard will need it's own toggles to match these settings.)
+  - `[prefix]hub <choice: add|remove> [channel: channel_id]`: Manage hub channels for the guild. The hub channel is a single voice channel that when joined, creates a user voice channel and moves the user to it while ensuring they have the permissions neccessary to manage their personal voice channel. This is basically a voice hub system. When the personal voice channel is empty, it gets deleted automatically. *(This feature currently isn't implemented yet. We will need to plan this one before we make this command.)*
+  - `[prefix]reddit <choice: list|add|remove> [subreddit: string] [channel: channel_id]`: Manage Reddit feeds for the specified subreddit.
+  - `[prefix]youtube <choice: list|add|remove> [youtube_slug: string] [channel: channel_id]`: Manage YouTube feeds for the specified channel.
+  - `[prefix]twitch <choice: list|add|remove> [twitch_slug: string] [channel: channel_id]`: Manage Twitch feeds for the specified channel.
+  - `[prefix]patch-notes <choice: enable|disable> [channel: channel_id]`: Manage Patch Notes feeds
+  - `[prefix]news <choice: list|add|remove> [feed_id: source_id] [channel: channel_id]`: Manage News feeds for the specified feed ID.
+  - `[prefix]free-games <choice: list|add|remove> [feed_id: source_id] [channel: channel_id]`: Manage Free Games feeds for the specified feed ID.
+  - `[prefix]game-deals <choice: list|add|remove> [feed_id: source_id] [channel: channel_id]`: Manage Deals feeds for the specified feed ID.
+  - `[prefix]welcome <choice: channel|message> [channel: channel_id] [message: string]`: Manage welcome message settings for the specified channel.
+  - `[prefix]tickets <choice: channel|manager_role|message> [channel: channel_id] [manager_role: role_id] [message: string]`: Manage ticket settings for the specified channel.
+  - `[prefix]role <choice: add|remove> [role: role_id] [user: user_id]`: Manage roles for the specified user.
+  - `[prefix]set dj [role: role_id]`: Set the DJ role for managing music playback. Requires the music support to be created first. This one will be held off until that is complete and fully tested.
+
+---
+
+### {{emoji}} Workstream W.{{N}}: Music Support
+
+**Locked user directives:**
+- "Music support was something we wanted in the bot, but had to remove due to issues with stability and resource management."
+- "We plan to revisit this feature again in order to come up with a more stable solution."
+- "Our new plan will be to integrate Discord's own Rythm app for music support, leveraging its stability and resource management capabilities."
+- "We will need to ensure that the integration with Rythm is seamless and does not negatively impact the bot's performance."
+- "We will also need to provide clear documentation and support for users to understand how to use the music features effectively."
+- "We will need to test the integration thoroughly to ensure it works reliably under various conditions."
+- "A proper dashboard queue management system will be necessary to handle music requests efficiently and ensure a smooth user experience."
+
+**Implementation checklist:**
+  - [ ] Create the new music support integration using Discord's Rythm app.
+  - [ ] Ensure seamless integration without impacting bot performance.
+  - [ ] Provide clear documentation and support for users.
+  - [ ] Test the integration thoroughly under various conditions.
+  - [ ] Implement a dashboard queue management system for music requests.
+  - [ ] Add new slash commands for music features once integration is confirmed reliable:
+    - [ ] `/play [song]` - Play a song in the user's current voice channel. Accepts the song name or URL.
+    - [ ] `/pause` - Pause the currently playing song.
+    - [ ] `/resume` - Resume the paused song.
+    - [ ] `/skip` - Skip the currently playing song.
+    - [ ] `/jump [position]` - Jump to a specific position in the music queue.
+    - [ ] `/queue` - Display the current music queue.
+    - [ ] `/loop [mode]` - Set the loop mode for the music queue. Modes can be `off`, `one`, or `all`.
+    - [ ] `/remove` - Remove a song from the queue.
+    - [ ] `/clear` - Clear the entire music queue.
+    - [ ] `/volume [level]` - Set the playback volume for the music bot.
+
+---
+
+### {{emoji}} Workstream W.{{N}}: Voice Hub System
+
+**Locked user directives:**
+- "The voice hub system will allow users to create personal voice channels dynamically by joining a designated hub channel."
+- "When a user joins the hub channel, a personal voice channel will be created for them, and they will be moved to it automatically."
+- "Users will have the necessary permissions to manage their personal voice channels."
+- "Personal voice channels will be deleted automatically when they are empty."
+- "We need to ensure that the system is stable and does not negatively impact the bot's performance."
+- "Clear documentation and support will be provided to help users understand how to use the voice hub system effectively."
+- "Thorough testing will be conducted to ensure the system works reliably under various conditions."
+
+**Implementation checklist:**
+  - [ ] Create a designated hub channel for users to join.
+  - [ ] Automatically create personal voice channels when users join the hub channel.
+  - [ ] Assign necessary permissions to users for managing their personal voice channels.
+  - [ ] Automatically delete personal voice channels when they are empty.
+  - [ ] Ensure the system is stable and does not negatively impact bot performance.
+  - [ ] Provide clear documentation and support for users.
+  - [ ] Conduct thorough testing under various conditions.
+
+
 ---
 
 ## 🛠️ Verification Commands
 
-```
+```bash
 npm run check               # typecheck + format:check + lint + tests (must pass)
 npm run build               # tsc compile to dist/ (must pass)
 npm test                    # vitest run

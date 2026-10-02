@@ -1,0 +1,186 @@
+# HELIX Discord Bot — Task Checklist & Session Tracking
+
+> {{ emoji }} **Living Source of Truth**: {{ description }}
+
+> [!IMPORTANT]
+> AI agents strictly required to update this page and all related pages **before** working on any new bug fixes or features and push it to the remote first, without exception. Failure to do so may result in working with outdated information and potentially introducing conflicts or redundant work. 
+
+---
+
+## 📜 Tracking Rules
+
+- **No Typo Duplication**: When recording user reports, clean and fix all typos to preserve professional quality.
+- **Consistent Formatting**: Maintain consistent formatting and style throughout all documentation to ensure readability and professionalism.
+- **Clear Sectioning**: Use clear and descriptive headers for each section to improve navigation and readability.
+- **Regular Updates**: Ensure that the roadmap is regularly updated to reflect the latest developments and changes in the project.
+- **Improve User Directives**: Continuously refine and clarify user directives to ensure they are easily understood and actionable.
+- **Universal Direct Store Links**: Every game alert, giveaway, or deal **MUST** resolve to the actual storefront page of the game.
+- **Always Track Everything**: Every new feature request, enhancement, or bug report must be logged in [`BUGS.md`](./BUGS.md), [`TODO.md`](./TODO.md), and [`ROADMAP.md`](./ROADMAP.md) before execution.
+
+---
+
+# {{ emoji }} Workstream W.{{N}}: {{ workstream.title }}
+
+{{ workstream.description }}
+
+## {{ emoji }} {{ section.header }}
+
+<!-- 
+    ... Mermaid diagrams must be desinged with compact layout ...
+    ... avoid overly complex structures and keep within sizing limits to ensure readability ...
+
+-->
+
+```mermaid
+{{ workstream.diagram }}
+```
+
+### {{emoji}} Workstream W.{{N}}: 
+
+**Locked user directives:**
+
+<!-- 
+    ... this section must be kept properly formatted to ensure clarity and readability ...
+    ... use a better formatting and wording to enhance readability and comprehension ...
+    ... the user may not always word things clearly or consistently ...
+    ... ensure that any important details or context are not overlooked ...
+    ... provide examples or clarifications if necessary to aid understanding ...
+    ... maintain a consistent style and structure throughout the section ...
+    ... regularly review and update this section to reflect any changes in the locked user directives ...
+    ... ensure that any updates or modifications are clearly documented and communicated to all relevant stakeholders ...
+
+-->
+
+- "{{ user.directive }}"
+
+**Implementation checklist:**
+
+<!--
+    ... Implementation checklist should be kept up-to-date with the latest tasks and sub-tasks ...
+    ... ensure that each item is clearly defined and actionable ...
+    ... regularly review and update the checklist to reflect the current state of the workstream ...
+    ... break down complex tasks into smaller, manageable sub-tasks to improve clarity and track progress ...
+    ... prioritize tasks based on their importance and urgency to optimize workflow ...
+    ... regularly communicate progress and any blockers to relevant stakeholders ...
+    ... ensure that completed tasks are properly documented and marked as done ...
+    ... continuously improve the checklist based on feedback and lessons learned from previous tasks ...
+-->
+
+- [ ] {{ list.item }}
+    - [ ] {{ sublist.item }}
+    - [ ] {{ sublist.item }}
+    - [ ] {{ sublist.item }}
+- [ ] {{ list.item }}
+    - [ ] {{ sublist.item }}
+    - [ ] {{ sublist.item }}
+    - [ ] {{ sublist.item }}
+- [ ] {{ list.item }}
+    - [ ] {{ sublist.item }}
+    - [ ] {{ sublist.item }}
+    - [ ] {{ sublist.item }}
+
+---
+
+# {{ emoji }} Workstream W.{{N}}: {{ workstream.title }}
+
+{{ workstream.description }}
+
+## {{ emoji }} {{ section.header }}
+
+<!-- 
+    ... Mermaid diagrams must be desinged with compact layout ...
+    ... avoid overly complex structures and keep within sizing limits to ensure readability ...
+
+-->
+
+```mermaid
+{{ workstream.diagram }}
+```
+
+### {{emoji}} Workstream W.{{N}}: 
+
+**Locked user directives:**
+
+<!-- 
+    ... this section must be kept properly formatted to ensure clarity and readability ...
+    ... use a better formatting and wording to enhance readability and comprehension ...
+    ... the user may not always word things clearly or consistently ...
+    ... ensure that any important details or context are not overlooked ...
+    ... provide examples or clarifications if necessary to aid understanding ...
+    ... maintain a consistent style and structure throughout the section ...
+    ... regularly review and update this section to reflect any changes in the locked user directives ...
+    ... ensure that any updates or modifications are clearly documented and communicated to all relevant stakeholders ...
+
+-->
+
+- "{{ user.directive }}"
+
+**Implementation checklist:**
+
+<!--
+    ... Implementation checklist should be kept up-to-date with the latest tasks and sub-tasks ...
+    ... ensure that each item is clearly defined and actionable ...
+    ... regularly review and update the checklist to reflect the current state of the workstream ...
+    ... break down complex tasks into smaller, manageable sub-tasks to improve clarity and track progress ...
+    ... prioritize tasks based on their importance and urgency to optimize workflow ...
+    ... regularly communicate progress and any blockers to relevant stakeholders ...
+    ... ensure that completed tasks are properly documented and marked as done ...
+    ... continuously improve the checklist based on feedback and lessons learned from previous tasks ...
+-->
+
+- [ ] {{ list.item }}
+    - [ ] {{ sublist.item }}
+    - [ ] {{ sublist.item }}
+    - [ ] {{ sublist.item }}
+- [ ] {{ list.item }}
+    - [ ] {{ sublist.item }}
+    - [ ] {{ sublist.item }}
+    - [ ] {{ sublist.item }}
+- [ ] {{ list.item }}
+    - [ ] {{ sublist.item }}
+    - [ ] {{ sublist.item }}
+    - [ ] {{ sublist.item }}
+
+
+---
+
+## 🛠️ Verification Commands
+
+<!-- 
+    ... Verification commands for the project ...
+    ... must be run and pass successfully before considering the workstream complete ...
+    ... failure to run these commands successfully indicates incomplete or incorrect implementation ...
+    ... ensure that all dependencies are correctly installed and up-to-date ...
+    ... verify that the environment is correctly configured before running the commands ...
+    ... document any known issues or caveats related to the verification commands ...
+    ... ensure that any required services or background processes are running before executing the verification commands ...
+    ... review the output of each command carefully to identify any potential issues or warnings ...
+    ... keep a record of the verification results for future reference ...
+    ... update the verification commands documentation as needed to reflect any changes in the project setup ...
+-->
+
+```bash
+npm run check               # typecheck + format:check + lint + tests (must pass)
+npm run build               # tsc compile to dist/ (must pass)
+npm test                    # vitest run
+```
+
+---
+
+## 🔖 Metadata
+
+<!-- 
+   ... Metadata for the project ...
+   ... should include project name, version, and any relevant ecosystem information ...
+   ... this helps in tracking the project setup and ensuring consistency across different environments ...
+   ... any additional metadata that may be relevant for project management or automation purposes ...
+   ... ensure that the metadata is kept up-to-date as the project evolves ...
+   ... consider including information about the project's dependencies, build tools, and runtime environment ...
+   ... include any relevant information about the project's maintainers or contributors ...
+   ... any other relevant project-specific metadata that may aid in project management or automation ...
+   ... ensure that the metadata is easily accessible and understandable by all project stakeholders ...
+   ... regularly review and update the metadata to reflect any changes in the project structure or dependencies ...
+-->
+
+- **Project**: {{ project.name }} · **version** {{ project.version }}
+- **Agent Ecosystem:** [`AGENTS`](./AGENTS) and [`.agents/`](.agents/) are tracked directly in repository git tracking.
