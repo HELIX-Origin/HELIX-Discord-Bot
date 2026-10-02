@@ -119,7 +119,15 @@ export class WebhookRouter {
       }
 
       const entries = await this.parseFeedContent(body, feed.feedType);
-      const isReddit = feed.feedType === 'reddit' || feed.url.toLowerCase().includes('reddit.com');
+      const isRedditHost = (() => {
+        try {
+          const hostname = new URL(feed.url).hostname.toLowerCase();
+          return hostname === 'reddit.com' || hostname.endsWith('.reddit.com');
+        } catch {
+          return false;
+        }
+      })();
+      const isReddit = feed.feedType === 'reddit' || isRedditHost;
       const validEntries = isReddit ? entries.filter((e) => !isRedditCommunityHomePost(e)) : entries;
 
       const unposted = validEntries.filter((e) => {
