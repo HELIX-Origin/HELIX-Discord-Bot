@@ -301,7 +301,6 @@ export function parseFeed(xml: string): ParsedFeed {
 export function decodeHtmlEntities(text: string): string {
   return text
     .replace(/&nbsp;/g, ' ')
-    .replace(/&amp;/g, '&')
     .replace(/&quot;/g, '"')
     .replace(/&apos;/g, "'")
     .replace(/&lt;/g, '<')
@@ -320,7 +319,8 @@ export function decodeHtmlEntities(text: string): string {
     .replace(/&#x([0-9a-fA-F]+);/g, (_m, hex: string) => {
       const code = parseInt(hex, 16);
       return Number.isNaN(code) ? '' : String.fromCodePoint(code);
-    });
+    })
+    .replace(/&amp;/g, '&');
 }
 
 export function stripHtml(text: string | null): string | null {
