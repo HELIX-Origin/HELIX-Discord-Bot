@@ -375,7 +375,7 @@ export function registerFeedsRoutes(router: Router<AppDeps>): void {
         const event = await listener.handleYoutubeNotification(req as unknown as Request);
         if (event) {
           d.repo.logActivity(
-            0,
+            null,
             'info',
             'feed-listener',
             `YouTube notification received: ${JSON.stringify(event.payload)}`,
@@ -383,7 +383,7 @@ export function registerFeedsRoutes(router: Router<AppDeps>): void {
         }
         sendJson(res, 200, { ok: true });
       } catch (err) {
-        d.repo.logActivity(0, 'error', 'feed-listener', `YouTube webhook error: ${(err as Error).message}`);
+        d.repo.logActivity(null, 'error', 'feed-listener', `YouTube webhook error: ${(err as Error).message}`);
         sendError(res, 500, 'Webhook processing failed');
       }
     });
@@ -400,11 +400,11 @@ export function registerFeedsRoutes(router: Router<AppDeps>): void {
         const listener = new FeedListener(d);
         const result = await listener.handleTwitchEventSub(req as unknown as Request);
         if (result && 'payload' in result) {
-          d.repo.logActivity(0, 'info', 'feed-listener', `Twitch EventSub received: ${JSON.stringify(result.payload)}`);
+          d.repo.logActivity(null, 'info', 'feed-listener', `Twitch EventSub received: ${JSON.stringify(result.payload)}`);
         }
         sendJson(res, 200, { ok: true });
       } catch (err) {
-        d.repo.logActivity(0, 'error', 'feed-listener', `Twitch webhook error: ${(err as Error).message}`);
+        d.repo.logActivity(null, 'error', 'feed-listener', `Twitch webhook error: ${(err as Error).message}`);
         sendError(res, 500, 'Webhook processing failed');
       }
     });
@@ -433,7 +433,7 @@ export function registerFeedsRoutes(router: Router<AppDeps>): void {
         const event = await listener.handleWebSubNotification(req as unknown as Request);
         if (event) {
           d.repo.logActivity(
-            0,
+            null,
             'info',
             'feed-listener',
             `WebSub notification received: ${JSON.stringify(event.payload)}`,
@@ -441,7 +441,7 @@ export function registerFeedsRoutes(router: Router<AppDeps>): void {
         }
         sendJson(res, 200, { ok: true });
       } catch (err) {
-        d.repo.logActivity(0, 'error', 'feed-listener', `WebSub webhook error: ${(err as Error).message}`);
+        d.repo.logActivity(null, 'error', 'feed-listener', `WebSub webhook error: ${(err as Error).message}`);
         sendError(res, 500, 'Webhook processing failed');
       }
     });
@@ -501,14 +501,14 @@ export function registerFeedsRoutes(router: Router<AppDeps>): void {
       }
 
       d.repo.logActivity(
-        0,
+        null,
         'info',
         'github-webhook',
         `Received ${eventHeader} for ${item.repoFullName} (delivered to ${deliveredCount} feeds)`,
       );
       sendJson(res, 200, { ok: true, deliveredCount });
     } catch (err) {
-      d.repo.logActivity(0, 'error', 'github-webhook', `GitHub webhook error: ${(err as Error).message}`);
+      d.repo.logActivity(null, 'error', 'github-webhook', `GitHub webhook error: ${(err as Error).message}`);
       sendError(res, 500, 'Webhook processing failed');
     }
   });

@@ -39,10 +39,11 @@ export class SettingsRepository {
   }
 
   logActivity(userId: number | null, level: string, source: string, message: string): void {
-    const entry: ActivityEntry = { ts: nowIso(), userId, level, source, message };
+    const validUserId = typeof userId === 'number' && userId > 0 ? userId : null;
+    const entry: ActivityEntry = { ts: nowIso(), userId: validUserId, level, source, message };
     this.db.raw
       .prepare('INSERT INTO activity_log (ts, user_id, level, source, message) VALUES (?, ?, ?, ?, ?)')
-      .run(entry.ts, userId, level, source, message);
+      .run(entry.ts, validUserId, level, source, message);
     this.state.logActivity(entry);
   }
 
