@@ -13,7 +13,7 @@ HELIX Discord Bot operates as a Discord application adhering strictly to **disco
 
 All commands register through Discord's native interaction model and use ephemeral response flags where appropriate (e.g. errors), with owner/team detection for elevated bot features.
 
-> 🖥️ **Web Dashboard Configuration**: Feed subscriptions (RSS, Atom, Scrapers, YouTube, Twitch, Free Games, Reddit), welcome announcements, support ticket systems, and guild settings (roles, prefix, feature toggles) are managed and configured directly through the **Web Dashboard** with real-time preview, role targeting, and interactive controls. In-chat slash commands are focused on moderation, administration, and server utilities.
+> 🖥️ **Web Dashboard Configuration**: Feed subscriptions (RSS, Atom, Scrapers, YouTube, Twitch, Free Games, Reddit), welcome announcements, support ticket systems, and guild settings (roles, prefix, thread delivery) are managed and configured directly through the **Web Dashboard** with real-time preview, role targeting, and interactive controls. In-chat slash commands are focused on moderation, administration, and server utilities.
 
 | Command | Subcommands / Options | Permissions Required | Description |
 | :--- | :--- | :--- | :--- |

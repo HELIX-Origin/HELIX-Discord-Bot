@@ -1,4 +1,4 @@
-﻿---
+---
 layout: documentation
 title: "Deployment & Hosting"
 ---
@@ -317,7 +317,7 @@ For users who prefer managed container hosting instead of maintaining a VPS, HEL
 ### ⚠️ Critical PaaS Prerequisites
 
 1. **Persistent Storage Volume (Mandatory for SQLite)**:
-   HELIX Discord Bot stores feeds, server settings, mod logs, and command toggles in a local SQLite file (`database.sqlite`).
+   HELIX Discord Bot stores feeds, server settings, and mod logs in a local SQLite file (`database.sqlite`).
    Cloud containers are ephemeral by default — **you must attach a persistent volume** mounted to `/app/data` (or set `SQLITE_DATA=/app/data`). Without a persistent volume, database changes will be wiped on every redeploy or container restart.
 2. **Environment Variables**:
    All configuration is provided via the platform's Environment Variables dashboard (never hardcoded in repo code).

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeAll, beforeEach } from 'vitest';
 import {
   registerCommand,
   getGuildEnabledCommands,
@@ -14,9 +14,12 @@ import * as ticketModule from '../../../src/bot/commands/admin/ticket.js';
 import { loadAllCommands } from '../../../src/bot/handlers/loader.js';
 
 describe('Command Toggles & Feature Module Enforcement', () => {
-  beforeEach(async () => {
-    vi.restoreAllMocks();
+  beforeAll(async () => {
     await loadAllCommands();
+  }, 30000);
+
+  beforeEach(() => {
+    vi.restoreAllMocks();
   });
 
   describe('getGuildEnabledCommands()', () => {

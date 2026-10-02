@@ -36,12 +36,10 @@ Visit the project site at [**helix-origin.github.io/HELIX-Discord-Bot**](https:/
 | 📰 **RSS, Web Scrapers & News Catalog** | RSS/Atom/JSON feeds, CSS-selector scrapers for sites without RSS, and a 700+ preset news catalog. Features single-newest-post delivery and rate-limit shield. → [Docs](https://helix-origin.github.io/HELIX-Discord-Bot/Feeds-and-Scrapers.html) |
 | 📢 **Stream Alerts** | YouTube & Twitch live/upload alerts delivered via webhooks with polling fallback. → [Docs](https://helix-origin.github.io/HELIX-Discord-Bot/Feeds-and-Scrapers.html) |
 | 🛡️ **Guild Administration** | Moderation (`/warn`, `/kick`, `/ban`, `/purge`, ...), role management, voice controls, and server settings. → [Docs](https://helix-origin.github.io/HELIX-Discord-Bot/Administration.html) |
-| 👋 **Welcome System** | Customizable welcome announcements for new arrivals (`/welcome` & dashboard) with placeholders (`{user}`, `{mention}`, `{server}`, `{membercount}`), plain text or embed format, and live Discord preview. → [Docs](https://helix-origin.github.io/HELIX-Discord-Bot/Administration.html) |
-| 🎫 **Ticket System** | Text-channel button prompt (`/ticket` & dashboard) that creates dedicated threads upon user interaction with support manager role pings and live button preview. → [Docs](https://helix-origin.github.io/HELIX-Discord-Bot/Administration.html) |
+| 👋 **Welcome System** | Customizable welcome announcements for new arrivals configured via the web dashboard with placeholders (`{user}`, `{mention}`, `{server}`, `{membercount}`), plain text or embed format, and live Discord preview. → [Docs](https://helix-origin.github.io/HELIX-Discord-Bot/Administration.html) |
+| 🎫 **Ticket System** | Support ticket prompt configured via the web dashboard that creates dedicated threads upon user interaction with support manager role pings and live button preview. → [Docs](https://helix-origin.github.io/HELIX-Discord-Bot/Administration.html) |
 | 🧵 **Thread Delivery** | Deliver each feed into its own dedicated thread auto-created in the feed's channel with auto-subscription. → [Docs](https://helix-origin.github.io/HELIX-Discord-Bot/Discord-Bot.html) |
 | 🖥️ **Web Dashboard** | Built-in management dashboard with Discord OAuth2, Light/Dark themes, responsive window-fitting layouts, live Discord previews, and per-guild configuration. → [Docs](https://helix-origin.github.io/HELIX-Discord-Bot/Architecture-and-Design.html) |
-
-Feature flags (`FEEDS_ENABLED`, `STREAM_ALERTS_ENABLED`, `DASHBOARD_ENABLED`, etc.) toggle each subsystem. → [Configuration](https://helix-origin.github.io/HELIX-Discord-Bot/Configuration.html)
 
 ---
 

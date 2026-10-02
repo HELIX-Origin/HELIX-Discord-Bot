@@ -145,7 +145,13 @@ export async function renderCommandsHtml(
       </div>
     </div>
     <h1 style="font-size: 1.75rem; font-weight: 800; margin-bottom: 0.5rem;">📖 Command Reference</h1>
-    <p style="color: var(--text-muted); margin-bottom: 2rem; line-height: 1.6;">A complete, read-only reference of all ${total} available commands. Commands marked with a <code style="background: rgba(0,0,0,0.4); padding: 0.15rem 0.35rem; border-radius: 0.25rem; font-family: monospace; color: var(--primary);">*</code> on an option are required.</p>
+    <p style="color: var(--text-muted); margin-bottom: 1.25rem; line-height: 1.6;">A complete, read-only reference of all ${total} available slash commands. Commands marked with a <code style="background: rgba(0,0,0,0.4); padding: 0.15rem 0.35rem; border-radius: 0.25rem; font-family: monospace; color: var(--primary);">*</code> on an option are required.</p>
+    <div style="background: rgba(99, 102, 241, 0.08); border: 1px solid rgba(99, 102, 241, 0.25); border-radius: 0.75rem; padding: 1rem 1.25rem; margin-bottom: 2rem; display: flex; align-items: flex-start; gap: 0.75rem;">
+      <i class="fa-solid fa-circle-info" style="color: var(--primary); margin-top: 0.2rem;"></i>
+      <div style="font-size: 0.875rem; color: var(--text); line-height: 1.5;">
+        <strong>Configured via Web Dashboard:</strong> Feeds (RSS, Reddit, YouTube, Twitch, Free Games), Welcome announcements, Support tickets, and Server settings are configured exclusively through the <a href="/dashboard" style="color: var(--primary); font-weight: 600; text-decoration: underline;">Web Dashboard</a>. In-chat slash commands focus on moderation, administration, and utilities.
+      </div>
+    </div>
     ${sections}
     ${renderFooter(appName)}
   </div>

@@ -54,7 +54,7 @@ flowchart TD
     subgraph Discord["Discord Platform"]
         Channels["Target Server Guild Channels"]
         Threads["Feed Threads (auto-created in feed channels)"]
-        SlashCmd["User Slash Commands (Feeds, Alerts, Admin)"]
+        SlashCmd["User Slash Commands (Moderation, Admin, Utilities)"]
     end
 
     Sources -->|Poll/Scrape| Parser

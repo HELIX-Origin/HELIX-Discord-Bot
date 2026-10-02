@@ -1,4 +1,4 @@
-﻿---
+---
 layout: documentation
 title: "Feeds & Scrapers Engine"
 ---
@@ -108,12 +108,8 @@ While all feeds and alerts poll automatically according to background schedules,
 - **Category Tabs**: Click **Check All Now** on the **News & RSS Feeds**, **Reddit Streams**, **Free Games Drops**, or **Stream Alerts** tabs to poll that specific category.
 - **Individual Feeds**: Click the ⚡ (**Check Now**) icon next to any feed in the feed list or within the feed edit modal.
 
-### 2. Discord Slash Commands
-- `/rss poll [id]` — Immediately poll a specific RSS/scraper feed or all RSS feeds in the server.
-- `/free-games check` — Immediately check for new game giveaways and free store drops.
-- `/youtube check [id]` — Immediately check for new uploads or livestreams.
-- `/twitch check [id]` — Immediately check live stream status for Twitch streamers.
-- `/reddit poll [id]` — Immediately poll a specific subreddit feed or all Reddit feeds in the server.
+### 2. Web Dashboard Configuration
+All feeds, web scrapers, Reddit streams, free games drops, and stream alerts are configured and managed directly through the **Web Dashboard** with live previews, feed editing, and instant manual check buttons. In-chat slash commands for feeds have been consolidated into the web dashboard.
 
 ### 3. REST API Endpoints
 - `POST /api/feeds/:id/poll` — Manually poll a single feed (requires Guild Manager / Owner).

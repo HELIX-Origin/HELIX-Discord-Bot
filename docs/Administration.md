@@ -101,7 +101,7 @@ Configurable under **General → Support Tickets** on the web dashboard:
 
 ## ⚙️ Server Configuration & Management
 
-Server settings (roles, command toggles, prefix, audit logging, export/import) are managed exclusively through the **Web Dashboard** (**Guild Settings** tab).
+Server settings (roles, prefix, thread delivery, audit logging, export/import) are managed exclusively through the **Web Dashboard** (**Guild Settings** tab).
 
 ---
 
@@ -150,12 +150,12 @@ When configured, all warn/kick/ban/purge/lock/unlock/slowmode actions post an em
 
 ## 🖥️ Dedicated Dashboard Admin & Management Tabs
 
-The web dashboard organizes server management into dedicated, permission-gated tabs (enabled when `ADMINISTRATION_ENABLED=true` and `DASHBOARD_ENABLED=true`):
+The web dashboard organizes server management into dedicated, permission-gated tabs:
 
 - **Welcome Message Tab**: Dedicated 2-column layout with channel select, plain text vs embed toggle, message textarea, available placeholders reference, and live simulated Discord preview.
 - **Support Tickets Tab**: Dedicated 2-column layout with ticket channel selector, support manager role dropdown, prompt message textarea, workflow guide, and live Discord button preview.
 - **Audit & Mod Logs Tab**: Audit log channel selection, event subscriptions (`guildBanAdd`, `memberRoleUpdate`, etc.), and paginated log stream.
-- **Guild Admin Tab**: Dedicated configuration for Administrator role, custom bot command prefix, feature flag toggles, per-server command enable/disable list, and thread delivery settings.
+- **Guild Admin Tab**: Dedicated configuration for Administrator role, custom bot command prefix, and thread delivery settings.
 
 ---
 
@@ -166,7 +166,7 @@ The web dashboard organizes server management into dedicated, permission-gated t
 | "Missing Permissions" error | Ensure bot has the required permission AND role hierarchy allows the action. |
 | "Cannot ban/kick user" | Target user has higher/equal top role than bot or moderator. |
 | "Mod log not posting" | Verify `mod-log-channel` is set and bot has `Send Messages`/`Embed Links` there. |
-| "Commands not showing" | Ensure `ADMINISTRATION_ENABLED=true` in `.env` and re-invite bot. |
+| "Commands not showing" | Verify bot permissions and re-invite the bot with application.commands scope. |
 | "Voice commands fail" | Bot must be in a voice channel and have `Mute Members`/`Deafen Members`/`Move Members`. |
 
 ---
@@ -174,5 +174,5 @@ The web dashboard organizes server management into dedicated, permission-gated t
 ## 🔗 Related
 
 - [Discord Bot & Commands](Discord-Bot.html) — Full command reference table
-- [Configuration → Feature Flags](Configuration.html) — `ADMINISTRATION_ENABLED`, `ADMIN_PANEL_ENABLED`
+- [Configuration](Configuration.html) — Environment configuration
 - [Integrations & Security → RBAC](Integrations-and-Security.html) — Permission model details

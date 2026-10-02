@@ -1,4 +1,4 @@
-﻿---
+---
 layout: documentation
 title: "Reddit Feeds"
 ---
@@ -128,7 +128,7 @@ Resolution order: `REDDIT_COOKIES_FILE` → `cookies.json` (preferred) → `cook
 > ⚠️ **Security**: always use a dedicated **alt Reddit account** for this cookie file to avoid possible account bans on your primary account. The files are gitignored — never commit them.
 
 ### Feature Gating
-Without a cookie file the **Reddit tab in the dashboard and the `/reddit` commands are disabled**. The command returns a `Reddit Feeds Disabled` notice and the dashboard tab shows a banner explaining how to enable Reddit feeds.
+Without a cookie file the **Reddit tab in the dashboard is disabled**. The dashboard tab shows a banner explaining how to configure Reddit session cookies to enable Reddit feeds.
 
 ---
 
@@ -143,5 +143,5 @@ HELIX verifies each subreddit's rating via the authenticated `about.json` endpoi
 | **Unverifiable** (probe failed / no session) | Denied for normal channels — only age-restricted targets (fails closed) |
 
 - A feed thread inherits the age-restriction state of its parent **channel** (threads are auto-created inside the feed's configured text channel).
-- If the selected channel is not age-restricted, adding or moving an NSFW/unverifiable subreddit is rejected with a clear error message both in the dashboard and via `/reddit add`.
+- If the selected channel is not age-restricted, adding or moving an NSFW/unverifiable subreddit is rejected with a clear error message in the dashboard.
 - This keeps NSFW content locked to channels explicitly marked as **NSFW** in Discord's age-restricted channel settings.

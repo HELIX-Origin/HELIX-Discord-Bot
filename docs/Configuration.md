@@ -1,4 +1,4 @@
-﻿---
+---
 layout: documentation
 title: "Configuration Guide"
 ---
@@ -61,11 +61,10 @@ HELIX Discord Bot is configured entirely via environment variables defined in a 
 
 ### 🧵 Thread Delivery (Optional)
 
-Thread delivery is a **per-server** feature — when enabled, each feed delivers into its own dedicated thread **auto-created in the feed's configured text channel** (one thread per feed, named after the feed). Toggle it per server from the dashboard **Guild Admin tab → Feed Delivery**, or via `PUT /api/guilds/:guildId/settings` with `body.threadsEnabled`. A global master switch backs it up:
+Thread delivery is a **per-server** feature — when enabled, each feed delivers into its own dedicated thread **auto-created in the feed's configured text channel** (one thread per feed, named after the feed). Toggle it per server from the dashboard **Guild Admin tab → Feed Delivery**, or via `PUT /api/guilds/:guildId/settings` with `body.threadsEnabled`:
 
 | Variable | Required | Default | Description |
 | :--- | :--- | :--- | :--- |
-| `THREADS_ENABLED` | No | `true` | Global master switch for thread delivery. When `false`, feeds always deliver directly to their channel even if a server enables the per-server toggle. |
 | `THREAD_KEEPALIVE_ENABLED` | No | `true` | Set to `false` to stop polling feed threads to keep them open. Alias: `KEEP_THREADS_OPEN=false`. |
 | `THREAD_KEEPALIVE_INTERVAL_MS` | No | `21600000` | How often the keepalive pass checks open feed threads (default 6 hours). |
 | `THREAD_KEEPALIVE_GRACE_MS` | No | `86400000` | Post a keep-alive message once a thread is within this window of its auto-archive time (default 24 hours ≈ once/week per thread). |
@@ -80,17 +79,6 @@ Thread delivery is a **per-server** feature — when enabled, each feed delivers
 | `DASHBOARD_THEME` | No | `dark` | `glassmorphism` \| `dark` \| `light` \| `cyberpunk` \| `dracula` \| `nord` \| `emerald`. Aliases: `DEFAULT_THEME`, `THEME`. Each theme provides its own accent color palette. |
 | `LANDING_PAGE_ENABLED` | No | `true` | Set to `false` to disable the landing page at `/` and redirect straight to `/dashboard`. Alias: `ENABLE_LANDING_PAGE`. |
 | `FEED_CATEGORY_LIMITS` | No | `rss=10,reddit=10` | Per-tab feed subscription caps as a CSV of `category=number` pairs (e.g. `rss=15,reddit=20`). Supported categories: `rss`, `reddit`, `freegames`, `streamalerts`. Set a category to `0` to make it unlimited. Categories not mentioned keep their defaults. |
-
-### 🚩 Feature Flags
-
-| Variable | Required | Default | Description |
-| :--- | :--- | :--- | :--- |
-| `FEEDS_ENABLED` | No | `true` | RSS/Reddit/Free Games feed delivery. |
-| `STREAM_ALERTS_ENABLED` | No | `true` | YouTube/Twitch live & upload alerts. |
-| `THREADS_ENABLED` | No | `true` | Thread delivery support (global master switch; per-guild toggle decides per server). |
-| `ADMINISTRATION_ENABLED` | No | `true` | Moderation, roles, and voice administration commands. |
-| `DASHBOARD_ENABLED` | No | `true` | Web dashboard & REST API. |
-| `ADMIN_PANEL_ENABLED` | No | `true` | Developer tools / admin panel. |
 
 ---
 
@@ -135,7 +123,6 @@ DISCORD_CLIENT_SECRET=
 DISCORD_REDIRECT_URL=https://discord.com/oauth2/authorize?client_id=your_client_id&permissions=8&integration_type=0&scope=bot+applications.commands
 
 # Optional: Thread Delivery (per-server toggle, dashboard configurable)
-# THREADS_ENABLED=true
 # THREAD_KEEPALIVE_ENABLED=true
 # THREAD_KEEPALIVE_INTERVAL_MS=21600000
 # THREAD_KEEPALIVE_GRACE_MS=86400000
@@ -153,12 +140,4 @@ YOUTUBE_CLIENT_SECRET=
 # Twitch API credentials (for Twitch Stream Alerts)
 TWITCH_CLIENT_ID=
 TWITCH_CLIENT_SECRET=
-
-# Global Feature Flags (defaults to true unless noted)
-FEEDS_ENABLED=true
-STREAM_ALERTS_ENABLED=true
-THREADS_ENABLED=true
-ADMINISTRATION_ENABLED=true
-DASHBOARD_ENABLED=true
-ADMIN_PANEL_ENABLED=true
 ```
