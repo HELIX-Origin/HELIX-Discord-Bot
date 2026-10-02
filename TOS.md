@@ -34,11 +34,7 @@ When running an instance of HELIX Discord Bot or using its features within a Dis
 - Administrative commands (`/warn`, `/kick`, `/ban`, `/purge`, `/lock`, `/slowmode`, `/role`, etc.) are intended solely for lawful server moderation and community management.
 - Bot operators and server administrators are responsible for ensuring that moderation actions comply with their own server rules and applicable regulations.
 
-### D. Audio & Media Playback
-- Audio playback via external Lavalink v4 nodes must comply with the terms and copyright restrictions of the streaming platforms and audio sources accessed.
-- Do not utilize the bot to distribute pirated or infringing media content.
-
-### E. Prohibited Content & Malicious Activity
+### D. Prohibited Content & Malicious Activity
 - Do not use the Service to transmit or disseminate malware, malicious payloads, phishing URLs, illegal content, harassment, or defamatory material.
 
 ---

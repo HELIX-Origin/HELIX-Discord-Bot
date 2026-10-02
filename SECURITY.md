@@ -31,7 +31,7 @@ If you believe you have discovered a vulnerability or security issue affecting H
 To help us investigate, triage, and resolve the issue efficiently, please include:
 - A clear description of the vulnerability and its potential impact.
 - Exact steps to reproduce the issue (including any sample payloads, curl commands, or script snippets).
-- Affected components (e.g., dashboard routes, OAuth handler, SQLite query layer, Lavalink audio gateway, Discord interaction handler).
+- Affected components (e.g., dashboard routes, OAuth handler, SQLite query layer, Discord interaction handler).
 - Node.js runtime version, operating system environment, and commit hash / tag version tested.
 - Any suggested mitigations or patches, if known.
 
@@ -57,7 +57,7 @@ HELIX Discord Bot follows a defensive, self-hosted architecture designed to safe
 - **Local SQLite Custody**: All guild settings, feed catalogs, user sessions, activity logs, and delivery caches reside in the local SQLite database (`data/database.sqlite`). Host administrators retain 100% custody of their data.
 
 ### B. Secrets & Credential Management
-- **Environment Isolation**: Discord bot tokens, client secrets, session secrets, and Lavalink passwords are read strictly from environment variables (`.env`).
+- **Environment Isolation**: Discord bot tokens, client secrets, and session secrets are read strictly from environment variables (`.env`).
 - **Never Committed to Version Control**: `.env` and SQLite database files are strictly ignored by `.gitignore`.
 - **Zero Credential Echoing**: Sensitive configuration variables are redacted from logs, diagnostic endpoints, and dashboard view payloads.
 
