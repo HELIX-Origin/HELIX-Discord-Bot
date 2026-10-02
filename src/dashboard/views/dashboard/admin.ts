@@ -4,7 +4,7 @@ export function renderGuildAdminTab(): string {
     <section id="tab-guildadmin" class="tab-pane">
       <div>
         <div class="section-title"><i class="fa-solid fa-shield-halved" style="color: #6366f1;"></i> Server Administration</div>
-        <div class="section-desc">Manage roles, feature flags, and command prefix for this server. Mirrors the <code style="color: var(--primary);">/set</code> command.</div>
+        <div class="section-desc">Manage roles, feature modules, and command prefix for this server.</div>
       </div>
 
       <div class="card">
@@ -27,16 +27,6 @@ export function renderGuildAdminTab(): string {
         </div>
         <div id="admin-features-list" style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.75rem;">
           <div class="empty-state">Loading features...</div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div>
-          <div class="card-title"><i class="fa-solid fa-terminal" style="color: var(--primary);"></i> Command Toggles</div>
-          <div class="card-desc">Enable or disable specific slash commands for this server. Mirrors <code style="color: var(--primary);">/server command</code>.</div>
-        </div>
-        <div id="admin-commands-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 0.5rem; margin-top: 0.75rem; max-height: 380px; overflow-y: auto; padding-right: 0.25rem;">
-          <div class="empty-state">Loading commands...</div>
         </div>
       </div>
 

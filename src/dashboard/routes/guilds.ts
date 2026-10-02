@@ -194,7 +194,6 @@ export function registerGuildRoutes(router: Router<AppDeps>): void {
       adminRoleId?: string | null;
       prefix?: string | null;
       features?: Record<string, boolean>;
-      commands?: Record<string, boolean>;
       welcome?: {
         channelId?: string | null;
         message?: string | null;
@@ -266,15 +265,7 @@ export function registerGuildRoutes(router: Router<AppDeps>): void {
         }
       }
 
-      if (body.commands) {
-        for (const [name, enabled] of Object.entries(body.commands)) {
-          const cmdName = name.toLowerCase().replace(/^\//, '');
-          d.repo.setGuildSetting(guildId, `cmd_disabled_${cmdName}`, enabled ? '0' : '1');
-          changes.push(`command /${cmdName} ${enabled ? 'enabled' : 'disabled'}`);
-        }
-      }
-
-      if (body.commands || body.features) {
+      if (body.features) {
         void d.bot?.syncGuildCommands(guildId);
       }
 
