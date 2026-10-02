@@ -98,29 +98,7 @@ flowchart TD
   - [`src/dashboard/views/dashboard/clientScript.ts`](file:///d:/Projects/HELIX-Discord-Bot/src/dashboard/views/dashboard/clientScript.ts)
   - [`tests/unit/dashboard/views.test.ts`](file:///d:/Projects/HELIX-Discord-Bot/tests/unit/dashboard/views.test.ts)
 
-### 4. Command Toggles Ineffective & Do Not Unregister Commands or Gate Dashboard Pages
-
-- **Severity**: 🟠 High (Dashboard & Command Management)
-- **Status**: 🚧 investigating (in verification)
-- **Reported Issue**: "the command toggles have absolutley no effect. they are suppose to enable or disabled the selected commands and their related features... when i say features i mean that any command that has it's own dashboard page should also have it's dashboard page hidden when the command is disabled... no error embed if command disabled. the command should be unregistered if it is disabled and the registration should be automatically applied to the guild."
-- **Root Cause**: Disabled command settings were stored in database settings, but the bot never re-registered guild commands to prune disabled commands from Discord's guild registration, and the dashboard navigation never hid pages corresponding to disabled features.
-- **Resolution**:
-  - Implemented dynamic guild-level unregistration via `guild.commands.set` in `src/bot/handlers/commands.ts` & `registry.ts`.
-  - Disabled commands are completely unregistered at the Discord API level with zero error embeds required.
-  - Dynamically hid associated dashboard pages in `src/dashboard/views/dashboard/sidebar.ts` and `clientScript.ts`:
-    - Feeds page hidden when `feed` is disabled
-    - Stream alerts page hidden when both `youtube` and `twitch` are disabled
-    - Welcome page hidden when `welcome` is disabled
-    - Tickets page hidden when `ticket` is disabled
-    - Logs page hidden when `logs` is disabled
-- **Affected Files**:
-  - [`src/bot/handlers/commands.ts`](file:///d:/Projects/HELIX-Discord-Bot/src/bot/handlers/commands.ts)
-  - [`src/bot/handlers/registry.ts`](file:///d:/Projects/HELIX-Discord-Bot/src/bot/handlers/registry.ts)
-  - [`src/dashboard/views/dashboard/sidebar.ts`](file:///d:/Projects/HELIX-Discord-Bot/src/dashboard/views/dashboard/sidebar.ts)
-  - [`src/dashboard/views/dashboard/clientScript.ts`](file:///d:/Projects/HELIX-Discord-Bot/src/dashboard/views/dashboard/clientScript.ts)
-  - [`tests/unit/admin/commandToggles.test.ts`](file:///d:/Projects/HELIX-Discord-Bot/tests/unit/admin/commandToggles.test.ts)
-
-### 5. Ticket Setup Message Placeholder Displays "this server" Instead of Guild Name
+### 4. Ticket Setup Message Placeholder Displays "this server" Instead of Guild Name
 
 - **Severity**: 🟡 Medium (Placeholders / Config)
 - **Status**: 🚧 investigating (in verification)
@@ -148,6 +126,13 @@ flowchart TD
   - [`src/dashboard/routes/feeds.ts`](file:///d:/Projects/HELIX-Discord-Bot/src/dashboard/routes/feeds.ts)
   - [`src/db/repositories/settings.ts`](file:///d:/Projects/HELIX-Discord-Bot/src/db/repositories/settings.ts)
   - [`src/feed/github.ts`](file:///d:/Projects/HELIX-Discord-Bot/src/feed/github.ts)
+
+### 2026-10-02 — Command Toggles Ineffective & Do Not Unregister Commands or Gate Dashboard Pages
+
+- **Severity**: 🟠 High (Dashboard & Command Management)
+- **Status**: ✅ resolved (Obsolete / Feature Removed)
+- **Reported Issue**: Command toggles in dashboard were ineffective and did not dynamically unregister commands from guild or gate pages.
+- **Resolution**: Command toggles were completely removed from HELIX Discord Bot architecture; commands and feature routing no longer use toggle configuration.
 
 ## 🛠️ Verification Gate
 
