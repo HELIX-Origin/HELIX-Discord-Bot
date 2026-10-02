@@ -3,7 +3,6 @@ import { appDisplayName, type AppDeps } from '../app.js';
 import { getRequestBaseUrl, sendError, sendHtml, sendJson, sendText } from './http/helpers.js';
 import { Router } from './http/router.js';
 import { renderDashboardHtml } from './views/dashboard.js';
-import { renderGuildsHtml } from './views/guilds.js';
 import { renderLandingHtml } from './views/landing.js';
 import { renderLoginHtml } from './views/login.js';
 import { renderLegalHtml } from './views/legal.js';
@@ -62,6 +61,11 @@ export function createHelixRssServer(deps: AppDeps): Server {
   // Dashboard UI
   router.add('GET', '/dashboard', async (req, res, _ctx, d) => {
     const userId = await authedUserId(req, d);
+    if (userId === null) {
+      res.writeHead(302, { Location: '/login' });
+      res.end();
+      return;
+    }
     sendHtml(res, 200, renderDashboardHtml(d, userId));
   });
 
@@ -140,15 +144,10 @@ export function createHelixRssServer(deps: AppDeps): Server {
   router.add('GET', '/bot/invite', handleInvite);
   router.add('GET', '/api/bot/invite', handleInvite);
 
-  // Guild selection page
-  router.add('GET', '/guilds', async (req, res, _ctx, d) => {
-    const userId = await authedUserId(req, d);
-    if (userId === null) {
-      res.writeHead(302, { Location: '/login' });
-      res.end();
-      return;
-    }
-    sendHtml(res, 200, renderGuildsHtml(d, userId));
+  // Guild selection route redirects to dashboard server selection
+  router.add('GET', '/guilds', async (_req, res) => {
+    res.writeHead(302, { Location: '/dashboard' });
+    res.end();
   });
 
   // Per-guild dashboard with sub-pages
@@ -191,10 +190,6 @@ export function createHelixRssServer(deps: AppDeps): Server {
   });
 
   // Legacy redirects
-  router.add('GET', '/dashboard', async (_req, res) => {
-    res.writeHead(302, { Location: '/guilds' });
-    res.end();
-  });
   router.add('GET', '/dev-tools', async (_req, res) => {
     res.writeHead(302, { Location: '/admin' });
     res.end();
@@ -204,7 +199,7 @@ export function createHelixRssServer(deps: AppDeps): Server {
     res.end();
   });
   router.add('GET', '/settings', async (_req, res) => {
-    res.writeHead(302, { Location: '/guilds' });
+    res.writeHead(302, { Location: '/dashboard' });
     res.end();
   });
 

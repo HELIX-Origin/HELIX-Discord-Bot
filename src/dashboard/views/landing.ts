@@ -151,8 +151,8 @@ export function renderLandingHtml(deps: AppDeps, userId: number | null = null): 
         </a>`
             : ''
         }
-        <a href="${repoUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-outline">
-          <i class="fa-brands fa-github"></i> View GitHub Wiki
+        <a href="https://helix-origin.github.io/HELIX-Discord-Bot/" target="_blank" rel="noopener noreferrer" class="btn btn-outline">
+          <i class="fa-brands fa-github"></i> GitHub Pages
         </a>
       </div>
     </section>

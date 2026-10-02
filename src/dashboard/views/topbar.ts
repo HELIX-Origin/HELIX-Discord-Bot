@@ -26,7 +26,7 @@ export function renderTopBar(deps: AppDeps, userId: number | null, opts: TopBarO
   const showInvite = opts.active !== 'login' && botInviteUrl !== null;
   const userBadge = userId !== null;
   const isOwner = isOwnerUser(userId, deps);
-  const homeHref = userBadge ? '/guilds' : '/';
+  const homeHref = '/';
 
   const brandMark = appIconUrl
     ? `<img src="${appIconUrl}" alt="${appName}" class="topbar-brand-img">`
@@ -39,8 +39,8 @@ export function renderTopBar(deps: AppDeps, userId: number | null, opts: TopBarO
     : '';
 
   const guildsMenuItem = userBadge
-    ? `<a href="/guilds" role="menuitem" class="topbar-menu-item${opts.active === 'guilds' ? ' active' : ''}">
-        <i class="fa-solid fa-server"></i> <span>Guilds</span>
+    ? `<a href="/dashboard" role="menuitem" class="topbar-menu-item${opts.active === 'dashboard' ? ' active' : ''}">
+        <i class="fa-solid fa-server"></i> <span>Servers</span>
       </a>`
     : '';
 

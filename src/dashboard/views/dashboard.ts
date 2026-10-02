@@ -101,7 +101,7 @@ export function renderDashboardHtml(
   <!-- Top Navigation Bar -->
   <header>
     <div class="header-left">
-      <a href="/dashboard" class="brand">
+      <a href="/" class="brand" title="Back to Splash Page">
         ${
           appIconUrl
             ? `<img src="${appIconUrl}" alt="${appName}" style="width: 2.25rem; height: 2.25rem; border-radius: 0.625rem; object-fit: cover; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">`
@@ -136,7 +136,7 @@ export function renderDashboardHtml(
           <i class="fa-solid fa-user" style="color: var(--primary);"></i> <span id="user-display-name">Discord User</span> <i class="fa-solid fa-chevron-down" style="font-size: 0.6875rem; color: var(--text-muted);"></i>
         </button>
         <div class="user-menu-list" id="user-menu-list" role="menu">
-          <a href="/guilds" role="menuitem" class="user-menu-item"><i class="fa-solid fa-server"></i> <span>Servers</span></a>
+          <a href="/dashboard" role="menuitem" class="user-menu-item"><i class="fa-solid fa-server"></i> <span>Servers</span></a>
           ${
             isOwner
               ? `<a href="/admin" role="menuitem" class="user-menu-item"><i class="fa-solid fa-screwdriver-wrench"></i> <span>Developer Tools</span></a>`

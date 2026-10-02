@@ -26,7 +26,7 @@ export function renderClientScript(): string {
     const DASHBOARD_ROUTE_REGEX = '^/dashboard/([^/]+)(?:/([^/]+))?(?:/([^/]+))?$';
     function getPathRoute() {
       var path = window.location.pathname;
-      if (path === '/guilds' || path === '/guilds/') return { view: 'guilds' };
+      if (path === '/dashboard' || path === '/dashboard/' || path === '/guilds' || path === '/guilds/') return { view: 'guilds' };
       var match = path.match(new RegExp(DASHBOARD_ROUTE_REGEX));
       if (match) {
         return { view: 'dashboard', guildId: match[1], page: match[2] || 'overview', feedId: match[3] || null };
@@ -120,7 +120,7 @@ export function renderClientScript(): string {
 
     function clearGuild(event) {
       if (event) event.preventDefault();
-      navigateTo('/guilds');
+      navigateTo('/dashboard');
     }
 
     function selectGuild(guildId) {
