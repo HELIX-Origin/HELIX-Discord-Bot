@@ -1,0 +1,23 @@
+# Normalize line endings so the Prettier `format:check` gate is deterministic on
+# every platform.
+#
+# Without this file, a Windows checkout with `core.autocrlf=true` materializes
+# CRLF working-tree files while Prettier's `endOfLine` is `lf`. `npm run check`
+# then fails on *every* file in `src/` regardless of its actual formatting,
+# which makes the mandatory verification gate impossible to satisfy.
+* text=auto eol=lf
+
+# Binary assets must never be line-ending normalized.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.bmp binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
+*.zip binary
+*.sqlite binary

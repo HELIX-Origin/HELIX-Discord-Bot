@@ -1,6 +1,6 @@
 import { fetchRaw } from './fetch.js';
-import { resolveDirectGiveawayUrl, detectStorePlatform, PLATFORM_BRANDING } from './freegames.js';
-import { decodeHtmlEntities, stripHtml } from './parser.js';
+import { resolveDirectGiveawayUrl, detectStorePlatform } from './freegames.js';
+import { decodeHtmlEntities } from './parser.js';
 
 export interface GameDealItem {
   id: string;

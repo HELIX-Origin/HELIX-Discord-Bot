@@ -45,37 +45,25 @@ export interface GuildCategory {
   updatedAt: string;
 }
 
-export type FeedType =
-  | 'rss'
-  | 'scrape'
-  | 'reddit'
-  | 'free_games'
-  | 'free_games_gamerpower'
-  | 'free_games_epic'
-  | 'free_games_steam'
-  | 'free_games_gog'
-  | 'free_games_indiegala'
-  | 'free_games_humble'
-  | 'free_games_itchio'
-  | 'free_games_ubisoft'
-  | 'free_games_ea'
-  | 'free_games_prime'
-  | 'free_games_battlenet'
-  | 'free_games_stove'
-  | 'game_deals'
-  | 'game_deals_steam'
-  | 'game_deals_gog'
-  | 'game_deals_epic'
-  | 'game_deals_humble'
-  | 'game_deals_gamerpower'
-  | 'game_patchnotes'
-  | 'game_patchnotes_steam'
-  | 'game_patchnotes_rss'
-  | 'youtube'
-  | 'twitch'
-  | 'github';
+/**
+ * Canonical feed type identifier union.
+ *
+ * Derived from the `FEED_TYPES` tuple further below so the compile-time type
+ * and the runtime validation list can never drift apart. Add new feed types to
+ * that tuple; this union follows automatically.
+ */
+export type FeedType = (typeof FEED_TYPES)[number];
 
-const FEED_TYPES: readonly FeedType[] = [
+/**
+ * Runtime mirror of the `FeedType` union.
+ *
+ * Declared as a tuple first so the union is *derived* from it: a feed type can
+ * never be added to the compile-time union without also being accepted by
+ * `isFeedType()` at runtime. Keeping these two lists in sync by hand previously
+ * let dashboard-created `game_deals_*` / `game_patchnotes_*` feeds fall through
+ * `rowToFeed()` and get silently coerced to `rss`.
+ */
+const FEED_TYPES = [
   'rss',
   'scrape',
   'reddit',
@@ -93,6 +81,7 @@ const FEED_TYPES: readonly FeedType[] = [
   'free_games_battlenet',
   'free_games_stove',
   'game_deals',
+  'game_deals_all',
   'game_deals_steam',
   'game_deals_gog',
   'game_deals_epic',
@@ -101,10 +90,21 @@ const FEED_TYPES: readonly FeedType[] = [
   'game_patchnotes',
   'game_patchnotes_steam',
   'game_patchnotes_rss',
+  'game_patchnotes_cs2',
+  'game_patchnotes_dota2',
+  'game_patchnotes_rust',
+  'game_patchnotes_helldivers2',
+  'game_patchnotes_apex',
+  'game_patchnotes_cyberpunk',
+  'game_patchnotes_bg3',
+  'game_patchnotes_terraria',
+  'game_patchnotes_dbd',
+  'game_patchnotes_warframe',
+  'game_patchnotes_nomansky',
   'youtube',
   'twitch',
   'github',
-];
+] as const;
 
 function isFeedType(value: unknown): value is FeedType {
   return typeof value === 'string' && (FEED_TYPES as readonly string[]).includes(value);

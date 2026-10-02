@@ -7,7 +7,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { gameDealsEmbed, patchNotesEmbed } from '../../../src/bot/utils/embeds.js';
 import { type GameDealItem, fetchGameDeals } from '../../../src/feed/gamedeals.js';
 import { type PatchNoteItem, fetchPatchNotes, POPULAR_STEAM_GAMES } from '../../../src/feed/patchnotes.js';
-import { feedCategory } from '../../../src/state/types.js';
+import { feedCategory, rowToFeed } from '../../../src/state/types.js';
 
 describe('Game Deals Embed & Branding', () => {
   it('omits footer from gameDealsEmbed and formats pricing fields', () => {
@@ -70,7 +70,7 @@ describe('Patch Notes Embed & Branding', () => {
       publishedAt: '2026-10-02T12:00:00Z',
     };
 
-    const embed = patchNotesEmbed(patch, 'Counter-Strike 2 Patch Notes');
+    const embed = patchNotesEmbed(patch);
 
     // Footer must be completely omitted
     expect(embed.footer).toBeUndefined();
@@ -118,5 +118,67 @@ describe('Game Presets & Dispatchers', () => {
     expect(POPULAR_STEAM_GAMES.rust.appId).toBe('252490');
     expect(POPULAR_STEAM_GAMES.helldivers2.appId).toBe('553850');
     expect(POPULAR_STEAM_GAMES.apex.appId).toBe('1172470');
+  });
+});
+
+/**
+ * Regression guard: the `FeedType` union and the runtime `isFeedType()` list used
+ * to drift apart. `rowToFeed` fell back to `rss` for any type missing from the
+ * runtime list, so dashboard-created Deals / Patch Notes feeds were silently
+ * coerced and stopped being polled as game feeds.
+ */
+describe('Game feed types survive database round-trips', () => {
+  const baseRow = {
+    id: 1,
+    user_id: 1,
+    name: 'Steam Deals & Sales',
+    url: 'gamedeals://steam',
+    topic: null,
+    channel_id: 'chan-1',
+    guild_id: 'guild-100',
+    enabled: 1,
+    scrape_item: null,
+    scrape_title: null,
+    scrape_link: null,
+    scrape_description: null,
+    last_entry_id: null,
+    last_checked_at: null,
+    last_posted_at: null,
+    role_id: null,
+    thread_channel_id: null,
+    thread_entry_count: 0,
+    created_at: '2026-10-02T00:00:00.000Z',
+  };
+
+  it.each([
+    'game_deals',
+    'game_deals_all',
+    'game_deals_steam',
+    'game_deals_gog',
+    'game_deals_epic',
+    'game_deals_humble',
+    'game_patchnotes',
+    'game_patchnotes_cs2',
+    'game_patchnotes_dota2',
+    'game_patchnotes_rust',
+    'game_patchnotes_helldivers2',
+    'game_patchnotes_apex',
+    'game_patchnotes_cyberpunk',
+    'game_patchnotes_bg3',
+    'game_patchnotes_terraria',
+    'game_patchnotes_dbd',
+    'game_patchnotes_warframe',
+    'game_patchnotes_nomansky',
+    'free_games',
+    'free_games_gamerpower',
+    'free_games_epic',
+  ])('rowToFeed preserves feed_type %s', (feedType) => {
+    const feed = rowToFeed({ ...baseRow, feed_type: feedType });
+    expect(feed?.feedType).toBe(feedType);
+  });
+
+  it('still falls back to rss for genuinely unknown feed types', () => {
+    const feed = rowToFeed({ ...baseRow, feed_type: 'not_a_real_feed_type' });
+    expect(feed?.feedType).toBe('rss');
   });
 });

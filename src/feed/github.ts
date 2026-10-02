@@ -334,7 +334,7 @@ export function parseApiEvent(event: Record<string, any>, slug: GitHubSlug): Git
       const statusLabel = action === 'closed' ? 'Closed' : action === 'reopened' ? 'Reopened' : 'Opened';
       const icon = action === 'closed' ? '🟣' : '🟢';
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       const labels = Array.isArray(issue['labels'])
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         ? issue['labels'].map((l: any) => (typeof l === 'string' ? l : l.name)).filter(Boolean)
@@ -368,7 +368,7 @@ export function parseApiEvent(event: Record<string, any>, slug: GitHubSlug): Git
 /**
  * Parses an incoming GitHub webhook payload into a GitHubFeedItem.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+ 
 export function parseGitHubWebhook(
   eventHeader: string,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -493,7 +493,7 @@ export function parseGitHubWebhook(
       const statusLabel = action === 'closed' ? 'Closed' : action === 'reopened' ? 'Reopened' : 'Opened';
       const icon = action === 'closed' ? '🟣' : '🟢';
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       const labels = Array.isArray(issue['labels'])
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         ? issue['labels'].map((l: any) => (typeof l === 'string' ? l : l.name)).filter(Boolean)
