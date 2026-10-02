@@ -1,4 +1,4 @@
-﻿---
+---
 layout: documentation
 title: "Architecture & Design"
 ---
@@ -19,17 +19,17 @@ flowchart TB
     end
 
     subgraph AppLayer["Application Core (Node.js / TypeScript)"]
-        HttpServer["Native HTTP Server & REST API (`src/dashboard/routes/*`)"]
-        SessionMgr["Discord OAuth2 & Session Manager (`src/dashboard/oauth/*` + `src/dashboard/auth/*`)"]
-        BotClient["Native Discord Bot Client (`src/bot/*`)"]
-        FeedWatcher["Background Feed Watcher (`src/feed/watcher.ts`)"]
-        ParserEngine["Multi-Format Parser & Scrapers (`src/feed/*`)"]
-        DedupEngine["Deduplication & Canonical Normalizer (`src/feed/deduplication.ts`)"]
+        HttpServer["Native HTTP Server & REST API (src/dashboard/routes/*)"]
+        SessionMgr["Discord OAuth2 & Session Manager (src/dashboard/oauth/* + src/dashboard/auth/*)"]
+        BotClient["Native Discord Bot Client (src/bot/*)"]
+        FeedWatcher["Background Feed Watcher (src/feed/watcher.ts)"]
+        ParserEngine["Multi-Format Parser & Scrapers (src/feed/*)"]
+        DedupEngine["Deduplication & Canonical Normalizer (src/feed/deduplication.ts)"]
     end
 
     subgraph DataLayer["Persistence & State Layer"]
-        DB[(SQLite Database (node:sqlite, WAL))]
-        Cache[(In-Memory AppState Cache)]
+        DB[("SQLite Database (node:sqlite, WAL)")]
+        Cache[("In-Memory AppState Cache")]
     end
 
     subgraph ExternalServices["External Endpoints"]

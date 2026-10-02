@@ -45,7 +45,7 @@ flowchart TD
         Watcher["Background Feed Watcher (Polling Scheduler)"]
         Parser["Parser & Fallback Scrapers"]
         Dedup["Composite Multi-Factor Deduplication"]
-        DB[(SQLite Database)]
+        DB[("SQLite Database")]
         Bot["Native Discord Bot Engine (Gateway + REST API)"]
         Web["Native HTTP Web Dashboard & REST API"]
         Admin["Guild Admin Engine"]
