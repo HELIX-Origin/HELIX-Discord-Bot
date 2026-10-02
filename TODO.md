@@ -1,12 +1,25 @@
-# HELIX Discord Bot — Task Checklist & Session Tracking
+# HELIX Discord Bot — Task Checklist & Workstream Tracking
 
-**Verification gate for every workstream:** `npm run check` + `pnpm build` must both pass before a workstream is considered done.
+> 🗺️ **Living Source of Truth**: This page tracks active and completed implementation workstreams. See [`PLAN.md`](./PLAN.md) for current sprint plans, [`BUGS.md`](./BUGS.md) for open bugs, and [`ROADMAP.md`](./ROADMAP.md) for long-term milestones.
+
+> [!IMPORTANT]
+> Keep this page and related tracking files synchronized as work progresses. Add new work before implementation, preserve user directives, and update checklist status as tasks are completed.
 
 ---
 
-## 🔥 Active Tasks
+## 📜 Tracking Rules
 
-### {{emoji}} Workstream W.{{N}}: Real-Time Single-Newest-Post Feed Delivery & Rate-Limit Shield
+- **No Typo Duplication**: Correct typos when recording user reports or directives.
+- **Clear, Actionable Tasks**: Keep checklist items specific and update them as the scope changes.
+- **Cross-File Tracking**: Keep plans in [`PLAN.md`](./PLAN.md), bugs in [`BUGS.md`](./BUGS.md), and long-term milestones in [`ROADMAP.md`](./ROADMAP.md).
+- **Universal Direct Store Links**: Every game alert, giveaway, or deal must resolve to the actual storefront page of the game.
+- **Verification Gate**: Run `npm run check` and `npm run build` before considering a workstream complete.
+
+---
+
+## ✅ Completed Workstreams
+
+### ✅ Workstream W.01: Real-Time Single-Newest-Post Feed Delivery & Rate-Limit Shield
 
 **Locked user directives:**
 
@@ -28,7 +41,7 @@
 - [x] `tests/unit/feed/watcher.test.ts`: Create test suite verifying single-newest-post delivery, backlog drain, and zero artificial time gating
 - [x] `npm run check` + `pnpm build` green
 
-### {{emoji}} Workstream W.{{N}}: Guild Admin Sections, Dedicated Feature Tabs & Permission-Gated Dashboard
+### ✅ Workstream W.02: Guild Admin Sections, Dedicated Feature Tabs & Permission-Gated Dashboard
 
 **Locked user directives:**
 
@@ -64,7 +77,7 @@
 - [x] Feed-add channel notification: `notifyFeedAdded` (`src/bot/lib/feeds/notify.ts`) posts a confirmation into the feed's target channel on slash-command adds and dashboard POST /api/feeds
 - [x] `npm run check` + `pnpm build` green (779e4bb)
 
-### {{emoji}} Workstream W.{{N}}: Dashboard UI Window-Fitting, Live Discord Previews & Reddit Filter
+### ✅ Workstream W.03: Dashboard UI Window-Fitting, Live Discord Previews & Reddit Filter
 
 **Locked user directives:**
 - Filter out Reddit community home posts: "The community home post should always be ignored in reddit feeds since it is a persistent static post that could cause reddit feeds to miss actual new posts."
@@ -86,7 +99,7 @@
 
 **Status:** dashboard phase (`627d783`), ticket redesign (`cf6c6c3`), forum→thread refactor (`21a4734`), docs sync + THREADS_ENABLED gate (`536e992`), and role-subscription + add-notification (`779e4bb`) committed + pushed — each ran green `npm run check` + `pnpm build`. Remaining: final docs/wiki/issue sync (roadmap issue #27 Phase 9/10 checkboxes + new Phase 11 role/notification row). Progress mirrored on roadmap issue #27.
 
-### {{emoji}} Workstream W.{{N}}: Theme System — Single Source of Truth (`themes/*.ts`)
+### ✅ Workstream W.04: Theme System — Single Source of Truth (`themes/*.ts`)
 
 **Locked user directives:**
 
@@ -102,7 +115,7 @@
 - [x] Docs: `.env.example`, `wiki/Configuration`, `wiki/Architecture-and-Design`, `.agents/rules/dashboard-standards`, `.agents/agents/engineering/sub-agents/dashboard-engineer`
 - [x] `npm run check` + `pnpm build` green
 
-### {{emoji}} Workstream W.{{N}}: Dead Code Cleanup + Vitest Scan Guard
+### ✅ Workstream W.05: Dead Code Cleanup + Vitest Scan Guard
 
 **Locked user directives:**
 
@@ -119,7 +132,7 @@
 - [x] `npx vitest run tests/unit/quality/dead-code.test.ts` → PASS (2 tests)
 - [x] `npm run check` + `pnpm build` green (52 files, +82/−1013)
 
-### {{emoji}} Workstream W.{{N}}: Stream Alerts Audit, Zero-Config YouTube Ingestion & Rich Twitch Metadata
+### ✅ Workstream W.06: Stream Alerts Audit, Zero-Config YouTube Ingestion & Rich Twitch Metadata
 
 **Locked user directives:**
 - "ok we need to audit our stream alert support. I don't know if they work or not, but we should check just in case."
@@ -137,7 +150,7 @@
 - [x] `npm run check` + `npm run build` green (22/22 test files, 348/348 tests passing)
 - [x] Repository documentation sync (`README.md`, `wiki/Feeds-and-Scrapers.md`, `wiki/Configuration.md`, `.env.example`, `TODO.md`)
 
-### {{emoji}} Workstream W.{{N}}: Optional Embed Support for Ticket Message Setup
+### ✅ Workstream W.07: Optional Embed Support for Ticket Message Setup
 
 **Locked user directives:**
 - "ok let's add optional embed support to the ticket message setup"
@@ -156,11 +169,11 @@
 - [x] `wiki/*`: Document embed options in `Administration.md`, `Discord-Bot.md`, and `API-Reference.md`
 - [x] `npm run check` + `npm run build` green (22/22 test files, 350/350 tests passing)
 
-### {{emoji}} Workstream W.{{N}}: Ticket Message Placeholders & Dynamic Guild Resolution
+### ✅ Workstream W.08: Ticket Message Placeholders & Dynamic Guild Resolution
 
 **Locked user directives:**
 - "also the ticket message needs to support placeholders."
-- "issue with the placholder output.s instead of displaying the server name `{server}` is showin `this server`. that is wrong."
+- "The placeholder output is incorrect: instead of displaying the server name for `{server}`, it shows `this server`."
 - "discord js can get the guild name by using guild.name so it is not incorrect to assume that the bot can get it's own name"
 
 **Implementation checklist:**
@@ -170,12 +183,12 @@
 - [x] Unit test coverage for placeholder replacement in `tests/unit/bot/placeholders.test.ts`
 - [x] `npm run check` + `npm run build` green
 
-### {{emoji}} Workstream W.{{N}}: Command Toggles, Feature Gating & Dynamic Guild Command Registration
+### ✅ Workstream W.09: Command Toggles, Feature Gating & Dynamic Guild Command Registration
 
 **Locked user directives:**
-- "the command toggles have absolutley no effect. they are suppose to enable or disabled the selected commands and their related features."
-- "when i say features i mean that any command that has it's own dashboard page should also have it's dashboard page hidden when the command is disabled."
-- "for instance if the feed command is disabled the feeds page should be hidden. if both youtube and twitch are disabled the stream alerts page should be disabled, etc"
+- "The command toggles have absolutely no effect. They are supposed to enable or disable the selected commands and their related features."
+- "When I say features, I mean that any command with its own dashboard page should also have that page hidden when the command is disabled."
+- "For instance, if the feed command is disabled, the feeds page should be hidden. If both YouTube and Twitch are disabled, the stream alerts page should be hidden."
 - "no error embed if command disabled. the command should be unregistered if it is disabled and the registration should be automatically applied to the guild."
 
 **Implementation checklist:**
@@ -191,9 +204,7 @@
 - [x] Unit test coverage in `tests/unit/admin/commandToggles.test.ts`
 - [x] `npm run check` + `npm run build` green
 
-### {{emoji}} Workstream W.{{N}}: Free Games Reliability, Embed Platform Branding & Dashboard Pill Catalogs
-
-### {{emoji}} Workstream W.{{N}}: Free Games Provider-Based Architecture & Direct Store URL Resolution
+### ✅ Workstream W.10: Free Games Provider-Based Architecture & Direct Store URL Resolution
 
 **Locked user directives:**
 - Restructure Free Game feeds around genuine providers (GamerPower Free Game Alerts & Epic Games Store Official) rather than splitting GamerPower into fake platform feeds.
@@ -217,7 +228,17 @@
 
 ---
 
-### {{emoji}} Workstream W.{{N}}: Game Feeds Tab Evolution (Free Games, Deals & Promotions, Patch Notes)
+## 🔥 Active Workstreams
+
+### 🎮 Workstream W.11: Game Feeds Tab Evolution (Free Games, Deals & Promotions, Patch Notes)
+
+```mermaid
+flowchart TD
+    A["Game feed sources"] --> B["Free games"]
+    A --> C["Deals"]
+    A --> D["Patch notes"]
+    B & C & D --> E["Resolve destination and deliver"]
+```
 
 **Locked user directives:**
 - The Free Games tab will become a **Game Feeds** tab.
@@ -250,7 +271,15 @@
 
 ---
 
-### {{emoji}} Workstream W.{{N}}: Stream Alerts (YouTube & Twitch) Manual Trigger Delivery Fix
+### 📡 Workstream W.12: Stream Alerts (YouTube & Twitch) Manual Trigger Delivery Fix
+
+```mermaid
+flowchart TD
+    A["Manual check"] --> B["Poll YouTube or Twitch"]
+    B --> C{"New item?"}
+    C -->|Yes| D["Deliver newest item"]
+    C -->|No| E["Deliver latest item or report status"]
+```
 
 **Locked user directives:**
 - "When YouTube and Twitch alerts are manually triggered, they should get the last stream/video posted. Right now they post nothing and it makes me think they aren't working at all."
@@ -266,7 +295,14 @@
 
 ---
 
-### {{emoji}} Workstream W.{{N}}: Prefix Commands
+### 🧩 Workstream W.13: Prefix Commands
+
+```mermaid
+flowchart TD
+    A["Guild message"] --> B["Parse configured prefix"]
+    B --> C["Check command and permissions"]
+    C --> D["Run guild-scoped action"]
+```
 **Locked user directives:**
 - "Prefix commands should be added to replace the failed slash action commands without having to worry about the slash command registration limits."
 
@@ -275,8 +311,8 @@
 - [ ] Create the following new `[prefix]` commands for users with the required permissions:
   - `[prefix]set prefix <new_prefix>`: Update the bot's command prefix per guild.
   - `[prefix]set manager_role <role_id: role_id>`: Update the manager role for the guild. This will affect which users have permission to manage the bot's settings via the commands and the dashboard. This simply allows for configuring the bot's features and settings, it does not grant any additional permissions beyond managing the bot.
-  - `[prefix]set <feature_id: news_feeds|game_feeds|reddit_feeds|patch_notes_feeds|stream_alerts|youtube_feeds|twitch_feeds|voice_hub|etc> <choice: enabled|disabled>`: Enable or disable feed types per guild. This will not remove them from the dashboard. Instead it toggles them per guild (The dashoard will need it's own toggles to match these settings.)
-  - `[prefix]hub <choice: add|remove> [channel: channel_id]`: Manage hub channels for the guild. The hub channel is a single voice channel that when joined, creates a user voice channel and moves the user to it while ensuring they have the permissions neccessary to manage their personal voice channel. This is basically a voice hub system. When the personal voice channel is empty, it gets deleted automatically. *(This feature currently isn't implemented yet. We will need to plan this one before we make this command.)*
+  - `[prefix]set <feature_id: news_feeds|game_feeds|reddit_feeds|patch_notes_feeds|stream_alerts|youtube_feeds|twitch_feeds|voice_hub|etc> <choice: enabled|disabled>`: Enable or disable feed types per guild. This will not remove them from the dashboard; it toggles them per guild. The dashboard will need its own matching toggles.
+  - `[prefix]hub <choice: add|remove> [channel: channel_id]`: Manage hub channels for the guild. The hub channel is a single voice channel that, when joined, creates a user voice channel and moves the user to it with the permissions necessary to manage their personal voice channel. The personal voice channel is deleted when empty. This feature is not implemented yet and needs planning before adding the command.
   - `[prefix]reddit <choice: list|add|remove> [subreddit: string] [channel: channel_id]`: Manage Reddit feeds for the specified subreddit.
   - `[prefix]youtube <choice: list|add|remove> [youtube_slug: string] [channel: channel_id]`: Manage YouTube feeds for the specified channel.
   - `[prefix]twitch <choice: list|add|remove> [twitch_slug: string] [channel: channel_id]`: Manage Twitch feeds for the specified channel.
@@ -291,7 +327,15 @@
 
 ---
 
-### {{emoji}} Workstream W.{{N}}: Music Support
+### 🎵 Workstream W.14: Music Support
+
+```mermaid
+flowchart TD
+    A["Assess Discord Rythm integration"] --> B{"Reliable and supportable?"}
+    B -->|Yes| C["Design commands and dashboard queue"]
+    B -->|No| D["Revise or defer proposal"]
+    C --> E["Document and test"]
+```
 
 **Locked user directives:**
 - "Music support was something we wanted in the bot, but had to remove due to issues with stability and resource management."
@@ -322,7 +366,16 @@
 
 ---
 
-### {{emoji}} Workstream W.{{N}}: Voice Hub System
+### 🔊 Workstream W.15: Voice Hub System
+
+```mermaid
+flowchart TD
+    A["User joins hub"] --> B["Create personal voice channel"]
+    B --> C["Move user and apply permissions"]
+    C --> D{"Channel empty?"}
+    D -->|Yes| E["Delete channel"]
+    D -->|No| C
+```
 
 **Locked user directives:**
 - "The voice hub system will allow users to create personal voice channels dynamically by joining a designated hub channel."
@@ -348,9 +401,9 @@
 ## 🛠️ Verification Commands
 
 ```bash
-npm run check               # typecheck + format:check + lint + tests (must pass)
-npm run build               # tsc compile to dist/ (must pass)
-npm test                    # vitest run
+npm run check
+npm run build
+npm test
 ```
 
 ---
@@ -358,4 +411,4 @@ npm test                    # vitest run
 ## 🔖 Metadata
 
 - **Project**: HELIX Discord Bot · **version** 0.6.0
-- **Agent Ecosystem:** `AGENTS` and `.agents/` are tracked directly in repository git tracking.
+- **Agent Ecosystem**: [`AGENTS.md`](./AGENTS.md) and [`.agents/`](.agents/) are tracked in the repository.
