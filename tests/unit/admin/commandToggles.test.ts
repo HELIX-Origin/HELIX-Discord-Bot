@@ -20,7 +20,7 @@ describe('Command Toggles & Feature Module Enforcement', () => {
   });
 
   describe('getGuildEnabledCommands()', () => {
-    it('excludes commands that are disabled for the specified guild', () => {
+    it('returns all registered commands', () => {
       const mockCmd1: BotCommand = {
         def: { name: 'toggleable1', description: 'Command 1' },
         category: 'utility',
@@ -34,18 +34,9 @@ describe('Command Toggles & Feature Module Enforcement', () => {
       registerCommand(mockCmd1);
       registerCommand(mockCmd2);
 
-      const guildSettings: Record<string, string> = {
-        'guild-100:cmd_disabled_toggleable1': '1',
-      };
-      const mockDeps = {
-        repo: {
-          getGuildSetting: (gId: string, k: string) => guildSettings[`${gId}:${k}`] ?? null,
-        },
-      } as unknown as AppDeps;
-
-      const enabled = getGuildEnabledCommands('guild-100', mockDeps);
+      const enabled = getGuildEnabledCommands('guild-100');
       const names = enabled.map((c) => c.name);
-      expect(names).not.toContain('toggleable1');
+      expect(names).toContain('toggleable1');
       expect(names).toContain('toggleable2');
     });
   });
@@ -116,39 +107,7 @@ describe('Command Toggles & Feature Module Enforcement', () => {
     });
   });
 
-  describe('dispatchInteraction() with command disabled', () => {
-    it('returns plain ephemeral content without error embed for disabled commands', async () => {
-      const mockCmd: BotCommand = {
-        def: { name: 'testtoggleable', description: 'Test command' },
-        category: 'utility',
-        execute: async () => ({ type: 4 }),
-      };
-      registerCommand(mockCmd);
-
-      const mockDeps = {
-        repo: {
-          getGuildSetting: (gId: string, k: string) => (k === 'cmd_disabled_testtoggleable' ? '1' : null),
-        },
-      } as unknown as AppDeps;
-
-      const interaction: DiscordInteraction = {
-        id: 'int-1',
-        application_id: 'app-1',
-        token: 'tok-1',
-        version: 1,
-        type: 2,
-        guild_id: 'guild-100',
-        data: {
-          name: 'testtoggleable',
-        },
-      };
-
-      const res = await dispatchInteraction(interaction, mockDeps, {} as any);
-      expect(res.data?.content).toBe('Command `/testtoggleable` is disabled in this server.');
-      expect(res.data?.embeds).toBeUndefined();
-      expect(res.data?.flags).toBe(64);
-    });
-
+  describe('dispatchInteraction() with component interaction', () => {
     it('blocks ticket_open button interaction without error embed when ticket is disabled', async () => {
       const ticketSpy = vi.spyOn(ticketModule, 'handleTicketButton').mockResolvedValue({ type: 4 });
 
@@ -173,7 +132,7 @@ describe('Command Toggles & Feature Module Enforcement', () => {
 
       const res = await dispatchInteraction(interaction, mockDeps, {} as any);
       expect(ticketSpy).not.toHaveBeenCalled();
-      expect(res.data?.content).toBe('The ticket system is currently disabled in this server.');
+      expect(res.data?.content).toBe('The ticket system is currently disabled.');
       expect(res.data?.embeds).toBeUndefined();
       expect(res.data?.flags).toBe(64);
     });

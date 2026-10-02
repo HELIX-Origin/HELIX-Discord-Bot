@@ -3,7 +3,7 @@ import { readBodyJson, sendError, sendJson } from '../http/helpers.js';
 import type { Router } from '../http/router.js';
 import { canUserManageGuild, getUserGuilds, isAdminOrOwner, requireDashboardUser } from './shared.js';
 import { hasInvitePermission } from '../oauth/discord.js';
-import { getAllCommands, isCommandDisabled } from '../../bot/handlers/registry.js';
+import { getAllCommands } from '../../bot/handlers/registry.js';
 import { loadAllCommands } from '../../bot/handlers/loader.js';
 import { getWelcomeConfig } from '../../bot/commands/admin/welcome.js';
 import {
@@ -156,7 +156,7 @@ export function registerGuildRoutes(router: Router<AppDeps>): void {
         name: c.def.name,
         category: c.category,
         description: c.def.description,
-        disabled: isCommandDisabled(guildId, c.def.name, d),
+        disabled: false,
       }));
 
       sendJson(res, 200, {

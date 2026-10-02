@@ -115,14 +115,8 @@ export function getEnabledCommands(_deps?: AppDeps): ApplicationCommand[] {
   return [...commandRegistry.values()].map((cmd) => cmd.def);
 }
 
-export function getGuildEnabledCommands(guildId: string, deps: AppDeps): ApplicationCommand[] {
-  const enabled: ApplicationCommand[] = [];
-  for (const cmd of commandRegistry.values()) {
-    if (!isCommandDisabled(guildId, cmd.def.name, deps)) {
-      enabled.push(cmd.def);
-    }
-  }
-  return enabled;
+export function getGuildEnabledCommands(_guildId?: string, _deps?: AppDeps): ApplicationCommand[] {
+  return [...commandRegistry.values()].map((cmd) => cmd.def);
 }
 
 export function registerCommandMetadata(metadata: CommandHelpMetadata): void {
@@ -157,20 +151,4 @@ export function getCategorizedCommands(): CategorizedCommands {
     }
   }
   return cats;
-}
-
-/**
- * Checks whether a command is disabled for a specific guild (via guild administration settings).
- */
-export function isCommandDisabled(guildId: string | null | undefined, commandName: string, deps: AppDeps): boolean {
-  const normalized = commandName.toLowerCase();
-  const cmd = getCommand(normalized);
-  if (!cmd) return true;
-
-  // Guild-level command disabled setting
-  if (guildId && deps?.repo && deps.repo.getGuildSetting(guildId, `cmd_disabled_${normalized}`) === '1') {
-    return true;
-  }
-
-  return false;
 }
