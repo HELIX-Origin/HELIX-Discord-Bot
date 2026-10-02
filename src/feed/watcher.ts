@@ -174,7 +174,7 @@ export class FeedWatcher {
     // YouTube and Twitch feeds are primarily handled via webhooks
     // But we also poll periodically as a fallback
     if (isYouTubeFeed || isTwitchFeed) {
-      await this.pollStreamAlertFeed(userId, feed);
+      await this.pollStreamAlertFeed(userId, feed, force);
       return;
     }
 
@@ -467,8 +467,8 @@ export class FeedWatcher {
     this.logger.info('Free games feed polled', { feedId: feed.id, feedName: feed.name, newEntries: toSend.length });
   }
 
-  private async pollStreamAlertFeed(userId: number, feed: Feed): Promise<void> {
-    this.logger.debug('Polling stream alert feed (fallback)', { feedId: feed.id, feedType: feed.feedType });
+  private async pollStreamAlertFeed(userId: number, feed: Feed, force = false): Promise<void> {
+    this.logger.debug('Polling stream alert feed (fallback)', { feedId: feed.id, feedType: feed.feedType, force });
 
     const { channelId } = resolveFeedTargets(feed);
     if (!channelId) {
@@ -494,7 +494,7 @@ export class FeedWatcher {
     if (feed.feedType === 'youtube') {
       entries = await this.fetchYouTubeFeed(feed);
     } else if (feed.feedType === 'twitch') {
-      entries = await this.fetchTwitchFeed(feed);
+      entries = await this.fetchTwitchFeed(feed, force);
     }
 
     const toSend: typeof entries = [];
@@ -504,21 +504,22 @@ export class FeedWatcher {
       toSend.push(entry);
     }
 
-    if (toSend.length > 0) {
-      const entry = toSend[0];
+    const entryToDeliver = toSend.length > 0 ? toSend[0] : force && entries.length > 0 ? entries[0] : null;
+
+    if (entryToDeliver) {
       const embed = streamAlertEmbed({
-        title: entry.title,
-        url: entry.link,
-        description: entry.description,
-        author: entry.author,
-        publishedAt: entry.publishedAt,
+        title: entryToDeliver.title,
+        url: entryToDeliver.link,
+        description: entryToDeliver.description,
+        author: entryToDeliver.author,
+        publishedAt: entryToDeliver.publishedAt,
         feedTitle: feed.name,
         color: feed.feedType === 'twitch' ? 0x9146ff : feed.feedType === 'youtube' ? 0xff0000 : 0x06b6d4,
-        imageUrl: entry.imageUrl,
+        imageUrl: entryToDeliver.imageUrl,
         feedType: feed.feedType,
         brandIconUrl: null,
-        game: entry.game,
-        viewers: entry.viewers,
+        game: entryToDeliver.game,
+        viewers: entryToDeliver.viewers,
       });
       let delivered = false;
       let errorDetail: string | null = null;
@@ -530,8 +531,8 @@ export class FeedWatcher {
       }
 
       if (delivered) {
-        this.repo.markEntrySent(feed.id, entry.id);
-        await this.redis?.markEntrySent(feed.id, entry.id);
+        this.repo.markEntrySent(feed.id, entryToDeliver.id);
+        await this.redis?.markEntrySent(feed.id, entryToDeliver.id);
         this.repo.setFeedPosted(userId, feed.id);
 
         // Drain backlog: mark older unposted stream alerts as sent
@@ -543,15 +544,20 @@ export class FeedWatcher {
       } else {
         this.logger.warn('Delivery failed for stream alert entry', {
           feedId: feed.id,
-          entryId: entry.id,
-          entryTitle: entry.title,
+          entryId: entryToDeliver.id,
+          entryTitle: entryToDeliver.title,
           error: errorDetail,
         });
       }
     }
 
     this.repo.setFeedChecked(userId, feed.id, entries.length ? entries[0].id : feed.lastEntryId);
-    this.logger.info('Stream alert feed polled', { feedId: feed.id, feedName: feed.name, newEntries: toSend.length });
+    this.logger.info('Stream alert feed polled', {
+      feedId: feed.id,
+      feedName: feed.name,
+      newEntries: toSend.length,
+      forced: force,
+    });
   }
 
   private async pollGitHubFeed(userId: number, feed: Feed): Promise<void> {
@@ -699,7 +705,10 @@ export class FeedWatcher {
     }
   }
 
-  private async fetchTwitchFeed(feed: Feed): Promise<
+  private async fetchTwitchFeed(
+    feed: Feed,
+    force = false,
+  ): Promise<
     Array<{
       id: string;
       title: string;
@@ -741,9 +750,9 @@ export class FeedWatcher {
         this.logger.warn('Twitch OAuth token request failed', { status: tokenRes.status });
         return [];
       }
-      const tokenData = await tokenRes.json();
-      accessToken = tokenData.access_token;
-      accessTokenSet = true;
+      const tokenData = (await tokenRes.json()) as { access_token?: string };
+      accessToken = tokenData.access_token || null;
+      accessTokenSet = Boolean(accessToken);
     } catch (err) {
       this.logger.error('Failed to get Twitch access token', { feedId: feed.id }, err);
       return [];
@@ -768,10 +777,8 @@ export class FeedWatcher {
         return [];
       }
 
-      const data = await response.json();
-
-      return (data.data || []).map(
-        (stream: {
+      const data = (await response.json()) as {
+        data?: Array<{
           id: string;
           user_name: string;
           title: string;
@@ -780,18 +787,90 @@ export class FeedWatcher {
           user_login: string;
           started_at: string;
           thumbnail_url?: string;
-        }) => ({
-          id: stream.id,
-          title: `${stream.user_name} is live: ${stream.title}`,
-          link: `https://twitch.tv/${stream.user_login}`,
-          publishedAt: stream.started_at,
-          author: stream.user_name,
-          description: stream.title,
-          game: stream.game_name || undefined,
-          viewers: typeof stream.viewer_count === 'number' ? stream.viewer_count : undefined,
-          imageUrl: stream.thumbnail_url?.replace('{width}', '1280').replace('{height}', '720'),
-        }),
-      );
+        }>;
+      };
+
+      const liveStreams = (data.data || []).map((stream) => ({
+        id: stream.id,
+        title: `${stream.user_name} is live: ${stream.title}`,
+        link: `https://twitch.tv/${stream.user_login}`,
+        publishedAt: stream.started_at,
+        author: stream.user_name,
+        description: stream.title,
+        game: stream.game_name || undefined,
+        viewers: typeof stream.viewer_count === 'number' ? stream.viewer_count : undefined,
+        imageUrl: stream.thumbnail_url?.replace('{width}', '1280').replace('{height}', '720'),
+      }));
+
+      if (liveStreams.length > 0) {
+        return liveStreams;
+      }
+
+      // If streamer is offline and this is a forced manual test check, query recent broadcast/VOD for verification
+      if (force) {
+        try {
+          const userRes = await fetch(`https://api.twitch.tv/helix/users?login=${encodeURIComponent(channelName)}`, {
+            headers: {
+              'Client-ID': clientId,
+              Authorization: `Bearer ${accessToken}`,
+            },
+          });
+          if (userRes.ok) {
+            const userData = (await userRes.json()) as { data?: Array<{ id: string; display_name: string }> };
+            const twitchUser = userData.data?.[0];
+            if (twitchUser?.id) {
+              const videoRes = await fetch(
+                `https://api.twitch.tv/helix/videos?user_id=${twitchUser.id}&first=1&sort=time`,
+                {
+                  headers: {
+                    'Client-ID': clientId,
+                    Authorization: `Bearer ${accessToken}`,
+                  },
+                },
+              );
+              if (videoRes.ok) {
+                const videoData = (await videoRes.json()) as {
+                  data?: Array<{
+                    id: string;
+                    user_name: string;
+                    title: string;
+                    url: string;
+                    published_at?: string;
+                    created_at?: string;
+                    description?: string;
+                    thumbnail_url?: string;
+                  }>;
+                };
+                const latestVideo = videoData.data?.[0];
+                if (latestVideo) {
+                  return [
+                    {
+                      id: latestVideo.id,
+                      title: `${latestVideo.user_name} (Recent Broadcast): ${latestVideo.title}`,
+                      link: latestVideo.url || `https://twitch.tv/videos/${latestVideo.id}`,
+                      publishedAt: latestVideo.published_at || latestVideo.created_at || new Date().toISOString(),
+                      author: latestVideo.user_name,
+                      description: latestVideo.description || latestVideo.title,
+                      imageUrl: latestVideo.thumbnail_url
+                        ?.replace('%{width}', '1280')
+                        .replace('%{height}', '720')
+                        .replace('{width}', '1280')
+                        .replace('{height}', '720'),
+                    },
+                  ];
+                }
+              }
+            }
+          }
+        } catch (vodErr) {
+          this.logger.warn('Failed to fetch Twitch VOD fallback during force poll', {
+            feedId: feed.id,
+            err: (vodErr as Error).message,
+          });
+        }
+      }
+
+      return [];
     } catch (err) {
       this.logger.error('Failed to fetch Twitch feed', { feedId: feed.id }, err);
       return [];

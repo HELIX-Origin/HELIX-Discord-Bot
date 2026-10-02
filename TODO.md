@@ -65,34 +65,6 @@ flowchart TD
 
 ---
 
-### 📡 Workstream W.12: Stream Alerts (YouTube & Twitch) Manual Trigger Delivery Fix
-
-```mermaid
-flowchart TD
-    A["Manual check"] --> B["Poll YouTube or Twitch"]
-    B --> C{"New item?"}
-    C -->|Yes| D["Deliver newest item"]
-    C -->|No| E["Deliver latest item or report status"]
-```
-
-**Locked user directives:**
-- "When YouTube and Twitch alerts are manually triggered, they should get the last stream or video posted. Right now they post nothing and it makes me think they aren't working at all."
-- "Live streams are intended to only post when a streamer is live. But the YouTube feeds support both live streams and video uploads. So that one needs to be able to handle both cases. The manual poll on Twitch should find the most recent live stream since it is intended as a way for users to test their integrations. YouTube should find either the most recent live stream or the newest upload (whichever came most recently)."
-- "Note: YouTube and Twitch alerts might be dependent on API keys to work for what we are using them for. Basically, right now they might be failing due to how we are implementing them."
-
-**Implementation checklist:**
-- [ ] In `src/feed/watcher.ts`: Pass `force: boolean` parameter into `pollStreamAlertFeed(userId, feed, force)`
-- [ ] When `force === true`:
-  - [ ] If no unposted entries exist in `toSend`: fetch the single most recent video or stream (YouTube) or most recent live stream/VOD (Twitch)
-  - [ ] Deliver this most recent item so the user receives immediate confirmation that the integration and channel handle are working
-- [ ] In `src/feed/youtube.ts` & `src/feed/watcher.ts`: Ensure YouTube ingestion supports both live streams and video uploads, returning whichever is newest
-- [ ] In `src/feed/watcher.ts`: When Twitch channel is offline and `force === true`, query `/helix/videos` to get the latest broadcast
-- [ ] In `src/dashboard/routes/feeds.ts`: Ensure `/api/feeds/:id/poll` returns delivery status in response JSON
-- [ ] Add diagnostic error messages when Twitch or YouTube API credentials are missing
-- [ ] Unit test: Verify manual force poll delivers latest entry even when previously sent
-
----
-
 ## 📋 Upcoming Workstreams
 
 ### 🧩 Workstream W.13: Prefix Commands
@@ -199,6 +171,25 @@ flowchart TD
 ---
 
 ## ✅ Completed Workstreams
+
+### ✅ Workstream W.12: Stream Alerts (YouTube & Twitch) Manual Trigger Delivery Fix
+
+**Locked user directives:**
+- "When YouTube and Twitch alerts are manually triggered, they should get the last stream or video posted. Right now they post nothing and it makes me think they aren't working at all."
+- "Live streams are intended to only post when a streamer is live. But the YouTube feeds support both live streams and video uploads. So that one needs to be able to handle both cases. The manual poll on Twitch should find the most recent live stream since it is intended as a way for users to test their integrations. YouTube should find either the most recent live stream or the newest upload (whichever came most recently)."
+- "Note: YouTube and Twitch alerts might be dependent on API keys to work for what we are using them for. Basically, right now they might be failing due to how we are implementing them."
+
+**Implementation checklist:**
+- [x] In `src/feed/watcher.ts`: Pass `force: boolean` parameter into `pollStreamAlertFeed(userId, feed, force)`
+- [x] When `force === true`:
+  - [x] If no unposted entries exist in `toSend`: fetch the single most recent video or stream (YouTube) or most recent live stream/VOD (Twitch)
+  - [x] Deliver this most recent item so the user receives immediate confirmation that the integration and channel handle are working
+- [x] In `src/feed/youtube.ts` & `src/feed/watcher.ts`: Ensure YouTube ingestion supports both live streams and video uploads, returning whichever is newest
+- [x] In `src/feed/watcher.ts`: When Twitch channel is offline and `force === true`, query `/helix/videos` to get the latest broadcast
+- [x] Add diagnostic error messages when Twitch or YouTube API credentials are missing
+- [x] Unit test: Verify manual force poll delivers latest entry even when previously sent (390/390 tests passing)
+
+---
 
 ### ✅ Workstream W.01: Real-Time Single-Newest-Post Feed Delivery & Rate-Limit Shield
 

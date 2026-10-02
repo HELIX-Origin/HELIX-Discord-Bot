@@ -214,7 +214,7 @@ describe('FeedWatcher Stream Alert Fetching', () => {
   });
 
   it('fetches YouTube channel via public Atom XML feed without API keys', async () => {
-    const watcher = new FeedWatcher(repo, botMock as never);
+    const watcher = new FeedWatcher(repo, null, undefined, botMock as never);
 
     const channelId = 'UC1234567890123456789012';
     const xmlUrl = `https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`;
@@ -261,7 +261,7 @@ describe('FeedWatcher Stream Alert Fetching', () => {
   });
 
   it('fetches Twitch live streams and extracts category and viewer count', async () => {
-    const watcher = new FeedWatcher(repo, botMock as never);
+    const watcher = new FeedWatcher(repo, null, undefined, botMock as never);
 
     // Set Twitch environment variables
     const originalClientId = process.env['TWITCH_CLIENT_ID'];
@@ -336,6 +336,168 @@ describe('FeedWatcher Stream Alert Fetching', () => {
       else delete process.env['TWITCH_CLIENT_SECRET'];
 
       globalFetchSpy.mockRestore();
+    }
+  });
+
+  it('fetches Twitch recent VOD when streamer is offline during force poll', async () => {
+    const watcher = new FeedWatcher(repo, null, undefined, botMock as never);
+
+    const originalClientId = process.env['TWITCH_CLIENT_ID'];
+    const originalClientSecret = process.env['TWITCH_CLIENT_SECRET'];
+    process.env['TWITCH_CLIENT_ID'] = 'test-client-id';
+    process.env['TWITCH_CLIENT_SECRET'] = 'test-client-secret';
+
+    const globalFetchSpy = vi.spyOn(globalThis, 'fetch').mockImplementation(async (input: unknown) => {
+      const url = String(input);
+      if (url.includes('id.twitch.tv/oauth2/token')) {
+        return new Response(
+          JSON.stringify({
+            access_token: 'mock-app-token',
+            expires_in: 3600,
+            token_type: 'bearer',
+          }),
+          { status: 200, headers: { 'content-type': 'application/json' } },
+        );
+      }
+      if (url.includes('api.twitch.tv/helix/streams')) {
+        // Streamer is offline: streams data is empty
+        return new Response(JSON.stringify({ data: [] }), {
+          status: 200,
+          headers: { 'content-type': 'application/json' },
+        });
+      }
+      if (url.includes('api.twitch.tv/helix/users')) {
+        return new Response(
+          JSON.stringify({
+            data: [{ id: 'user-12345', display_name: 'OfflineStreamer' }],
+          }),
+          { status: 200, headers: { 'content-type': 'application/json' } },
+        );
+      }
+      if (url.includes('api.twitch.tv/helix/videos')) {
+        return new Response(
+          JSON.stringify({
+            data: [
+              {
+                id: 'vod-999',
+                user_name: 'OfflineStreamer',
+                title: 'Past Stream Archive',
+                url: 'https://twitch.tv/videos/vod-999',
+                published_at: '2025-01-19T22:00:00Z',
+                thumbnail_url: 'https://static-cdn.jtvnw.net/cf_vods/vod-999-%{width}x%{height}.jpg',
+              },
+            ],
+          }),
+          { status: 200, headers: { 'content-type': 'application/json' } },
+        );
+      }
+      return new Response('Not Found', { status: 404 });
+    });
+
+    try {
+      const entries = await (
+        watcher as unknown as { fetchTwitchFeed: (feed: unknown, force?: boolean) => Promise<unknown[]> }
+      ).fetchTwitchFeed(
+        {
+          id: 3,
+          name: 'OfflineStreamer Twitch',
+          url: 'https://twitch.tv/offlinestreamer',
+          feedType: 'twitch',
+        },
+        true, // force = true
+      );
+
+      expect(entries).toHaveLength(1);
+      const vod = entries[0] as {
+        id: string;
+        title: string;
+        link: string;
+        imageUrl: string;
+      };
+      expect(vod.id).toBe('vod-999');
+      expect(vod.title).toBe('OfflineStreamer (Recent Broadcast): Past Stream Archive');
+      expect(vod.link).toBe('https://twitch.tv/videos/vod-999');
+      expect(vod.imageUrl).toBe('https://static-cdn.jtvnw.net/cf_vods/vod-999-1280x720.jpg');
+    } finally {
+      if (originalClientId) process.env['TWITCH_CLIENT_ID'] = originalClientId;
+      else delete process.env['TWITCH_CLIENT_ID'];
+
+      if (originalClientSecret) process.env['TWITCH_CLIENT_SECRET'] = originalClientSecret;
+      else delete process.env['TWITCH_CLIENT_SECRET'];
+
+      globalFetchSpy.mockRestore();
+    }
+  });
+
+  it('delivers latest item during forced manual poll even when previously sent', async () => {
+    const watcher = new FeedWatcher(repo, null, undefined, botMock as never);
+
+    const xmlUrl = 'https://www.youtube.com/feeds/videos.xml?channel_id=UC1234567890123456789012';
+    const sampleXml = `<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>YouTube Creator</title>
+  <entry>
+    <id>yt:video:alreadySentVid</id>
+    <title>Already Sent Video</title>
+    <link rel="alternate" href="https://www.youtube.com/watch?v=alreadySentVid"/>
+    <published>2025-01-20T10:00:00+00:00</published>
+  </entry>
+</feed>`;
+
+    vi.spyOn(fetchModule, 'fetchRaw').mockResolvedValue({
+      url: xmlUrl,
+      status: 200,
+      text: sampleXml,
+      body: new TextEncoder().encode(sampleXml),
+      contentType: 'application/atom+xml',
+      challenged: false,
+      durationMs: 10,
+    });
+
+    const feed = repo.addFeed(
+      userId,
+      'YouTube Feed',
+      xmlUrl,
+      '123456789012345678',
+      'youtube',
+      null,
+    );
+
+    // Mark entry as already sent in the database
+    repo.markEntrySent(feed.id, 'alreadySentVid');
+    expect(repo.isEntrySent(feed.id, 'alreadySentVid')).toBe(true);
+
+    // Non-forced poll should deliver nothing
+    await watcher.pollFeed(userId, feed.id, false);
+    expect(sentMessages).toHaveLength(0);
+
+    // Forced manual poll should deliver the latest item as a verification post
+    await watcher.pollFeed(userId, feed.id, true);
+    expect(sentMessages).toHaveLength(1);
+    expect(sentMessages[0].channelId).toBe('123456789012345678');
+  });
+
+  it('skips Twitch feed gracefully when credentials are not configured', async () => {
+    const watcher = new FeedWatcher(repo, null, undefined, botMock as never);
+
+    const originalClientId = process.env['TWITCH_CLIENT_ID'];
+    const originalClientSecret = process.env['TWITCH_CLIENT_SECRET'];
+    delete process.env['TWITCH_CLIENT_ID'];
+    delete process.env['TWITCH_CLIENT_SECRET'];
+
+    try {
+      const entries = await (
+        watcher as unknown as { fetchTwitchFeed: (feed: unknown) => Promise<unknown[]> }
+      ).fetchTwitchFeed({
+        id: 4,
+        name: 'Unconfigured Twitch',
+        url: 'https://twitch.tv/unconfigured',
+        feedType: 'twitch',
+      });
+      expect(entries).toEqual([]);
+    } finally {
+      if (originalClientId) process.env['TWITCH_CLIENT_ID'] = originalClientId;
+      if (originalClientSecret) process.env['TWITCH_CLIENT_SECRET'] = originalClientSecret;
     }
   });
 });

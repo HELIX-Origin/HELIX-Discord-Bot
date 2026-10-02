@@ -7,6 +7,19 @@
 
 ---
 
+## 📜 Tracking Rules
+
+- **No Typo Duplication**: When recording user reports, clean and fix all typos to preserve professional quality.
+- **Consistent Formatting**: Maintain consistent formatting and style throughout all documentation to ensure readability and professionalism.
+- **Clear Sectioning**: Use clear and descriptive headers for each section to improve navigation and readability.
+- **Active Items First**: The currently active milestone, sprint, task, or workstream must always be placed at the top of the content sections.
+- **Regular Updates**: Ensure that the roadmap is regularly updated to reflect the latest developments and changes in the project.
+- **Improve User Directives**: Continuously refine and clarify user directives to ensure they are easily understood and actionable.
+- **Universal Direct Store Links**: Every game alert, giveaway, or deal **MUST** resolve to the actual storefront page of the game.
+- **Always Track Everything**: Every new feature request, enhancement, or bug report must be logged in [`BUGS.md`](./BUGS.md), [`TODO.md`](./TODO.md), and [`ROADMAP.md`](./ROADMAP.md) before execution.
+
+---
+
 ## 📖 Legend
 
 ### 🚦 Status
@@ -25,45 +38,20 @@
 
 ---
 
-## 🚫 Known quirks & external limitations (wontfix bucket)
+## ⚠️ Active & Open Bugs
+
+*No open bugs at this time.*
+
+---
+
+## 🚫 Known Quirks & External Limitations (wontfix bucket)
 
 - 🐢 **External Feed Throttling & Rate Limits:** Upstream APIs (Reddit, YouTube, Twitch, GamerPower) enforce rate limits. Handlers and background workers throttle requests and implement exponential backoff rather than spam-retrying.
 - **Discord API Gateway & Rate Limits:** Discord enforces global and route-specific rate limits on interaction responses, guild command syncs, and embeds. Guild command updates must be debounced.
 
-## 💡 Explicitly not bugs
+## 💡 Explicitly Not Bugs
 
 - Disabled features intentionally hide their corresponding dashboard navigation links and unregister their slash commands from Discord guilds rather than rendering disabled error embeds.
-
----
-
-## 2026-10-02 — YouTube and Twitch Alerts Post Nothing on Manual Trigger Check
-
-- **Severity**: 🟠 High (Stream Alerts / User Feedback)
-- **Status**: ⚠️ open
-- **Reported Issue**: "When YouTube and Twitch alerts are manually triggered, they should get the last stream or video posted. Right now they post nothing and it makes me think they aren't working at all. Note that YouTube and Twitch alerts might be dependent on API keys to work for what we are using them for, and might be failing due to how we are implementing them. Live streams are intended to only post when a streamer is live, but YouTube feeds support both live streams and video uploads. So that one needs to be able to handle both cases. The manual poll on Twitch should find the most recent live stream since it is intended as a way for users to test their integrations. YouTube should find either the most recent live stream or the newest upload (whichever came most recently)."
-
-### Root Cause
-
-1. **Twitch API Live Broadcast Limit & Missing API Credentials**: The Helix `/streams` endpoint returns active live broadcasts only. When a streamer is offline, the poller returns zero items. Additionally, the Twitch poller requires `TWITCH_CLIENT_ID` and `TWITCH_CLIENT_SECRET`; without them or when channels are offline, manual triggers complete silently with zero feedback.
-    - **Impact**: Users cannot test or verify their Twitch feed integration when a streamer is not actively live, making the feature appear completely broken.
-    - **Proposed Fix**:
-        - **Recent Live Stream / VOD Fallback for Manual Testing**: On a forced manual check (`force = true`), query `/helix/streams` first, and if offline, query `/helix/videos` for the streamer's most recent live stream/VOD to verify the integration.
-        - **Clear Credential Diagnostics**: Provide actionable console logging and API feedback when `TWITCH_CLIENT_ID` or `TWITCH_CLIENT_SECRET` are missing.
-    - **Steps to Implement**:
-        - **Pass force flag**: Propagate `force: boolean` through `pollFeed` down into `pollStreamAlertFeed(userId, feed, force)`.
-        - **Query latest stream on force**: In `fetchTwitchFeed`, fall back to the most recent broadcast/video when `force === true` and channel is offline.
-        - **Deliver verification post**: Post the resolved stream as a verification test.
-
-2. **YouTube Dual Delivery & Silent Deduplication Gate**: YouTube feeds are required to support both live streams and regular video uploads. During routine polling, new live broadcasts or new video uploads should alert users. Furthermore, manual checks currently check `isEntrySent` deduplication; if the latest video was already posted previously, the poller discards it and produces no output.
-    - **Impact**: Manual trigger checks fail to produce any Discord post if no new unposted video exists, misleading users into believing the feed is dysfunctional.
-    - **Proposed Fix**:
-        - **Dual Support (Live Streams + Uploads)**: Ensure `fetchYouTubeFeed` extracts both live streams and video uploads, returning whichever came most recently.
-        - **Deliver Latest Item on Force**: On manual force poll, when `toSend.length === 0`, deliver `entries[0]` (the most recent video or live stream) as a verification post.
-        - **Zero-Config Public Atom Feed Priority**: Rely on the zero-config Atom XML feed (`channel_id=UC...`) and fall back to Data API v3 when configured.
-    - **Steps to Implement**:
-        - **Order entries by timestamp**: In `fetchYouTubeFeed`, verify items are properly sorted by published date.
-        - **Deliver verification item**: In `pollStreamAlertFeed`, deliver `entries[0]` when `force === true` and `toSend.length === 0`.
-        - **Add API diagnostics**: Report clear diagnostic messages if channel handle resolution or API requests fail.
 
 ---
 

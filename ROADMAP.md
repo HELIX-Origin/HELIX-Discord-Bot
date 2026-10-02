@@ -24,7 +24,6 @@
 
 | Milestone | Target Version | Category | Status | Primary Focus |
 | :--- | :--- | :--- | :--- | :--- |
-| **M.07** | `v0.6.1` | Stream Alerts | 🚀 Active | Manual Trigger Verification, Dual YouTube Handling, Twitch Offline VOD Fallback |
 | **M.08** | `v0.7.0` | Game Feeds | 🚀 Active | Free Games, Game Deals & Promotions, Patch Notes Engine |
 | **M.09** | `v0.8.0` | Bot Commands | 🔮 Planned | Guild Prefix Commands Engine & Slash Parity |
 | **M.10** | `v0.9.0` | Voice Systems | 🔮 Planned | Dynamic User Voice Hub System & Auto Lifecycle |
@@ -35,40 +34,11 @@
 | **M.04** | `v0.4.0` | Giveaways | ✅ Completed | Free Game Alerts, Standards Framework, Quality Scans |
 | **M.05** | `v0.5.0` | Architecture | ✅ Completed | Lavalink Audio Retirement, Streamlined Core Services |
 | **M.06** | `v0.6.0` | Administration | ✅ Completed | Single-Newest Delivery, Thread Feeds, Role Subscriptions, Theme System |
+| **M.07** | `v0.6.1` | Stream Alerts | ✅ Completed | Manual Trigger Verification, Dual YouTube Handling, Twitch Offline VOD Fallback |
 
 ---
 
 ## 🚀 Active Milestones
-
-### Milestone M.07: Stream Alerts Reliability & Manual Trigger Verification (`v0.6.1`)
-
-```mermaid
-flowchart TD
-    A["Stream Alert Poll"] --> B{"Manual Force Poll?"}
-    B -->|Yes| C{"New Unposted Item?"}
-    C -->|Yes| D["Deliver New Item"]
-    C -->|No| E["Deliver Most Recent Item as Verification"]
-    B -->|No| F{"Stream or Video Live?"}
-    F -->|Twitch Live| G["Deliver Live Alert"]
-    F -->|YouTube Live or Upload| H["Deliver Alert"]
-    F -->|Offline or Old| I["Drain Backlog or Idle"]
-```
-
-Ensure YouTube and Twitch stream alerts operate reliably and provide meaningful verification on manual trigger checks instead of silently returning nothing.
-
-#### 🧭 Architecture & Implementation Phases
-
-1. **Behavioral Differentiation**:
-    - **Twitch Alerts**: Intended strictly for live broadcasts during routine polling. On manual trigger (`force = true`), query `/helix/streams` or fall back to `/helix/videos` to post the latest live stream/VOD as a configuration verification test.
-    - **YouTube Alerts**: Support both live streams and video uploads. During routine polling and manual triggers, identify whichever came most recently (live stream or uploaded video) and post it.
-2. **Force-Poll Parameter Propagation**:
-    - Pass `force: boolean` through `pollFeed` to `pollStreamAlertFeed(userId, feed, force)`.
-    - If `toSend.length === 0` during a forced check, deliver `entries[0]` as a manual verification post.
-3. **Credential & API Diagnostics**:
-    - Provide actionable error reporting when `TWITCH_CLIENT_ID` / `TWITCH_CLIENT_SECRET` or `YOUTUBE_API_KEY` are missing or invalid.
-    - Support zero-config public YouTube Atom feeds out of the box with Data API v3 fallback.
-
----
 
 ### Milestone M.08: Game Feeds Tab Evolution (`v0.7.0`)
 
@@ -184,6 +154,33 @@ Reintroduce music playback by integrating Discord's native Rythm application arc
 ---
 
 ## ✅ Completed Milestones (Historical Evolution)
+
+### Milestone M.07: Stream Alerts Reliability & Manual Trigger Verification (`v0.6.1`)
+
+```mermaid
+flowchart TD
+    A["Stream Alert Poll"] --> B{"Manual Force Poll?"}
+    B -->|Yes| C{"New Unposted Item?"}
+    C -->|Yes| D["Deliver New Item"]
+    C -->|No| E["Deliver Most Recent Item as Verification"]
+    B -->|No| F{"Stream or Video Live?"}
+    F -->|Twitch Live| G["Deliver Live Alert"]
+    F -->|YouTube Live or Upload| H["Deliver Alert"]
+    F -->|Offline or Old| I["Drain Backlog or Idle"]
+```
+
+Ensured YouTube and Twitch stream alerts operate reliably, differentiating Twitch live broadcasts with offline VOD fallback and YouTube dual live/upload handling with forced manual verification delivery.
+
+#### 🏛️ Architectural Accomplishments
+
+1. **Forced Verification Delivery & Backlog Drain**:
+    - Propagated `force: boolean` from route endpoints down through `watcher.ts`.
+    - Delivered the most recent item when `toSend.length === 0` on forced manual checks.
+2. **Twitch Offline Fallback & YouTube Dual Ingestion**:
+    - Implemented `/helix/videos` fallback on forced Twitch checks when a streamer is offline.
+    - Ordered YouTube Atom XML entries newest first by published timestamp to support both live streams and video uploads seamlessly.
+
+---
 
 ### Milestone M.01: Core Inception & Discord Gateway (`v0.1.0`)
 

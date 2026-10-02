@@ -87,16 +87,18 @@ export async function resolveYouTubeXmlUrl(input: string): Promise<string> {
  */
 export function parseYouTubeAtomXml(xml: string): YouTubeVideoEntry[] {
   const parsed = parseFeed(xml);
-  return parsed.entries.map((entry: FeedEntry) => {
-    const videoId = entry.id.replace(/^yt:video:/, '') || (entry.link.match(/v=([a-zA-Z0-9_-]+)/)?.[1] ?? '');
-    return {
-      id: videoId || entry.id,
-      title: entry.title,
-      link: entry.link || (videoId ? `https://www.youtube.com/watch?v=${videoId}` : ''),
-      publishedAt: entry.publishedAt || new Date().toISOString(),
-      author: entry.author || parsed.title,
-      description: entry.description || undefined,
-      imageUrl: entry.imageUrl || (videoId ? `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg` : undefined),
-    };
-  });
+  return parsed.entries
+    .map((entry: FeedEntry) => {
+      const videoId = entry.id.replace(/^yt:video:/, '') || (entry.link.match(/v=([a-zA-Z0-9_-]+)/)?.[1] ?? '');
+      return {
+        id: videoId || entry.id,
+        title: entry.title,
+        link: entry.link || (videoId ? `https://www.youtube.com/watch?v=${videoId}` : ''),
+        publishedAt: entry.publishedAt || new Date().toISOString(),
+        author: entry.author || parsed.title,
+        description: entry.description || undefined,
+        imageUrl: entry.imageUrl || (videoId ? `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg` : undefined),
+      };
+    })
+    .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
 }
