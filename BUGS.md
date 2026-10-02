@@ -3,7 +3,7 @@
 > 🐛 **Living Source of Truth**: This page tracks known, unresolved bugs. Resolved or superseded entries are removed; implementation tasks belong in [`TODO.md`](./TODO.md), sprint plans in [`PLAN.md`](./PLAN.md), and long-term milestones in [`ROADMAP.md`](./ROADMAP.md).
 
 > [!IMPORTANT]
-> Review and update this page when a bug is reported or investigated. Keep entries actionable and synchronize related work with the other tracking files.
+> AI agents strictly required to update this page and all related pages **before** working on any new bug fixes or features and push it to the remote first, without exception. Failure to do so may result in working with outdated information and potentially introducing conflicts or redundant work. 
 
 ---
 
@@ -11,69 +11,68 @@
 
 ### 🚦 Status
 
-- ⚠️ **Open** — reproducible and needs fixing.
-- 🚧 **Investigating** — reproduction or root-cause analysis is in progress; reference the related open bug.
-- 🚫 **Won't fix** — accepted limitation or trade-off.
-- ✅ **Resolved** — verified as fixed; remove the entry from this active tracker.
+- ⚠️ **open** — reproducible, needs fixing *(Detailed lists with possible fixes encouraged. Attempt to include steps to reproduce, expected behavior, and actual behavior. An estimate of how long it might take to fix is also helpful.)*
+- 🚧 **investigating** — repro/root-cause in progress *(List of issues currently being worked on. Used for tracking active work. must reference an existing bug from the open section.)*
+- 🚫 **wontfix** — accepted limitations *(features that can't be fixed at this time without significant changes or trade-offs)*
+- ✅ **resolved** — verified and fixed *(moved to closed with the corresponding release version or commit)*
 
 ### 🚨 Severity
 
-- 🔴 **Critical** — crashes or causes major functionality loss.
-- 🟠 **High** — significantly impacts usability without crashing the application.
-- 🟡 **Medium** — affects a limited feature or causes a minor usability issue.
-- 🟢 **Low** — minor issue or visual glitch.
+- 🔴 **Critical**: *Bugs that cause crashes or major functionality loss.*
+- 🟠 **High**: *Bugs that significantly impact usability but do not crash the app.*
+- 🟡 **Medium**: *Bugs that affect certain features or have minor usability issues.*
+- 🟢 **Low**: *Minor bugs or visual glitches that do not significantly impact the user experience.*
 
 ---
 
-## 🚫 Known Quirks & External Limitations
+## 🚫 Known quirks & external limitations (wontfix bucket)
 
-- 🐢 **External feed throttling and rate limits**: Upstream APIs (Reddit, YouTube, Twitch, and GamerPower) enforce limits. Handlers and background workers throttle requests and use exponential backoff rather than repeatedly retrying.
-- **Discord API rate limits**: Discord enforces global and route-specific limits on interaction responses, guild command syncs, and embeds. Guild command updates must be debounced.
+- 🐢 **External Feed Throttling & Rate Limits:** Upstream APIs (Reddit, YouTube, Twitch, GamerPower) enforce rate limits. Handlers and background workers throttle requests and implement exponential backoff rather than spam-retrying.
+- **Discord API Gateway & Rate Limits:** Discord enforces global and route-specific rate limits on interaction responses, guild command syncs, and embeds. Guild command updates must be debounced.
 
-## 💡 Explicitly Not Bugs
+## 💡 Explicitly not bugs
 
-- Disabled features intentionally hide their dashboard navigation links and unregister their slash commands from Discord guilds rather than rendering disabled error embeds.
+- Disabled features intentionally hide their corresponding dashboard navigation links and unregister their slash commands from Discord guilds rather than rendering disabled error embeds.
 
 ---
 
-## ⚠️ Open Bugs
-
-### 2026-10-02 — YouTube and Twitch Alerts Post Nothing on Manual Trigger Check
+## 2026-10-02 — YouTube and Twitch Alerts Post Nothing on Manual Trigger Check
 
 - **Severity**: 🟠 High (Stream Alerts / User Feedback)
-- **Status**: ⚠️ Open
-- **Reported issue**: "When YouTube and Twitch alerts are manually triggered, they should retrieve the latest stream or video posted. Currently they post nothing on manual trigger, making it appear as though the feeds are not working at all."
+- **Status**: ⚠️ open
+- **Reported Issue**: "When YouTube and Twitch alerts are manually triggered, they should get the last stream or video posted. Right now they post nothing and it makes me think they aren't working at all. Note that YouTube and Twitch alerts might be dependent on API keys to work for what we are using them for, and might be failing due to how we are implementing them. Live streams are intended to only post when a streamer is live, but YouTube feeds support both live streams and video uploads. So that one needs to be able to handle both cases. The manual poll on Twitch should find the most recent live stream since it is intended as a way for users to test their integrations. YouTube should find either the most recent live stream or the newest upload (whichever came most recently)."
 
-#### Root Cause
+### Root Cause
 
-1. **Twitch**: The Helix `/streams` endpoint returns active broadcasts only. When a streamer is offline, it can return no items; the poller also requires `TWITCH_CLIENT_ID` and `TWITCH_CLIENT_SECRET`.
-2. **YouTube**: Data API requests can return no items when videos are not publicly available or when `YOUTUBE_API_KEY` is missing or invalid. Public Atom feeds may also fail.
-3. Manual checks currently depend on new, unposted items. If no such item is returned, the check can complete silently.
+1. **Twitch API Live Broadcast Limit & Missing API Credentials**: The Helix `/streams` endpoint returns active live broadcasts only. When a streamer is offline, the poller returns zero items. Additionally, the Twitch poller requires `TWITCH_CLIENT_ID` and `TWITCH_CLIENT_SECRET`; without them or when channels are offline, manual triggers complete silently with zero feedback.
+    - **Impact**: Users cannot test or verify their Twitch feed integration when a streamer is not actively live, making the feature appear completely broken.
+    - **Proposed Fix**:
+        - **Recent Live Stream / VOD Fallback for Manual Testing**: On a forced manual check (`force = true`), query `/helix/streams` first, and if offline, query `/helix/videos` for the streamer's most recent live stream/VOD to verify the integration.
+        - **Clear Credential Diagnostics**: Provide actionable console logging and API feedback when `TWITCH_CLIENT_ID` or `TWITCH_CLIENT_SECRET` are missing.
+    - **Steps to Implement**:
+        - **Pass force flag**: Propagate `force: boolean` through `pollFeed` down into `pollStreamAlertFeed(userId, feed, force)`.
+        - **Query latest stream on force**: In `fetchTwitchFeed`, fall back to the most recent broadcast/video when `force === true` and channel is offline.
+        - **Deliver verification post**: Post the resolved stream as a verification test.
 
-#### Impact
-
-Users cannot tell whether a manual feed check succeeded, and offline Twitch channels or already-delivered YouTube videos may appear to be broken.
-
-#### Expected Behavior
-
-A manual verification check should post the latest available video or broadcast regardless of live status or deduplication state. If no item can be retrieved, the check should provide an actionable status.
-
-#### Proposed Fix and Implementation Steps
-
-1. Pass a force flag from manual polling routes through to the stream alert poller.
-2. On a forced check with no new entries, retrieve and deliver the latest available item as a verification post.
-3. Provide clear diagnostics when required credentials are missing or no item is available.
-4. Add regression tests for already-sent items, offline Twitch channels, and unavailable credentials.
-5. Verify with `npm run check` and `npm run build`.
+2. **YouTube Dual Delivery & Silent Deduplication Gate**: YouTube feeds are required to support both live streams and regular video uploads. During routine polling, new live broadcasts or new video uploads should alert users. Furthermore, manual checks currently check `isEntrySent` deduplication; if the latest video was already posted previously, the poller discards it and produces no output.
+    - **Impact**: Manual trigger checks fail to produce any Discord post if no new unposted video exists, misleading users into believing the feed is dysfunctional.
+    - **Proposed Fix**:
+        - **Dual Support (Live Streams + Uploads)**: Ensure `fetchYouTubeFeed` extracts both live streams and video uploads, returning whichever came most recently.
+        - **Deliver Latest Item on Force**: On manual force poll, when `toSend.length === 0`, deliver `entries[0]` (the most recent video or live stream) as a verification post.
+        - **Zero-Config Public Atom Feed Priority**: Rely on the zero-config Atom XML feed (`channel_id=UC...`) and fall back to Data API v3 when configured.
+    - **Steps to Implement**:
+        - **Order entries by timestamp**: In `fetchYouTubeFeed`, verify items are properly sorted by published date.
+        - **Deliver verification item**: In `pollStreamAlertFeed`, deliver `entries[0]` when `force === true` and `toSend.length === 0`.
+        - **Add API diagnostics**: Report clear diagnostic messages if channel handle resolution or API requests fail.
 
 ---
 
 ## 🛠️ Verification Commands
 
 ```bash
-npm run check
-npm run build
-npm test
+npm run check               # typecheck + format:check + lint + tests (must pass)
+npm run build               # tsc compile to dist/ (must pass)
+npm test                    # vitest run
 ```
 
 ---
@@ -81,4 +80,4 @@ npm test
 ## 🔖 Metadata
 
 - **Project**: HELIX Discord Bot · **version** 0.6.0
-- **Agent Ecosystem**: [`AGENTS.md`](./AGENTS.md) and [`.agents/`](.agents/) are tracked in the repository.
+- **Agent Ecosystem:** [`AGENTS`](./AGENTS) and [`.agents/`](.agents/) are tracked directly in repository git tracking.

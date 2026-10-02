@@ -3,103 +3,119 @@
 > 🗺️ **Living Source of Truth**: This page records current sprint plans, implementation decisions, and completed work. See [`TODO.md`](./TODO.md) for workstream checklists, [`BUGS.md`](./BUGS.md) for open bugs, and [`ROADMAP.md`](./ROADMAP.md) for long-term milestones.
 
 > [!IMPORTANT]
-> Keep this page and related tracking files synchronized as work progresses. Record new work before implementation and update its status as decisions or scope change.
+> AI agents strictly required to update this page and all related pages **before** working on any new bug fixes or features and push it to the remote first, without exception. Failure to do so may result in working with outdated information and potentially introducing conflicts or redundant work. 
 
 ---
 
 ## 📜 Tracking Rules
 
-- **Consistent Formatting**: Keep workstreams, directives, and checklists clear and actionable.
-- **Regular Updates**: Update active plans as implementation progresses; move completed work into the completed section.
-- **Cross-File Tracking**: Track implementation tasks in [`TODO.md`](./TODO.md), open bugs in [`BUGS.md`](./BUGS.md), and long-term architecture in [`ROADMAP.md`](./ROADMAP.md).
-- **Universal Direct Store Links**: Every game alert, giveaway, or deal must resolve to the actual storefront page of the game.
+- **No Typo Duplication**: When recording user reports, clean and fix all typos to preserve professional quality.
+- **Consistent Formatting**: Maintain consistent formatting and style throughout all documentation to ensure readability and professionalism.
+- **Clear Sectioning**: Use clear and descriptive headers for each section to improve navigation and readability.
+- **Active Items First**: The currently active milestone, sprint, task, or workstream must always be placed at the top of the content sections.
+- **Regular Updates**: Ensure that the roadmap is regularly updated to reflect the latest developments and changes in the project.
+- **Improve User Directives**: Continuously refine and clarify user directives to ensure they are easily understood and actionable.
+- **Universal Direct Store Links**: Every game alert, giveaway, or deal **MUST** resolve to the actual storefront page of the game.
+- **Always Track Everything**: Every new feature request, enhancement, or bug report must be logged in [`BUGS.md`](./BUGS.md), [`TODO.md`](./TODO.md), and [`ROADMAP.md`](./ROADMAP.md) before execution.
 
 ---
 
-## 🎯 Sprint 1: Stream Alerts Manual Trigger Delivery
+## 🎯 Active Sprints
 
-> Ensure manual checks for YouTube and Twitch provide a useful latest-item verification post rather than silently returning nothing.
+### 🎯 Sprint 1: Stream Alerts Manual Trigger Delivery & Dual YouTube/Twitch Ingestion
 
-### 🧭 Delivery Flow
+> Ensure manual checks for YouTube and Twitch provide a useful latest-item verification post rather than silently returning nothing, differentiating between Twitch live broadcasts and YouTube live/upload feeds.
+
+#### 📝 Tasks 
 
 ```mermaid
 flowchart TD
-    A["Manual check"] --> B["Poll stream alert feed"]
-    B --> C{"New item available?"}
-    C -->|Yes| D["Deliver newest item"]
-    C -->|No, forced check| E{"Latest item available?"}
-    E -->|Yes| F["Deliver verification post"]
-    E -->|No| G["Return actionable status"]
+    A["Trigger check"] --> B{"Manual force check?"}
+    B -->|Yes| C["Fetch provider data"]
+    B -->|No| D["Scheduled poll"]
+    C --> E{"Twitch or YouTube?"}
+    E -->|Twitch| F{"Streamer live?"}
+    F -->|Yes| G["Deliver active live stream"]
+    F -->|No| H["Deliver most recent stream or VOD as test"]
+    E -->|YouTube| I["Deliver newest of live stream or upload"]
+    D --> J{"New unposted item?"}
+    J -->|Yes| K["Deliver single newest item"]
+    J -->|No| L["Idle or drain backlog"]
 ```
 
-### Root Cause Analysis
+1. **Parameter Propagation & Poller Dispatch**:
+    - Pass force flag: Pass `force: boolean` through `pollFeed` to `pollStreamAlertFeed(userId, feed, force)`.
+        - Verify `watcher.ts`: Update `pollFeed` call site to pass `force` when invoking `pollStreamAlertFeed`.
+    - Handle forced empty backlog: When `force === true && toSend.length === 0`, select `entries[0]` for delivery.
+        - Mark entry sent after delivery: Ensure cursor advancement and delivery records are maintained.
 
-1. `src/feed/watcher.ts`: `pollStreamAlertFeed` checks `this.repo.isEntrySent(feed.id, entry.id)` and `redis.isEntrySent(...)`.
-2. When a user clicks **Check Now** or invokes `/api/feeds/:id/poll`, the latest item may already have been delivered, or the channel may be offline, leaving `toSend` empty and producing no feedback.
-3. A forced check should deliver the latest available video or broadcast when there are no new unposted items, with a clear verification indication.
+2. **Twitch Ingestion & Offline Test Fallback**:
+    - Live stream query: Query `/helix/streams` for active broadcasts.
+        - Offline VOD fallback on force: If streamer is offline and `force === true`, query `/helix/videos` to fetch the most recent stream or VOD.
+    - Credential verification: Log actionable diagnostics if `TWITCH_CLIENT_ID` or `TWITCH_CLIENT_SECRET` are unset.
+        - Prevent silent failures: Return a diagnostic status explaining credential or feed failure.
 
-### Implementation Checklist
-
-- [ ] Pass `force = true` through manual polling to `pollStreamAlertFeed(userId, feed, force)`.
-- [ ] When a forced check has no unposted entries, deliver the most recent available item as a verification post.
-- [ ] Add tests in `tests/unit/feed/streamAlerts.test.ts` for forced delivery of the latest entry.
-- [ ] Verify with `npm run check` and `npm run build`.
+3. **YouTube Dual Ingestion (Live Streams & Uploads)**:
+    - Ingest both media types: Extract both live broadcasts and video uploads from Atom XML / Data API v3.
+        - Sort by published date: Select whichever item is newest (most recent live stream or latest upload).
+    - Deliver latest on force: On manual trigger, deliver the most recent item immediately.
+        - Public Atom feed robustness: Support channel ID, `@handle`, and custom URLs seamlessly.
 
 ---
 
-## 🎮 Sprint 2: Game Feeds Tab Evolution
+### 🎮 Sprint 2: Game Feeds Tab Evolution
 
-> Plan the expansion of the Free Games tab into a Game Feeds area supporting free game alerts, deals and promotions, and patch notes.
+> Plan the expansion of the Free Games tab into a Game Feeds area supporting Free Game Alerts, Deals & Promotions, and Patch Notes.
 
-### 🧭 Feature Flow
+#### 📝 Tasks 
 
 ```mermaid
 flowchart TD
-    A["Game feed sources"] --> B["Free game alerts"]
-    A --> C["Deals and promotions"]
-    A --> D["Patch notes"]
-    B --> E["Resolve direct storefront links"]
+    A["Game feed sources"] --> B["Free game alerts (100% off)"]
+    A --> C["Deals and promotions (sales)"]
+    A --> D["Patch notes (updates)"]
+    B --> E["Universal direct store URL resolution"]
     C --> E
     D --> E
-    E --> F["Format and deliver game feed posts"]
+    E --> F["Deliver canonical embed without footer"]
 ```
 
-### Feature Scope
+1. **Data Model & Type Registry**:
+    - Extend FeedType union: Add `game_deals_*` and `game_patchnotes_*` to `src/state/types.ts`.
+        - Database migration: Prepare category filter columns if necessary.
+    - Preset definitions: Define catalog presets for top PC games and storefronts.
 
-1. **Free Game Alerts**: 100% off giveaways and permanent claims (GamerPower and Epic Games Store API). Embeds show value, availability, platform, and a direct claim link without a footer.
-2. **Deals and Promotions**: Discounted PC games that are not free. Embeds show discount, original and sale prices, savings, and a direct store link.
-3. **Patch Notes**: Game updates, balance changes, and changelogs. Embeds show game title, version/build, highlights, and a direct changelog link.
+2. **Feed Fetchers & Direct URL Engine**:
+    - Implement `src/feed/gamedeals.ts`: Query game sales with discount %, original price, sale price, and direct storefront links.
+        - Universal Direct Store URL: Follow 3xx redirects to the final storefront URL.
+    - Implement `src/feed/patchnotes.ts`: Query Steam Community announcements and game RSS changelogs.
+        - Formatter: Extract patch version, update highlights, and direct changelog links.
 
-### Architecture Checklist
-
-- [ ] Define feed type keys in `src/state/types.ts` for `free_games_*`, `game_deals_*`, and `game_patchnotes_*`.
-- [ ] Add deal and patch-note fetchers with universal direct-store URL resolution.
-- [ ] Add `gameDealsEmbed` and `patchNotesEmbed`.
-- [ ] Rename the dashboard tab to **Game Feeds** and add category filters and catalogs.
-- [ ] Add Discord command support for all three categories.
-- [ ] Update relevant wiki documentation and add parser/embed tests.
+3. **Discord Embeds & Web Dashboard UI**:
+    - Embed formatters: Create `gameDealsEmbed` and `patchNotesEmbed` with matching author icons and zero footers.
+        - Dashboard redesign: Rename "Free Games" tab to "Game Feeds" (`fa-gamepad`) with sub-category tabs.
 
 ---
 
-## ✅ Completed
+## ✅ Completed Sprints
 
-### Free Games Provider-Based Architecture & Direct Store URL Resolution
+### Sprint: Free Games Provider-Based Architecture & Direct Store URL Resolution
 
 - Restructured Free Game feeds around genuine providers (`GamerPower Free Game Alerts`, `Epic Games Store Official`, and `All Free Game Drops`).
-- Removed the footer from `freeGameEmbed` and displayed the storefront platform in the `🏷️ Platform` field.
+- Removed the footer from `freeGameEmbed` and displayed the storefront platform in the `🏷️ Platform` field with matching author branding.
 - Implemented `resolveDirectGiveawayUrl` to follow up to five redirects with timeout protection.
 - Implemented `detectStorePlatform` for Steam, GOG, IndieGala, Stove, Epic Games Store, Itch.io, Humble Bundle, Ubisoft, EA App, Prime Gaming, and Battle.net.
 - Added dedicated Stove branding and the `free_games_stove` feed type.
-- Cleaned up reported typos in `BUGS.md`; the related implementation was verified by 387 passing Vitest tests.
+- Cleaned up reported user typos in `BUGS.md` and verified with 387 passing Vitest tests.
 
 ---
 
 ## 🛠️ Verification Commands
 
 ```bash
-npm run check
-npm run build
-npm test
+npm run check               # typecheck + format:check + lint + tests (must pass)
+npm run build               # tsc compile to dist/ (must pass)
+npm test                    # vitest run
 ```
 
 ---
@@ -107,4 +123,4 @@ npm test
 ## 🔖 Metadata
 
 - **Project**: HELIX Discord Bot · **version** 0.6.0
-- **Agent Ecosystem**: [`AGENTS.md`](./AGENTS.md) and [`.agents/`](.agents/) are tracked in the repository.
+- **Agent Ecosystem:** [`AGENTS`](./AGENTS) and [`.agents/`](.agents/) are tracked directly in repository git tracking.
