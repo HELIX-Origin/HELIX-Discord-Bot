@@ -24,8 +24,8 @@
 
 | Milestone | Target Version | Category | Status | Primary Focus |
 | :--- | :--- | :--- | :--- | :--- |
-| **M.08** | `v0.7.0` | Game Feeds | 🚀 Active | Free Games, Game Deals & Promotions, Patch Notes Engine |
-| **M.09** | `v0.8.0` | Bot Commands | 🔮 Planned | Guild Prefix Commands Engine & Slash Parity |
+| **M.09** | `v0.8.0` | Bot Commands | 🚀 Active | Guild Prefix Commands Engine & Slash Parity |
+| **M.08** | `v0.7.0` | Game Feeds | ✅ Completed | Free Games, Game Deals & Promotions, Patch Notes Engine |
 | **M.10** | `v0.9.0` | Voice Systems | 🔮 Planned | Dynamic User Voice Hub System & Auto Lifecycle |
 | **M.11** | `v1.0.0` | Media & Music | 🔮 Planned | Discord Rythm Integration & Dashboard Queue Controller |
 | **M.01** | `v0.1.0` | Core Inception | ✅ Completed | Foundation, Discord Gateway, Initial Feed Syndication |
@@ -40,46 +40,6 @@
 
 ## 🚀 Active Milestones
 
-### Milestone M.08: Game Feeds Tab Evolution (`v0.7.0`)
-
-```mermaid
-flowchart TD
-    subgraph Feeds["Game Feeds Engine"]
-        F1["Free Game Alerts"]
-        F2["Deals and Promotions"]
-        F3["Patch Notes"]
-    end
-    subgraph Sources["Providers"]
-        S1["GamerPower API"]
-        S2["Epic Games Promotions"]
-        S3["Steam News or Event API"]
-        S4["Store Sale Aggregators"]
-    end
-    S1 --> F1
-    S2 --> F1
-    S1 --> F2
-    S4 --> F2
-    S3 --> F3
-    F1 --> R["Universal Direct Store URL Resolver"]
-    F2 --> R
-    F3 --> R
-    R --> D["Discord Embed Dispatch"]
-```
-
-Evolve the Free Games tab into a comprehensive **Game Feeds** hub supporting three distinct feed categories: Free Game Alerts, Deals & Promotions, and Patch Notes.
-
-#### 🧭 Architecture & Implementation Phases
-
-1. ✅ **Feed Types & Schema Extension** — Added `game_deals_*` and `game_patchnotes_*` to `FeedType` in `src/state/types.ts`. `feedCategory()` and `rowToGuildCategory()` updated to handle all three categories.
-2. ✅ **Deals & Patch Notes Ingestion Engines** — `src/feed/gamedeals.ts` (CheapShark API, redirect-resolved direct storefront URLs) and `src/feed/patchnotes.ts` (Steam News API for 11 preset games + custom AppIDs) fully implemented and wired into `FeedWatcher`.
-3. ✅ **Embed Layouts & Dashboard UI** — `gameDealsEmbed` and `patchNotesEmbed` created with zero footers and branding author lines. Dashboard sidebar renamed to "Game Feeds", dropdown optgroups added, `GAME_FEEDS_OPTIONS` catalog wired into `submitAddFreeGamesFeed`. `/free-games` slash command expanded to all 16 game feed types.
-4. ✅ **Test Coverage** — `tests/unit/feed/gameFeeds.test.ts` written and passing. **395/395 Vitest tests green**.
-5. ✅ **Build Gate & Branch Push** — `npm run build` clean. Committed and pushed to `feat/game-feeds-w11`. Ready for review and merge to `main`.
-
----
-
-## 🔮 Planned & Future Milestones
-
 ### Milestone M.09: Guild Prefix Commands Engine (`v0.8.0`)
 
 ```mermaid
@@ -93,15 +53,26 @@ flowchart TD
 
 Introduce traditional guild prefix commands to operate alongside slash commands, bypassing Discord slash registration limits and offering fast command-line management for server admins.
 
-#### 🎯 Strategic Objectives & Deliverables
+#### 🧭 Delivery Phases
 
-1. **Prefix Command Dispatcher**:
-    - Implement message listener matching custom per-guild prefixes (`!`, `?`, `.`, or custom).
-    - Support management commands: `[prefix]set prefix`, `[prefix]set manager_role`, `[prefix]set <feature> <enabled|disabled>`.
-2. **Feed & Feature Command Parity**:
-    - Add prefix commands for `reddit`, `youtube`, `twitch`, `news`, `free-games`, `game-deals`, `patch-notes`, `welcome`, and `tickets`.
+```mermaid
+flowchart LR
+    P1["Phase 1: Engine and set commands"] --> P2["Phase 2: Feed commands"]
+    P2 --> P3["Phase 3: Channel and role commands"]
+```
+
+1. ✅ **Phase 1 — Engine Foundation & `set` Commands**:
+    - Per-guild command prefix with validation, plus manager role persistence.
+    - Feature toggle catalog mapping user-facing ids onto the guild `feature_*` keys already enforced by the feed watcher, welcome, and ticket subsystems.
+    - Invocation parser with quoted-argument tokenization and channel/role/user mention resolution.
+    - Dynamic prefix command registry and dispatcher wired to `MessageCreate`.
+    - `[prefix]set prefix`, `[prefix]set manager_role`, `[prefix]set <feature> <enabled|disabled>`, and `[prefix]help`.
+2. 🔮 **Phase 2 — Feed Commands**: `news`, `reddit`, `youtube`, `twitch`, `free-games`, `game-deals`, `patch-notes` sharing one feed management library.
+3. 🔮 **Phase 3 — Channel & Role Commands**: `hub`, `welcome`, `tickets`, `role`, and the DJ role.
 
 ---
+
+## 🔮 Planned & Future Milestones
 
 ### Milestone M.10: Dynamic Voice Hub System (`v0.9.0`)
 
@@ -149,6 +120,50 @@ Reintroduce music playback by integrating Discord's native Rythm application arc
 ---
 
 ## ✅ Completed Milestones (Historical Evolution)
+
+### Milestone M.08: Game Feeds Tab Evolution (`v0.7.0`)
+
+```mermaid
+flowchart TD
+    subgraph Feeds["Game Feeds Engine"]
+        F1["Free Game Alerts"]
+        F2["Deals and Promotions"]
+        F3["Patch Notes"]
+    end
+    subgraph Sources["Providers"]
+        S1["GamerPower API"]
+        S2["Epic Games Promotions"]
+        S3["Steam News API"]
+        S4["CheapShark Aggregator"]
+    end
+    S1 --> F1
+    S2 --> F1
+    S4 --> F2
+    S3 --> F3
+    F1 --> R["Direct Storefront URL Resolver"]
+    F2 --> R
+    F3 --> R
+    R --> D["Discord Embed Dispatch"]
+```
+
+Evolved the Free Games tab into a comprehensive **Game Feeds** hub supporting three distinct feed categories: Free Game Alerts, Deals & Promotions, and Patch Notes.
+
+#### 🏛️ Architectural Accomplishments
+
+1. **Ingestion Engines**:
+    - `src/feed/gamedeals.ts` queries the CheapShark API and resolves redirect chains to actual storefront pages.
+    - `src/feed/patchnotes.ts` queries the Steam News API for 11 preset games plus arbitrary AppIDs.
+2. **Embed Layouts**:
+    - Created `gameDealsEmbed` (pricing, discount badge, direct store link) and `patchNotesEmbed` (version, summary, changelog link), both with zero footers per the locked brand directive.
+3. **Dashboard & Command Surface**:
+    - Sidebar renamed to "Game Feeds" with optgroup-based source selection and a `GAME_FEEDS_OPTIONS` catalog.
+    - `/free-games` expanded to cover every game feed type with a shared `isGameFeed` predicate.
+4. **Feed Type Registry Hardening**:
+    - The `FeedType` union is now derived from the runtime `FEED_TYPES` tuple. Previously the two hand-written lists had drifted, so `game_deals_all` and the `game_patchnotes_*` types fell through `rowToFeed()`'s `rss` fallback and dashboard-created game feeds were silently broken.
+5. **Verification Gate Restoration**:
+    - Added a line-ending policy (`.gitattributes` + explicit `endOfLine`) and applied real formatting fixes, making `npm run check` passable on every platform.
+
+---
 
 ### Milestone M.07: Stream Alerts Reliability & Manual Trigger Verification (`v0.6.1`)
 

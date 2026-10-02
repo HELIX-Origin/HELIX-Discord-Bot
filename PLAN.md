@@ -22,24 +22,34 @@
 
 ## 🎯 Active Sprints
 
-### 🎮 Sprint 1: Game Feeds Tab Evolution
+### 🧩 Sprint 2: Guild Prefix Commands Engine (W.13 / M.09) — Phase 1: Foundation
 
-> Plan and implement the expansion of the Free Games tab into a Game Feeds area supporting Free Game Alerts, Deals & Promotions, and Patch Notes.
+> Introduce traditional guild prefix commands alongside slash commands, bypassing Discord's per-guild slash registration limits. Delivered in reviewable phases; Phase 1 establishes the engine and the `set` command surface.
 
-#### 📝 Tasks 
+#### 📝 Phase 1 Architecture
 
 ```mermaid
 flowchart TD
-    A["Game feed sources"] --> B["Free game alerts (100% off)"]
-    A --> C["Deals and promotions (sales)"]
-    A --> D["Patch notes (updates)"]
-    B --> E["Universal direct store URL resolution"]
-    C --> E
-    D --> E
-    E --> F["Deliver canonical embed without footer"]
+    A["MessageCreate event"] --> B["Resolve guild prefix"]
+    B --> C["Parse invocation"]
+    C --> D["Resolve prefix command"]
+    D --> E{"Permission check"}
+    E -->|Denied| F["Denied embed"]
+    E -->|Granted| G["Execute command"]
+    G --> H["EmbedHandler reply"]
 ```
 
-**Progress as of 2026-10-02 session:**
+**Phase 1 scope:**
+1. **Prefix settings library** — per-guild command prefix (with validation) and manager role persistence.
+2. **Feature toggle catalog** — user-facing feature ids mapped onto the guild `feature_*` setting keys already enforced by the watcher, welcome, and ticket subsystems.
+3. **Parser** — invocation parsing with quoted-argument tokenization and mention/ID resolution for channels, roles, and users.
+4. **Registry & dispatcher** — dynamic prefix command registry, permission gate, and `MessageCreate` wiring.
+5. **`set` command surface** — `[prefix]set prefix`, `[prefix]set manager_role`, `[prefix]set <feature> <enabled|disabled>`.
+6. **Tests & documentation.**
+
+**Later phases:** Phase 2 adds feed commands (`news`, `reddit`, `youtube`, `twitch`, `free-games`, `game-deals`, `patch-notes`); Phase 3 adds channel/role commands (`hub`, `welcome`, `tickets`, `role`, `dj`).
+
+#### ✅ Sprint 1 Outcomes (W.11 / M.08)
 
 1. ✅ **Data Model & Type Registry** — `game_deals_*` and `game_patchnotes_*` feed types added to `src/state/types.ts`. `feedCategory()` and `rowToGuildCategory()` updated.
 
@@ -51,9 +61,23 @@ flowchart TD
 
 5. ✅ **Slash Command** — `/free-games` expanded to cover all game feed types. `PLATFORM_NAMES` now maps all 16 feed keys. `isGameFeed` predicate covers all three categories.
 
-6. ✅ **Tests** — `tests/unit/feed/gameFeeds.test.ts` added. **395/395 tests passing**.
+6. ✅ **Tests** — `tests/unit/feed/gameFeeds.test.ts` added.
 
-7. ✅ **Build gate + branch push** — `npm run build` clean. Pushed to `feat/game-feeds-w11`. Awaiting merge to `main`.
+7. ✅ **Build gate + branch push** — `npm run build` clean. Pushed to `feat/game-feeds-w11`.
+
+---
+
+## 🛠️ Hotfix Log
+
+### ✅ Feed type registry drift (fixed, commit `3747ad5`)
+
+`FeedType` was declared as a hand-written union while `isFeedType()` validated against a second hand-written list. The two had drifted: `game_deals_all` and every `game_patchnotes_*` type offered by the dashboard catalog and `/free-games` existed only in neither list. `rowToFeed()` therefore hit its `rss` fallback on read-back, so **dashboard-created Deals and Patch Notes feeds were silently downgraded to plain RSS feeds** and never polled through the game feed pipeline.
+
+The union is now derived from the runtime tuple, so the type and its validator cannot drift apart again. All 11 Steam preset games plus `game_deals_all` are registered, with a regression test asserting every game feed type survives a `rowToFeed` round-trip while genuinely unknown types still fall back to `rss`.
+
+### ✅ Verification gate was unpassable (fixed, commit `019685a`)
+
+`npm run check` could not pass on a Windows checkout. With `core.autocrlf=true`, no `.gitattributes`, and Prettier's default `endOfLine: "lf"`, `format:check` failed on **all 129 files** in `src/` regardless of content. Added a line-ending policy and applied real formatting fixes to the 16 genuinely drifted files.
 
 ---
 

@@ -22,60 +22,6 @@
 
 ## 🔥 Active Workstreams
 
-### 🎮 Workstream W.11: Game Feeds Tab Evolution (Free Games, Deals & Promotions, Patch Notes)
-
-```mermaid
-flowchart TD
-    A["Game feed sources"] --> B["Free games"]
-    A --> C["Deals"]
-    A --> D["Patch notes"]
-    B --> E["Resolve destination and deliver"]
-    C --> E
-    D --> E
-```
-
-**Locked user directives:**
-- The Free Games tab will become a **Game Feeds** tab.
-- It will support **three** distinct types of feeds from the provided feed sources:
-  1. **Free Game Alerts**: Games that are being given away for free (100% off / free to keep).
-  2. **Deals and Promotions**: Games that are on sale / discounted, but not given away for free.
-  3. **Patch Notes**: Game updates, changelogs, and patch notes.
-
-**Implementation checklist:**
-- [x] **Architecture & Schema Planning**:
-  - [x] Define feed type keys: `free_games_*`, `game_deals_*`, `game_patchnotes_*` in `src/state/types.ts`
-  - [x] Add data provider adapters for Deals and Patch Notes (CheapShark API, Steam News API)
-- [x] **Feed Fetchers & Parser Engine**:
-  - [x] Implement `src/feed/gamedeals.ts`: fetch discounted game promotions with discount %, original/sale price, and direct storefront links via CheapShark API
-  - [x] Implement `src/feed/patchnotes.ts`: parse Steam Community patch notes, version numbers, and summary highlights
-  - [x] Ensure universal direct store URL resolution applies to all game deals
-- [x] **Discord Embed Handlers**:
-  - [x] `gameDealsEmbed`: showcase game title, store platform, discount badge (`🏷️ -75%`), current/original price, and direct deal link
-  - [x] `patchNotesEmbed`: showcase game title, patch/version number, update summary, and direct changelog link
-- [x] **Dashboard UI Redesign (`sources.ts`, `sidebar.ts`, `clientScript.ts`)**:
-  - [x] Rename sidebar tab from "Free Games" to "Game Feeds" with game controller icon (`fa-gamepad`)
-  - [x] Form dropdown redesigned with optgroups for Free Games, Deals & Promotions, and Patch Notes
-  - [x] `submitAddFreeGamesFeed` updated to `GAME_FEEDS_OPTIONS` catalog mapping all 16 feed types to correct `feedType` and `url`
-  - [x] `categoryForFeed` updated to route `game_deals_*` and `game_patchnotes_*` to the freegames tab
-  - [x] `feedTopicOf` updated to include `game_deals_*` and `game_patchnotes_*` topic categorization
-  - [x] `renderFeedPill` updated with styled badges for Deals (`🏷️`) and Patch Notes (`📄`)
-- [x] **Discord Slash Commands (`src/bot/commands/feeds/free-games.ts`)**:
-  - [x] Expanded `/free-games enable` platform choices to include `game_deals_*` and `game_patchnotes_*` types
-  - [x] Updated `PLATFORM_NAMES` map with all 16 game feed types
-  - [x] Updated status/disable/check handlers to operate on all game feed types (free games + deals + patch notes)
-  - [x] `isGameFeed` predicate covers `free_games`, `game_deals`, and `game_patchnotes` prefixes
-  - [x] `defaultUrl` auto-generated from feedType (e.g. `gamedeals://steam`, `patchnotes://cs2`)
-- [x] **Test Coverage & Validation**:
-  - [x] `tests/unit/feed/gameFeeds.test.ts` created — embed structure, footer absence, field format, category mapping, and preset validation
-  - [x] 395/395 Vitest tests passing
-- [x] **Build Verification & Push**:
-  - [x] `npm run build` — TypeScript compilation clean ✅
-  - [x] Committed and pushed to `feat/game-feeds-w11` branch
-
----
-
-## 📋 Upcoming Workstreams
-
 ### 🧩 Workstream W.13: Prefix Commands
 
 ```mermaid
@@ -88,26 +34,61 @@ flowchart TD
 **Locked user directives:**
 - "Prefix commands should be added to replace the failed slash action commands without having to worry about the slash command registration limits."
 
-**Implementation checklist:**
-- [ ] Update our command handler to support both slash commands and prefix commands
-- [ ] Create the following new `[prefix]` commands for users with the required permissions:
-  - [ ] `[prefix]set prefix <new_prefix>`: Update the bot's command prefix per guild.
-  - [ ] `[prefix]set manager_role <role_id: role_id>`: Update the manager role for the guild.
-  - [ ] `[prefix]set <feature_id: news_feeds|game_feeds|reddit_feeds|patch_notes_feeds|stream_alerts|youtube_feeds|twitch_feeds|voice_hub|etc> <choice: enabled|disabled>`: Enable or disable feed types per guild.
-  - [ ] `[prefix]hub <choice: add|remove> [channel: channel_id]`: Manage hub channels for the guild.
-  - [ ] `[prefix]reddit <choice: list|add|remove> [subreddit: string] [channel: channel_id]`: Manage Reddit feeds for the specified subreddit.
-  - [ ] `[prefix]youtube <choice: list|add|remove> [youtube_slug: string] [channel: channel_id]`: Manage YouTube feeds for the specified channel.
-  - [ ] `[prefix]twitch <choice: list|add|remove> [twitch_slug: string] [channel: channel_id]`: Manage Twitch feeds for the specified channel.
-  - [ ] `[prefix]patch-notes <choice: enable|disable> [channel: channel_id]`: Manage Patch Notes feeds.
-  - [ ] `[prefix]news <choice: list|add|remove> [feed_id: source_id] [channel: channel_id]`: Manage News feeds for the specified feed ID.
-  - [ ] `[prefix]free-games <choice: list|add|remove> [feed_id: source_id] [channel: channel_id]`: Manage Free Games feeds for the specified feed ID.
-  - [ ] `[prefix]game-deals <choice: list|add|remove> [feed_id: source_id] [channel: channel_id]`: Manage Deals feeds for the specified feed ID.
-  - [ ] `[prefix]welcome <choice: channel|message> [channel: channel_id] [message: string]`: Manage welcome message settings.
-  - [ ] `[prefix]tickets <choice: channel|manager_role|message> [channel: channel_id] [manager_role: role_id] [message: string]`: Manage ticket settings.
-  - [ ] `[prefix]role <choice: add|remove> [role: role_id] [user: user_id]`: Manage roles for the specified user.
-  - [ ] `[prefix]set dj [role: role_id]`: Set the DJ role for managing music playback.
+**Delivery phases** (each phase is independently reviewable and gate-passing):
+
+```mermaid
+flowchart LR
+    P1["Phase 1: Engine foundation and set commands"] --> P2["Phase 2: Feed commands"]
+    P2 --> P3["Phase 3: Channel and role commands"]
+```
+
+#### Phase 1 — Engine Foundation & `set` Commands
+
+- [x] **Prefix settings library** (`src/bot/lib/prefix/settings.ts`):
+  - [x] `getGuildPrefix()` / `setGuildPrefix()` with prefix validation (length, character set, no whitespace)
+  - [x] `getManagerRoleId()` / `setManagerRoleId()` for the guild manager role
+  - [x] `DEFAULT_COMMAND_PREFIX` fallback of `!`
+- [x] **Feature toggle catalog** (`src/bot/lib/prefix/features.ts`):
+  - [x] Map user-facing feature ids onto the `feature_*` guild setting keys already enforced by the feed watcher, welcome, and ticket subsystems
+  - [x] `isFeatureEnabled()` / `setFeatureEnabled()` with defaults of enabled
+  - [x] Cover `news_feeds`, `reddit_feeds`, `game_feeds`, `patch_notes_feeds`, `stream_alerts`, `youtube_feeds`, `twitch_feeds`, `welcome`, `tickets`, `voice_hub`, `music`
+- [x] **Parser** (`src/bot/lib/prefix/parser.ts`):
+  - [x] `parsePrefixInvocation()` with quoted-argument tokenization
+  - [x] `resolveChannelId()`, `resolveRoleId()`, `resolveUserId()` accepting `<#id>`, `<@&id>`, `<@id>`, or a bare snowflake
+- [x] **Registry & dispatcher** (`src/bot/handlers/prefix.ts`):
+  - [x] `registerPrefixCommand()` / `getPrefixCommand()` with aliases and metadata
+  - [x] `dispatchPrefixMessage()` — bot/DM guards, prefix resolution, permission gate, execution
+  - [x] Wire `Events.MessageCreate` in `src/bot/handlers/events.ts`
+- [x] **`set` command** (`src/bot/commands/prefix/set.ts`):
+  - [x] `[prefix]set prefix <new_prefix>`
+  - [x] `[prefix]set manager_role <role_id>` (accepts `none` to clear)
+  - [x] `[prefix]set <feature_id> <enabled|disabled>`
+- [x] **`help` command** (`src/bot/commands/prefix/help.ts`): dynamic list of registered prefix commands
+- [x] **Tests**: `tests/unit/bot/prefixParser.test.ts`, `tests/unit/bot/prefixSettings.test.ts`, `tests/unit/bot/prefixDispatch.test.ts`
+- [x] **Verification**: `npm run check` and `npm run build` green
+
+#### Phase 2 — Feed Commands
+
+- [ ] Shared feed management library (`list` / `add` / `remove`) reused by every feed command
+- [ ] `[prefix]news <list|add|remove> [feed_id] [channel]`
+- [ ] `[prefix]reddit <list|add|remove> [subreddit] [channel]`
+- [ ] `[prefix]youtube <list|add|remove> [youtube_slug] [channel]`
+- [ ] `[prefix]twitch <list|add|remove> [twitch_slug] [channel]`
+- [ ] `[prefix]free-games <list|add|remove> [feed_id] [channel]`
+- [ ] `[prefix]game-deals <list|add|remove> [feed_id] [channel]`
+- [ ] `[prefix]patch-notes <enable|disable> [channel]`
+
+#### Phase 3 — Channel & Role Commands
+
+- [ ] `[prefix]hub <add|remove> [channel]`
+- [ ] `[prefix]welcome <channel|message> [channel] [message]`
+- [ ] `[prefix]tickets <channel|manager_role|message> [channel] [manager_role] [message]`
+- [ ] `[prefix]role <add|remove> [role] [user]`
+- [ ] `[prefix]set dj [role]`
 
 ---
+
+## 📋 Upcoming Workstreams
 
 ### 🎵 Workstream W.14: Music Support
 
@@ -180,6 +161,47 @@ flowchart TD
 ---
 
 ## ✅ Completed Workstreams
+
+### ✅ Workstream W.11: Game Feeds Tab Evolution (Free Games, Deals & Promotions, Patch Notes)
+
+**Locked user directives:**
+- The Free Games tab will become a **Game Feeds** tab.
+- It will support **three** distinct types of feeds from the provided feed sources:
+  1. **Free Game Alerts**: Games that are being given away for free (100% off / free to keep).
+  2. **Deals and Promotions**: Games that are on sale / discounted, but not given away for free.
+  3. **Patch Notes**: Game updates, changelogs, and patch notes.
+
+**Implementation checklist:**
+- [x] **Architecture & Schema Planning**:
+  - [x] Define feed type keys: `free_games_*`, `game_deals_*`, `game_patchnotes_*` in `src/state/types.ts`
+  - [x] Add data provider adapters for Deals and Patch Notes (CheapShark API, Steam News API)
+- [x] **Feed Fetchers & Parser Engine**:
+  - [x] Implement `src/feed/gamedeals.ts`: fetch discounted game promotions with discount %, original/sale price, and direct storefront links via CheapShark API
+  - [x] Implement `src/feed/patchnotes.ts`: parse Steam Community patch notes, version numbers, and summary highlights
+  - [x] Ensure universal direct store URL resolution applies to all game deals
+- [x] **Discord Embed Handlers**:
+  - [x] `gameDealsEmbed`: showcase game title, store platform, discount badge (`🏷️ -75%`), current/original price, and direct deal link
+  - [x] `patchNotesEmbed`: showcase game title, patch/version number, update summary, and direct changelog link
+- [x] **Dashboard UI Redesign (`sources.ts`, `sidebar.ts`, `clientScript.ts`)**:
+  - [x] Rename sidebar tab from "Free Games" to "Game Feeds" with game controller icon (`fa-gamepad`)
+  - [x] Form dropdown redesigned with optgroups for Free Games, Deals & Promotions, and Patch Notes
+  - [x] `submitAddFreeGamesFeed` updated to `GAME_FEEDS_OPTIONS` catalog mapping all feed types to correct `feedType` and `url`
+  - [x] `categoryForFeed` updated to route `game_deals_*` and `game_patchnotes_*` to the freegames tab
+  - [x] `feedTopicOf` updated to include `game_deals_*` and `game_patchnotes_*` topic categorization
+  - [x] `renderFeedPill` updated with styled badges for Deals (`🏷️`) and Patch Notes (`📄`)
+- [x] **Discord Slash Commands (`src/bot/commands/feeds/free-games.ts`)**:
+  - [x] Expanded `/free-games enable` platform choices to include `game_deals_*` and `game_patchnotes_*` types
+  - [x] Updated `PLATFORM_NAMES` map with all game feed types
+  - [x] Updated status/disable/check handlers to operate on all game feed types
+  - [x] `isGameFeed` predicate covers `free_games`, `game_deals`, and `game_patchnotes` prefixes
+  - [x] `defaultUrl` auto-generated from feedType (e.g. `gamedeals://steam`, `patchnotes://cs2`)
+- [x] **Follow-up hotfixes:**
+  - [x] `FeedType` union derived from the runtime `FEED_TYPES` tuple so the type and `isFeedType()` can never drift apart
+  - [x] Registered the missing `game_deals_all` and all 11 `game_patchnotes_*` preset types that the dashboard and `/free-games` already offered but `rowToFeed()` silently coerced to `rss`
+  - [x] Regression coverage asserting every game feed type survives a `rowToFeed` round-trip
+  - [x] Restored a passable `npm run check` gate (`.gitattributes` line-ending policy + Prettier fixes)
+
+---
 
 ### ✅ Workstream W.12: Stream Alerts (YouTube & Twitch) Manual Trigger Delivery Fix
 
