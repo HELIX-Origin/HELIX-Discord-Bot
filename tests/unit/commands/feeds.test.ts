@@ -8,7 +8,7 @@
  *   - /free-games
  *   - /reddit
  */
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, afterEach, vi } from 'vitest';
 import { handleRssCommand, rssCommandDef } from '../../../src/bot/commands/feeds/rss.js';
 import { handleYouTubeCommand, youtubeCommandDef } from '../../../src/bot/commands/feeds/youtube.js';
 import { handleTwitchCommand, twitchCommandDef } from '../../../src/bot/commands/feeds/twitch.js';
@@ -17,6 +17,14 @@ import { handleRedditCommand, redditCommandDef } from '../../../src/bot/commands
 import type { AppDeps } from '../../../src/app.js';
 import type { DiscordInteraction } from '../../../src/bot/utils/types.js';
 import type { Feed } from '../../../src/state/types.js';
+import { stubFetchRaw } from '../../helpers/feed.js';
+
+/** Canonical channel ID the stubbed scrape resolves `@veritasium` to. */
+const YT_CHANNEL_ID = 'UCHnyfMqiRRG1u-2MsSQLbXA';
+
+afterEach(() => {
+  vi.restoreAllMocks();
+});
 
 function makeDeps(): { deps: AppDeps; feeds: Feed[]; polledIds: number[] } {
   const feeds: Feed[] = [];
@@ -250,6 +258,14 @@ describe('/youtube command', () => {
   });
 
   it('adds a YouTube channel feed', async () => {
+    // Handle -> channel ID resolution scrapes YouTube, so the network is stubbed
+    // to keep this unit test hermetic and fast.
+    const net = stubFetchRaw(() => ({
+      status: 200,
+      contentType: 'text/html',
+      text: `<html><meta itemprop="channelId" content="${YT_CHANNEL_ID}"></html>`,
+    }));
+
     const { deps, feeds } = makeDeps();
     const interaction = makeInteraction({
       data: {
@@ -271,10 +287,18 @@ describe('/youtube command', () => {
     const res = await handleYouTubeCommand(interaction, deps, {} as any);
     expect(feeds).toHaveLength(1);
     expect(feeds[0].feedType).toBe('youtube');
+    expect(feeds[0].url).toContain(YT_CHANNEL_ID);
+    expect(net.urls()).toContain('https://www.youtube.com/@veritasium');
     expect(res.data?.embeds![0].title).toContain('YouTube Alert Added');
   });
 
   it('checks YouTube channel feeds', async () => {
+    stubFetchRaw(() => ({
+      status: 200,
+      contentType: 'text/html',
+      text: `<html><meta itemprop="channelId" content="${YT_CHANNEL_ID}"></html>`,
+    }));
+
     const { deps, polledIds } = makeDeps();
     await handleYouTubeCommand(
       makeInteraction({

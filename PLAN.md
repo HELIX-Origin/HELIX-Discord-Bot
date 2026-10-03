@@ -49,6 +49,16 @@ flowchart TD
 
 **Later phases:** Phase 2 adds feed commands (`news`, `reddit`, `youtube`, `twitch`, `free-games`, `game-deals`, `patch-notes`); Phase 3 adds channel/role commands (`hub`, `welcome`, `tickets`, `role`, `dj`).
 
+**Phase 1 outcomes:**
+
+1. ✅ **Prefix settings library** — `src/bot/lib/prefix/settings.ts`: per-guild prefix (validated, `!` default, 5-char cap), manager role get/set, `reset` writes the literal default because `SettingsRepository` has no delete primitive.
+2. ✅ **Feature toggle catalog** — `src/bot/lib/prefix/features.ts`: 11 user-facing ids over `feature_<id>` keys, plus a **derived family aggregate** that disables the shared gate only when every member feature is off, so `feature_feeds`, `feature_streamalerts`, `feature_welcome`, and `feature_ticket` enforcement in `src/feed/watcher.ts` stays correct.
+3. ✅ **Parser** — `src/bot/lib/prefix/parser.ts`: quote-aware `tokenize()`, `parsePrefixInvocation()`, and channel/role/user ID resolvers accepting `<#id>`, `#id`, `<@&id>`, `@id`, or a bare snowflake.
+4. ✅ **Registry & dispatcher** — `src/bot/handlers/prefix.ts`: dynamic registry with aliases, `isGuildManager()` gate (owner / ManageGuild / Administrator / manager role), and `Events.MessageCreate` wiring in `src/bot/handlers/events.ts`.
+5. ✅ **Dynamic discovery** — `src/bot/handlers/loader.ts` routes the `prefix` category to `registerPrefixCommand()` and warns when a scanned category yields zero registrations.
+6. ✅ **Command surface** — `set` (prefix, manager role, feature toggles, bare summary) and a dynamic `help`.
+7. ✅ **Tests** — `prefixParser`, `prefixSettings`, `prefixDispatch`, `loader` suites. Gate green at **516 tests**, `npm run build` clean.
+
 #### ✅ Sprint 1 Outcomes (W.11 / M.08)
 
 1. ✅ **Data Model & Type Registry** — `game_deals_*` and `game_patchnotes_*` feed types added to `src/state/types.ts`. `feedCategory()` and `rowToGuildCategory()` updated.
@@ -78,6 +88,24 @@ The union is now derived from the runtime tuple, so the type and its validator c
 ### ✅ Verification gate was unpassable (fixed, commit `019685a`)
 
 `npm run check` could not pass on a Windows checkout. With `core.autocrlf=true`, no `.gitattributes`, and Prettier's default `endOfLine: "lf"`, `format:check` failed on **all 129 files** in `src/` regardless of content. Added a line-ending policy and applied real formatting fixes to the 16 genuinely drifted files.
+
+### ✅ Prefix mention resolvers rejected every real mention (fixed, W.13 Phase 1)
+
+`resolveChannelId()`, `resolveRoleId()`, and `resolveUserId()` each wrapped their marker group as mandatory, and the role pattern additionally spelled `<@&>` including a closing bracket. The result: `<#123…>` failed because the pattern demanded `<#>`; `<@&987…>` failed for the same reason; and a bare snowflake failed because the marker was not optional. **Every** role and channel token was rejected, so `[prefix]set manager_role` could never accept a mention.
+
+Markers are now optional (`^(?:<@&|@&?|role:)?(\d{16,20})>?$`), which accepts full mentions, `#id` / `@id` shorthand, and bare IDs while still rejecting cross-kind tokens such as `<@123…>` when a role is expected.
+
+### ✅ `feeds` category was never scanned, and 7 commands were never registered (logged, W.13 Phase 1)
+
+`COMMAND_CATEGORIES` omitted `'feeds'`, and seven slash command modules (`feeds/rss`, `feeds/youtube`, `feeds/twitch`, `feeds/free-games`, `feeds/reddit`, `admin/welcome`, `admin/ticket`) export a `*CommandDef` plus a free handler but never wrap them in a `BotCommand`. Result: `/rss`, `/youtube`, `/twitch`, `/free-games`, `/reddit`, `/welcome`, and `/tickets` were never registered with Discord and always reported as unknown. Found by the new `loader.test.ts`, which asserts against the real command tree.
+
+`'feeds'` is now scanned and the loader warns on any empty category, so the gap is no longer silent. The missing `BotCommand` exports are tracked as **BUG-001** and deliberately not fixed in this commit.
+
+### ✅ YouTube command unit tests hit the live network (fixed, W.13 Phase 1)
+
+`tests/unit/commands/feeds.test.ts > adds a YouTube channel feed` resolved `@veritasium` through the real scraper, issuing an outbound request to `youtube.com` with a 10s timeout inside a 5s test budget. It passed alone (1.7s) and flaked under full-suite load (5.01s vs a 5000ms limit) — a real gate flake, not a new regression.
+
+Added `stubFetchRaw()` to `tests/helpers/feed.ts`, which replaces `fetchRaw` with a URL-driven canned responder, and made both YouTube command tests use it. The suite is now hermetic and deterministic, and asserts the resolved channel URL rather than depending on a warm module-level cache.
 
 ---
 

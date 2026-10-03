@@ -2,25 +2,38 @@
  * src/bot/handlers/loader.ts
  *
  * Dynamic command loader — discovers and registers every BotCommand from the
- * `src/bot/commands/<category>/` directory tree at startup.
+ * `src/bot/commands/<category>/` directory tree at startup, and every
+ * PrefixCommand from the `prefix` category.
  *
  * Design principles (Rule 06 & Discord.js Standards):
  *  - Zero static command index files inside `src/bot/commands/`.
  *  - Commands are dynamically discovered by scanning category subdirectories.
- *  - Each command file is self-contained and exports a `BotCommand` object.
- *  - The loader calls `registerCommand()` for each discovered BotCommand.
+ *  - Each command file is self-contained and exports its command object.
+ *  - The loader calls `registerCommand()` (slash) or `registerPrefixCommand()`
+ *    (prefix) for each discovered command.
  */
 
 import { readdirSync } from 'node:fs';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { join, dirname } from 'node:path';
 import { registerCommand, type BotCommand } from './registry.js';
+import { registerPrefixCommand } from './prefix.js';
+import type { PrefixCommand } from '../lib/prefix/types.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-/** Recognised command category directory names under src/bot/commands/. */
-const COMMAND_CATEGORIES = ['admin', 'mod', 'utility'] as const;
+/**
+ * Recognised command category directory names under src/bot/commands/.
+ *
+ * Every directory here must exist in the tree, otherwise its commands are never
+ * discovered. Keep in sync with `CommandCategory` in `registry.ts`, which the
+ * dashboard uses to group slash commands.
+ */
+const COMMAND_CATEGORIES = ['feeds', 'admin', 'mod', 'utility', 'prefix'] as const;
+
+/** Category whose exports are registered as prefix commands. */
+const PREFIX_CATEGORY = 'prefix';
 
 /**
  * Returns true when a module export value looks like a BotCommand —
@@ -33,6 +46,24 @@ function isBotCommand(value: unknown): value is BotCommand {
     typeof v['def'] === 'object' &&
     v['def'] !== null &&
     typeof (v['def'] as Record<string, unknown>)['name'] === 'string' &&
+    typeof v['execute'] === 'function'
+  );
+}
+
+/**
+ * Returns true when a module export value looks like a PrefixCommand.
+ *
+ * Prefix commands are identified by a flat `name`/`usage`/`execute` shape with
+ * no `def`, which keeps the two registries unambiguous.
+ */
+function isPrefixCommand(value: unknown): value is PrefixCommand {
+  if (!value || typeof value !== 'object') return false;
+  const v = value as Record<string, unknown>;
+  return (
+    v['def'] === undefined &&
+    typeof v['name'] === 'string' &&
+    typeof v['usage'] === 'string' &&
+    typeof v['description'] === 'string' &&
     typeof v['execute'] === 'function'
   );
 }
@@ -76,6 +107,8 @@ export async function loadAllCommands(): Promise<number> {
         return f.endsWith('.js') || f.endsWith('.ts');
       });
 
+      let categoryCount = 0;
+
       // Deduplicate base filenames in case both .ts and .js exist in the same dir
       const seenBases = new Set<string>();
 
@@ -96,12 +129,26 @@ export async function loadAllCommands(): Promise<number> {
         }
 
         for (const value of Object.values(mod)) {
-          if (isBotCommand(value)) {
+          if (category === PREFIX_CATEGORY) {
+            if (isPrefixCommand(value)) {
+              registerPrefixCommand(value);
+              categoryCount++;
+            }
+          } else if (isBotCommand(value)) {
             registerCommand(value);
-            count++;
+            categoryCount++;
           }
         }
       }
+
+      // A category directory that yields nothing means its command modules do
+      // not export a matching command object, so those commands never reach
+      // Discord. Fail loudly rather than registering a silently shortened list.
+      if (categoryCount === 0) {
+        console.warn(`[loader] No commands discovered in category "${category}" (${files.length} file(s) scanned)`);
+      }
+
+      count += categoryCount;
     }
 
     loaded = true;

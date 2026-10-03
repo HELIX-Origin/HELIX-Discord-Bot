@@ -7,6 +7,7 @@ import {
   type Channel,
   type Role,
   type VoiceState,
+  type Message,
   type ChatInputCommandInteraction,
   type AutocompleteInteraction,
   type CommandInteractionOption,
@@ -15,6 +16,8 @@ import type { DiscordBot } from '../bot.js';
 import type { AppDeps } from '../../app.js';
 import type { DiscordInteraction, InteractionOption, ApplicationCommandOptionType } from '../utils/types.js';
 import { dispatchInteraction } from './commands.js';
+import { handleMessageCreate } from './prefix.js';
+import { loadAllCommands } from './loader.js';
 import { handleReady } from '../events/ready.js';
 import { handleGuildCreate } from '../events/guild-create.js';
 import { handleGuildMemberAdd } from '../events/member.js';
@@ -222,6 +225,19 @@ export function registerBotEvents(client: Client, bot: DiscordBot, deps: AppDeps
         /* ignore fallback failure */
       }
     }
+  });
+
+  // Prefix command dispatch
+  client.on(Events.MessageCreate, (message: Message) => {
+    void (async () => {
+      try {
+        // Cheap and idempotent after the first call; populates the prefix registry.
+        await loadAllCommands();
+        await handleMessageCreate(message, deps, bot);
+      } catch (err) {
+        bot.logger.debug('Prefix command dispatch skipped', { err: (err as Error).message });
+      }
+    })();
   });
 
   // Guild join & leave

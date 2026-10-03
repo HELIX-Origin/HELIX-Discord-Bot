@@ -18,6 +18,8 @@ export interface MockMemberOptions {
   permissions?: bigint[];
   /** Highest role position — used for hierarchy comparisons. */
   highestRolePosition?: number;
+  /** Role IDs this member holds. Backs `roles.cache.has()`. */
+  roleIds?: string[];
 }
 
 /**
@@ -31,9 +33,11 @@ export function makeMember(opts: MockMemberOptions = {}): GuildMember {
     ownerId = 'owner-000',
     permissions = [],
     highestRolePosition = 1,
+    roleIds = [],
   } = opts;
 
   const permSet = new Set(permissions);
+  const roleSet = new Set(roleIds);
 
   return {
     id,
@@ -47,6 +51,14 @@ export function makeMember(opts: MockMemberOptions = {}): GuildMember {
     },
     roles: {
       highest: { position: highestRolePosition },
+      cache: {
+        has(roleId: string): boolean {
+          return roleSet.has(roleId);
+        },
+        get(roleId: string): { id: string; name: string } | undefined {
+          return roleSet.has(roleId) ? { id: roleId, name: `role-${roleId}` } : undefined;
+        },
+      },
     },
   } as unknown as GuildMember;
 }

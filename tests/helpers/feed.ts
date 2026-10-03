@@ -1,10 +1,13 @@
 /**
  * tests/helpers/feed.ts
  *
- * XML feed fixture strings and entry factory helpers for feed parser tests.
+ * XML feed fixture strings, entry factory helpers, and network stubs for feed
+ * parser and feed command tests.
  */
 
+import { vi, type MockInstance } from 'vitest';
 import type { FeedEntry, ParsedFeed } from '../../src/feed/parser.js';
+import * as fetchModule from '../../src/feed/fetch.js';
 
 // ── XML Fixtures ──────────────────────────────────────────────────────────────
 
@@ -120,4 +123,45 @@ export function makeFeed(overrides: Partial<ParsedFeed> = {}): ParsedFeed {
     entries: [makeEntry()],
     ...overrides,
   };
+}
+
+// ── Network Stubs ─────────────────────────────────────────────────────────────
+
+/** The subset of `FetchResult` a stub needs to describe a canned response. */
+export type FetchStubResponse = Partial<Awaited<ReturnType<typeof fetchModule.fetchRaw>>>;
+
+export interface StubbedFetch {
+  /** Spy over `fetchRaw`, for per-test assertions or overrides. */
+  spy: MockInstance<typeof fetchModule.fetchRaw>;
+  /** Every URL `fetchRaw` was called with, in call order. */
+  urls: () => string[];
+}
+
+/**
+ * Replaces `fetchRaw` so tests never make real outbound requests.
+ *
+ * `respond` receives the requested URL and returns the fields to override,
+ * letting a test simulate a scrape (for example resolving a YouTube handle to a
+ * channel ID) without touching the network. Unmatched URLs return a 404.
+ *
+ * @param respond Optional per-URL responder.
+ */
+export function stubFetchRaw(respond?: (url: string) => FetchStubResponse): StubbedFetch {
+  const urls: string[] = [];
+
+  const spy = vi.spyOn(fetchModule, 'fetchRaw').mockImplementation(async (url: string) => {
+    urls.push(url);
+    return {
+      url,
+      status: 404,
+      contentType: null,
+      body: new Uint8Array(),
+      text: '',
+      durationMs: 0,
+      challenged: false,
+      ...respond?.(url),
+    };
+  });
+
+  return { spy, urls: () => [...urls] };
 }

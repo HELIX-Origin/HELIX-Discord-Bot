@@ -57,15 +57,22 @@ flowchart LR
   - [x] `resolveChannelId()`, `resolveRoleId()`, `resolveUserId()` accepting `<#id>`, `<@&id>`, `<@id>`, or a bare snowflake
 - [x] **Registry & dispatcher** (`src/bot/handlers/prefix.ts`):
   - [x] `registerPrefixCommand()` / `getPrefixCommand()` with aliases and metadata
-  - [x] `dispatchPrefixMessage()` — bot/DM guards, prefix resolution, permission gate, execution
+  - [x] `handleMessageCreate()` — bot/DM guards, prefix resolution, permission gate, execution
   - [x] Wire `Events.MessageCreate` in `src/bot/handlers/events.ts`
+  - [x] Route the `prefix` command category to the prefix registry in `src/bot/handlers/loader.ts`
+  - [x] Warn when a scanned command category yields zero registrations (surfaced BUG-001)
 - [x] **`set` command** (`src/bot/commands/prefix/set.ts`):
   - [x] `[prefix]set prefix <new_prefix>`
   - [x] `[prefix]set manager_role <role_id>` (accepts `none` to clear)
   - [x] `[prefix]set <feature_id> <enabled|disabled>`
 - [x] **`help` command** (`src/bot/commands/prefix/help.ts`): dynamic list of registered prefix commands
-- [x] **Tests**: `tests/unit/bot/prefixParser.test.ts`, `tests/unit/bot/prefixSettings.test.ts`, `tests/unit/bot/prefixDispatch.test.ts`
-- [x] **Verification**: `npm run check` and `npm run build` green
+- [x] **Tests**: `tests/unit/bot/prefixParser.test.ts`, `prefixSettings.test.ts`, `prefixDispatch.test.ts`, `loader.test.ts`
+- [x] **Verification**: `npm run check` (516 tests) and `npm run build` green
+
+> [!NOTE]
+> **BUG-001** was found while writing `loader.test.ts`: seven slash command modules
+> (`feeds/*`, `admin/welcome.ts`, `admin/ticket.ts`) export no `BotCommand` and are
+> never registered with Discord. Tracked in [`BUGS.md`](./BUGS.md); not fixed here.
 
 #### Phase 2 — Feed Commands
 
