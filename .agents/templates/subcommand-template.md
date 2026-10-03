@@ -86,7 +86,12 @@ export async function handleManageCommand(
 export const manageCommand: BotCommand = {
   def: manageCommandDef,
   category: 'admin',
-  isEnabled: (deps) => Boolean(deps.config.features.administrationEnabled),
   execute: handleManageCommand,
 };
 ```
+
+> [!NOTE]
+> Feature gating is **per-guild**, not config. Gate inside the handler with
+> `isFeatureEnabled(deps, guildId, '<feature>')` from `src/bot/lib/prefix/features.js`
+> — there is no `isEnabled` hook on `BotCommand` and no
+> `deps.config.features.*` surface. See Rule 06 §2.5.

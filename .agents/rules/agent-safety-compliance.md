@@ -23,9 +23,9 @@ This is the foundational safety rule for all AI agents working on **HELIX Discor
 
 4. **Secrets & Credentials Protection**:
    - **NEVER** commit, hardcode, or log sensitive credentials:
-     - `DISCORD_TOKEN`, `DISCORD_CLIENT_SECRET`, `DISCORD_CLIENT_ID`
-     - `LAVA_PASS`, `GENIUS_ACCESS_TOKEN`, `SPOTIFY_CLIENT_SECRET`, `YOUTUBE_REFRESH_TOKEN`
-     - `YOUTUBE_API_KEY`, `TWITCH_CLIENT_SECRET`, `KLIPY_API_KEY`
+     - `DISCORD_TOKEN`, `DISCORD_CLIENT_ID`, `DISCORD_CLIENT_SECRET`
+     - `YOUTUBE_API_KEY`, `YOUTUBE_CLIENT_ID`, `YOUTUBE_CLIENT_SECRET`
+     - `TWITCH_CLIENT_ID`, `TWITCH_CLIENT_SECRET`, `DB_URI`
      - OAuth state tokens, session tokens, or password hashes
    - All credentials belong exclusively in `.env` (which is git-ignored). `.env.example` serves strictly as a template with placeholder values.
    - Mask credentials in log outputs (`logger.info`, `logger.warn`, `logger.error`).

@@ -39,12 +39,12 @@ All templates adhere strictly to:
 
 ```
 src/bot/
-├── commands/              # Self-contained commands with colocated options & subcommands
-│   ├── admin/             # e.g., role.ts, server.ts, set.ts, voice.ts
-│   ├── entertainment/     # e.g., gif.ts, slap.ts, hug.ts
-│   ├── feeds/             # e.g., rss.ts, youtube.ts, twitch.ts, free-games.ts, reddit.ts
+├── commands/              # COMMANDS ONLY (Rule 06 §3.1) — no reusable exports
+│   ├── admin/             # e.g., role.ts, voice.ts
 │   ├── mod/               # e.g., kick.ts, ban.ts, warn.ts, purge.ts, lock.ts
-│   └── utility/           # e.g., about.ts, help.ts, stats.ts, ping.ts
+│   ├── prefix/            # Prefix command system (set.ts, help.ts)
+│   ├── utility/           # e.g., about.ts, help.ts, stats.ts
+│   └── feeds/             # WITHDRAWN action commands — intentionally no BotCommand export
 └── lib/                   # Shared reusable libraries, modules, and utilities
     ├── embeds/            # EmbedHandler builder, limits, variants, responses
     ├── admin/             # Permission helpers, role hierarchy, modlog

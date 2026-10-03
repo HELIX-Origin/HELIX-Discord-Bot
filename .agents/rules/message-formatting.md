@@ -16,13 +16,18 @@
    - Feed embeds (`src/bot/utils/embeds.ts`) format: `title`, `url`, `description`, `author`, `publishedAt`, `imageUrl`, and brand icons.
 
 3. **Discord Character Limit Clamping**:
-   - All text fields must be strictly clamped before submission to Discord:
-     - Title: max 256 characters (`clampTitle`)
-     - Description: max 4096 characters (`clampDescription`)
-     - Field name: max 256 characters (`clampFieldName`)
-     - Field value: max 1024 characters (`clampFieldValue`)
-     - Total embed characters: max 6000 characters
-     - Max fields per embed: 25
+   - All text fields must be strictly clamped before submission to Discord. The
+     authoritative values live in `EMBED_LIMITS` in `src/bot/lib/embeds/limits.ts`,
+     and the shared helper is `clampText(text, max)` — there are no per-field
+     `clampTitle` / `clampDescription` / `clampFieldName` / `clampFieldValue` helpers:
+     - Title: max 256 characters (`EMBED_LIMITS.title`)
+     - Description: max 4096 characters (`EMBED_LIMITS.description`)
+     - Field name: max 256 characters (`EMBED_LIMITS.fieldName`)
+     - Field value: max 1024 characters (`EMBED_LIMITS.fieldValue`)
+     - Footer text: max 2048 characters (`EMBED_LIMITS.footer`)
+     - Total embed characters: max 6000 characters (**not yet clamped** — `EmbedHandler` must enforce)
+     - Max fields per embed: 25 (`EMBED_LIMITS.fields`)
+   - `TEXT_LIMITS` holds our tighter house targets for compact UI text.
 
 4. **Category-Based Delivery Routing**:
    - Feed target resolution follows `resolveFeedTargets(repo, feed)`:

@@ -24,4 +24,7 @@ Index of permanent, non-negotiable rules for all AI coding assistants, automated
 ## Enforcement Hierarchy
 1. **Rule 00 (Safety)** and **Rule 01 (Zero Unsolicited Injection)** supersede all other implementation decisions.
 2. **Rule 06 (Discord.js Standards)** is mandatory for all Discord-facing commands, events, embeds, and option definitions.
+   - Rule 06 is a **derived copy** of upstream truth. **Discord's documentation wins over Rule 06.** If they conflict, the rule file is the bug — fix it, and never "fix" the rule by editing it to bless bad code.
+   - Part A of Rule 06 holds authoritative API invariants with citations; Part B holds HELIX house style. Do not present house style as a Discord requirement, and do not relax Part A.
+   - The load-bearing structural rule (`src/bot/commands/` carries commands only; reusable logic lives in `src/bot/lib/`) is enforced by `tests/unit/architecture/commandBoundaries.test.ts`.
 3. Every pull request or task completion must verify compliance via `npm run check` (Rule 00 & Rule 02).

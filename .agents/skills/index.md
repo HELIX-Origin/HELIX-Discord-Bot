@@ -8,7 +8,7 @@ Index of technical skills, subsystem domain guides, and engineering references f
 
 | Skill | Target Domain | Core Focus | File |
 |---|---|---|---|
-| **Discord.js v14 Engineering** | Discord Subsystem | Modular `lib/options/<category>/`, commands, events, EmbedHandler, API limits | [discord-js](discord-js) |
+| **Discord.js v14 Engineering** | Discord Subsystem | Command boundaries (`lib/` vs `commands/`), events, EmbedHandler, API limits | [discord-js](discord-js) |
 | **HELIX Development Workflow** | Bot Architecture | Command creation, event registration, persistence, verification checklist | [helix-discord-bot](helix-discord-bot) |
 | **Feed Syndication & Threads** | Feed & Content Delivery | RSS/Atom/Reddit, weekly Sunday Free Games, dedicated thread delivery | [feed-syndication](feed-syndication) |
 | **Guild Administration** | Moderation & Roles | Moderation actions, permissions, role hierarchy, mod log channels | [guild-administration](guild-administration) |

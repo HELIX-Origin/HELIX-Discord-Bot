@@ -21,7 +21,7 @@ A concise, high-level summary (2–3 sentences) capturing the core focus of this
 
 ### 🔹 <Feature Area 2>
 - **Dashboard / API**: Describe new routes, view enhancements, or configuration settings.
-- **Integration**: Note any changes to external providers (Discord, Lavalink, KLIPY, feeds).
+- **Integration**: Note any changes to external providers (Discord API, YouTube, Twitch, feed sources).
 
 ---
 

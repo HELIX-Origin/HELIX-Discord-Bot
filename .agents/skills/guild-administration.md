@@ -30,5 +30,6 @@ All administration commands enforce Discord native permissions via `interaction.
    - Mod log embeds include: case number, target user, moderator, reason, timestamp, and action color.
 
 3. **Modular Option Definitions**:
-   - Subcommand options reside in `src/bot/lib/options/admin.ts` and `src/bot/lib/options/set.ts`.
+   - Command options are colocated in the command file by default. Only large schemas
+     factor out to `src/bot/lib/options/<command>.ts` (current precedent: `ticket.ts`, `welcome.ts`).
    - Actions and choices are strictly clamped to max 25 choices per option.

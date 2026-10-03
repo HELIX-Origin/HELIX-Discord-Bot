@@ -29,11 +29,12 @@ This directory provides standardized code templates and workflow guides for **HE
 Commands and shared libraries are organized as:
 ```
 src/bot/
-├── commands/              # Commands with colocated options & subcommands
-│   ├── admin/             # e.g., set.ts, ticket.ts, welcome.ts
-│   ├── entertainment/     # e.g., gif.ts, slap.ts
-│   ├── feeds/             # e.g., feed.ts
-│   └── utility/           # e.g., ping.ts, help.ts, stats.ts, info.ts
+├── commands/              # COMMANDS ONLY (Rule 06 §3.1)
+│   ├── admin/             # e.g., role.ts, voice.ts
+│   ├── mod/               # e.g., ban.ts, kick.ts, purge.ts
+│   ├── prefix/            # Prefix command system (set.ts, help.ts)
+│   ├── utility/           # e.g., about.ts, help.ts, stats.ts
+│   └── feeds/             # WITHDRAWN action commands — no BotCommand export
 └── lib/                   # Shared libraries, modules, and utilities
     ├── embeds/            # EmbedHandler builder, limits, variants
     ├── admin/             # Permission helpers, role hierarchy, modlog

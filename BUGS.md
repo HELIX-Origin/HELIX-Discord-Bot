@@ -40,7 +40,84 @@
 
 ## ⚠️ Active & Open Bugs
 
-*No open bugs at this time.*
+### 🟡 BUG-002 — Command definitions use the deprecated `dm_permission` field
+
+- **Status**: ⚠️ **open**
+- **Severity**: 🟡 Medium
+- **Discovered**: 2026-10-02, via a Rule 06 audit against Discord's current application-command docs
+- **Area**: 12 command files under `src/bot/commands/`
+
+#### Description
+
+Every guild-scoped command sets `dm_permission: false`. Discord's documentation
+now marks this field **deprecated** — "Indicates whether the command is available
+in DMs with the app, only for globally-scoped commands. By default, commands are
+visible." The replacement is the `contexts` field (`GUILD` = `0`, `BOT_DM` = `1`,
+`PRIVATE_CHANNEL` = `2`), which applies to globally-scoped commands only.
+
+It is currently harmless-but-wrong: every one of these commands sets
+`default_member_permissions` to a non-admin bitfield, so it is guild-only by
+permission already. But the field is on a deprecation path and our
+`ApplicationCommand` type still models it.
+
+#### Affected files
+
+`admin/{role,voice,welcome,ticket}.ts`, `mod/{announce,ban,kick,lock,purge,slowmode,unlock,warn}.ts`,
+plus the `dm_permission?: boolean` field in `src/bot/utils/types.ts`.
+
+#### Fix
+
+1. Remove `dm_permission` from all 12 command definitions.
+2. Remove `dm_permission?: boolean` from the `ApplicationCommand` type.
+3. Where DM visibility is genuinely wanted, add an explicit
+   `contexts: [InteractionContextType.Guild]` / `BotDm` array instead.
+4. Extend `validateCommandLimits` to reject `dm_permission` so it cannot return.
+
+**Estimate**: ~30 min (mechanical, plus 4 tests asserting guild-only behaviour).
+
+---
+
+### 🟡 BUG-003 — `validateCommandLimits` misses most Discord command limits
+
+- **Status**: ⚠️ **open**
+- **Severity**: 🟡 Medium
+- **Discovered**: 2026-10-02, same Rule 06 audit
+- **Area**: `src/bot/handlers/registry.ts`
+
+#### Description
+
+We build command definitions as plain objects rather than through
+`SlashCommandBuilder`, so `validateCommandLimits` is the **only** thing standing
+between a malformed definition and a rejected registration. It currently checks
+name format, description length, option count, option name format, option
+description length, and choice count.
+
+It does **not** check these documented Discord rules:
+
+| Missing rule | Consequence if violated |
+|---|---|
+| Combined 8,000-character budget across name/description/values/choices | Silent registration failure at deploy time |
+| Required options must precede optional options | Registration failure |
+| `autocomplete: true` is incompatible with `choices` | Registration failure |
+| Option `name` must be unique within its array | Registration failure |
+| Choice `name` 1–100 chars, choice `value` ≤100 chars | Registration failure |
+| `STRING` `min_length`/`max_length` ≤ 6000 | Registration failure |
+| `default_member_permissions` must be a valid permission bitfield string | Registration failure |
+| Total registered commands ≤ 100 per application | Deployment overflow |
+
+Note the audit corrected a long-standing documentation error: the combined budget
+is **8,000** characters, not the 4,000 previously asserted in Rule 06.
+
+#### Fix
+
+1. Add each check above to `validateCommandLimits`, throwing with the offending
+   command/option named.
+2. Add a combined-size walker over the definition and its choices.
+3. Add unit tests for each rule, including a passing control case.
+
+**Estimate**: ~2h (validation logic + ~10 test cases).
+
+---
 
 > [!IMPORTANT]
 > **Withdrawn action commands are not bugs.** `src/bot/commands/feeds/` and the
@@ -51,6 +128,12 @@
 > worked reliably, and the prefix command system (W.13) replaces them. **Do not
 > "fix" discovery by adding a `BotCommand` export to those modules.**
 > `tests/unit/bot/loader.test.ts` asserts their continued absence.
+>
+> Separately, those modules are a **layering violation** (Rule 06 §3.1): they export
+> feature subsystems — config getters, renderers, senders, a button handler — which
+> `events/member.ts`, `handlers/commands.ts`, and `dashboard/routes/guilds.ts` all
+> import from. `welcome.ts` even imports sideways from `ticket.ts`. Tracked as a
+> workstream in [`TODO.md`](./TODO.md), not here.
 
 ---
 

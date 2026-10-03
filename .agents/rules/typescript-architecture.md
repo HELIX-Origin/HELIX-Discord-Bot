@@ -15,21 +15,25 @@ src/
 ├── bot/                            # Discord Bot subsystem (discord.js v14)
 │   ├── bot.ts                      # DiscordBot client wrapper (Gateway & lifecycle)
 │   ├── rest.ts                     # DiscordRestClient (REST API client)
-│   ├── commands/                   # Slash command implementations (categorized, colocated options)
-│   │   ├── index.ts                # Central dynamic command catalog & exports
-│   │   ├── admin/                  # /admin, /set, /ticket, /welcome
-│   │   ├── entertainment/          # /gif, /slap, /hug, and action reaction commands
-│   │   ├── feeds/                  # /feed syndication commands
-│   │   └── utility/                # /about, /stats, /ping, /help
+│   ├── commands/                   # COMMANDS ONLY — reusable logic belongs in lib/ (Rule 06 §3.1)
+│   │   ├── admin/                  # /role, /voice
+│   │   ├── mod/                    # /announce, /ban, /kick, /lock, /purge, /slowmode, /unlock, /warn
+│   │   ├── prefix/                 # Prefix command system (not slash)
+│   │   ├── utility/                # /about, /stats, /help
+│   │   └── feeds/                  # WITHDRAWN action commands — no BotCommand export
 │   ├── events/                     # Client event handlers (one file per event)
 │   ├── handlers/                   # Dynamic command, event & interaction dispatchers
 │   │   ├── commands.ts             # Interaction & autocomplete router
 │   │   ├── events.ts               # Dynamic bot event registrar
+│   │   ├── loader.ts               # Filesystem command discovery (no static index)
+│   │   ├── prefix.ts               # Prefix command registry & messageCreate dispatch
 │   │   └── registry.ts             # Slash command validation, limit guards, & registry
 │   ├── lib/                        # Shared reusable libraries, modules, and utilities
 │   │   ├── admin/                  # Permissions, role hierarchy, mod log channels
 │   │   ├── embeds/                 # EmbedHandler fluent builder, limits, responses, variants
-│   │   └── feeds/                  # Feed entry embed formatting & delivery helpers
+│   │   ├── feeds/                  # Feed entry embed formatting & delivery helpers
+│   │   ├── options/                # Large command option schemas (ticket.ts, welcome.ts)
+│   │   └── prefix/                 # Feature gating, parser, settings, types
 │   └── utils/                      # Discord API types & external client wrappers
 ├── dashboard/                      # Integrated Web Management Dashboard
 │   ├── server.ts                   # Native Node.js HTTP server lifecycle & middleware

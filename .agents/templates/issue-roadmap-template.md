@@ -15,14 +15,15 @@ flowchart TD
 
 ## 1. Goal & Context
 - **Objective**: Detailed description of what is being built or fixed.
-- **Affected Subsystems**: e.g., `src/bot/commands/<category>/`, `src/bot/lib/options/<category>/`, `src/bot/events/`.
+- **Affected Subsystems**: e.g., `src/bot/commands/<category>/`, `src/bot/lib/`, `src/bot/events/`.
 - **Discord API Constraints**: Character counts, option counts, choices limits, permissions required.
 
 ---
 
 ## 2. Architecture & Modular Options Plan
-- [ ] Options separated into `src/bot/lib/options/<category>/<command>.ts`.
-- [ ] Command file imports options from modular lib.
+- [ ] Command file exports only the command and its colocated parts; no reusable logic (Rule 06 §3.1).
+- [ ] Reusable services moved into `src/bot/lib/`.
+- [ ] Options colocated in the command file, or factored to `src/bot/lib/options/<command>.ts` if large.
 - [ ] Embed responses standardized via `EmbedHandler`.
 - [ ] Permissions enforced via `PermissionFlagsBits` and role hierarchy.
 
@@ -30,8 +31,9 @@ flowchart TD
 
 ## 3. Milestones & Task Breakdown
 - [ ] **Phase 1: Options & Command Registry**
-  - [ ] `src/bot/lib/options/<category>/<command>.ts` defined with typed builders
-  - [ ] Slash command builder configured in `src/bot/commands/<category>/<command>.ts`
+  - [ ] `<name>CommandDef` defined in `src/bot/commands/<category>/<command>.ts`
+  - [ ] `<name>Command: BotCommand` exported so `loader.ts` discovers it
+  - [ ] `registerCommandMetadata({...})` called for help/dashboard
 - [ ] **Phase 2: Business Logic & Handlers**
   - [ ] Execution logic in dedicated service or command handler
   - [ ] Error boundary with isolated catch blocks
