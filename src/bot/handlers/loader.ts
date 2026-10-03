@@ -26,11 +26,17 @@ const __dirname = dirname(__filename);
 /**
  * Recognised command category directory names under src/bot/commands/.
  *
- * Every directory here must exist in the tree, otherwise its commands are never
- * discovered. Keep in sync with `CommandCategory` in `registry.ts`, which the
- * dashboard uses to group slash commands.
+ * Only categories that hold registrable slash commands belong here. The
+ * `feeds/` directory (and the action-style `admin/welcome.ts` and
+ * `admin/ticket.ts`) intentionally export no `BotCommand`: those action commands
+ * were withdrawn because they never worked reliably, and are being replaced by
+ * the prefix command system (see `commands/prefix/`). Their handlers are kept
+ * only as reference logic for the prefix rewrite — do NOT add a `BotCommand`
+ * export to them to "fix" discovery.
+ *
+ * `tests/unit/bot/loader.test.ts` enforces this.
  */
-const COMMAND_CATEGORIES = ['feeds', 'admin', 'mod', 'utility', 'prefix'] as const;
+const COMMAND_CATEGORIES = ['admin', 'mod', 'utility', 'prefix'] as const;
 
 /** Category whose exports are registered as prefix commands. */
 const PREFIX_CATEGORY = 'prefix';

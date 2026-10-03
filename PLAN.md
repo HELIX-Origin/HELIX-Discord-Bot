@@ -95,11 +95,16 @@ The union is now derived from the runtime tuple, so the type and its validator c
 
 Markers are now optional (`^(?:<@&|@&?|role:)?(\d{16,20})>?$`), which accepts full mentions, `#id` / `@id` shorthand, and bare IDs while still rejecting cross-kind tokens such as `<@123…>` when a role is expected.
 
-### ✅ `feeds` category was never scanned, and 7 commands were never registered (logged, W.13 Phase 1)
+### ✅ Confirmed withdrawn action commands are correctly unregistered (W.13 Phase 1)
 
-`COMMAND_CATEGORIES` omitted `'feeds'`, and seven slash command modules (`feeds/rss`, `feeds/youtube`, `feeds/twitch`, `feeds/free-games`, `feeds/reddit`, `admin/welcome`, `admin/ticket`) export a `*CommandDef` plus a free handler but never wrap them in a `BotCommand`. Result: `/rss`, `/youtube`, `/twitch`, `/free-games`, `/reddit`, `/welcome`, and `/tickets` were never registered with Discord and always reported as unknown. Found by the new `loader.test.ts`, which asserts against the real command tree.
+The new `loader.test.ts` asserts against the real command tree, which showed that `src/bot/commands/feeds/` and the action-style `admin/welcome.ts` and `admin/ticket.ts` export no `BotCommand` — so `/rss`, `/youtube`, `/twitch`, `/free-games`, `/reddit`, `/welcome`, and `/ticket` are never registered with Discord.
 
-`'feeds'` is now scanned and the loader warns on any empty category, so the gap is no longer silent. The missing `BotCommand` exports are tracked as **BUG-001** and deliberately not fixed in this commit.
+This is **intended**, not a defect: those action commands were withdrawn because they never worked reliably, and the prefix command system replaces them. An interim commit briefly added `'feeds'` to `COMMAND_CATEGORIES` and logged this as BUG-001; both have been reverted.
+
+What remains from the investigation:
+- `COMMAND_CATEGORIES` is documented as holding only registrable categories, with an explicit warning against adding a `BotCommand` to the withdrawn modules.
+- `loader.test.ts` gained `WITHDRAWN_ACTION_COMMANDS`, asserting all seven stay unregistered — a future well-meaning "fix" now fails the gate instead of silently resurrecting them.
+- The loader still warns when a scanned category yields zero registrations, which is a genuine guard for the categories that *should* register.
 
 ### ✅ YouTube command unit tests hit the live network (fixed, W.13 Phase 1)
 

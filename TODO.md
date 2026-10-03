@@ -60,19 +60,23 @@ flowchart LR
   - [x] `handleMessageCreate()` — bot/DM guards, prefix resolution, permission gate, execution
   - [x] Wire `Events.MessageCreate` in `src/bot/handlers/events.ts`
   - [x] Route the `prefix` command category to the prefix registry in `src/bot/handlers/loader.ts`
-  - [x] Warn when a scanned command category yields zero registrations (surfaced BUG-001)
+  - [x] Warn when a scanned command category yields zero registrations
+  - [x] Pin the withdrawn action commands as permanently unregistered (`WITHDRAWN_ACTION_COMMANDS` in `loader.test.ts`)
 - [x] **`set` command** (`src/bot/commands/prefix/set.ts`):
   - [x] `[prefix]set prefix <new_prefix>`
   - [x] `[prefix]set manager_role <role_id>` (accepts `none` to clear)
   - [x] `[prefix]set <feature_id> <enabled|disabled>`
 - [x] **`help` command** (`src/bot/commands/prefix/help.ts`): dynamic list of registered prefix commands
 - [x] **Tests**: `tests/unit/bot/prefixParser.test.ts`, `prefixSettings.test.ts`, `prefixDispatch.test.ts`, `loader.test.ts`
-- [x] **Verification**: `npm run check` (516 tests) and `npm run build` green
+- [x] **Verification**: `npm run check` (517 tests) and `npm run build` green
 
 > [!NOTE]
-> **BUG-001** was found while writing `loader.test.ts`: seven slash command modules
-> (`feeds/*`, `admin/welcome.ts`, `admin/ticket.ts`) export no `BotCommand` and are
-> never registered with Discord. Tracked in [`BUGS.md`](./BUGS.md); not fixed here.
+> `src/bot/commands/feeds/` and the action-style `admin/welcome.ts` and
+> `admin/ticket.ts` intentionally export no `BotCommand`, so `/rss`, `/youtube`,
+> `/twitch`, `/free-games`, `/reddit`, `/welcome`, and `/ticket` stay unregistered.
+> They are the retired slash actions that **this workstream replaces** — Phase 2
+> and Phase 3 rebuild their behaviour as prefix commands. Do not add a
+> `BotCommand` export to those modules. See [`BUGS.md`](./BUGS.md).
 
 #### Phase 2 — Feed Commands
 
