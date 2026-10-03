@@ -25,6 +25,7 @@
 | Milestone | Target Version | Category | Status | Primary Focus |
 | :--- | :--- | :--- | :--- | :--- |
 | **M.09** | `v0.8.0` | Bot Commands | 🚀 Active | Guild Prefix Commands Engine & Slash Parity |
+| **M.12** | `v0.8.1` | Architecture | 🚀 Active | discord.js Standards Alignment & Command Boundary |
 | **M.08** | `v0.7.0` | Game Feeds | ✅ Completed | Free Games, Game Deals & Promotions, Patch Notes Engine |
 | **M.10** | `v0.9.0` | Voice Systems | 🔮 Planned | Dynamic User Voice Hub System & Auto Lifecycle |
 | **M.11** | `v1.0.0` | Media & Music | 🔮 Planned | Discord Rythm Integration & Dashboard Queue Controller |
@@ -39,6 +40,54 @@
 ---
 
 ## 🚀 Active Milestones
+
+### Milestone M.12: discord.js Standards Alignment & Command Boundary (`v0.8.1`)
+
+Align the codebase with **actual** discord.js v14 conventions rather than
+hand-rolled approximations that merely compile. Resolves the layering violation
+where `src/bot/commands/` hosts feature subsystems and `src/dashboard/` reaches
+into command modules for domain logic.
+
+> [!IMPORTANT]
+> **This blocks M.09 Phases 2 and 3.** Those phases implement the prefix `feed`
+> and `welcome`/`tickets` commands, which need exactly the services currently
+> trapped inside command files (`admin/ticket.ts` at 843 lines, `admin/welcome.ts`
+> at 423 lines). Extract them first, then build the commands on top.
+
+#### The three problems
+
+```mermaid
+flowchart TD
+    P1["Problem 1: Command modules host subsystems"] --> P1F["dashboard/routes/guilds.ts imports welcome and ticket services<br/>events/member.ts imports welcome services<br/>handlers/commands.ts imports handleTicketButton<br/>welcome.ts imports sideways from ticket.ts"]
+    P2["Problem 2: Plain-object command definitions"] --> P2F["No SlashCommandBuilder, so no validation.<br/>validateCommandLimits is our only guard and misses 8 documented limits.<br/>dm_permission deprecated in 12 files."]
+    P3["Problem 3: Gateway path round-trips"] --> P3F["discord.js interaction object is downgraded to raw snake_case,<br/>dispatch returns a plain InteractionResponse,<br/>then re-encoded as ephemeral: flags === 64 before reply()."]
+```
+
+#### 🧭 Delivery phases
+
+```mermaid
+flowchart LR
+    A["A: Command boundary"] --> B["B: SlashCommandBuilder definitions"]
+    B --> C["C: Interaction model"]
+```
+
+1. 🔮 **Phase A — Command Boundary** (no behavior change):
+    - Shared interaction helpers (`optionRaw`, `optionValue`, `parseHexColor`) → `src/bot/lib/discord/`; `resolveGuildName` → `src/bot/lib/discord/guild.ts`.
+    - Welcome subsystem → `src/bot/lib/welcome/`.
+    - Ticket subsystem → `src/bot/lib/tickets/`.
+    - Feed management logic → `src/bot/lib/feeds/`; delete the 7 dead withdrawn command files and their handler-only tests.
+    - Derive `DASHBOARD_CONFIGURED_COMMANDS` instead of hardcoding it.
+    - Add `tests/unit/architecture/commandBoundaries.test.ts` so the boundary cannot regress.
+2. 🔮 **Phase B — SlashCommandBuilder Definitions**:
+    - Replace plain `ApplicationCommand` literals with `SlashCommandBuilder`; `.toJSON()` becomes the wire payload.
+    - Retire `dm_permission` in favour of `setContexts` (closes **BUG-002**).
+    - Shrink `validateCommandLimits` to what the builder does not cover: registration totals, permission-bitfield validity (closes **BUG-003**).
+3. 🔮 **Phase C — Interaction Model**:
+    - Use `InteractionResolver` so the HTTP `/interactions` webhook yields real discord.js interaction objects, unifying both paths.
+    - Handlers receive `ChatInputCommandInteraction` and use `isChatInputCommand()`, `reply()`, `deferReply()`.
+    - Delete `toDiscordInteraction`, the `ephemeral: flags === 64` re-encoding, and the `guild_id ?? guildId` shape-guessing.
+
+---
 
 ### Milestone M.09: Guild Prefix Commands Engine (`v0.8.0`)
 
@@ -67,8 +116,8 @@ flowchart LR
     - Invocation parser with quoted-argument tokenization and channel/role/user mention resolution.
     - Dynamic prefix command registry and dispatcher wired to `MessageCreate`.
     - `[prefix]set prefix`, `[prefix]set manager_role`, `[prefix]set <feature> <enabled|disabled>`, and `[prefix]help`.
-2. 🔮 **Phase 2 — Feed Commands**: `news`, `reddit`, `youtube`, `twitch`, `free-games`, `game-deals`, `patch-notes` sharing one feed management library.
-3. 🔮 **Phase 3 — Channel & Role Commands**: `hub`, `welcome`, `tickets`, `role`, and the DJ role.
+2. 🔮 **Phase 2 — Feed Commands**: `news`, `reddit`, `youtube`, `twitch`, `free-games`, `game-deals`, `patch-notes` sharing one feed management library. *Blocked on **M.12 Phase A** — the shared feed management library must leave `commands/feeds/` first.*
+3. 🔮 **Phase 3 — Channel & Role Commands**: `hub`, `welcome`, `tickets`, `role`, and the DJ role. *Blocked on **M.12 Phase A** — welcome and ticket services must live in `src/bot/lib/` before commands are built on them.*
 
 ---
 

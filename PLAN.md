@@ -22,6 +22,47 @@
 
 ## 🎯 Active Sprints
 
+### 🧩 Sprint 3: discord.js Standards Alignment & Command Boundary (W.16 / M.12) — Phase A
+
+> Move non-command logic out of `src/bot/commands/` so those folders carry commands
+> only (Rule 06 §3.1), then align command definitions and the interaction model with
+> real discord.js v14. Phase A is behavior-preserving and unblocks W.13 Phases 2–3.
+
+#### 📝 Phase A Architecture
+
+```mermaid
+flowchart TD
+    subgraph Before["Before — layering inverted"]
+        B1["dashboard/routes/guilds.ts"] --> B2["commands/admin/ticket.ts<br/>commands/admin/welcome.ts"]
+        B3["events/member.ts"] --> B2
+        B4["handlers/commands.ts"] --> B2
+        B2 --> B5["commands/admin/ticket.ts<br/>(sideways import)"]
+    end
+    subgraph After["After — one-way dependency"]
+        A1["dashboard / events / handlers / commands"] --> A2["src/bot/lib/&lt;feature&gt;/"]
+        A2 --> A3["src/bot/utils/"]
+        A3 --> A4["discord.js"]
+    end
+    Before -->|refactor| After
+```
+
+**Phase A scope:**
+1. **Shared discord helpers** — `optionRaw`, `optionValue`, `parseHexColor`, `errorResponse` to `src/bot/lib/discord/interactions.ts`; `resolveGuildName` to `src/bot/lib/discord/guild.ts`. Collapses the triple duplication currently present in both `admin/welcome.ts` and `admin/ticket.ts` and removes the sideways import.
+2. **Welcome subsystem** → `src/bot/lib/welcome/`.
+3. **Ticket subsystem** → `src/bot/lib/tickets/`.
+4. **Feed management logic** → `src/bot/lib/feeds/`.
+5. **Delete the 7 withdrawn command files** and derive `DASHBOARD_CONFIGURED_COMMANDS`.
+6. **Architecture test** pinning the boundary.
+
+**Behavior invariants:** embed output must stay byte-identical. The private
+`errorResponse` wraps `createEmbed(...)`, so its embeds carry a timestamp and the
+`HELIX Discord Bot` footer. `errorEmbedResponse` in `src/bot/lib/embeds/responses.ts`
+hardcodes `0xef4444` with neither. They are **not** interchangeable — substituting
+would silently strip branding from every error embed.
+
+**Later phases:** Phase B adopts `SlashCommandBuilder` and closes BUG-002/BUG-003;
+Phase C unifies both interaction paths behind `InteractionResolver`.
+
 ### 🧩 Sprint 2: Guild Prefix Commands Engine (W.13 / M.09) — Phase 1: Foundation
 
 > Introduce traditional guild prefix commands alongside slash commands, bypassing Discord's per-guild slash registration limits. Delivered in reviewable phases; Phase 1 establishes the engine and the `set` command surface.

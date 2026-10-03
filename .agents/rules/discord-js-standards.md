@@ -151,14 +151,30 @@ combined budget is the one limit that module does **not** currently clamp.
 
 These are **not** Discord requirements. They are our conventions.
 
-### 2.1 Colocation, and the one exception
+### 2.1 Colocation, and when to factor out to `lib/`
 
 Default: a command file is **self-contained** — its options, definition, and handler
 all live together, for full visibility.
 
-Exception: commands with genuinely large option schemas factor their option array
-into `src/bot/lib/options/<command>.ts`. This is a readability allowance, not a
-requirement, and it does **not** apply to a command's execution logic (see §3.1).
+Factor out into `src/bot/lib/` when either of these applies:
+
+1. **Size management** — the command file would otherwise become unwieldy. A large
+   option schema belongs in `src/bot/lib/options/<command>.ts` so the command file
+   stays readable.
+2. **Shared resources** — the resource is needed by more than one command or feature,
+   so extracting it avoids duplication and keeps them in sync. Shared resources go in
+   a feature folder (`src/bot/lib/<feature>/`), not `lib/options/`.
+
+These are the two justifications for a shared folder, and both are legitimate. The
+boundary is about **what gets shared**, not about keeping files small: option
+*schemas* go to `lib/options/<command>.ts`; anything reusable at runtime
+(config getters, renderers, senders, component handlers) goes to `lib/<feature>/`.
+
+This applies only to **resources a command consumes**. It never applies to a
+command's own execution logic, which stays in the command file (see §3.1).
+
+Current factor-outs: `lib/options/{ticket,welcome}.ts` (size), and the feature
+subsystems under `lib/admin/`, `lib/feeds/`, `lib/prefix/` (shared).
 
 ### 2.2 Flat actions over subcommands
 

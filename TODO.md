@@ -22,6 +22,46 @@
 
 ## 🔥 Active Workstreams
 
+### 🧩 Workstream W.16: discord.js Standards Alignment & Command Boundary
+
+> Tracks **M.12**. Corrects the layering violation where `src/bot/commands/` hosts
+> feature subsystems, then aligns command definitions and the interaction model with
+> real discord.js v14 conventions. **Blocks W.13 Phases 2 and 3.**
+
+**Locked user directives:**
+- "Follow proper discord.js standards! That is not optional and must always be obeyed."
+- "Always verify everything with the actual discord.js standards."
+- "We need to align our bot with actual discord.js standards now."
+- Commands stay self-contained; a shared folder is for **size management** and **resources other commands/features reuse**, to avoid duplication.
+
+**Why now:** hand-rolled `DiscordInteraction`/`InteractionResponse` and plain-object
+command definitions compiled and tested green while diverging from upstream. Root
+cause was pattern-matching instead of reading the library. Rule 06 now splits
+**Part A (Discord API invariants, cited)** from **Part B (HELIX house style)** so the
+distinction cannot be lost again.
+
+#### Phase A — Command Boundary
+
+- [ ] **Shared discord helpers** — extract `optionRaw`, `optionValue`, `parseHexColor`, `errorResponse` to `src/bot/lib/discord/interactions.ts`; `resolveGuildName` to `src/bot/lib/discord/guild.ts`. Preserve exact embed behavior (`createEmbed` + `embedResponse`); do **not** substitute `errorEmbedResponse`, which drops the footer/timestamp.
+- [ ] **Welcome subsystem** → `src/bot/lib/welcome/` (`WelcomeConfig`, `getWelcomeConfig`, `renderWelcomeMessage`, `WelcomeSender`, `sendWelcomeMessage`, `DEFAULT_WELCOME_MESSAGE`). Repoint `src/bot/events/member.ts` and `src/dashboard/routes/guilds.ts`.
+- [ ] **Ticket subsystem** → `src/bot/lib/tickets/` (`TicketConfig`, `getTicketConfig`, `renderTicketMessage`, `isTicketThread`, `TICKET_OPEN_BUTTON_ID`, `sendTicketButtonMessage`, `handleTicketButton`). Repoint `src/bot/handlers/commands.ts` and `src/dashboard/routes/guilds.ts`.
+- [ ] **Feed management logic** → `src/bot/lib/feeds/`, preserving coverage in `tests/unit/commands/feeds.test.ts`.
+- [ ] **Delete the 7 withdrawn command files** (`feeds/{rss,youtube,twitch,free-games,reddit}.ts`, `admin/welcome.ts`, `admin/ticket.ts`) and their handler-only tests. They stay withdrawn — the prefix system replaces them; do **not** restore them as slash commands.
+- [ ] **Derive `DASHBOARD_CONFIGURED_COMMANDS`** instead of hardcoding the withdrawn names (`src/bot/handlers/commands.ts`).
+- [ ] **Architecture test** — `tests/unit/architecture/commandBoundaries.test.ts`: fail if any module under `src/bot/commands/` exports a non-`BotCommand`/`PrefixCommand`, and if any file outside `src/bot/commands/` imports from one (loader excepted).
+
+#### Phase B — SlashCommandBuilder Definitions
+
+- [ ] Replace plain `ApplicationCommand` literals with `SlashCommandBuilder`; `.toJSON()` as the wire payload.
+- [ ] Retire `dm_permission` across 12 command files in favour of `setContexts` (**BUG-002**).
+- [ ] Shrink `validateCommandLimits` to uncovered rules: registration totals, `default_member_permissions` bitfield validity (**BUG-003**).
+
+#### Phase C — Interaction Model
+
+- [ ] `InteractionResolver` on the HTTP `/interactions` path so both entry points yield real discord.js interaction objects.
+- [ ] Handlers receive `ChatInputCommandInteraction`; use `isChatInputCommand()`, `reply()`, `deferReply()`.
+- [ ] Delete `toDiscordInteraction`, the `ephemeral: flags === 64` re-encoding, and `guild_id ?? guildId` shape-guessing.
+
 ### 🧩 Workstream W.13: Prefix Commands
 
 ```mermaid
